@@ -14,7 +14,230 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          account_type: string
+          available_balance: number
+          balance: number
+          created_at: string | null
+          credit_limit: number | null
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          account_type: string
+          available_balance?: number
+          balance?: number
+          created_at?: string | null
+          credit_limit?: number | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          account_type?: string
+          available_balance?: number
+          balance?: number
+          created_at?: string | null
+          credit_limit?: number | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payees: {
+        Row: {
+          account_number: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          payee_name: string
+          payee_type: string | null
+          user_id: string
+        }
+        Insert: {
+          account_number?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          payee_name: string
+          payee_type?: string | null
+          user_id: string
+        }
+        Update: {
+          account_number?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          payee_name?: string
+          payee_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      scheduled_payments: {
+        Row: {
+          account_id: string
+          amount: number
+          created_at: string | null
+          frequency: string | null
+          id: string
+          is_active: boolean | null
+          next_payment_date: string
+          payee_id: string | null
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          created_at?: string | null
+          frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          next_payment_date: string
+          payee_id?: string | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          created_at?: string | null
+          frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          next_payment_date?: string
+          payee_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_payments_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_payments_payee_id_fkey"
+            columns: ["payee_id"]
+            isOneToOne: false
+            referencedRelation: "payees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          balance_after: number
+          category: string
+          created_at: string | null
+          description: string
+          id: string
+          reference_number: string | null
+          status: string | null
+          transaction_type: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          balance_after: number
+          category: string
+          created_at?: string | null
+          description: string
+          id?: string
+          reference_number?: string | null
+          status?: string | null
+          transaction_type: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          balance_after?: number
+          category?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          reference_number?: string | null
+          status?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zelle_contacts: {
+        Row: {
+          contact_email: string | null
+          contact_name: string
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
