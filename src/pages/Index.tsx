@@ -200,14 +200,37 @@ const Index = () => {
               <p className="text-muted-foreground">View your account balances and recent activity</p>
             </div>
 
-            <div onClick={() => setShowZelleModal(true)}>
-              <QuickActions />
-            </div>
+            <QuickActions 
+              onZelleClick={() => setShowZelleModal(true)}
+              onTransferClick={() => setShowTransferModal(true)}
+              onMobileDepositClick={() => showNotification("Mobile Deposit", "Mobile deposit feature coming soon", "info")}
+              onPayBillsClick={() => showNotification("Pay Bills", "Bill payment feature coming soon", "info")}
+            />
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <AccountCard name="Checking Account" balance={accounts.checking.balance} accountNumber={accounts.checking.number} type="checking" />
-              <AccountCard name="Savings Account" balance={accounts.savings.balance} accountNumber={accounts.savings.number} type="savings" />
-              <AccountCard name="Credit Card" balance={accounts.credit.balance} accountNumber={accounts.credit.number} type="credit" />
+              <AccountCard 
+                name="Checking Account" 
+                balance={accounts.checking.balance} 
+                accountNumber={accounts.checking.number} 
+                type="checking" 
+                onTransferClick={() => setShowTransferModal(true)}
+                onZelleClick={() => setShowZelleModal(true)}
+              />
+              <AccountCard 
+                name="Savings Account" 
+                balance={accounts.savings.balance} 
+                accountNumber={accounts.savings.number} 
+                type="savings" 
+                onTransferClick={() => setShowTransferModal(true)}
+                onZelleClick={() => setShowZelleModal(true)}
+              />
+              <AccountCard 
+                name="Credit Card" 
+                balance={accounts.credit.balance} 
+                accountNumber={accounts.credit.number} 
+                type="credit" 
+                onPayBillClick={() => showNotification("Pay Bill", "Credit card payment feature coming soon", "info")}
+              />
             </div>
 
             <RecentTransactions />
