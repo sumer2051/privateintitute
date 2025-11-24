@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
+
+interface Account {
+  id: string;
+  account_name: string;
+  account_number: string;
+}
 
 interface ZelleModalProps {
   isOpen: boolean;
@@ -18,10 +25,25 @@ const contacts = [
 ];
 
 export const ZelleModal = ({ isOpen, onClose, onSubmit }: ZelleModalProps) => {
-  const [fromAccount, setFromAccount] = useState("checking");
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [fromAccount, setFromAccount] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedContact, setSelectedContact] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchAccounts();
+    }
+  }, [isOpen]);
+
+  const fetchAccounts = async () => {
+    const { data } = await supabase.from("accounts").select("id, account_name, account_number").eq("is_active", true);
+    if (data) {
+      setAccounts(data);
+      if (data.length > 0) setFromAccount(data[0].id);
+    }
+  };
 
   const handleSubmit = async () => {
     const amountNum = parseFloat(amount);
@@ -63,8 +85,11 @@ export const ZelleModal = ({ isOpen, onClose, onSubmit }: ZelleModalProps) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="checking">Checking Account (****4582)</SelectItem>
-                <SelectItem value="savings">Savings Account (****7821)</SelectItem>
+                {accounts.map((acc) => (
+                  <SelectItem key={acc.id} value={acc.id}>
+                    {acc.account_name} (****{acc.account_number})
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
