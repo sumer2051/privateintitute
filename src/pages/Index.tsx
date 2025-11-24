@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Bell, Search, User, Moon, Sun } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bell, Search, User, Moon, Sun, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,17 +13,18 @@ import { TransferModal } from "@/components/TransferModal";
 import { ZelleModal } from "@/components/ZelleModal";
 import { DevToolsModal } from "@/components/DevToolsModal";
 import { NotificationToast } from "@/components/NotificationToast";
+import { supabase } from "@/integrations/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 type Page = "overview" | "accounts" | "transfers" | "billpay" | "security" | "support";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [currentPage, setCurrentPage] = useState<Page>("overview");
   const [darkMode, setDarkMode] = useState(false);
-  const [accounts, setAccounts] = useState({
-    checking: { balance: 4582.75, number: "4582" },
-    savings: { balance: 12350.2, number: "7821" },
-    credit: { balance: 1245.5, number: "3098" },
-  });
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showZelleModal, setShowZelleModal] = useState(false);
@@ -36,6 +38,30 @@ const Index = () => {
   });
 
   useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      fetchAccounts();
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
     } else {
@@ -43,58 +69,61 @@ const Index = () => {
     }
   }, [darkMode]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      showNotification("Welcome Back", "Your accounts are ready", "success");
-    }, 1000);
-  }, []);
+  const fetchAccounts = async () => {
+    const { data } = await supabase.from("accounts").select("*").order("created_at");
+    if (data) {
+      setAccounts(data);
+    }
+    setLoading(false);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
 
   const showNotification = (title: string, message: string, type: "success" | "error" | "warning" | "info") => {
     setNotification({ show: true, title, message, type });
   };
 
-  const handleTransfer = (data: any) => {
+  const handleTransfer = async (data: any) => {
     const { fromAccount, amount } = data;
-    if (fromAccount === "checking") {
-      setAccounts(prev => ({ ...prev, checking: { ...prev.checking, balance: prev.checking.balance - amount } }));
-    } else {
-      setAccounts(prev => ({ ...prev, savings: { ...prev.savings, balance: prev.savings.balance - amount } }));
-    }
+    const fromAcc = accounts.find(a => a.id === fromAccount);
+    if (!fromAcc) return;
+
+    await supabase.from("accounts").update({ balance: fromAcc.balance - amount }).eq("id", fromAccount);
     setShowTransferModal(false);
     showNotification("External Transfer Sent", `$${amount.toFixed(2)} sent successfully`, "success");
+    fetchAccounts();
   };
 
-  const handleZelle = (data: any) => {
+  const handleZelle = async (data: any) => {
     const { fromAccount, amount } = data;
-    if (fromAccount === "checking") {
-      setAccounts(prev => ({ ...prev, checking: { ...prev.checking, balance: prev.checking.balance - amount } }));
-    } else {
-      setAccounts(prev => ({ ...prev, savings: { ...prev.savings, balance: prev.savings.balance - amount } }));
-    }
+    const fromAcc = accounts.find(a => a.id === fromAccount);
+    if (!fromAcc) return;
+
+    await supabase.from("accounts").update({ balance: fromAcc.balance - amount }).eq("id", fromAccount);
     setShowZelleModal(false);
     showNotification("Zelle Transfer Sent", `$${amount.toFixed(2)} sent with Zelle`, "success");
+    fetchAccounts();
   };
 
-  const handleAddFunds = (data: any) => {
-    const { account, amount, unlimited } = data;
+  const handleAddFunds = async (data: any) => {
+    const { account, amount } = data;
     
-    if (unlimited) {
-      setAccounts({
-        checking: { balance: 9999999, number: "4582" },
-        savings: { balance: 9999999, number: "7821" },
-        credit: { balance: 0, number: "3098" },
-      });
-      showNotification("💰 Unlimited Funds!", "All accounts funded with unlimited money!", "success");
+    if (account === "both") {
+      const checking = accounts.find(a => a.account_type === "checking");
+      const savings = accounts.find(a => a.account_type === "savings");
+      if (checking) await supabase.from("accounts").update({ balance: checking.balance + amount }).eq("id", checking.id);
+      if (savings) await supabase.from("accounts").update({ balance: savings.balance + amount }).eq("id", savings.id);
     } else {
-      if (account === "checking" || account === "both") {
-        setAccounts(prev => ({ ...prev, checking: { ...prev.checking, balance: prev.checking.balance + amount } }));
-      }
-      if (account === "savings" || account === "both") {
-        setAccounts(prev => ({ ...prev, savings: { ...prev.savings, balance: prev.savings.balance + amount } }));
-      }
-      showNotification("Funds Added", `$${amount.toFixed(2)} added successfully`, "success");
+      const acc = accounts.find(a => a.id === account);
+      if (acc) await supabase.from("accounts").update({ balance: acc.balance + amount }).eq("id", acc.id);
     }
+    
+    showNotification("Funds Added", `$${amount.toFixed(2)} added successfully`, "success");
     setShowDevToolsModal(false);
+    fetchAccounts();
   };
 
   const navItems = [
@@ -105,6 +134,10 @@ const Index = () => {
     { id: "security" as Page, label: "Security" },
     { id: "support" as Page, label: "Support" },
   ];
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
@@ -163,8 +196,8 @@ const Index = () => {
               </Badge>
             </Button>
 
-            <Button variant="ghost" size="icon" onClick={() => showNotification("Profile", "Profile settings would open here", "info")}>
-              <User className="h-5 w-5" />
+            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign Out">
+              <LogOut className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -208,29 +241,18 @@ const Index = () => {
             />
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <AccountCard 
-                name="Checking Account" 
-                balance={accounts.checking.balance} 
-                accountNumber={accounts.checking.number} 
-                type="checking" 
-                onTransferClick={() => setShowTransferModal(true)}
-                onZelleClick={() => setShowZelleModal(true)}
-              />
-              <AccountCard 
-                name="Savings Account" 
-                balance={accounts.savings.balance} 
-                accountNumber={accounts.savings.number} 
-                type="savings" 
-                onTransferClick={() => setShowTransferModal(true)}
-                onZelleClick={() => setShowZelleModal(true)}
-              />
-              <AccountCard 
-                name="Credit Card" 
-                balance={accounts.credit.balance} 
-                accountNumber={accounts.credit.number} 
-                type="credit" 
-                onPayBillClick={() => showNotification("Pay Bill", "Credit card payment feature coming soon", "info")}
-              />
+              {accounts.map((account) => (
+                <AccountCard
+                  key={account.id}
+                  name={account.account_name}
+                  balance={account.balance}
+                  accountNumber={account.account_number}
+                  type={account.account_type}
+                  onTransferClick={() => setShowTransferModal(true)}
+                  onZelleClick={() => setShowZelleModal(true)}
+                  onPayBillClick={() => showNotification("Pay Bill", "Credit card payment feature coming soon", "info")}
+                />
+              ))}
             </div>
 
             <RecentTransactions />
@@ -243,7 +265,12 @@ const Index = () => {
         {(currentPage === "accounts" || currentPage === "transfers" || currentPage === "billpay") && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <h2 className="text-3xl font-bold text-secondary capitalize">{currentPage}</h2>
-            <p className="text-muted-foreground">This section is under development</p>
+            <p className="text-muted-foreground">
+              Navigate to the dedicated {currentPage} page for full functionality
+            </p>
+            <Button onClick={() => navigate(`/${currentPage}`)}>
+              Go to {currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}
+            </Button>
           </div>
         )}
       </main>
