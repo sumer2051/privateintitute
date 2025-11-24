@@ -7,9 +7,12 @@ interface AccountCardProps {
   balance: number;
   accountNumber: string;
   type: "checking" | "savings" | "credit";
+  onTransferClick?: () => void;
+  onZelleClick?: () => void;
+  onPayBillClick?: () => void;
 }
 
-export const AccountCard = ({ name, balance, accountNumber, type }: AccountCardProps) => {
+export const AccountCard = ({ name, balance, accountNumber, type, onTransferClick, onZelleClick, onPayBillClick }: AccountCardProps) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -31,20 +34,21 @@ export const AccountCard = ({ name, balance, accountNumber, type }: AccountCardP
       <CardContent className="flex gap-2">
         {type !== "credit" ? (
           <>
-            <Button variant="secondary" size="sm" className="flex-1">
+            <Button variant="secondary" size="sm" className="flex-1" onClick={onTransferClick}>
               <ArrowRightLeft className="mr-1 h-4 w-4" />
               Transfer
             </Button>
             <Button 
               size="sm" 
               className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90"
+              onClick={onZelleClick}
             >
               <Send className="mr-1 h-4 w-4" />
               Zelle
             </Button>
           </>
         ) : (
-          <Button variant="default" size="sm" className="flex-1">
+          <Button variant="default" size="sm" className="flex-1" onClick={onPayBillClick}>
             Pay Bill
           </Button>
         )}

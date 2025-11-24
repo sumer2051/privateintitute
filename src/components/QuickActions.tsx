@@ -28,7 +28,20 @@ const actions = [
   },
 ];
 
-export const QuickActions = () => {
+interface QuickActionsProps {
+  onZelleClick?: () => void;
+  onTransferClick?: () => void;
+  onMobileDepositClick?: () => void;
+  onPayBillsClick?: () => void;
+}
+
+export const QuickActions = ({ onZelleClick, onTransferClick, onMobileDepositClick, onPayBillsClick }: QuickActionsProps) => {
+  const handleActionClick = (title: string) => {
+    if (title === "Send with Zelle") onZelleClick?.();
+    else if (title === "External Transfer") onTransferClick?.();
+    else if (title === "Mobile Deposit") onMobileDepositClick?.();
+    else if (title === "Pay Bills") onPayBillsClick?.();
+  };
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {actions.map((action) => {
@@ -37,6 +50,7 @@ export const QuickActions = () => {
           <Card
             key={action.title}
             className="group cursor-pointer overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg"
+            onClick={() => handleActionClick(action.title)}
           >
             <CardContent className="flex flex-col items-center p-6 text-center">
               <div
