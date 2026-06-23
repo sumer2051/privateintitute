@@ -14,26 +14,9 @@ interface AuthLayoutProps {
 
 export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutProps) => {
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-      }
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        navigate("/auth");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+  const [darkMode, setDarkMode] = useState(() =>
+    typeof document !== "undefined" && document.documentElement.classList.contains("dark")
+  );
 
   useEffect(() => {
     if (darkMode) {
@@ -49,13 +32,13 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   };
 
   const navItems = [
-    { id: "overview", label: "Overview", path: "/" },
     { id: "accounts", label: "Accounts", path: "/accounts" },
     { id: "transfers", label: "Transfers", path: "/transfers" },
     { id: "billpay", label: "Bill Pay", path: "/billpay" },
-    { id: "security", label: "Security", path: "/" },
+    { id: "overview", label: "Overview", path: "/overview" },
     { id: "settings", label: "Settings", path: "/settings" },
   ];
+
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
