@@ -74,7 +74,7 @@ const Auth = () => {
               <span className="text-3xl font-bold text-primary-foreground">B</span>
             </div>
           </div>
-          <CardTitle className="text-2xl text-center text-secondary">Bank of America</CardTitle>
+          <CardTitle className="text-2xl text-center text-secondary">BoA private institute</CardTitle>
           <CardDescription className="text-center">
             {isLogin ? "Sign in to your account" : "Create a new account"}
           </CardDescription>
