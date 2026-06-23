@@ -148,7 +148,7 @@ const Index = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 shadow-lg">
               <span className="text-xl font-bold text-primary-foreground">B</span>
             </div>
-            <h1 className="text-xl font-bold text-secondary">Bank of America</h1>
+            <h1 className="text-xl font-bold text-secondary">BoA private institute</h1>
           </div>
 
           <div className="flex items-center gap-4">
