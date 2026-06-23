@@ -33,7 +33,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You have successfully logged in.",
         });
-        navigate("/");
+        navigate("/accounts");
       } else {
         const { error } = await supabase.auth.signUp({
           email,
