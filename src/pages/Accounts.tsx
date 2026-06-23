@@ -51,12 +51,20 @@ const Accounts = () => {
     }).format(amount);
   };
 
-  if (loading) {
-    return <AuthLayout><div className="p-8">Loading accounts...</div></AuthLayout>;
-  }
-
   return (
     <AuthLayout currentPage="accounts">
+      {loading ? (
+        <div className="space-y-6 animate-pulse">
+          <div className="h-10 w-64 rounded bg-muted" />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-56 rounded-lg bg-muted" />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <>
+
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
         <h2 className="text-3xl font-bold text-secondary mb-2">My Accounts</h2>
