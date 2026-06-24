@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Download, TrendingUp } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ArrowUpDown, Download, TrendingUp, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Account {
@@ -19,6 +20,7 @@ const Accounts = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [displayName, setDisplayName] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -29,8 +31,13 @@ const Accounts = () => {
       const meta: any = u.user_metadata || {};
       const name = meta.full_name || meta.name || meta.first_name || (u.email ? u.email.split("@")[0] : "");
       setDisplayName(name);
+      setAvatarUrl(meta.avatar_url || meta.picture || "");
     });
   }, []);
+
+  const initials = displayName
+    ? displayName.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase()
+    : "U";
 
   const greeting = (() => {
     const h = new Date().getHours();
@@ -81,12 +88,26 @@ const Accounts = () => {
         <>
 
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 border">
-        <p className="text-sm text-muted-foreground">{greeting},</p>
-        <h2 className="text-3xl font-bold text-secondary mb-1">
-          Welcome back{displayName ? `, ${displayName}` : ""} 👋
-        </h2>
-        <p className="text-muted-foreground">Here's an overview of your accounts today.</p>
+      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent p-6 shadow-sm">
+        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-accent/20 blur-3xl" />
+        <div className="relative flex items-center gap-4">
+          <Avatar className="h-16 w-16 ring-2 ring-primary/40 shadow-md">
+            <AvatarImage src={avatarUrl} alt={displayName} />
+            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-display text-xl font-bold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1">
+              <Sparkles className="h-3 w-3" /> {greeting}
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-secondary leading-tight">
+              Welcome back{displayName ? <>, <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{displayName}</span></> : ""}
+            </h2>
+            <p className="text-sm text-muted-foreground italic">"Your wealth, curated with precision."</p>
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

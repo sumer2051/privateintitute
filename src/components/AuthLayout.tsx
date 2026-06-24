@@ -18,6 +18,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const [darkMode, setDarkMode] = useState(() =>
     typeof document !== "undefined" && document.documentElement.classList.contains("dark")
   );
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (darkMode) {
@@ -28,8 +29,11 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   }, [darkMode]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
+    setSigningOut(true);
+    setTimeout(async () => {
+      await supabase.auth.signOut();
+      navigate("/auth");
+    }, 480);
   };
 
   const navItems = [
@@ -40,14 +44,35 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "settings", label: "Settings", path: "/settings" },
   ];
 
-
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
-      <header className="sticky top-0 z-50 border-b bg-card shadow-sm">
+    <div
+      className={`min-h-screen bg-background transition-colors duration-300 ${
+        signingOut ? "animate-fade-out-scale" : "animate-in fade-in duration-500"
+      }`}
+    >
+      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <button onClick={() => navigate("/accounts")} className="flex items-center gap-3">
-            <img src={logo} alt="BoA private institute logo" width={40} height={40} className="h-10 w-10 rounded-full object-contain shadow-lg" />
-            <h1 className="text-xl font-bold text-secondary">BoA private institute</h1>
+          <button onClick={() => navigate("/accounts")} className="group flex items-center gap-3">
+            <span className="relative inline-flex">
+              <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/40 via-accent/30 to-primary/40 blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
+              <img
+                src={logo}
+                alt="BoA private institute logo"
+                width={44}
+                height={44}
+                className="relative h-11 w-11 rounded-full object-contain ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all animate-logo-glow"
+              />
+            </span>
+            <span className="flex flex-col items-start leading-tight">
+              <h1 className="font-display text-xl font-bold text-secondary tracking-tight">
+                BoA <span className="text-primary">private</span> institute
+              </h1>
+              <span
+                className="text-[10px] uppercase tracking-[0.25em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer"
+              >
+                Wealth · Trust · Legacy
+              </span>
+            </span>
           </button>
 
           <div className="flex items-center gap-4">
@@ -67,7 +92,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               </Badge>
             </Button>
 
-            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign Out">
+            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign Out" disabled={signingOut}>
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
