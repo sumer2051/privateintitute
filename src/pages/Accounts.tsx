@@ -18,11 +18,26 @@ interface Account {
 const Accounts = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
+  const [displayName, setDisplayName] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
     fetchAccounts();
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data.user;
+      if (!u) return;
+      const meta: any = u.user_metadata || {};
+      const name = meta.full_name || meta.name || meta.first_name || (u.email ? u.email.split("@")[0] : "");
+      setDisplayName(name);
+    });
   }, []);
+
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 18) return "Good afternoon";
+    return "Good evening";
+  })();
 
   const fetchAccounts = async () => {
     try {
@@ -66,9 +81,12 @@ const Accounts = () => {
         <>
 
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div>
-        <h2 className="text-3xl font-bold text-secondary mb-2">My Accounts</h2>
-        <p className="text-muted-foreground">Manage and view all your accounts</p>
+      <div className="rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 border">
+        <p className="text-sm text-muted-foreground">{greeting},</p>
+        <h2 className="text-3xl font-bold text-secondary mb-1">
+          Welcome back{displayName ? `, ${displayName}` : ""} 👋
+        </h2>
+        <p className="text-muted-foreground">Here's an overview of your accounts today.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
