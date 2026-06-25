@@ -25,20 +25,8 @@ function buildRawEmail(to: string, subject: string, body: string): string {
   return btoa(msg).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-async function sendAdminEmail(summary: string, userEmail: string, userName: string, urgency: string) {
-  const subject = `[BoA Support — ${urgency.toUpperCase()}] Follow-up needed for ${userName || userEmail}`;
-  const body = `A user has requested human support via the AI assistant.
-
-User: ${userName || "(no name)"}
-Email: ${userEmail}
-Urgency: ${urgency}
-
---- Conversation summary ---
-${summary}
-
-Please reach out within 24 hours.`;
-
-  const raw = buildRawEmail(ADMIN_EMAIL, subject, body);
+async function gmailSend(to: string, subject: string, body: string) {
+  const raw = buildRawEmail(to, subject, body);
   const res = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
     method: "POST",
     headers: {
@@ -53,6 +41,42 @@ Please reach out within 24 hours.`;
     throw new Error(`Gmail send failed ${res.status}: ${t}`);
   }
   return await res.json();
+}
+
+async function sendAdminEmail(summary: string, userEmail: string, userName: string, urgency: string) {
+  const subject = `[BoA Support — ${urgency.toUpperCase()}] Follow-up needed for ${userName || userEmail}`;
+  const body = `A user has requested human support via the AI assistant.
+
+User: ${userName || "(no name)"}
+Email: ${userEmail}
+Urgency: ${urgency}
+
+--- Conversation summary ---
+${summary}
+
+Please reach out within 24 hours.`;
+  return await gmailSend(ADMIN_EMAIL, subject, body);
+}
+
+async function sendUserConfirmationEmail(summary: string, userEmail: string, userName: string) {
+  const subject = "We've received your support request — BoA private institute";
+  const body = `Hi ${userName || "there"},
+
+Thanks for reaching out to BoA private institute support. Our AI assistant has escalated your request to a human specialist on our team.
+
+--- Summary of your request ---
+${summary}
+
+What happens next:
+• A specialist will personally review your request.
+• You'll hear back from us within 24 hours at this email address (${userEmail}).
+• If your matter is urgent, you can also call our 24/7 support line listed in the Support section of your account.
+
+For your security, we will never ask you for your password, full card number, or one-time codes by email.
+
+Warm regards,
+The BoA private institute Support Team`;
+  return await gmailSend(userEmail, subject, body);
 }
 
 Deno.serve(async (req) => {
