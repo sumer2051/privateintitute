@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.png";
+import { AiChatWidget } from "@/components/AiChatWidget";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,13 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     typeof document !== "undefined" && document.documentElement.classList.contains("dark")
   );
   const [signingOut, setSigningOut] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setChatOpen(true);
+    window.addEventListener("open-ai-chat", handler);
+    return () => window.removeEventListener("open-ai-chat", handler);
+  }, []);
 
   useEffect(() => {
     if (darkMode) {
@@ -121,6 +129,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
       </header>
 
       <main className="container mx-auto px-4 py-8">{children}</main>
+
+      <AiChatWidget open={chatOpen} onOpenChange={setChatOpen} />
     </div>
   );
 };
