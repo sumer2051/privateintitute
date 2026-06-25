@@ -12,12 +12,10 @@ export const SupportPage = ({ onNotify, onOpenDevTools }: SupportPageProps) => {
     {
       icon: MessageCircle,
       title: "Live Chat",
-      description: "Chat with a customer service representative",
+      description: "Chat with our AI assistant — escalates to a specialist when needed",
       action: () => {
-        onNotify("Live Chat", "Starting live chat session...", "info");
-        setTimeout(() => {
-          onNotify("Live Chat", "Support agent has joined the chat", "success");
-        }, 1500);
+        window.dispatchEvent(new Event("open-ai-chat"));
+        onNotify("Live Chat", "Opening AI assistant...", "info");
       },
     },
     {
