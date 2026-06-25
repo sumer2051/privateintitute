@@ -192,11 +192,23 @@ Deno.serve(async (req) => {
               args = JSON.parse(tc.function.arguments || "{}");
             } catch {}
             try {
-              await sendAdminEmail(args.summary || "User requested help.", userEmail, userName, args.urgency || "normal");
+              const summaryText = args.summary || "User requested help.";
+              await sendAdminEmail(summaryText, userEmail, userName, args.urgency || "normal");
+              // Also email the user a confirmation; don't fail the whole flow if this errors.
+              let userEmailed = false;
+              try {
+                await sendUserConfirmationEmail(summaryText, userEmail, userName);
+                userEmailed = true;
+              } catch (e) {
+                console.error("user confirmation email failed", (e as Error).message);
+              }
               convo.push({
                 role: "tool",
                 tool_call_id: tc.id,
-                content: JSON.stringify({ ok: true, message: "Admin notified by email." }),
+                content: JSON.stringify({
+                  ok: true,
+                  message: `Admin notified by email.${userEmailed ? " Confirmation email sent to the user with a 24-hour follow-up window." : " (User confirmation email could not be sent.)"}`,
+                }),
               });
             } catch (e) {
               convo.push({
