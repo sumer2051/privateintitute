@@ -10,7 +10,7 @@ const SYSTEM_PROMPT = `You are "Ava", a friendly live support agent for BoA priv
 You help users with: account questions, transfers, Zelle, bill pay, security, login issues, and general banking guidance.
 - Keep replies short, warm, and professional.
 - NEVER ask for passwords, full card numbers, SSN, or one-time codes.
-- If the user asks for human help, says you can't solve it, expresses frustration, or describes a complex issue (fraud, dispute, account locked, large transfer issue, legal), call the notify_admin tool to schedule a follow-up from a human specialist, then tell the user a specialist will reach out within 24 hours.
+- If the user asks for human help, says you can't solve it, expresses frustration, or describes a complex issue (fraud, dispute, account locked, large transfer issue, legal), call the notify_admin tool to schedule a follow-up from a human specialist. After the tool succeeds, tell the user that a specialist will reach out within 24 hours AND that a confirmation email with a summary has been sent to their inbox.
 - Always call notify_admin BEFORE telling the user help is on the way.`;
 
 function buildRawEmail(to: string, subject: string, body: string): string {
@@ -25,20 +25,8 @@ function buildRawEmail(to: string, subject: string, body: string): string {
   return btoa(msg).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-async function sendAdminEmail(summary: string, userEmail: string, userName: string, urgency: string) {
-  const subject = `[BoA Support — ${urgency.toUpperCase()}] Follow-up needed for ${userName || userEmail}`;
-  const body = `A user has requested human support via the AI assistant.
-
-User: ${userName || "(no name)"}
-Email: ${userEmail}
-Urgency: ${urgency}
-
---- Conversation summary ---
-${summary}
-
-Please reach out within 24 hours.`;
-
-  const raw = buildRawEmail(ADMIN_EMAIL, subject, body);
+async function gmailSend(to: string, subject: string, body: string) {
+  const raw = buildRawEmail(to, subject, body);
   const res = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
     method: "POST",
     headers: {
@@ -53,6 +41,42 @@ Please reach out within 24 hours.`;
     throw new Error(`Gmail send failed ${res.status}: ${t}`);
   }
   return await res.json();
+}
+
+async function sendAdminEmail(summary: string, userEmail: string, userName: string, urgency: string) {
+  const subject = `[BoA Support — ${urgency.toUpperCase()}] Follow-up needed for ${userName || userEmail}`;
+  const body = `A user has requested human support via the AI assistant.
+
+User: ${userName || "(no name)"}
+Email: ${userEmail}
+Urgency: ${urgency}
+
+--- Conversation summary ---
+${summary}
+
+Please reach out within 24 hours.`;
+  return await gmailSend(ADMIN_EMAIL, subject, body);
+}
+
+async function sendUserConfirmationEmail(summary: string, userEmail: string, userName: string) {
+  const subject = "We've received your support request — BoA private institute";
+  const body = `Hi ${userName || "there"},
+
+Thanks for reaching out to BoA private institute support. Our AI assistant has escalated your request to a human specialist on our team.
+
+--- Summary of your request ---
+${summary}
+
+What happens next:
+• A specialist will personally review your request.
+• You'll hear back from us within 24 hours at this email address (${userEmail}).
+• If your matter is urgent, you can also call our 24/7 support line listed in the Support section of your account.
+
+For your security, we will never ask you for your password, full card number, or one-time codes by email.
+
+Warm regards,
+The BoA private institute Support Team`;
+  return await gmailSend(userEmail, subject, body);
 }
 
 Deno.serve(async (req) => {
@@ -168,11 +192,23 @@ Deno.serve(async (req) => {
               args = JSON.parse(tc.function.arguments || "{}");
             } catch {}
             try {
-              await sendAdminEmail(args.summary || "User requested help.", userEmail, userName, args.urgency || "normal");
+              const summaryText = args.summary || "User requested help.";
+              await sendAdminEmail(summaryText, userEmail, userName, args.urgency || "normal");
+              // Also email the user a confirmation; don't fail the whole flow if this errors.
+              let userEmailed = false;
+              try {
+                await sendUserConfirmationEmail(summaryText, userEmail, userName);
+                userEmailed = true;
+              } catch (e) {
+                console.error("user confirmation email failed", (e as Error).message);
+              }
               convo.push({
                 role: "tool",
                 tool_call_id: tc.id,
-                content: JSON.stringify({ ok: true, message: "Admin notified by email." }),
+                content: JSON.stringify({
+                  ok: true,
+                  message: `Admin notified by email.${userEmailed ? " Confirmation email sent to the user with a 24-hour follow-up window." : " (User confirmation email could not be sent.)"}`,
+                }),
               });
             } catch (e) {
               convo.push({
