@@ -96,6 +96,9 @@ const Auth = () => {
             <CardDescription className="text-center pt-2">
               {isLogin ? "Sign in to access your private portfolio" : "Create your private banking account"}
             </CardDescription>
+            <p className="mx-auto max-w-xs text-center text-xs leading-relaxed text-muted-foreground">
+              Independent private banking portal. Not affiliated with Bank of America or any other financial institution.
+            </p>
           </CardHeader>
 
           <CardContent>
@@ -168,7 +171,7 @@ const Auth = () => {
 
             <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground border-t pt-4">
               <ShieldCheck className="h-3.5 w-3.5 text-success" />
-              <span>256-bit encryption · FDIC-style protected</span>
+              <span>Secure encrypted access · Private portal demo</span>
             </div>
           </CardContent>
         </div>

@@ -1,4 +1,6 @@
-# Welcome to your Lovable project
+# BoA private institute Banking Portal
+
+This is an independent banking-style web app built for a private/demo portal experience. It is not affiliated with, endorsed by, or connected to Bank of America or any other financial institution.
 
 ## Project info
 
@@ -60,9 +62,25 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Required environment variables
+
+Do not commit a real `.env` file to GitHub, GitLab, Netlify, or any public repository. Copy `.env.example` locally, then set the same variables in your hosting provider's environment-variable settings:
+
+```sh
+VITE_SUPABASE_URL=your_backend_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+VITE_SUPABASE_PROJECT_ID=your_project_id
+```
+
+For Netlify, add these under Site configuration → Environment variables, then trigger a fresh deploy.
+
+For GitHub Pages, add them as repository secrets named `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_SUPABASE_PROJECT_ID` before running the workflow.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/113eecff-8aa6-4803-a188-98efbd4b59bd) and click on Share -> Publish.
+
+For Netlify, the included `netlify.toml` and `public/_redirects` support React Router refreshes. If Netlify pauses or suspends the site, review their phishing/impersonation notice: banking clones and brand lookalikes can be flagged unless the app is clearly your own brand and includes an unaffiliated notice.
 
 ## Can I connect a custom domain to my Lovable project?
 
