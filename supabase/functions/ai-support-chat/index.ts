@@ -6,12 +6,26 @@ const GOOGLE_MAIL_API_KEY = Deno.env.get("GOOGLE_MAIL_API_KEY")!;
 const ADMIN_EMAIL = Deno.env.get("ADMIN_EMAIL") || "admin@example.com";
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
 
-const SYSTEM_PROMPT = `You are "Ava", a friendly live support agent for BoA private institute, a private banking portal.
-You help users with: account questions, transfers, Zelle, bill pay, security, login issues, and general banking guidance.
-- Keep replies short, warm, and professional.
-- NEVER ask for passwords, full card numbers, SSN, or one-time codes.
-- If the user asks for human help, says you can't solve it, expresses frustration, or describes a complex issue (fraud, dispute, account locked, large transfer issue, legal), call the notify_admin tool to schedule a follow-up from a human specialist. After the tool succeeds, tell the user that a specialist will reach out within 24 hours AND that a confirmation email with a summary has been sent to their inbox.
-- Always call notify_admin BEFORE telling the user help is on the way.`;
+const SYSTEM_PROMPT = `You are "Ava", the senior AI banking concierge for BoA private institute — a private banking portal.
+
+Personality: warm, sharp, concise, proactive. Sound like a top-tier private banker, not a chatbot. Use the user's name when it fits naturally.
+
+Capabilities — you have LIVE READ access to the signed-in user's banking data via the structured "user_context" block provided at the start of the conversation. You can:
+- Answer balance questions (checking, savings, credit) with exact figures.
+- Explain recent transactions, spending categories, and trends.
+- Walk users through transfers, Zelle, bill pay, scheduled payments, security settings, and login issues step-by-step.
+- Spot anomalies (large debits, low balance, near credit limit) and proactively flag them.
+- Do financial math (available balance after a planned transfer, % of credit used, monthly spend by category).
+- Give clear, friendly explanations of banking concepts.
+
+Hard rules:
+- NEVER ask for passwords, full card numbers, SSN, CVV, or one-time codes. If a user shares one, tell them not to and ignore it.
+- NEVER invent data. If something isn't in user_context, say you don't see it and offer to escalate.
+- Currency: format as USD with two decimals (e.g. $4,582.75).
+- Keep replies tight — 1-4 short paragraphs or a small bullet list. No walls of text.
+- Use markdown sparingly (bold for figures, lists for steps).
+
+Escalation: If the user (a) explicitly asks for a human, (b) reports fraud / unauthorized activity / a locked account / a legal matter / a dispute, or (c) you cannot resolve it after one attempt — call the notify_admin tool BEFORE replying, then tell the user a specialist will reach out within 24 hours AND that a confirmation email has been sent to their inbox.`;
 
 function buildRawEmail(to: string, subject: string, body: string): string {
   const msg = [
@@ -21,7 +35,6 @@ function buildRawEmail(to: string, subject: string, body: string): string {
     "",
     body,
   ].join("\r\n");
-  // base64url
   return btoa(msg).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
@@ -79,6 +92,44 @@ The BoA private institute Support Team`;
   return await gmailSend(userEmail, subject, body);
 }
 
+async function loadUserContext(supabase: any, userId: string) {
+  const [profileRes, accountsRes, payeesRes, zelleRes, schedRes] = await Promise.all([
+    supabase.from("profiles").select("full_name,email,phone,created_at").eq("id", userId).maybeSingle(),
+    supabase.from("accounts").select("id,account_type,account_name,account_number,balance,available_balance,credit_limit,is_active").eq("user_id", userId),
+    supabase.from("payees").select("id,payee_name,payee_type,account_number,is_active").eq("user_id", userId),
+    supabase.from("zelle_contacts").select("id,contact_name,contact_email,contact_phone").eq("user_id", userId),
+    supabase.from("scheduled_payments").select("id,account_id,payee_id,amount,frequency,next_payment_date,is_active").eq("user_id", userId),
+  ]);
+
+  const accounts = accountsRes.data ?? [];
+  const accountIds = accounts.map((a: any) => a.id);
+  let transactions: any[] = [];
+  if (accountIds.length) {
+    const txRes = await supabase
+      .from("transactions")
+      .select("id,account_id,transaction_type,amount,balance_after,description,category,status,created_at")
+      .in("account_id", accountIds)
+      .order("created_at", { ascending: false })
+      .limit(40);
+    transactions = txRes.data ?? [];
+  }
+
+  // Redact account numbers to last 4
+  const redact = (n: string | null | undefined) => (n ? `••••${String(n).slice(-4)}` : null);
+  const accountsRedacted = accounts.map((a: any) => ({ ...a, account_number: redact(a.account_number) }));
+  const payeesRedacted = (payeesRes.data ?? []).map((p: any) => ({ ...p, account_number: redact(p.account_number) }));
+
+  return {
+    profile: profileRes.data ?? null,
+    accounts: accountsRedacted,
+    transactions,
+    payees: payeesRedacted,
+    zelle_contacts: zelleRes.data ?? [],
+    scheduled_payments: schedRes.data ?? [],
+    generated_at: new Date().toISOString(),
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -103,8 +154,10 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const userId = claimsData.claims.sub as string;
     const userEmail = (claimsData.claims.email as string) || "unknown@user";
-    const userName = ((claimsData.claims.user_metadata as any)?.full_name as string) || userEmail;
+    const userName =
+      ((claimsData.claims.user_metadata as any)?.full_name as string) || userEmail;
 
     const { messages } = await req.json();
     if (!Array.isArray(messages)) {
@@ -114,12 +167,20 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Load fresh banking context for this user (RLS-scoped via auth header)
+    let userContext: any = null;
+    try {
+      userContext = await loadUserContext(supabase, userId);
+    } catch (e) {
+      console.error("loadUserContext failed", (e as Error).message);
+    }
+
     const tools = [
       {
         type: "function",
         function: {
           name: "notify_admin",
-          description: "Email a human specialist to follow up with the user. Use when user asks for human help or has a complex issue.",
+          description: "Email a human specialist to follow up with the user. Use when user asks for human help, reports fraud/dispute/locked account, or has a complex issue you cannot solve.",
           parameters: {
             type: "object",
             properties: {
@@ -132,12 +193,18 @@ Deno.serve(async (req) => {
       },
     ];
 
-    const convo = [
-      { role: "system", content: `${SYSTEM_PROMPT}\n\nUser context: name=${userName}, email=${userEmail}` },
+    const contextBlock = userContext
+      ? `\n\nuser_context (live, RLS-scoped to this signed-in user):\n${JSON.stringify(userContext, null, 2)}`
+      : `\n\nuser_context: (unavailable — tell the user you can't read their data right now and offer to escalate)`;
+
+    const convo: any[] = [
+      {
+        role: "system",
+        content: `${SYSTEM_PROMPT}\n\nSigned-in user: name="${userName}", email="${userEmail}".${contextBlock}`,
+      },
       ...messages,
     ];
 
-    // Up to 3 tool-call rounds
     for (let i = 0; i < 3; i++) {
       const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -146,7 +213,7 @@ Deno.serve(async (req) => {
           Authorization: `Bearer ${LOVABLE_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "google/gemini-2.5-flash",
           messages: convo,
           tools,
         }),
@@ -188,13 +255,10 @@ Deno.serve(async (req) => {
         for (const tc of toolCalls) {
           if (tc.function?.name === "notify_admin") {
             let args: any = {};
-            try {
-              args = JSON.parse(tc.function.arguments || "{}");
-            } catch {}
+            try { args = JSON.parse(tc.function.arguments || "{}"); } catch {}
             try {
               const summaryText = args.summary || "User requested help.";
               await sendAdminEmail(summaryText, userEmail, userName, args.urgency || "normal");
-              // Also email the user a confirmation; don't fail the whole flow if this errors.
               let userEmailed = false;
               try {
                 await sendUserConfirmationEmail(summaryText, userEmail, userName);
@@ -207,7 +271,7 @@ Deno.serve(async (req) => {
                 tool_call_id: tc.id,
                 content: JSON.stringify({
                   ok: true,
-                  message: `Admin notified by email.${userEmailed ? " Confirmation email sent to the user with a 24-hour follow-up window." : " (User confirmation email could not be sent.)"}`,
+                  message: `Admin notified.${userEmailed ? " Confirmation email sent to user." : ""}`,
                 }),
               });
             } catch (e) {
