@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.png";
 import { AiChatWidget } from "@/components/AiChatWidget";
+import { NotificationsBell } from "@/components/NotificationsBell";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -93,12 +94,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs" variant="destructive">
-                2
-              </Badge>
-            </Button>
+            <NotificationsBell />
+
 
             <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign Out" disabled={signingOut}>
               <LogOut className="h-5 w-5" />
