@@ -165,9 +165,18 @@ const Transfers = () => {
         .select()
         .single();
       if (error) throw error;
+      supabase.functions.invoke("send-transfer-confirmation", {
+        body: {
+          type: "External Transfer",
+          amount: amt,
+          recipient: extRecipient,
+          detail: `${extBank} ····${extAccountNum.slice(-4)}${extMemo ? ` — ${extMemo}` : ""}`,
+          reference: ref,
+        },
+      }).catch((e) => console.error("confirmation email failed", e));
       toast({
         title: "Transfer submitted — Pending approval",
-        description: `Ref ${ref}. A support specialist will reach out shortly.`,
+        description: `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
       });
       setExtAmount(""); setExtRecipient(""); setExtBank(""); setExtRouting(""); setExtAccountNum(""); setExtMemo("");
       if (data) setSelectedTx(data as PendingTx);
