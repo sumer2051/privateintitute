@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.png";
 import { AiChatWidget } from "@/components/AiChatWidget";
+import { NotificationsBell } from "@/components/NotificationsBell";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
