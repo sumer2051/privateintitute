@@ -19,8 +19,12 @@ try {
       "Missing backend configuration. Set <b>VITE_SUPABASE_URL</b> and <b>VITE_SUPABASE_PUBLISHABLE_KEY</b> in your hosting provider's environment variables, then redeploy."
     );
   } else {
-    const { default: App } = await import("./App.tsx");
-    createRoot(rootEl).render(<App />);
+    import("./App.tsx")
+      .then(({ default: App }) => createRoot(rootEl).render(<App />))
+      .catch((err) => {
+        console.error(err);
+        renderFatal("The app failed to start. Open the browser console for details.");
+      });
   }
 } catch (err) {
   console.error(err);
