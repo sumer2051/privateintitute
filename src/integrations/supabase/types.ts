@@ -176,6 +176,7 @@ export type Database = {
           reference_number: string | null
           status: string | null
           transaction_type: string
+          user_id: string
         }
         Insert: {
           account_id: string
@@ -188,6 +189,7 @@ export type Database = {
           reference_number?: string | null
           status?: string | null
           transaction_type: string
+          user_id: string
         }
         Update: {
           account_id?: string
@@ -200,6 +202,7 @@ export type Database = {
           reference_number?: string | null
           status?: string | null
           transaction_type?: string
+          user_id?: string
         }
         Relationships: [
           {

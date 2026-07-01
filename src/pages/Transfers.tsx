@@ -101,8 +101,11 @@ const Transfers = () => {
       await supabase.from("accounts").update({ balance: fromAcc.balance - transferAmount }).eq("id", fromAccount);
       await supabase.from("accounts").update({ balance: toAcc.balance + transferAmount }).eq("id", toAccount);
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
       await supabase.from("transactions").insert([
         {
+          user_id: user.id,
           account_id: fromAccount,
           transaction_type: "debit",
           category: "Transfer Out",
@@ -113,6 +116,7 @@ const Transfers = () => {
           reference_number: genRef("INT"),
         },
         {
+          user_id: user.id,
           account_id: toAccount,
           transaction_type: "credit",
           category: "Transfer In",
@@ -150,9 +154,12 @@ const Transfers = () => {
     setExtLoading(true);
     try {
       const ref = genRef("EXT");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
       const { data, error } = await supabase
         .from("transactions")
         .insert({
+          user_id: user.id,
           account_id: extFrom,
           transaction_type: "debit",
           category: "External Transfer",
@@ -204,9 +211,12 @@ const Transfers = () => {
     setZLoading(true);
     try {
       const ref = genRef("ZEL");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
       const { data, error } = await supabase
         .from("transactions")
         .insert({
+          user_id: user.id,
           account_id: zFrom,
           transaction_type: "debit",
           category: "Zelle",
