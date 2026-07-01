@@ -1,5 +1,4 @@
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
 import "./index.css";
 
 const rootEl = document.getElementById("root")!;
@@ -20,6 +19,7 @@ try {
       "Missing backend configuration. Set <b>VITE_SUPABASE_URL</b> and <b>VITE_SUPABASE_PUBLISHABLE_KEY</b> in your hosting provider's environment variables, then redeploy."
     );
   } else {
+    const { default: App } = await import("./App.tsx");
     createRoot(rootEl).render(<App />);
   }
 } catch (err) {
