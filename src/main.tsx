@@ -3,6 +3,11 @@ import "./index.css";
 
 const rootEl = document.getElementById("root")!;
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://fvrzpuxkehukgfjhjehh.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiOiJmIn0.invalid";
+
 function renderFatal(message: string) {
   rootEl.innerHTML = `
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,system-ui,sans-serif;background:#0b1220;color:#fff;">
@@ -14,7 +19,7 @@ function renderFatal(message: string) {
 }
 
 try {
-  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     renderFatal(
       "Missing backend configuration. Set <b>VITE_SUPABASE_URL</b> and <b>VITE_SUPABASE_PUBLISHABLE_KEY</b> in your hosting provider's environment variables, then redeploy."
     );
