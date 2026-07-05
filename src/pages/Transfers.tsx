@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Account {
   id: string;
@@ -63,6 +64,7 @@ const Transfers = () => {
   const [zLoading, setZLoading] = useState(false);
 
   const { toast } = useToast();
+  const { format, convert, toUsd, currency } = useCurrency();
 
   useEffect(() => {
     fetchAccounts();
@@ -84,15 +86,16 @@ const Transfers = () => {
     if (data) setPending(data as PendingTx[]);
   };
 
-  const formatCurrency = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+  // Balances are stored in USD; format() converts to the selected currency for display.
+  const formatCurrency = (usdAmount: number) => format(usdAmount);
 
   const handleInternalTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fromAccount || !toAccount || !amount) return;
     setLoading(true);
     try {
-      const transferAmount = parseFloat(amount);
+      const transferAmountDisplay = parseFloat(amount);
+      const transferAmount = toUsd(transferAmountDisplay); // store as USD
       const fromAcc = accounts.find((a) => a.id === fromAccount);
       const toAcc = accounts.find((a) => a.id === toAccount);
       if (!fromAcc || !toAcc) throw new Error("Invalid accounts");
@@ -144,7 +147,8 @@ const Transfers = () => {
       toast({ title: "Missing details", description: "Please complete all required fields.", variant: "destructive" });
       return;
     }
-    const amt = parseFloat(extAmount);
+    const amtDisplay = parseFloat(extAmount);
+    const amt = toUsd(amtDisplay);
     const fromAcc = accounts.find((a) => a.id === extFrom);
     if (!fromAcc) return;
     if (fromAcc.balance < amt) {
@@ -175,7 +179,8 @@ const Transfers = () => {
       supabase.functions.invoke("send-transfer-confirmation", {
         body: {
           type: "External Transfer",
-          amount: amt,
+          amount: amtDisplay,
+          currency: currency.code,
           recipient: extRecipient,
           detail: `${extBank} ····${extAccountNum.slice(-4)}${extMemo ? ` — ${extMemo}` : ""}`,
           reference: ref,
@@ -201,7 +206,8 @@ const Transfers = () => {
       toast({ title: "Missing details", description: "Please complete all required fields.", variant: "destructive" });
       return;
     }
-    const amt = parseFloat(zAmount);
+    const amtDisplay = parseFloat(zAmount);
+    const amt = toUsd(amtDisplay);
     const fromAcc = accounts.find((a) => a.id === zFrom);
     if (!fromAcc) return;
     if (fromAcc.balance < amt) {
@@ -232,7 +238,8 @@ const Transfers = () => {
       supabase.functions.invoke("send-transfer-confirmation", {
         body: {
           type: "Zelle",
-          amount: amt,
+          amount: amtDisplay,
+          currency: currency.code,
           recipient: zRecipient,
           detail: `${zContact}${zMemo ? ` — ${zMemo}` : ""}`,
           reference: ref,

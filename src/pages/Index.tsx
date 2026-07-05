@@ -13,6 +13,7 @@ import { TransferModal } from "@/components/TransferModal";
 import { ZelleModal } from "@/components/ZelleModal";
 import { DevToolsModal } from "@/components/DevToolsModal";
 import { NotificationToast } from "@/components/NotificationToast";
+import { CurrencySelector } from "@/components/CurrencySelector";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -172,6 +173,8 @@ const Index = () => {
                 }}
               />
             </div>
+
+            <CurrencySelector variant="compact" />
 
             <Button
               variant="ghost"

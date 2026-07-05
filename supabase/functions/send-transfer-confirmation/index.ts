@@ -43,11 +43,22 @@ function renderEmail(opts: {
   userName: string;
   type: string; // "External Transfer" | "Zelle"
   amount: number;
+  currency?: string;
   recipient: string;
   detail: string;
   reference: string;
 }) {
-  const fmt = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(opts.amount);
+  const code = (opts.currency || "USD").toUpperCase();
+  let fmt: string;
+  try {
+    fmt = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: code,
+      maximumFractionDigits: code === "JPY" ? 0 : 2,
+    }).format(opts.amount);
+  } catch {
+    fmt = `${code} ${opts.amount.toFixed(2)}`;
+  }
   return `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f4f6fb;font-family:Helvetica,Arial,sans-serif;color:#1a2238;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:32px 0;">
@@ -138,7 +149,7 @@ Deno.serve(async (req) => {
       ((claims.claims.user_metadata as any)?.full_name as string) || userEmail.split("@")[0];
 
     const body = await req.json();
-    const { type, amount, recipient, detail, reference } = body || {};
+    const { type, amount, currency, recipient, detail, reference } = body || {};
     if (!type || !amount || !recipient || !reference) {
       return new Response(JSON.stringify({ error: "Missing fields" }), {
         status: 400,
@@ -150,6 +161,7 @@ Deno.serve(async (req) => {
       userName,
       type,
       amount: Number(amount),
+      currency: typeof currency === "string" ? currency : "USD",
       recipient,
       detail: detail || "—",
       reference,

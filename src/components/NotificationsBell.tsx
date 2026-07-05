@@ -9,6 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useNavigate } from "react-router-dom";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Notif {
   id: string;
@@ -58,8 +59,8 @@ export const NotificationsBell = () => {
     setUnread(0);
   };
 
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+  const { format } = useCurrency();
+  const fmt = (n: number) => format(n);
 
   const timeAgo = (iso: string | null) => {
     if (!iso) return "";

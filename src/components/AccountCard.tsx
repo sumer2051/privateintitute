@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ArrowRightLeft, Send } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface AccountCardProps {
   name: string;
@@ -13,12 +14,8 @@ interface AccountCardProps {
 }
 
 export const AccountCard = ({ name, balance, accountNumber, type, onTransferClick, onZelleClick, onPayBillClick }: AccountCardProps) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
+  const { format } = useCurrency();
+  const formatCurrency = (amount: number) => format(amount);
 
   return (
     <Card className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">

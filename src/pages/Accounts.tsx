@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowUpDown, Download, TrendingUp, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Account {
   id: string;
@@ -66,12 +67,8 @@ const Accounts = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
+  const { format } = useCurrency();
+  const formatCurrency = (amount: number) => format(amount);
 
   return (
     <AuthLayout currentPage="accounts">

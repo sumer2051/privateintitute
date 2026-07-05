@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const transactions = [
   {
@@ -34,12 +35,8 @@ const transactions = [
 ];
 
 export const RecentTransactions = () => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(Math.abs(amount));
-  };
+  const { format } = useCurrency();
+  const formatCurrency = (amount: number) => format(Math.abs(amount));
 
   return (
     <Card>
