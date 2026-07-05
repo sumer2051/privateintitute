@@ -94,7 +94,8 @@ const Transfers = () => {
     if (!fromAccount || !toAccount || !amount) return;
     setLoading(true);
     try {
-      const transferAmount = parseFloat(amount);
+      const transferAmountDisplay = parseFloat(amount);
+      const transferAmount = toUsd(transferAmountDisplay); // store as USD
       const fromAcc = accounts.find((a) => a.id === fromAccount);
       const toAcc = accounts.find((a) => a.id === toAccount);
       if (!fromAcc || !toAcc) throw new Error("Invalid accounts");
