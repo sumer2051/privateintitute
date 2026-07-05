@@ -147,7 +147,8 @@ const Transfers = () => {
       toast({ title: "Missing details", description: "Please complete all required fields.", variant: "destructive" });
       return;
     }
-    const amt = parseFloat(extAmount);
+    const amtDisplay = parseFloat(extAmount);
+    const amt = toUsd(amtDisplay);
     const fromAcc = accounts.find((a) => a.id === extFrom);
     if (!fromAcc) return;
     if (fromAcc.balance < amt) {
@@ -178,7 +179,8 @@ const Transfers = () => {
       supabase.functions.invoke("send-transfer-confirmation", {
         body: {
           type: "External Transfer",
-          amount: amt,
+          amount: amtDisplay,
+          currency: currency.code,
           recipient: extRecipient,
           detail: `${extBank} ····${extAccountNum.slice(-4)}${extMemo ? ` — ${extMemo}` : ""}`,
           reference: ref,
