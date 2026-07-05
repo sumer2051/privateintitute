@@ -206,7 +206,8 @@ const Transfers = () => {
       toast({ title: "Missing details", description: "Please complete all required fields.", variant: "destructive" });
       return;
     }
-    const amt = parseFloat(zAmount);
+    const amtDisplay = parseFloat(zAmount);
+    const amt = toUsd(amtDisplay);
     const fromAcc = accounts.find((a) => a.id === zFrom);
     if (!fromAcc) return;
     if (fromAcc.balance < amt) {
@@ -237,7 +238,8 @@ const Transfers = () => {
       supabase.functions.invoke("send-transfer-confirmation", {
         body: {
           type: "Zelle",
-          amount: amt,
+          amount: amtDisplay,
+          currency: currency.code,
           recipient: zRecipient,
           detail: `${zContact}${zMemo ? ` — ${zMemo}` : ""}`,
           reference: ref,
