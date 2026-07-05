@@ -66,12 +66,8 @@ const Accounts = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
+  const { format } = useCurrency();
+  const formatCurrency = (amount: number) => format(amount);
 
   return (
     <AuthLayout currentPage="accounts">
