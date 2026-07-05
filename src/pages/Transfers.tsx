@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Account {
   id: string;
