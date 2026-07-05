@@ -35,12 +35,8 @@ const transactions = [
 ];
 
 export const RecentTransactions = () => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(Math.abs(amount));
-  };
+  const { format } = useCurrency();
+  const formatCurrency = (amount: number) => format(Math.abs(amount));
 
   return (
     <Card>
