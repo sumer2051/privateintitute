@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.png";
 import { AiChatWidget } from "@/components/AiChatWidget";
 import { NotificationsBell } from "@/components/NotificationsBell";
+import { CurrencySelector } from "@/components/CurrencySelector";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
