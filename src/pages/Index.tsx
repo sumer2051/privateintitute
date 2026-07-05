@@ -174,6 +174,8 @@ const Index = () => {
               />
             </div>
 
+            <CurrencySelector variant="compact" />
+
             <Button
               variant="ghost"
               size="icon"
