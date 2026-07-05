@@ -64,6 +64,7 @@ const Transfers = () => {
   const [zLoading, setZLoading] = useState(false);
 
   const { toast } = useToast();
+  const { format, convert, toUsd, currency } = useCurrency();
 
   useEffect(() => {
     fetchAccounts();
@@ -85,8 +86,8 @@ const Transfers = () => {
     if (data) setPending(data as PendingTx[]);
   };
 
-  const formatCurrency = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+  // Balances are stored in USD; format() converts to the selected currency for display.
+  const formatCurrency = (usdAmount: number) => format(usdAmount);
 
   const handleInternalTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
