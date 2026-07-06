@@ -10,8 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail } from "lucide-react";
+import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail, Globe2 } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { getBankingProfile } from "@/lib/bank-profiles";
 
 interface Account {
   id: string;
@@ -45,13 +46,11 @@ const Transfers = () => {
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // External
+  // External — dynamic per-currency banking profile
   const [extFrom, setExtFrom] = useState("");
   const [extAmount, setExtAmount] = useState("");
   const [extRecipient, setExtRecipient] = useState("");
-  const [extBank, setExtBank] = useState("");
-  const [extRouting, setExtRouting] = useState("");
-  const [extAccountNum, setExtAccountNum] = useState("");
+  const [extFields, setExtFields] = useState<Record<string, string>>({});
   const [extMemo, setExtMemo] = useState("");
   const [extLoading, setExtLoading] = useState(false);
 
