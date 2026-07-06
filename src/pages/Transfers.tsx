@@ -10,8 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail } from "lucide-react";
+import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail, Globe2 } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { getBankingProfile } from "@/lib/bank-profiles";
 
 interface Account {
   id: string;
@@ -45,13 +46,11 @@ const Transfers = () => {
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // External
+  // External — dynamic per-currency banking profile
   const [extFrom, setExtFrom] = useState("");
   const [extAmount, setExtAmount] = useState("");
   const [extRecipient, setExtRecipient] = useState("");
-  const [extBank, setExtBank] = useState("");
-  const [extRouting, setExtRouting] = useState("");
-  const [extAccountNum, setExtAccountNum] = useState("");
+  const [extFields, setExtFields] = useState<Record<string, string>>({});
   const [extMemo, setExtMemo] = useState("");
   const [extLoading, setExtLoading] = useState(false);
 
@@ -141,10 +140,21 @@ const Transfers = () => {
     }
   };
 
+  const profile = getBankingProfile(currency.code);
+
   const handleExternalTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!extFrom || !extAmount || !extRecipient || !extBank || !extAccountNum) {
-      toast({ title: "Missing details", description: "Please complete all required fields.", variant: "destructive" });
+    const missing = profile.fields
+      .filter((f) => f.required !== false && !(extFields[f.key] ?? "").trim())
+      .map((f) => f.label);
+    if (!extFrom || !extAmount || !extRecipient || missing.length) {
+      toast({
+        title: "Missing details",
+        description: missing.length
+          ? `Please complete: ${missing.join(", ")}`
+          : "Please complete all required fields.",
+        variant: "destructive",
+      });
       return;
     }
     const amtDisplay = parseFloat(extAmount);
@@ -160,6 +170,15 @@ const Transfers = () => {
       const ref = genRef("EXT");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
+
+      // Build a human-readable summary of the profile-specific fields for the
+      // transaction description and email body.
+      const detailPairs = profile.fields
+        .map((f) => [f.label, (extFields[f.key] ?? "").trim()] as const)
+        .filter(([, v]) => v.length > 0);
+      const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
+      const details = Object.fromEntries(detailPairs);
+
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -167,7 +186,7 @@ const Transfers = () => {
           account_id: extFrom,
           transaction_type: "debit",
           category: "External Transfer",
-          description: `To ${extRecipient} · ${extBank} ****${extAccountNum.slice(-4)}${extMemo ? ` — ${extMemo}` : ""}`,
+          description: `[${profile.scheme}] To ${extRecipient} — ${detailString}${extMemo ? ` — ${extMemo}` : ""}`,
           amount: amt,
           balance_after: fromAcc.balance,
           status: "pending",
@@ -182,15 +201,19 @@ const Transfers = () => {
           amount: amtDisplay,
           currency: currency.code,
           recipient: extRecipient,
-          detail: `${extBank} ····${extAccountNum.slice(-4)}${extMemo ? ` — ${extMemo}` : ""}`,
+          scheme: profile.scheme,
+          region: profile.region,
+          settlement: profile.settlement,
+          details,
+          memo: extMemo || undefined,
           reference: ref,
         },
       }).catch((e) => console.error("confirmation email failed", e));
       toast({
-        title: "Transfer submitted — Pending approval",
+        title: `${profile.scheme} submitted — Pending approval`,
         description: `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
       });
-      setExtAmount(""); setExtRecipient(""); setExtBank(""); setExtRouting(""); setExtAccountNum(""); setExtMemo("");
+      setExtAmount(""); setExtRecipient(""); setExtFields({}); setExtMemo("");
       if (data) setSelectedTx(data as PendingTx);
       fetchPending();
     } catch (err: any) {
@@ -323,6 +346,15 @@ const Transfers = () => {
                   <ShieldCheck className="h-3.5 w-3.5 text-success" />
                   Transfers to outside banks are reviewed by our support team before release.
                 </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-xs">
+                  <Globe2 className="h-3.5 w-3.5 text-primary" />
+                  <span className="font-medium">{currency.flag} {currency.code} · {profile.scheme}</span>
+                  <span className="text-muted-foreground">· {profile.region}</span>
+                  <Badge variant="secondary" className="ml-auto">{profile.settlement}</Badge>
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  The recipient form updates to match your selected currency. Switch currency in the top-right to change the transfer style.
+                </p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleExternalTransfer} className="space-y-4">
@@ -345,33 +377,41 @@ const Transfers = () => {
                       <Input value={extRecipient} onChange={(e) => setExtRecipient(e.target.value)} placeholder="Jane Doe" />
                     </div>
                     <div>
-                      <Label>Bank Name</Label>
-                      <Input value={extBank} onChange={(e) => setExtBank(e.target.value)} placeholder="Chase Bank" />
-                    </div>
-                    <div>
-                      <Label>Routing Number</Label>
-                      <Input value={extRouting} onChange={(e) => setExtRouting(e.target.value)} placeholder="9 digits" inputMode="numeric" />
-                    </div>
-                    <div>
-                      <Label>Account Number</Label>
-                      <Input value={extAccountNum} onChange={(e) => setExtAccountNum(e.target.value)} placeholder="Recipient account" inputMode="numeric" />
-                    </div>
-                    <div>
-                      <Label>Amount</Label>
+                      <Label>Amount ({currency.code})</Label>
                       <Input type="number" step="0.01" placeholder="0.00" value={extAmount} onChange={(e) => setExtAmount(e.target.value)} />
                     </div>
-                    <div>
+                    {profile.fields.map((f) => (
+                      <div key={f.key} className={f.help ? "sm:col-span-2" : ""}>
+                        <Label>
+                          {f.label}
+                          {f.required === false && <span className="ml-1 text-xs text-muted-foreground">(optional)</span>}
+                        </Label>
+                        <Input
+                          value={extFields[f.key] ?? ""}
+                          onChange={(e) => {
+                            const v = f.uppercase ? e.target.value.toUpperCase() : e.target.value;
+                            setExtFields((prev) => ({ ...prev, [f.key]: v }));
+                          }}
+                          placeholder={f.placeholder}
+                          inputMode={f.inputMode}
+                          maxLength={f.maxLength}
+                        />
+                        {f.help && <p className="mt-1 text-[11px] text-muted-foreground">{f.help}</p>}
+                      </div>
+                    ))}
+                    <div className="sm:col-span-2">
                       <Label>Memo (optional)</Label>
                       <Input value={extMemo} onChange={(e) => setExtMemo(e.target.value)} placeholder="Invoice #123" />
                     </div>
                   </div>
                   <Button type="submit" className="w-full" disabled={extLoading}>
-                    {extLoading ? "Submitting..." : "Submit Transfer for Approval"}
+                    {extLoading ? "Submitting..." : `Submit ${profile.scheme} for Approval`}
                   </Button>
                 </form>
               </CardContent>
             </Card>
           </TabsContent>
+
 
           <TabsContent value="zelle">
             <Card className="border-accent/30">

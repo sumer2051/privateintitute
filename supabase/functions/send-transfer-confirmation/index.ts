@@ -39,19 +39,42 @@ function buildHtmlEmail(opts: {
   return encodeRaw(msg);
 }
 
+function escapeHtml(s: string) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Currency → locale map so amounts render in the recipient country's style
+// (e.g. "1.234,56 €" for EUR, "£1,234.56" for GBP, "₹1,23,456.00" for INR).
+const CURRENCY_LOCALES: Record<string, string> = {
+  USD: "en-US", EUR: "de-DE", GBP: "en-GB", JPY: "ja-JP", CAD: "en-CA",
+  AUD: "en-AU", CHF: "de-CH", CNY: "zh-CN", INR: "en-IN", MXN: "es-MX",
+  BRL: "pt-BR", NGN: "en-NG", ZAR: "en-ZA", AED: "ar-AE",
+};
+
 function renderEmail(opts: {
   userName: string;
-  type: string; // "External Transfer" | "Zelle"
+  type: string;
   amount: number;
   currency?: string;
   recipient: string;
-  detail: string;
+  scheme?: string;
+  region?: string;
+  settlement?: string;
+  details?: Record<string, string>;
+  detail?: string; // legacy fallback
+  memo?: string;
   reference: string;
 }) {
   const code = (opts.currency || "USD").toUpperCase();
+  const locale = CURRENCY_LOCALES[code] || "en-US";
   let fmt: string;
   try {
-    fmt = new Intl.NumberFormat("en-US", {
+    fmt = new Intl.NumberFormat(locale, {
       style: "currency",
       currency: code,
       maximumFractionDigits: code === "JPY" ? 0 : 2,
@@ -59,6 +82,24 @@ function renderEmail(opts: {
   } catch {
     fmt = `${code} ${opts.amount.toFixed(2)}`;
   }
+
+  const scheme = opts.scheme || opts.type;
+  const region = opts.region || "";
+  const settlement = opts.settlement || "";
+
+  // Detail rows: prefer structured `details`, fall back to legacy `detail` string.
+  const detailEntries = opts.details && Object.keys(opts.details).length
+    ? Object.entries(opts.details)
+    : opts.detail
+      ? [["Details", opts.detail] as [string, string]]
+      : [];
+  const detailRowsHtml = detailEntries
+    .map(
+      ([k, v]) =>
+        `<tr><td style="color:#6a7590;width:42%;">${escapeHtml(k)}</td><td style="font-weight:600;">${escapeHtml(v)}</td></tr>`,
+    )
+    .join("");
+
   return `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f4f6fb;font-family:Helvetica,Arial,sans-serif;color:#1a2238;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:32px 0;">
@@ -78,20 +119,22 @@ function renderEmail(opts: {
           </td>
         </tr>
         <tr><td style="padding:32px;">
-          <h1 style="margin:0 0 8px;font-size:22px;color:#0a1a3f;">Transfer received — pending approval</h1>
+          <h1 style="margin:0 0 8px;font-size:22px;color:#0a1a3f;">${escapeHtml(scheme)} — pending approval</h1>
           <p style="margin:0 0 20px;font-size:15px;line-height:1.55;color:#3a4660;">
-            Hi ${opts.userName || "there"}, we've received your ${opts.type} request. Our support team will personally verify and approve the transfer shortly.
+            Hi ${escapeHtml(opts.userName || "there")}, we've received your <strong>${escapeHtml(scheme)}</strong>${region ? ` (${escapeHtml(region)})` : ""} request. Our support team will personally verify and approve the transfer shortly.
           </p>
 
           <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e6e9f2;border-radius:10px;margin:0 0 22px;">
             <tr><td style="padding:14px 18px;background:#f7f9fc;border-bottom:1px solid #e6e9f2;font-size:12px;letter-spacing:2px;color:#5a6680;text-transform:uppercase;">Transfer Summary</td></tr>
             <tr><td style="padding:18px;">
               <table width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;color:#1a2238;">
-                <tr><td style="color:#6a7590;width:42%;">Type</td><td style="font-weight:600;">${opts.type}</td></tr>
+                <tr><td style="color:#6a7590;width:42%;">Scheme</td><td style="font-weight:600;">${escapeHtml(scheme)}${region ? ` · ${escapeHtml(region)}` : ""}</td></tr>
                 <tr><td style="color:#6a7590;">Amount</td><td style="font-weight:700;font-size:18px;color:#0a1a3f;">${fmt}</td></tr>
-                <tr><td style="color:#6a7590;">Recipient</td><td style="font-weight:600;">${opts.recipient}</td></tr>
-                <tr><td style="color:#6a7590;">Details</td><td>${opts.detail}</td></tr>
-                <tr><td style="color:#6a7590;">Reference</td><td style="font-family:monospace;">${opts.reference}</td></tr>
+                <tr><td style="color:#6a7590;">Recipient</td><td style="font-weight:600;">${escapeHtml(opts.recipient)}</td></tr>
+                ${detailRowsHtml}
+                ${opts.memo ? `<tr><td style="color:#6a7590;">Memo</td><td>${escapeHtml(opts.memo)}</td></tr>` : ""}
+                ${settlement ? `<tr><td style="color:#6a7590;">Expected Settlement</td><td>${escapeHtml(settlement)}</td></tr>` : ""}
+                <tr><td style="color:#6a7590;">Reference</td><td style="font-family:monospace;">${escapeHtml(opts.reference)}</td></tr>
                 <tr><td style="color:#6a7590;">Status</td><td><span style="background:#fff3cd;color:#7a5b00;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;">PENDING APPROVAL</span></td></tr>
               </table>
             </td></tr>
@@ -149,7 +192,7 @@ Deno.serve(async (req) => {
       ((claims.claims.user_metadata as any)?.full_name as string) || userEmail.split("@")[0];
 
     const body = await req.json();
-    const { type, amount, currency, recipient, detail, reference } = body || {};
+    const { type, amount, currency, recipient, detail, details, scheme, region, settlement, memo, reference } = body || {};
     if (!type || !amount || !recipient || !reference) {
       return new Response(JSON.stringify({ error: "Missing fields" }), {
         status: 400,
@@ -163,12 +206,17 @@ Deno.serve(async (req) => {
       amount: Number(amount),
       currency: typeof currency === "string" ? currency : "USD",
       recipient,
-      detail: detail || "—",
+      scheme: typeof scheme === "string" ? scheme : undefined,
+      region: typeof region === "string" ? region : undefined,
+      settlement: typeof settlement === "string" ? settlement : undefined,
+      details: details && typeof details === "object" ? details : undefined,
+      detail: typeof detail === "string" ? detail : undefined,
+      memo: typeof memo === "string" ? memo : undefined,
       reference,
     });
     const raw = buildHtmlEmail({
       to: userEmail,
-      subject: `${type} received — pending approval (${reference})`,
+      subject: `${scheme || type} received — pending approval (${reference})`,
       html,
     });
 
