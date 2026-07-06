@@ -140,10 +140,21 @@ const Transfers = () => {
     }
   };
 
+  const profile = getBankingProfile(currency.code);
+
   const handleExternalTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!extFrom || !extAmount || !extRecipient || !extBank || !extAccountNum) {
-      toast({ title: "Missing details", description: "Please complete all required fields.", variant: "destructive" });
+    const missing = profile.fields
+      .filter((f) => f.required !== false && !(extFields[f.key] ?? "").trim())
+      .map((f) => f.label);
+    if (!extFrom || !extAmount || !extRecipient || missing.length) {
+      toast({
+        title: "Missing details",
+        description: missing.length
+          ? `Please complete: ${missing.join(", ")}`
+          : "Please complete all required fields.",
+        variant: "destructive",
+      });
       return;
     }
     const amtDisplay = parseFloat(extAmount);
@@ -159,6 +170,15 @@ const Transfers = () => {
       const ref = genRef("EXT");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
+
+      // Build a human-readable summary of the profile-specific fields for the
+      // transaction description and email body.
+      const detailPairs = profile.fields
+        .map((f) => [f.label, (extFields[f.key] ?? "").trim()] as const)
+        .filter(([, v]) => v.length > 0);
+      const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
+      const details = Object.fromEntries(detailPairs);
+
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -166,7 +186,7 @@ const Transfers = () => {
           account_id: extFrom,
           transaction_type: "debit",
           category: "External Transfer",
-          description: `To ${extRecipient} · ${extBank} ****${extAccountNum.slice(-4)}${extMemo ? ` — ${extMemo}` : ""}`,
+          description: `[${profile.scheme}] To ${extRecipient} — ${detailString}${extMemo ? ` — ${extMemo}` : ""}`,
           amount: amt,
           balance_after: fromAcc.balance,
           status: "pending",
@@ -181,15 +201,19 @@ const Transfers = () => {
           amount: amtDisplay,
           currency: currency.code,
           recipient: extRecipient,
-          detail: `${extBank} ····${extAccountNum.slice(-4)}${extMemo ? ` — ${extMemo}` : ""}`,
+          scheme: profile.scheme,
+          region: profile.region,
+          settlement: profile.settlement,
+          details,
+          memo: extMemo || undefined,
           reference: ref,
         },
       }).catch((e) => console.error("confirmation email failed", e));
       toast({
-        title: "Transfer submitted — Pending approval",
+        title: `${profile.scheme} submitted — Pending approval`,
         description: `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
       });
-      setExtAmount(""); setExtRecipient(""); setExtBank(""); setExtRouting(""); setExtAccountNum(""); setExtMemo("");
+      setExtAmount(""); setExtRecipient(""); setExtFields({}); setExtMemo("");
       if (data) setSelectedTx(data as PendingTx);
       fetchPending();
     } catch (err: any) {
