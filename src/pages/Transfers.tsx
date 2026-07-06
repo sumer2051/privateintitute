@@ -346,6 +346,15 @@ const Transfers = () => {
                   <ShieldCheck className="h-3.5 w-3.5 text-success" />
                   Transfers to outside banks are reviewed by our support team before release.
                 </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-xs">
+                  <Globe2 className="h-3.5 w-3.5 text-primary" />
+                  <span className="font-medium">{currency.flag} {currency.code} · {profile.scheme}</span>
+                  <span className="text-muted-foreground">· {profile.region}</span>
+                  <Badge variant="secondary" className="ml-auto">{profile.settlement}</Badge>
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  The recipient form updates to match your selected currency. Switch currency in the top-right to change the transfer style.
+                </p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleExternalTransfer} className="space-y-4">
@@ -368,33 +377,41 @@ const Transfers = () => {
                       <Input value={extRecipient} onChange={(e) => setExtRecipient(e.target.value)} placeholder="Jane Doe" />
                     </div>
                     <div>
-                      <Label>Bank Name</Label>
-                      <Input value={extBank} onChange={(e) => setExtBank(e.target.value)} placeholder="Chase Bank" />
-                    </div>
-                    <div>
-                      <Label>Routing Number</Label>
-                      <Input value={extRouting} onChange={(e) => setExtRouting(e.target.value)} placeholder="9 digits" inputMode="numeric" />
-                    </div>
-                    <div>
-                      <Label>Account Number</Label>
-                      <Input value={extAccountNum} onChange={(e) => setExtAccountNum(e.target.value)} placeholder="Recipient account" inputMode="numeric" />
-                    </div>
-                    <div>
-                      <Label>Amount</Label>
+                      <Label>Amount ({currency.code})</Label>
                       <Input type="number" step="0.01" placeholder="0.00" value={extAmount} onChange={(e) => setExtAmount(e.target.value)} />
                     </div>
-                    <div>
+                    {profile.fields.map((f) => (
+                      <div key={f.key} className={f.help ? "sm:col-span-2" : ""}>
+                        <Label>
+                          {f.label}
+                          {f.required === false && <span className="ml-1 text-xs text-muted-foreground">(optional)</span>}
+                        </Label>
+                        <Input
+                          value={extFields[f.key] ?? ""}
+                          onChange={(e) => {
+                            const v = f.uppercase ? e.target.value.toUpperCase() : e.target.value;
+                            setExtFields((prev) => ({ ...prev, [f.key]: v }));
+                          }}
+                          placeholder={f.placeholder}
+                          inputMode={f.inputMode}
+                          maxLength={f.maxLength}
+                        />
+                        {f.help && <p className="mt-1 text-[11px] text-muted-foreground">{f.help}</p>}
+                      </div>
+                    ))}
+                    <div className="sm:col-span-2">
                       <Label>Memo (optional)</Label>
                       <Input value={extMemo} onChange={(e) => setExtMemo(e.target.value)} placeholder="Invoice #123" />
                     </div>
                   </div>
                   <Button type="submit" className="w-full" disabled={extLoading}>
-                    {extLoading ? "Submitting..." : "Submit Transfer for Approval"}
+                    {extLoading ? "Submitting..." : `Submit ${profile.scheme} for Approval`}
                   </Button>
                 </form>
               </CardContent>
             </Card>
           </TabsContent>
+
 
           <TabsContent value="zelle">
             <Card className="border-accent/30">
