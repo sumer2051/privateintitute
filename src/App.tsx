@@ -9,6 +9,7 @@ import OAuthConsent from "./pages/OAuthConsent";
 import Accounts from "./pages/Accounts";
 import Transfers from "./pages/Transfers";
 import BillPay from "./pages/BillPay";
+import Cards from "./pages/Cards";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
