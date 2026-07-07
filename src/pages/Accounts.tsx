@@ -85,27 +85,28 @@ const Accounts = () => {
         <>
 
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent p-6 shadow-sm">
+      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent p-4 md:p-6 shadow-sm">
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-accent/20 blur-3xl" />
-        <div className="relative flex items-center gap-4">
-          <Avatar className="h-16 w-16 ring-2 ring-primary/40 shadow-md">
+        <div className="relative flex items-center gap-3 md:gap-4">
+          <Avatar className="h-12 w-12 md:h-16 md:w-16 ring-2 ring-primary/40 shadow-md shrink-0">
             <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-display text-xl font-bold">
+            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-display text-lg md:text-xl font-bold">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1">
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1">
               <Sparkles className="h-3 w-3" /> {greeting}
             </p>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-secondary leading-tight">
+            <h2 className="font-display text-xl md:text-4xl font-bold text-secondary leading-tight truncate">
               Welcome back{displayName ? <>, <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{displayName}</span></> : ""}
             </h2>
-            <p className="text-sm text-muted-foreground italic">"Your wealth, curated with precision."</p>
+            <p className="hidden md:block text-sm text-muted-foreground italic">"Your wealth, curated with precision."</p>
           </div>
         </div>
       </div>
+
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {accounts.map((account) => (
