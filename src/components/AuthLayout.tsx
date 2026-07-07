@@ -48,6 +48,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
   const navItems = [
     { id: "accounts", label: "Accounts", path: "/accounts" },
+    { id: "cards", label: "Cards", path: "/cards" },
     { id: "transfers", label: "Transfers", path: "/transfers" },
     { id: "billpay", label: "Bill Pay", path: "/billpay" },
     { id: "overview", label: "Overview", path: "/overview" },
