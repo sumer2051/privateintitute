@@ -62,31 +62,31 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
       }`}
     >
       <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur shadow-sm">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <button onClick={() => navigate("/accounts")} className="group flex items-center gap-3">
-            <span className="relative inline-flex">
+        <div className="container mx-auto flex h-14 md:h-16 items-center justify-between gap-2 px-3 md:px-4">
+          <button onClick={() => navigate("/accounts")} className="group flex min-w-0 items-center gap-2 md:gap-3">
+            <span className="relative inline-flex shrink-0">
               <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/40 via-accent/30 to-primary/40 blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
               <img
                 src={logo}
                 alt="BoA private institute logo"
                 width={44}
                 height={44}
-                className="relative h-11 w-11 rounded-full object-contain ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all animate-logo-glow"
+                className="relative h-9 w-9 md:h-11 md:w-11 rounded-full object-contain ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all animate-logo-glow"
               />
             </span>
-            <span className="flex flex-col items-start leading-tight">
-              <h1 className="font-display text-xl font-bold text-secondary tracking-tight">
+            <span className="flex min-w-0 flex-col items-start leading-tight">
+              <h1 className="font-display text-sm md:text-xl font-bold text-secondary tracking-tight truncate max-w-[160px] md:max-w-none">
                 BoA <span className="text-primary">private</span> institute
               </h1>
               <span
-                className="text-[10px] uppercase tracking-[0.25em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer"
+                className="hidden md:inline text-[10px] uppercase tracking-[0.25em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer"
               >
                 Wealth · Trust · Legacy
               </span>
             </span>
           </button>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 md:gap-3 shrink-0">
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input type="search" placeholder="Search accounts, services..." className="w-64 pl-10" />
@@ -94,21 +94,21 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
             <CurrencySelector variant="compact" />
 
-            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)}>
+            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setDarkMode(!darkMode)}>
               {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
             <NotificationsBell />
 
 
-            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign Out" disabled={signingOut}>
+            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={handleSignOut} title="Sign Out" disabled={signingOut}>
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
         </div>
 
         <nav className="border-t bg-card">
-          <div className="container mx-auto flex gap-1 overflow-x-auto px-4">
+          <div className="container mx-auto flex gap-1 overflow-x-auto px-3 md:px-4 scrollbar-none">
             {navItems.map((item) => (
               <button
                 key={item.id}
@@ -116,7 +116,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                   if (item.path) navigate(item.path);
                   if (onPageChange) onPageChange(item.id);
                 }}
-                className={`whitespace-nowrap border-b-2 px-6 py-3 text-sm font-semibold transition-all ${
+                className={`whitespace-nowrap border-b-2 px-4 md:px-6 py-2.5 md:py-3 text-xs md:text-sm font-semibold transition-all ${
+
                   currentPage === item.id
                     ? "border-primary text-primary"
                     : "border-transparent text-secondary hover:border-primary hover:text-primary"
