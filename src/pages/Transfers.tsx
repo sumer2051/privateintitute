@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail, Globe2 } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { getBankingProfile } from "@/lib/bank-profiles";
+import { getBankingProfile, getBankingSchemes } from "@/lib/bank-profiles";
 
 interface Account {
   id: string;
@@ -53,6 +53,7 @@ const Transfers = () => {
   const [extFields, setExtFields] = useState<Record<string, string>>({});
   const [extMemo, setExtMemo] = useState("");
   const [extLoading, setExtLoading] = useState(false);
+  const [schemeId, setSchemeId] = useState<string>("");
 
   // Zelle
   const [zFrom, setZFrom] = useState("");
@@ -140,7 +141,16 @@ const Transfers = () => {
     }
   };
 
-  const profile = getBankingProfile(currency.code);
+  const schemes = getBankingSchemes(currency.code);
+  const profile = getBankingProfile(currency.code, schemeId);
+
+  // Reset scheme + collected fields whenever the currency changes so we always
+  // start from the default profile for that country.
+  useEffect(() => {
+    setSchemeId(schemes[0]?.id ?? "");
+    setExtFields({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency.code]);
 
   const handleExternalTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
