@@ -362,9 +362,40 @@ const Transfers = () => {
                   <span className="text-muted-foreground">· {profile.region}</span>
                   <Badge variant="secondary" className="ml-auto">{profile.settlement}</Badge>
                 </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  The recipient form updates to match your selected currency. Switch currency in the top-right to change the transfer style.
-                </p>
+
+                <div className="mt-3 space-y-2">
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Transfer style for {currency.code}
+                  </Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {schemes.map((s) => {
+                      const active = s.id === profile.id;
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => { setSchemeId(s.id); setExtFields({}); }}
+                          className={`text-left rounded-lg border px-3 py-2 transition ${
+                            active
+                              ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/40"
+                              : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-sm text-secondary">{s.scheme}</span>
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.settlement}</span>
+                          </div>
+                          {s.tagline && (
+                            <p className="text-[11px] text-muted-foreground mt-0.5">{s.tagline}</p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Switch currency in the top-right to see transfer styles for another country.
+                  </p>
+                </div>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleExternalTransfer} className="space-y-4">
