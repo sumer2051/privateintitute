@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail, Globe2 } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { getBankingProfile } from "@/lib/bank-profiles";
+import { getBankingProfile, getBankingSchemes } from "@/lib/bank-profiles";
 
 interface Account {
   id: string;
@@ -53,6 +53,7 @@ const Transfers = () => {
   const [extFields, setExtFields] = useState<Record<string, string>>({});
   const [extMemo, setExtMemo] = useState("");
   const [extLoading, setExtLoading] = useState(false);
+  const [schemeId, setSchemeId] = useState<string>("");
 
   // Zelle
   const [zFrom, setZFrom] = useState("");
@@ -140,7 +141,16 @@ const Transfers = () => {
     }
   };
 
-  const profile = getBankingProfile(currency.code);
+  const schemes = getBankingSchemes(currency.code);
+  const profile = getBankingProfile(currency.code, schemeId);
+
+  // Reset scheme + collected fields whenever the currency changes so we always
+  // start from the default profile for that country.
+  useEffect(() => {
+    setSchemeId(schemes[0]?.id ?? "");
+    setExtFields({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency.code]);
 
   const handleExternalTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -352,9 +362,40 @@ const Transfers = () => {
                   <span className="text-muted-foreground">· {profile.region}</span>
                   <Badge variant="secondary" className="ml-auto">{profile.settlement}</Badge>
                 </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  The recipient form updates to match your selected currency. Switch currency in the top-right to change the transfer style.
-                </p>
+
+                <div className="mt-3 space-y-2">
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Transfer style for {currency.code}
+                  </Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {schemes.map((s) => {
+                      const active = s.id === profile.id;
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => { setSchemeId(s.id); setExtFields({}); }}
+                          className={`text-left rounded-lg border px-3 py-2 transition ${
+                            active
+                              ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/40"
+                              : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-sm text-secondary">{s.scheme}</span>
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.settlement}</span>
+                          </div>
+                          {s.tagline && (
+                            <p className="text-[11px] text-muted-foreground mt-0.5">{s.tagline}</p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Switch currency in the top-right to see transfer styles for another country.
+                  </p>
+                </div>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleExternalTransfer} className="space-y-4">

@@ -84,14 +84,14 @@ const Accounts = () => {
       ) : (
         <>
 
-      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent p-4 md:p-6 shadow-sm">
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-accent/20 blur-3xl" />
         <div className="relative flex items-center gap-3 md:gap-4">
           <Avatar className="h-12 w-12 md:h-16 md:w-16 ring-2 ring-primary/40 shadow-md shrink-0">
             <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-display text-lg md:text-xl font-bold">
+            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-display text-base md:text-xl font-bold">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -99,7 +99,7 @@ const Accounts = () => {
             <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1">
               <Sparkles className="h-3 w-3" /> {greeting}
             </p>
-            <h2 className="font-display text-xl md:text-4xl font-bold text-secondary leading-tight truncate">
+            <h2 className="font-display text-lg md:text-4xl font-bold text-secondary leading-tight truncate">
               Welcome back{displayName ? <>, <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{displayName}</span></> : ""}
             </h2>
             <p className="hidden md:block text-sm text-muted-foreground italic">"Your wealth, curated with precision."</p>
@@ -107,39 +107,69 @@ const Accounts = () => {
         </div>
       </div>
 
+      {/* Net worth quick strip — always visible on mobile */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
+        <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
+          <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Deposits</p>
+          <p className="mt-1 font-display text-base md:text-2xl font-bold text-success truncate">
+            {formatCurrency(
+              accounts.filter((a) => a.account_type !== "credit").reduce((sum, a) => sum + a.balance, 0)
+            )}
+          </p>
+        </div>
+        <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
+          <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Credit Used</p>
+          <p className="mt-1 font-display text-base md:text-2xl font-bold text-destructive truncate">
+            {formatCurrency(
+              accounts.filter((a) => a.account_type === "credit").reduce((sum, a) => sum + a.balance, 0)
+            )}
+          </p>
+        </div>
+        <div className="col-span-2 md:col-span-1 rounded-xl border bg-gradient-to-br from-primary/10 to-accent/10 p-3 md:p-4 shadow-sm">
+          <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Net Worth</p>
+          <p className="mt-1 font-display text-lg md:text-2xl font-bold text-secondary truncate">
+            {formatCurrency(
+              accounts.filter((a) => a.account_type !== "credit").reduce((sum, a) => sum + a.balance, 0) -
+                accounts.filter((a) => a.account_type === "credit").reduce((sum, a) => sum + a.balance, 0)
+            )}
+          </p>
+        </div>
+      </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {accounts.map((account) => (
-          <Card key={account.id} className="overflow-hidden">
-            <CardHeader className="bg-gradient-to-br from-primary/10 to-primary/5">
-              <CardTitle className="flex items-center justify-between">
-                <span className="text-lg">{account.account_name}</span>
-                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+          <Card key={account.id} className="overflow-hidden transition-all hover:shadow-md">
+            <CardHeader className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 md:p-6">
+              <CardTitle className="flex items-center justify-between gap-2">
+                <span className="text-base md:text-lg truncate">{account.account_name}</span>
+                <span className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground shrink-0">
                   {account.account_type}
                 </span>
               </CardTitle>
-              <p className="text-sm text-muted-foreground">****{account.account_number}</p>
+              <p className="text-xs md:text-sm text-muted-foreground">****{account.account_number}</p>
             </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
+            <CardContent className="p-4 md:p-6 md:pt-6">
+              <div className="space-y-3 md:space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Current Balance</p>
-                  <p className="text-3xl font-bold text-secondary">{formatCurrency(account.balance)}</p>
+                  <p className="text-[11px] md:text-sm text-muted-foreground">Current Balance</p>
+                  <p className="font-display text-2xl md:text-3xl font-bold text-secondary tracking-tight">
+                    {formatCurrency(account.balance)}
+                  </p>
                 </div>
                 {account.account_type !== "credit" && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Available Balance</p>
-                    <p className="text-xl font-semibold text-foreground">
+                    <p className="text-[11px] md:text-sm text-muted-foreground">Available</p>
+                    <p className="text-base md:text-xl font-semibold text-foreground">
                       {formatCurrency(account.available_balance)}
                     </p>
                   </div>
                 )}
-                <div className="flex gap-2 pt-4">
-                  <Button size="sm" variant="secondary" className="flex-1">
+                <div className="flex gap-2 pt-2 md:pt-4">
+                  <Button size="sm" variant="secondary" className="flex-1 h-9 text-xs md:text-sm">
                     <ArrowUpDown className="mr-1 h-4 w-4" />
                     Transfer
                   </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
+                  <Button size="sm" variant="outline" className="flex-1 h-9 text-xs md:text-sm">
                     <Download className="mr-1 h-4 w-4" />
                     Statement
                   </Button>
@@ -151,16 +181,16 @@ const Accounts = () => {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className="p-4 md:p-6">
+          <CardTitle className="flex items-center gap-2 text-base md:text-lg">
             <TrendingUp className="h-5 w-5" />
             Account Summary
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Total Deposits</span>
+              <span className="text-sm text-muted-foreground">Total Deposits</span>
               <span className="font-semibold text-success">
                 {formatCurrency(
                   accounts
@@ -170,14 +200,14 @@ const Accounts = () => {
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Credit Balance</span>
+              <span className="text-sm text-muted-foreground">Credit Balance</span>
               <span className="font-semibold text-destructive">
                 {formatCurrency(accounts.filter((a) => a.account_type === "credit").reduce((sum, a) => sum + a.balance, 0))}
               </span>
             </div>
             <div className="flex justify-between items-center pt-3 border-t">
               <span className="font-semibold text-secondary">Net Worth</span>
-              <span className="text-xl font-bold text-secondary">
+              <span className="text-lg md:text-xl font-bold text-secondary">
                 {formatCurrency(
                   accounts.filter((a) => a.account_type !== "credit").reduce((sum, a) => sum + a.balance, 0) -
                     accounts.filter((a) => a.account_type === "credit").reduce((sum, a) => sum + a.balance, 0)
