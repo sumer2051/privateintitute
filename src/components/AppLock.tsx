@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
   const { toast } = useToast();
-  const splashDoneAt = useRef<number>(0);
+  const [splashDone, setSplashDone] = useState(false);
 
   // Auth state
   useEffect(() => {
@@ -53,19 +53,25 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
 
   // Splash timing — always show ~1.6s on cold load
   useEffect(() => {
-    const t = setTimeout(() => {
-      splashDoneAt.current = Date.now();
-      resolveNext();
-    }, 1600);
+    const t = setTimeout(() => setSplashDone(true), 1600);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // When auth resolves after splash, re-evaluate
+  // Resolve phase once both splash finished AND auth resolved
   useEffect(() => {
-    if (splashDoneAt.current && authChecked) resolveNext();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authChecked, user]);
+    if (!splashDone || !authChecked) return;
+    if (phase !== "splash") return;
+    const hasPasscode = !!localStorage.getItem(PASSCODE_KEY);
+    if (!user) {
+      setPhase("ready");
+      return;
+    }
+    if (!hasPasscode) {
+      setPhase("setup");
+      return;
+    }
+    setPhase("locked");
+  }, [splashDone, authChecked, user, phase]);
 
   // Re-lock when tab regains focus if a passcode exists AND user is signed in
   useEffect(() => {
@@ -80,20 +86,7 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [phase, user]);
 
-  const resolveNext = () => {
-    if (!authChecked) return;
-    const hasPasscode = !!localStorage.getItem(PASSCODE_KEY);
-    if (!user) {
-      // no auth = no lock, show app (Auth page etc.)
-      setPhase("ready");
-      return;
-    }
-    if (!hasPasscode) {
-      setPhase("setup");
-      return;
-    }
-    setPhase("locked");
-  };
+
 
   const rejectWithShake = (msg: string) => {
     setError(msg);
