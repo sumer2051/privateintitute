@@ -12,6 +12,7 @@ import BillPay from "./pages/BillPay";
 import Cards from "./pages/Cards";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Claim from "./pages/Claim";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { AppLock } from "./components/AppLock";
