@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, Lock, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import logo from "@/assets/logo.png";
 
 const Auth = () => {
@@ -21,20 +22,56 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 2FA prompt state (post-login, optional)
+  const [tfaOpen, setTfaOpen] = useState(false);
+  const [tfaCode, setTfaCode] = useState("");
+  const [tfaInput, setTfaInput] = useState("");
+  const [tfaDest, setTfaDest] = useState("");
+
+  const proceedAfterLogin = () => {
+    toast({ title: "Welcome back!", description: "You have successfully logged in." });
+    if (nextPath) {
+      window.location.href = nextPath;
+    } else {
+      navigate("/accounts");
+    }
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ title: "Welcome back!", description: "You have successfully logged in." });
-        if (nextPath) {
-          window.location.href = nextPath;
-        } else {
-          navigate("/accounts");
+
+        // Check 2FA preference
+        const userId = data.user?.id;
+        if (userId) {
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("two_factor_enabled, two_factor_method, phone")
+            .eq("id", userId)
+            .maybeSingle();
+          if (prof && (prof as any).two_factor_enabled) {
+            const method = (prof as any).two_factor_method || "sms";
+            const dest = method === "sms" ? ((prof as any).phone || email) : email;
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            setTfaCode(code);
+            setTfaDest(dest);
+            setTfaInput("");
+            setTfaOpen(true);
+            toast({
+              title: "Verification code sent",
+              description: `Code sent to ${dest}. (Demo code: ${code})`,
+            });
+            setLoading(false);
+            return;
+          }
         }
+
+        proceedAfterLogin();
       } else {
         const signupRedirect = nextPath
           ? `${window.location.origin}${nextPath}`
@@ -56,6 +93,21 @@ const Auth = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const verifyTfa = () => {
+    if (tfaInput.trim() !== tfaCode) {
+      toast({ title: "Invalid code", description: "Please try again.", variant: "destructive" });
+      return;
+    }
+    setTfaOpen(false);
+    proceedAfterLogin();
+  };
+
+  const skipTfa = () => {
+    setTfaOpen(false);
+    toast({ title: "Skipped 2FA", description: "You can enable it again in Settings." });
+    proceedAfterLogin();
   };
 
   return (
@@ -186,6 +238,32 @@ const Auth = () => {
           </CardContent>
         </div>
       </Card>
+
+      <Dialog open={tfaOpen} onOpenChange={setTfaOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Two-Factor Verification</DialogTitle>
+            <DialogDescription>
+              A 6-digit code was sent to <span className="font-semibold text-secondary">{tfaDest}</span>. Verification is optional — you may skip this time.
+            </DialogDescription>
+          </DialogHeader>
+          <div>
+            <Label htmlFor="tfa">Verification Code</Label>
+            <Input
+              id="tfa"
+              value={tfaInput}
+              onChange={(e) => setTfaInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="123456"
+              inputMode="numeric"
+              className="text-center text-2xl tracking-[0.5em] font-mono"
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="ghost" onClick={skipTfa}>Skip this time</Button>
+            <Button onClick={verifyTfa}>Verify & Continue</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
