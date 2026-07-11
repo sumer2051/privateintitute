@@ -116,6 +116,29 @@ All colors MUST be HSL.
   }
 }
 
+@layer base {
+  html, body {
+    @apply overflow-x-hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+  /* Prevent iOS/Android auto-zoom on focus: inputs must be >=16px on mobile */
+  @media (max-width: 767px) {
+    input, textarea, select {
+      font-size: 16px !important;
+    }
+  }
+  /* Native-feeling touch targets */
+  button, [role="button"], a {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (max-width: 767px) {
+    button, [role="button"] {
+      min-height: 40px;
+    }
+  }
+}
+
 @layer utilities {
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
@@ -129,4 +152,7 @@ All colors MUST be HSL.
     0% { transform: translateX(-120%); }
     100% { transform: translateX(220%); }
   }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { scrollbar-width: none; }
 }
+
