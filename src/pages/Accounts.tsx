@@ -24,6 +24,7 @@ const Accounts = () => {
   const [loading, setLoading] = useState(true);
   const [displayName, setDisplayName] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [transferOpen, setTransferOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
