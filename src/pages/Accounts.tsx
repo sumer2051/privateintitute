@@ -10,6 +10,26 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { CountUp } from "@/components/CountUp";
 import { TransferModal } from "@/components/TransferModal";
 
+function useRollingName<T extends HTMLElement>(name: string) {
+  const ref = useRef<T>(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    setReady(!!name);
+    if (!ref.current || !name) return;
+    const el = ref.current;
+    const parent = el.parentElement;
+    if (!parent) return;
+    const overflow = el.scrollWidth - parent.clientWidth;
+    const offset = overflow > 4 ? `${overflow + 16}px` : "8px";
+    const duration = overflow > 4
+      ? Math.max(6, Math.min(14, overflow / 18))
+      : 4;
+    el.style.setProperty("--roll-offset", `-${offset}`);
+    el.style.setProperty("--roll-duration", `${duration}s`);
+  }, [name]);
+  return { ref, shouldRoll: ready };
+}
+
 interface Account {
   id: string;
   account_name: string;
@@ -28,6 +48,7 @@ const Accounts = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { ref: nameRef, shouldRoll } = useRollingName<HTMLSpanElement>(displayName);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -186,8 +207,17 @@ const Accounts = () => {
             <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1">
               <Sparkles className="h-3 w-3" /> {greeting}
             </p>
-            <h2 className="font-display text-lg md:text-4xl font-bold text-secondary leading-tight truncate">
-              Welcome back{displayName ? <>, <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{displayName}</span></> : ""}
+            <h2 className="font-display text-lg md:text-4xl font-bold text-secondary leading-tight">
+              Welcome back{displayName ? (
+                <>, <span className="overflow-hidden align-bottom inline-block max-w-full">
+                  <span
+                    ref={nameRef}
+                    className={`inline-block whitespace-nowrap bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent ${shouldRoll ? "animate-roll" : ""}`}
+                  >
+                    {displayName}
+                  </span>
+                </span></>
+              ) : ""}
             </h2>
             <p className="hidden md:block text-sm text-muted-foreground italic">"Your wealth, curated with precision."</p>
           </div>
