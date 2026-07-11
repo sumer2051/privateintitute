@@ -325,7 +325,14 @@ const Cards = () => {
               variant="outline"
               size="sm"
               className="flex-col h-auto py-2"
-              onClick={() => setPinDialog(c)}
+              onClick={() =>
+                guard(
+                  `viewing PIN for card •••• ${c.last4}`,
+                  "Verify to view PIN",
+                  `We emailed a 6-digit code to display the PIN for card •••• ${c.last4}.`,
+                  () => setPinDialog(c),
+                )
+              }
             >
               <KeyRound className="h-4 w-4" />
               <span className="mt-1 text-[10px]">PIN</span>
