@@ -10,9 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail, Globe2 } from "lucide-react";
+import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail, Globe2, Sparkles } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { getBankingProfile, getBankingSchemes } from "@/lib/bank-profiles";
+import { getCountryMethods, type CountryMethod } from "@/lib/country-methods";
+import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
 
 interface Account {
   id: string;
@@ -62,6 +64,18 @@ const Transfers = () => {
   const [zContact, setZContact] = useState("");
   const [zMemo, setZMemo] = useState("");
   const [zLoading, setZLoading] = useState(false);
+
+  // Country-driven Send Money (per top currency switcher)
+  const [smFrom, setSmFrom] = useState("");
+  const [smMethodId, setSmMethodId] = useState<string>("");
+  const [smAmount, setSmAmount] = useState("");
+  const [smRecipient, setSmRecipient] = useState("");
+  const [smEmail, setSmEmail] = useState("");
+  const [smFields, setSmFields] = useState<Record<string, string>>({});
+  const [smNote, setSmNote] = useState("");
+  const [smVariant, setSmVariant] = useState<string>("");
+  const [smLoading, setSmLoading] = useState(false);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
 
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
@@ -233,6 +247,119 @@ const Transfers = () => {
     }
   };
 
+  // ---- Country-driven Send Money (driven by top currency switcher) ----
+  const methods = getCountryMethods(currency.code);
+  const smMethod: CountryMethod = methods.find((m) => m.id === smMethodId) ?? methods[0];
+
+  useEffect(() => {
+    setSmMethodId(methods[0]?.id ?? "");
+    setSmFields({});
+    setSmVariant("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency.code]);
+
+  const handleSendMoney = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const missing = smMethod.fields
+      .filter((f) => f.required !== false && !(smFields[f.key] ?? "").trim())
+      .map((f) => f.label);
+    if (!smFrom || !smAmount || !smEmail || missing.length) {
+      toast({
+        title: "Missing details",
+        description: missing.length ? `Please complete: ${missing.join(", ")}` : "Please complete all required fields, including the recipient email.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const amtDisplay = parseFloat(smAmount);
+    if (!(amtDisplay > 0)) {
+      toast({ title: "Invalid amount", variant: "destructive" });
+      return;
+    }
+    const amt = toUsd(amtDisplay);
+    const fromAcc = accounts.find((a) => a.id === smFrom);
+    if (!fromAcc) return;
+    if (fromAcc.balance < amt) {
+      toast({ title: "Insufficient funds", variant: "destructive" });
+      return;
+    }
+    setSmLoading(true);
+    try {
+      const ref = genRef(smMethod.id.toUpperCase().slice(0, 4));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
+
+      const detailPairs = smMethod.fields
+        .map((f) => [f.label, (smFields[f.key] ?? "").trim()] as const)
+        .filter(([, v]) => v.length > 0);
+      const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
+      const details = Object.fromEntries(detailPairs);
+      const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail;
+
+      const { data, error } = await supabase
+        .from("transactions")
+        .insert({
+          user_id: user.id,
+          account_id: smFrom,
+          transaction_type: "debit",
+          category: smMethod.name,
+          description: `[${smMethod.name}] To ${displayName} — ${detailString}${smNote ? ` — ${smNote}` : ""}${smVariant ? ` (${smVariant === "gs" ? "Goods & Services" : "Friends & Family"})` : ""}`,
+          amount: amt,
+          balance_after: fromAcc.balance,
+          status: "pending",
+          reference_number: ref,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+
+      supabase.functions.invoke("send-transfer-confirmation", {
+        body: {
+          type: smMethod.name,
+          amount: amtDisplay,
+          currency: currency.code,
+          recipient: displayName,
+          recipientEmail: smEmail,
+          scheme: smMethod.name,
+          region: currency.name,
+          settlement: smMethod.settlement,
+          details,
+          memo: smNote || undefined,
+          reference: ref,
+        },
+      }).catch((e) => console.error("confirmation email failed", e));
+
+      const { data: profileRow } = await supabase.auth.getUser();
+      const senderName = (profileRow?.user?.user_metadata?.full_name as string) || (profileRow?.user?.email ?? "You");
+
+      setReceipt({
+        method: smMethod,
+        amount: amtDisplay,
+        currencyCode: currency.code,
+        currencySymbol: currency.symbol,
+        senderName,
+        recipientName: displayName,
+        recipientEmail: smEmail,
+        fields: details,
+        note: smNote || undefined,
+        variant: smVariant || undefined,
+        reference: ref,
+        timestamp: new Date().toISOString(),
+      });
+
+      toast({
+        title: `${smMethod.name} sent — Pending approval`,
+        description: `Ref ${ref}. Receipt emailed to ${smEmail}.`,
+      });
+      setSmAmount(""); setSmRecipient(""); setSmEmail(""); setSmFields({}); setSmNote(""); setSmVariant("");
+      fetchPending();
+    } catch (err: any) {
+      toast({ title: "Submission failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSmLoading(false);
+    }
+  };
+
   const handleZelleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!zFrom || !zAmount || !zRecipient || !zContact) {
@@ -300,12 +427,133 @@ const Transfers = () => {
           <p className="text-muted-foreground">Move money between your accounts, to external banks, or via Zelle</p>
         </div>
 
-        <Tabs defaultValue="internal" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="send" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+            <TabsTrigger value="send"><Sparkles className="mr-2 h-4 w-4" />Send Money</TabsTrigger>
             <TabsTrigger value="internal"><ArrowRightLeft className="mr-2 h-4 w-4" />Between Accounts</TabsTrigger>
-            <TabsTrigger value="external"><Building className="mr-2 h-4 w-4" />External Transfer</TabsTrigger>
+            <TabsTrigger value="external"><Building className="mr-2 h-4 w-4" />External</TabsTrigger>
             <TabsTrigger value="zelle"><Send className="mr-2 h-4 w-4" />Zelle</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="send">
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Send Money · {currency.flag} {currency.name}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <Globe2 className="h-3.5 w-3.5 text-primary" />
+                  Methods below match the country selected in the top currency switcher.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div>
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">Choose a method</Label>
+                  <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {methods.map((m) => {
+                      const active = m.id === smMethod.id;
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => { setSmMethodId(m.id); setSmFields({}); setSmVariant(""); }}
+                          className={`text-left rounded-xl border p-3 transition ${
+                            active
+                              ? "border-primary ring-2 ring-primary/40 bg-primary/5"
+                              : "border-border hover:border-primary/40 hover:bg-muted/50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`h-9 w-9 rounded-lg bg-gradient-to-br ${m.accent} text-white font-bold flex items-center justify-center shadow-sm`}>
+                              {m.glyph}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-semibold text-secondary truncate">{m.name}</div>
+                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">{m.settlement}</div>
+                            </div>
+                          </div>
+                          <p className="mt-1.5 text-[11px] text-muted-foreground line-clamp-2">{m.tagline}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <form onSubmit={handleSendMoney} className="space-y-4">
+                  <div>
+                    <Label>From Account</Label>
+                    <Select value={smFrom} onValueChange={setSmFrom}>
+                      <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
+                      <SelectContent>
+                        {accounts.map((acc) => (
+                          <SelectItem key={acc.id} value={acc.id}>
+                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(acc.balance)})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <Label>Amount ({currency.code})</Label>
+                      <Input type="number" step="0.01" placeholder="0.00" value={smAmount} onChange={(e) => setSmAmount(e.target.value)} />
+                    </div>
+                    <div>
+                      <Label>Recipient Name</Label>
+                      <Input value={smRecipient} onChange={(e) => setSmRecipient(e.target.value)} placeholder="Jane Doe" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Recipient Email <span className="text-destructive">*</span></Label>
+                      <Input type="email" value={smEmail} onChange={(e) => setSmEmail(e.target.value)} placeholder="name@email.com" />
+                      <p className="mt-1 text-[11px] text-muted-foreground">Receipt will be emailed to this address.</p>
+                    </div>
+
+                    {smMethod.variants && (
+                      <div className="sm:col-span-2">
+                        <Label>Payment Type</Label>
+                        <Select value={smVariant} onValueChange={setSmVariant}>
+                          <SelectTrigger><SelectValue placeholder="Select payment type" /></SelectTrigger>
+                          <SelectContent>
+                            {smMethod.variants.map((v) => (
+                              <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {smMethod.fields.map((f) => (
+                      <div key={f.key} className={f.help || f.key === "note" ? "sm:col-span-2" : ""}>
+                        <Label>
+                          {f.label}
+                          {f.required === false && <span className="ml-1 text-xs text-muted-foreground">(optional)</span>}
+                        </Label>
+                        <Input
+                          value={f.key === "note" ? smNote : (smFields[f.key] ?? "")}
+                          onChange={(e) => {
+                            const v = f.uppercase ? e.target.value.toUpperCase() : e.target.value;
+                            if (f.key === "note") setSmNote(v);
+                            else setSmFields((prev) => ({ ...prev, [f.key]: v }));
+                          }}
+                          placeholder={f.placeholder}
+                          inputMode={f.inputMode}
+                          maxLength={f.maxLength}
+                        />
+                        {f.help && <p className="mt-1 text-[11px] text-muted-foreground">{f.help}</p>}
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={smLoading}>
+                    {smLoading ? "Sending..." : `Send with ${smMethod.name}`}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
 
           <TabsContent value="internal">
             <Card>
@@ -578,6 +826,8 @@ const Transfers = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <TransferReceipt open={!!receipt} onClose={() => setReceipt(null)} receipt={receipt} />
     </AuthLayout>
   );
 };
