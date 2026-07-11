@@ -341,7 +341,14 @@ const Cards = () => {
               variant="outline"
               size="sm"
               className="flex-col h-auto py-2"
-              onClick={() => setReplaceDialog(c)}
+              onClick={() =>
+                guard(
+                  `replacing card •••• ${c.last4}`,
+                  "Verify to replace card",
+                  `Confirm the 6-digit code we emailed you to order a replacement for card •••• ${c.last4}.`,
+                  () => setReplaceDialog(c),
+                )
+              }
             >
               <RefreshCw className="h-4 w-4" />
               <span className="mt-1 text-[10px]">Replace</span>
