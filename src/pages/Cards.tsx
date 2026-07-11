@@ -664,6 +664,18 @@ const Cards = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <VerifyCodeDialog
+        open={!!verifyState}
+        onOpenChange={(o) => !o && setVerifyState(null)}
+        purpose={verifyState?.purpose || ""}
+        title={verifyState?.title}
+        description={verifyState?.description}
+        onVerified={() => {
+          const fn = verifyState?.onOk;
+          setVerifyState(null);
+          fn?.();
+        }}
+      />
     </AuthLayout>
   );
 };
