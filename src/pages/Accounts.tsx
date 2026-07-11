@@ -10,6 +10,27 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { CountUp } from "@/components/CountUp";
 import { TransferModal } from "@/components/TransferModal";
 
+function useRollingName<T extends HTMLElement>(name: string) {
+  const ref = useRef<T>(null);
+  const [shouldRoll, setShouldRoll] = useState(false);
+  useEffect(() => {
+    if (!ref.current || !name) return;
+    const el = ref.current;
+    const parent = el.parentElement;
+    if (!parent) return;
+    const overflow = el.scrollWidth - parent.clientWidth;
+    if (overflow > 4) {
+      el.style.setProperty("--roll-offset", `-${overflow + 16}px`);
+      const duration = Math.max(6, Math.min(14, overflow / 18));
+      el.style.setProperty("--roll-duration", `${duration}s`);
+      setShouldRoll(true);
+    } else {
+      setShouldRoll(false);
+    }
+  }, [name]);
+  return { ref, shouldRoll };
+}
+
 interface Account {
   id: string;
   account_name: string;
