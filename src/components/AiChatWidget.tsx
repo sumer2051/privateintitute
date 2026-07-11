@@ -156,7 +156,6 @@ export const AiChatWidget = ({ open, onOpenChange }: Props) => {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
             disabled={loading}
-            autoFocus
           />
           <Button type="submit" size="icon" disabled={loading || !input.trim()}>
             <Send className="h-4 w-4" />
