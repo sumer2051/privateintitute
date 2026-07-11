@@ -206,7 +206,7 @@ Deno.serve(async (req) => {
       ((claims.claims.user_metadata as any)?.full_name as string) || userEmail.split("@")[0];
 
     const body = await req.json();
-    const { type, amount, currency, recipient, detail, details, scheme, region, settlement, memo, reference } = body || {};
+    const { type, amount, currency, recipient, detail, details, scheme, region, settlement, memo, reference, recipientEmail } = body || {};
     if (!type || !amount || !recipient || !reference) {
       return new Response(JSON.stringify({ error: "Missing fields" }), {
         status: 400,
@@ -214,8 +214,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const html = renderEmail({
-      userName,
+    const baseOpts = {
       type,
       amount: Number(amount),
       currency: typeof currency === "string" ? currency : "USD",
@@ -227,32 +226,48 @@ Deno.serve(async (req) => {
       detail: typeof detail === "string" ? detail : undefined,
       memo: typeof memo === "string" ? memo : undefined,
       reference,
-    });
-    const raw = buildHtmlEmail({
-      to: userEmail,
-      subject: `${scheme || type} received — pending approval (${reference})`,
-      html,
-    });
+    };
 
-    const res = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": GOOGLE_MAIL_API_KEY,
-      },
-      body: JSON.stringify({ raw }),
-    });
-    if (!res.ok) {
-      const t = await res.text();
-      console.error("gmail send failed", res.status, t);
-      return new Response(JSON.stringify({ error: `Gmail ${res.status}: ${t}` }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    async function sendOne(to: string, subject: string, html: string) {
+      const raw = buildHtmlEmail({ to, subject, html });
+      const r = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "X-Connection-Api-Key": GOOGLE_MAIL_API_KEY,
+        },
+        body: JSON.stringify({ raw }),
       });
+      if (!r.ok) {
+        const t = await r.text();
+        console.error(`gmail send failed to ${to}`, r.status, t);
+        throw new Error(`Gmail ${r.status}: ${t}`);
+      }
     }
 
-    return new Response(JSON.stringify({ ok: true }), {
+    // 1) Sender confirmation
+    const senderHtml = renderEmail({ ...baseOpts, userName, audience: "sender" });
+    await sendOne(userEmail, `${scheme || type} received — pending approval (${reference})`, senderHtml);
+
+    // 2) Recipient notification (optional)
+    let recipientSent = false;
+    if (typeof recipientEmail === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail) && recipientEmail.toLowerCase() !== userEmail.toLowerCase()) {
+      try {
+        const recipientHtml = renderEmail({
+          ...baseOpts,
+          userName: recipient || recipientEmail.split("@")[0],
+          senderName: userName,
+          audience: "recipient",
+        });
+        await sendOne(recipientEmail, `Incoming ${scheme || type} — pending approval (${reference})`, recipientHtml);
+        recipientSent = true;
+      } catch (e) {
+        console.error("recipient email send failed", (e as Error).message);
+      }
+    }
+
+    return new Response(JSON.stringify({ ok: true, recipientSent }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
