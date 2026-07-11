@@ -159,23 +159,38 @@ const Accounts = () => {
                 <div>
                   <p className="text-[11px] md:text-sm text-muted-foreground">Current Balance</p>
                   <p className="font-display text-2xl md:text-3xl font-bold text-secondary tracking-tight">
-                    {formatCurrency(account.balance)}
+                    <CountUp value={account.balance} format={formatCurrency} />
                   </p>
                 </div>
                 {account.account_type !== "credit" && (
                   <div>
                     <p className="text-[11px] md:text-sm text-muted-foreground">Available</p>
                     <p className="text-base md:text-xl font-semibold text-foreground">
-                      {formatCurrency(account.available_balance)}
+                      <CountUp value={account.available_balance} format={formatCurrency} />
                     </p>
                   </div>
                 )}
                 <div className="flex gap-2 pt-2 md:pt-4">
-                  <Button size="sm" variant="secondary" className="flex-1 h-9 text-xs md:text-sm">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="flex-1 h-9 text-xs md:text-sm transition-transform hover:scale-[1.03] hover:shadow-md"
+                    onClick={() => setTransferOpen(true)}
+                  >
                     <ArrowUpDown className="mr-1 h-4 w-4" />
                     Transfer
                   </Button>
-                  <Button size="sm" variant="outline" className="flex-1 h-9 text-xs md:text-sm">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 h-9 text-xs md:text-sm transition-transform hover:scale-[1.03] hover:shadow-md"
+                    onClick={() =>
+                      toast({
+                        title: "Statement ready",
+                        description: `${account.account_name} statement download started.`,
+                      })
+                    }
+                  >
                     <Download className="mr-1 h-4 w-4" />
                     Statement
                   </Button>
