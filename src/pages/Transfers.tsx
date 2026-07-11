@@ -263,10 +263,10 @@ const Transfers = () => {
     const missing = smMethod.fields
       .filter((f) => f.required !== false && !(smFields[f.key] ?? "").trim())
       .map((f) => f.label);
-    if (!smFrom || !smAmount || !smEmail || missing.length) {
+    if (!smFrom || !smAmount || missing.length) {
       toast({
         title: "Missing details",
-        description: missing.length ? `Please complete: ${missing.join(", ")}` : "Please complete all required fields, including the recipient email.",
+        description: missing.length ? `Please complete: ${missing.join(", ")}` : "Please complete all required fields.",
         variant: "destructive",
       });
       return;
