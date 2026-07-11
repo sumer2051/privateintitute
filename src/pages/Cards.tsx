@@ -475,10 +475,16 @@ const Cards = () => {
             <Button
               variant="outline"
               onClick={() =>
-                toast({
-                  title: "New card requested",
-                  description: "A specialist will contact you to complete issuance.",
-                })
+                guard(
+                  "requesting a new card",
+                  "Verify to request a new card",
+                  "For your security, enter the 6-digit code we emailed you before we submit a new card request.",
+                  () =>
+                    toast({
+                      title: "New card requested",
+                      description: "A specialist will contact you to complete issuance.",
+                    }),
+                )
               }
             >
               + Request new card
