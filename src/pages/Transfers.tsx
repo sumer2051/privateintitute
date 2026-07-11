@@ -263,10 +263,10 @@ const Transfers = () => {
     const missing = smMethod.fields
       .filter((f) => f.required !== false && !(smFields[f.key] ?? "").trim())
       .map((f) => f.label);
-    if (!smFrom || !smAmount || !smEmail || missing.length) {
+    if (!smFrom || !smAmount || missing.length) {
       toast({
         title: "Missing details",
-        description: missing.length ? `Please complete: ${missing.join(", ")}` : "Please complete all required fields, including the recipient email.",
+        description: missing.length ? `Please complete: ${missing.join(", ")}` : "Please complete all required fields.",
         variant: "destructive",
       });
       return;
@@ -294,7 +294,7 @@ const Transfers = () => {
         .filter(([, v]) => v.length > 0);
       const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
       const details = Object.fromEntries(detailPairs);
-      const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail;
+      const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail || "recipient";
 
       const { data, error } = await supabase
         .from("transactions")
@@ -349,7 +349,7 @@ const Transfers = () => {
 
       toast({
         title: `${smMethod.name} sent — Pending approval`,
-        description: `Ref ${ref}. Receipt emailed to ${smEmail}.`,
+        description: smEmail ? `Ref ${ref}. Receipts emailed to you and ${smEmail}.` : `Ref ${ref}. Receipt emailed to you.`,
       });
       setSmAmount(""); setSmRecipient(""); setSmEmail(""); setSmFields({}); setSmNote(""); setSmVariant("");
       fetchPending();
@@ -505,9 +505,9 @@ const Transfers = () => {
                       <Input value={smRecipient} onChange={(e) => setSmRecipient(e.target.value)} placeholder="Jane Doe" />
                     </div>
                     <div className="sm:col-span-2">
-                      <Label>Recipient Email <span className="text-destructive">*</span></Label>
+                      <Label>Recipient Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
                       <Input type="email" value={smEmail} onChange={(e) => setSmEmail(e.target.value)} placeholder="name@email.com" />
-                      <p className="mt-1 text-[11px] text-muted-foreground">Receipt will be emailed to this address.</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">If provided, the recipient will receive a matching receipt with pending status.</p>
                     </div>
 
                     {smMethod.variants && (

@@ -69,6 +69,8 @@ function renderEmail(opts: {
   detail?: string; // legacy fallback
   memo?: string;
   reference: string;
+  audience?: "sender" | "recipient";
+  senderName?: string;
 }) {
   const code = (opts.currency || "USD").toUpperCase();
   const locale = CURRENCY_LOCALES[code] || "en-US";
@@ -100,6 +102,22 @@ function renderEmail(opts: {
     )
     .join("");
 
+  const isRecipient = opts.audience === "recipient";
+  const heading = isRecipient
+    ? `Incoming ${escapeHtml(scheme)} — pending approval`
+    : `${escapeHtml(scheme)} — pending approval`;
+  const intro = isRecipient
+    ? `Hi ${escapeHtml(opts.userName || "there")}, <strong>${escapeHtml(opts.senderName || "a sender")}</strong> has initiated a <strong>${escapeHtml(scheme)}</strong>${region ? ` (${escapeHtml(region)})` : ""} transfer to you. The payment is currently under review by our compliance team and will land in your account once approved.`
+    : `Hi ${escapeHtml(opts.userName || "there")}, we've received your <strong>${escapeHtml(scheme)}</strong>${region ? ` (${escapeHtml(region)})` : ""} request. Our support team will personally verify and approve the transfer shortly.`;
+  const partyLabel = isRecipient ? "From" : "Recipient";
+  const partyValue = isRecipient ? (opts.senderName || "Sender") : opts.recipient;
+  const nextSteps = isRecipient
+    ? `A ${BRAND} specialist is reviewing this transfer with the sender. You'll receive a second email confirming settlement once approval completes (typically within 24 hours).`
+    : `A ${BRAND} specialist will reach out within 24 hours to verify and approve this transfer. Funds remain on hold in your account until approval is complete.`;
+  const footerNote = isRecipient
+    ? `If you were not expecting this payment, you can safely ignore this email — no funds have been credited yet.`
+    : `If you did <strong>not</strong> initiate this transfer, contact our support team immediately by replying to this email.`;
+
   return `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f4f6fb;font-family:Helvetica,Arial,sans-serif;color:#1a2238;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:32px 0;">
@@ -119,10 +137,8 @@ function renderEmail(opts: {
           </td>
         </tr>
         <tr><td style="padding:32px;">
-          <h1 style="margin:0 0 8px;font-size:22px;color:#0a1a3f;">${escapeHtml(scheme)} — pending approval</h1>
-          <p style="margin:0 0 20px;font-size:15px;line-height:1.55;color:#3a4660;">
-            Hi ${escapeHtml(opts.userName || "there")}, we've received your <strong>${escapeHtml(scheme)}</strong>${region ? ` (${escapeHtml(region)})` : ""} request. Our support team will personally verify and approve the transfer shortly.
-          </p>
+          <h1 style="margin:0 0 8px;font-size:22px;color:#0a1a3f;">${heading}</h1>
+          <p style="margin:0 0 20px;font-size:15px;line-height:1.55;color:#3a4660;">${intro}</p>
 
           <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e6e9f2;border-radius:10px;margin:0 0 22px;">
             <tr><td style="padding:14px 18px;background:#f7f9fc;border-bottom:1px solid #e6e9f2;font-size:12px;letter-spacing:2px;color:#5a6680;text-transform:uppercase;">Transfer Summary</td></tr>
@@ -130,7 +146,7 @@ function renderEmail(opts: {
               <table width="100%" cellpadding="6" cellspacing="0" style="font-size:14px;color:#1a2238;">
                 <tr><td style="color:#6a7590;width:42%;">Scheme</td><td style="font-weight:600;">${escapeHtml(scheme)}${region ? ` · ${escapeHtml(region)}` : ""}</td></tr>
                 <tr><td style="color:#6a7590;">Amount</td><td style="font-weight:700;font-size:18px;color:#0a1a3f;">${fmt}</td></tr>
-                <tr><td style="color:#6a7590;">Recipient</td><td style="font-weight:600;">${escapeHtml(opts.recipient)}</td></tr>
+                <tr><td style="color:#6a7590;">${partyLabel}</td><td style="font-weight:600;">${escapeHtml(partyValue)}</td></tr>
                 ${detailRowsHtml}
                 ${opts.memo ? `<tr><td style="color:#6a7590;">Memo</td><td>${escapeHtml(opts.memo)}</td></tr>` : ""}
                 ${settlement ? `<tr><td style="color:#6a7590;">Expected Settlement</td><td>${escapeHtml(settlement)}</td></tr>` : ""}
@@ -142,13 +158,11 @@ function renderEmail(opts: {
 
           <div style="background:#eef3ff;border-left:4px solid #1a3aa6;padding:14px 18px;border-radius:6px;margin-bottom:22px;">
             <p style="margin:0;font-size:14px;line-height:1.55;color:#1a2238;">
-              <strong>What happens next:</strong> A ${BRAND} specialist will reach out within 24 hours to verify and approve this transfer. Funds remain on hold in your account until approval is complete.
+              <strong>What happens next:</strong> ${nextSteps}
             </p>
           </div>
 
-          <p style="margin:0 0 8px;font-size:13px;color:#6a7590;">
-            If you did <strong>not</strong> initiate this transfer, contact our support team immediately by replying to this email.
-          </p>
+          <p style="margin:0 0 8px;font-size:13px;color:#6a7590;">${footerNote}</p>
           <p style="margin:0;font-size:13px;color:#6a7590;">
             For your security, we will never ask for your password, full card number, or one‑time codes.
           </p>
@@ -192,7 +206,7 @@ Deno.serve(async (req) => {
       ((claims.claims.user_metadata as any)?.full_name as string) || userEmail.split("@")[0];
 
     const body = await req.json();
-    const { type, amount, currency, recipient, detail, details, scheme, region, settlement, memo, reference } = body || {};
+    const { type, amount, currency, recipient, detail, details, scheme, region, settlement, memo, reference, recipientEmail } = body || {};
     if (!type || !amount || !recipient || !reference) {
       return new Response(JSON.stringify({ error: "Missing fields" }), {
         status: 400,
@@ -200,8 +214,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const html = renderEmail({
-      userName,
+    const baseOpts = {
       type,
       amount: Number(amount),
       currency: typeof currency === "string" ? currency : "USD",
@@ -213,32 +226,48 @@ Deno.serve(async (req) => {
       detail: typeof detail === "string" ? detail : undefined,
       memo: typeof memo === "string" ? memo : undefined,
       reference,
-    });
-    const raw = buildHtmlEmail({
-      to: userEmail,
-      subject: `${scheme || type} received — pending approval (${reference})`,
-      html,
-    });
+    };
 
-    const res = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": GOOGLE_MAIL_API_KEY,
-      },
-      body: JSON.stringify({ raw }),
-    });
-    if (!res.ok) {
-      const t = await res.text();
-      console.error("gmail send failed", res.status, t);
-      return new Response(JSON.stringify({ error: `Gmail ${res.status}: ${t}` }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    async function sendOne(to: string, subject: string, html: string) {
+      const raw = buildHtmlEmail({ to, subject, html });
+      const r = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "X-Connection-Api-Key": GOOGLE_MAIL_API_KEY,
+        },
+        body: JSON.stringify({ raw }),
       });
+      if (!r.ok) {
+        const t = await r.text();
+        console.error(`gmail send failed to ${to}`, r.status, t);
+        throw new Error(`Gmail ${r.status}: ${t}`);
+      }
     }
 
-    return new Response(JSON.stringify({ ok: true }), {
+    // 1) Sender confirmation
+    const senderHtml = renderEmail({ ...baseOpts, userName, audience: "sender" });
+    await sendOne(userEmail, `${scheme || type} received — pending approval (${reference})`, senderHtml);
+
+    // 2) Recipient notification (optional)
+    let recipientSent = false;
+    if (typeof recipientEmail === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail) && recipientEmail.toLowerCase() !== userEmail.toLowerCase()) {
+      try {
+        const recipientHtml = renderEmail({
+          ...baseOpts,
+          userName: recipient || recipientEmail.split("@")[0],
+          senderName: userName,
+          audience: "recipient",
+        });
+        await sendOne(recipientEmail, `Incoming ${scheme || type} — pending approval (${reference})`, recipientHtml);
+        recipientSent = true;
+      } catch (e) {
+        console.error("recipient email send failed", (e as Error).message);
+      }
+    }
+
+    return new Response(JSON.stringify({ ok: true, recipientSent }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
