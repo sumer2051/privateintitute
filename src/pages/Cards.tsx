@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { VerifyCodeDialog } from "@/components/VerifyCodeDialog";
 
 interface Account {
   id: string;
