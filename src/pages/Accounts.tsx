@@ -241,6 +241,19 @@ const Accounts = () => {
       </div>
         </>
       )}
+      <TransferModal
+        isOpen={transferOpen}
+        onClose={() => setTransferOpen(false)}
+        onSubmit={async ({ fromAccount, amount }) => {
+          const from = accounts.find((a) => a.id === fromAccount);
+          if (from) {
+            await supabase.from("accounts").update({ balance: from.balance - amount }).eq("id", fromAccount);
+            fetchAccounts();
+          }
+          setTransferOpen(false);
+          toast({ title: "Transfer submitted", description: `${formatCurrency(amount)} is pending approval.` });
+        }}
+      />
     </AuthLayout>
 
   );
