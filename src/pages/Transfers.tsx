@@ -10,11 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail, Globe2, Sparkles } from "lucide-react";
+import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail, Globe2, Sparkles, Link2 } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { getBankingProfile, getBankingSchemes } from "@/lib/bank-profiles";
 import { getCountryMethods, type CountryMethod } from "@/lib/country-methods";
 import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
+import { PaymentLinkPanel } from "@/components/PaymentLinkPanel";
 
 interface Account {
   id: string;
@@ -429,12 +430,17 @@ const Transfers = () => {
         </div>
 
         <Tabs defaultValue="send" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
             <TabsTrigger value="send"><Sparkles className="mr-2 h-4 w-4" />Send Money</TabsTrigger>
+            <TabsTrigger value="link"><Link2 className="mr-2 h-4 w-4" />Payment Link</TabsTrigger>
             <TabsTrigger value="internal"><ArrowRightLeft className="mr-2 h-4 w-4" />Between Accounts</TabsTrigger>
             <TabsTrigger value="external"><Building className="mr-2 h-4 w-4" />External</TabsTrigger>
             <TabsTrigger value="zelle"><Send className="mr-2 h-4 w-4" />Zelle</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="link">
+            <PaymentLinkPanel />
+          </TabsContent>
 
           <TabsContent value="send">
             <Card className="border-primary/20">
