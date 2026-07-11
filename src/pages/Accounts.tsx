@@ -208,8 +208,17 @@ const Accounts = () => {
             <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1">
               <Sparkles className="h-3 w-3" /> {greeting}
             </p>
-            <h2 className="font-display text-lg md:text-4xl font-bold text-secondary leading-tight truncate">
-              Welcome back{displayName ? <>, <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{displayName}</span></> : ""}
+            <h2 className="font-display text-lg md:text-4xl font-bold text-secondary leading-tight">
+              Welcome back{displayName ? (
+                <>, <span className="overflow-hidden align-bottom inline-block max-w-full">
+                  <span
+                    ref={nameRef}
+                    className={`inline-block whitespace-nowrap bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent ${shouldRoll ? "animate-roll" : ""}`}
+                  >
+                    {displayName}
+                  </span>
+                </span></>
+              ) : ""}
             </h2>
             <p className="hidden md:block text-sm text-muted-foreground italic">"Your wealth, curated with precision."</p>
           </div>
