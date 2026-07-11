@@ -288,7 +288,18 @@ const Cards = () => {
               variant="outline"
               size="sm"
               className="flex-col h-auto py-2"
-              onClick={() => setRevealed((p) => ({ ...p, [c.id]: !p[c.id] }))}
+              onClick={() => {
+                if (isRevealed) {
+                  setRevealed((p) => ({ ...p, [c.id]: false }));
+                } else {
+                  guard(
+                    `revealing card •••• ${c.last4}`,
+                    "Verify to reveal card",
+                    `We emailed a 6-digit security code to unmask card •••• ${c.last4}.`,
+                    () => setRevealed((p) => ({ ...p, [c.id]: true })),
+                  );
+                }
+              }}
             >
               {isRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               <span className="mt-1 text-[10px]">{isRevealed ? "Hide" : "Reveal"}</span>
