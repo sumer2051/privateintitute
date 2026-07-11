@@ -29,6 +29,7 @@ const App = () => (
           <AppLock>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/claim" element={<Claim />} />
             <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/" element={<Navigate to="/accounts" replace />} />
             <Route path="/overview" element={<ProtectedRoute><Index /></ProtectedRoute>} />
