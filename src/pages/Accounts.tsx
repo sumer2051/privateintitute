@@ -51,6 +51,7 @@ const Accounts = () => {
   })();
 
   const fetchAccounts = async () => {
+    const start = Date.now();
     try {
       const { data, error } = await supabase
         .from("accounts")
@@ -66,7 +67,9 @@ const Accounts = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      const elapsed = Date.now() - start;
+      const remaining = Math.max(0, 1500 - elapsed);
+      setTimeout(() => setLoading(false), remaining);
     }
   };
 
