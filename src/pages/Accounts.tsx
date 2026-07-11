@@ -29,14 +29,29 @@ const Accounts = () => {
 
   useEffect(() => {
     fetchAccounts();
-    supabase.auth.getUser().then(({ data }) => {
+    (async () => {
+      const { data } = await supabase.auth.getUser();
       const u = data.user;
       if (!u) return;
       const meta: any = u.user_metadata || {};
       const name = meta.full_name || meta.name || meta.first_name || (u.email ? u.email.split("@")[0] : "");
       setDisplayName(name);
-      setAvatarUrl(meta.avatar_url || meta.picture || "");
-    });
+      let url = meta.avatar_url || meta.picture || "";
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("avatar_url, full_name")
+        .eq("id", u.id)
+        .maybeSingle();
+      if (prof) {
+        if ((prof as any).full_name) setDisplayName((prof as any).full_name);
+        const path = (prof as any).avatar_url as string | undefined;
+        if (path) {
+          const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60);
+          if (signed?.signedUrl) url = signed.signedUrl;
+        }
+      }
+      setAvatarUrl(url);
+    })();
   }, []);
 
   const initials = displayName
