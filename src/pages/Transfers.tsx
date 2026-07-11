@@ -326,6 +326,7 @@ const Transfers = () => {
           details,
           memo: smNote || undefined,
           reference: ref,
+          status: "pending",
         },
       }).catch((e) => console.error("confirmation email failed", e));
 
