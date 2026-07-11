@@ -360,7 +360,7 @@ const Transfers = () => {
     }
   };
 
-
+  const handleZelleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!zFrom || !zAmount || !zRecipient || !zContact) {
       toast({ title: "Missing details", description: "Please complete all required fields.", variant: "destructive" });
