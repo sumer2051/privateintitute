@@ -294,7 +294,7 @@ const Transfers = () => {
         .filter(([, v]) => v.length > 0);
       const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
       const details = Object.fromEntries(detailPairs);
-      const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail;
+      const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail || "recipient";
 
       const { data, error } = await supabase
         .from("transactions")
