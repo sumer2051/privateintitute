@@ -10,9 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail, Globe2 } from "lucide-react";
+import { ArrowRightLeft, Send, Building, Clock, ShieldCheck, Mail, Globe2, Sparkles } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { getBankingProfile, getBankingSchemes } from "@/lib/bank-profiles";
+import { getCountryMethods, type CountryMethod } from "@/lib/country-methods";
+import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
 
 interface Account {
   id: string;
