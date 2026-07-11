@@ -114,33 +114,33 @@ const Accounts = () => {
       </div>
 
       {/* Net worth quick strip — always visible on mobile */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
-        <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
-          <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Deposits</p>
-          <p className="mt-1 font-display text-base md:text-2xl font-bold text-success truncate">
-            {formatCurrency(
-              accounts.filter((a) => a.account_type !== "credit").reduce((sum, a) => sum + a.balance, 0)
-            )}
-          </p>
-        </div>
-        <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
-          <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Credit Used</p>
-          <p className="mt-1 font-display text-base md:text-2xl font-bold text-destructive truncate">
-            {formatCurrency(
-              accounts.filter((a) => a.account_type === "credit").reduce((sum, a) => sum + a.balance, 0)
-            )}
-          </p>
-        </div>
-        <div className="col-span-2 md:col-span-1 rounded-xl border bg-gradient-to-br from-primary/10 to-accent/10 p-3 md:p-4 shadow-sm">
-          <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Net Worth</p>
-          <p className="mt-1 font-display text-lg md:text-2xl font-bold text-secondary truncate">
-            {formatCurrency(
-              accounts.filter((a) => a.account_type !== "credit").reduce((sum, a) => sum + a.balance, 0) -
-                accounts.filter((a) => a.account_type === "credit").reduce((sum, a) => sum + a.balance, 0)
-            )}
-          </p>
-        </div>
-      </div>
+      {(() => {
+        const deposits = accounts.filter((a) => a.account_type !== "credit").reduce((s, a) => s + a.balance, 0);
+        const credit = accounts.filter((a) => a.account_type === "credit").reduce((s, a) => s + a.balance, 0);
+        const net = deposits - credit;
+        return (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
+            <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
+              <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Deposits</p>
+              <p className="mt-1 font-display text-base md:text-2xl font-bold text-success truncate">
+                <CountUp value={deposits} format={formatCurrency} />
+              </p>
+            </div>
+            <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
+              <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Credit Used</p>
+              <p className="mt-1 font-display text-base md:text-2xl font-bold text-destructive truncate">
+                <CountUp value={credit} format={formatCurrency} />
+              </p>
+            </div>
+            <div className="col-span-2 md:col-span-1 rounded-xl border bg-gradient-to-br from-primary/10 to-accent/10 p-3 md:p-4 shadow-sm">
+              <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Net Worth</p>
+              <p className="mt-1 font-display text-lg md:text-2xl font-bold text-secondary truncate">
+                <CountUp value={net} format={formatCurrency} />
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="grid gap-3 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {accounts.map((account) => (
