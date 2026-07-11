@@ -19,14 +19,13 @@ function useRollingName<T extends HTMLElement>(name: string) {
     const parent = el.parentElement;
     if (!parent) return;
     const overflow = el.scrollWidth - parent.clientWidth;
-    if (overflow > 4) {
-      el.style.setProperty("--roll-offset", `-${overflow + 16}px`);
-      const duration = Math.max(6, Math.min(14, overflow / 18));
-      el.style.setProperty("--roll-duration", `${duration}s`);
-      setShouldRoll(true);
-    } else {
-      setShouldRoll(false);
-    }
+    const offset = overflow > 4 ? `${overflow + 16}px` : "8px";
+    const duration = overflow > 4
+      ? Math.max(6, Math.min(14, overflow / 18))
+      : 4;
+    el.style.setProperty("--roll-offset", `-${offset}`);
+    el.style.setProperty("--roll-duration", `${duration}s`);
+    setShouldRoll(true);
   }, [name]);
   return { ref, shouldRoll };
 }
