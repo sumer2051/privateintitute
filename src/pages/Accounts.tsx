@@ -12,8 +12,9 @@ import { TransferModal } from "@/components/TransferModal";
 
 function useRollingName<T extends HTMLElement>(name: string) {
   const ref = useRef<T>(null);
-  const [shouldRoll, setShouldRoll] = useState(false);
+  const [ready, setReady] = useState(false);
   useEffect(() => {
+    setReady(!!name);
     if (!ref.current || !name) return;
     const el = ref.current;
     const parent = el.parentElement;
@@ -25,9 +26,8 @@ function useRollingName<T extends HTMLElement>(name: string) {
       : 4;
     el.style.setProperty("--roll-offset", `-${offset}`);
     el.style.setProperty("--roll-duration", `${duration}s`);
-    setShouldRoll(true);
   }, [name]);
-  return { ref, shouldRoll };
+  return { ref, shouldRoll: ready };
 }
 
 interface Account {
