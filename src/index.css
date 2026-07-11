@@ -167,6 +167,17 @@ All colors MUST be HSL.
     0% { transform: translateX(-120%); }
     100% { transform: translateX(220%); }
   }
+  @keyframes rollText {
+    0% { transform: translateX(0); }
+    10% { transform: translateX(0); }
+    45% { transform: translateX(var(--roll-offset, -100%)); }
+    55% { transform: translateX(var(--roll-offset, -100%)); }
+    90% { transform: translateX(0); }
+    100% { transform: translateX(0); }
+  }
+  .animate-roll {
+    animation: rollText var(--roll-duration, 8s) linear infinite;
+  }
   .scrollbar-none::-webkit-scrollbar { display: none; }
   .scrollbar-none { scrollbar-width: none; }
 }
