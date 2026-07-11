@@ -247,7 +247,120 @@ const Transfers = () => {
     }
   };
 
-  const handleZelleTransfer = async (e: React.FormEvent) => {
+  // ---- Country-driven Send Money (driven by top currency switcher) ----
+  const methods = getCountryMethods(currency.code);
+  const smMethod: CountryMethod = methods.find((m) => m.id === smMethodId) ?? methods[0];
+
+  useEffect(() => {
+    setSmMethodId(methods[0]?.id ?? "");
+    setSmFields({});
+    setSmVariant("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency.code]);
+
+  const handleSendMoney = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const missing = smMethod.fields
+      .filter((f) => f.required !== false && !(smFields[f.key] ?? "").trim())
+      .map((f) => f.label);
+    if (!smFrom || !smAmount || !smEmail || missing.length) {
+      toast({
+        title: "Missing details",
+        description: missing.length ? `Please complete: ${missing.join(", ")}` : "Please complete all required fields, including the recipient email.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const amtDisplay = parseFloat(smAmount);
+    if (!(amtDisplay > 0)) {
+      toast({ title: "Invalid amount", variant: "destructive" });
+      return;
+    }
+    const amt = toUsd(amtDisplay);
+    const fromAcc = accounts.find((a) => a.id === smFrom);
+    if (!fromAcc) return;
+    if (fromAcc.balance < amt) {
+      toast({ title: "Insufficient funds", variant: "destructive" });
+      return;
+    }
+    setSmLoading(true);
+    try {
+      const ref = genRef(smMethod.id.toUpperCase().slice(0, 4));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
+
+      const detailPairs = smMethod.fields
+        .map((f) => [f.label, (smFields[f.key] ?? "").trim()] as const)
+        .filter(([, v]) => v.length > 0);
+      const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
+      const details = Object.fromEntries(detailPairs);
+      const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail;
+
+      const { data, error } = await supabase
+        .from("transactions")
+        .insert({
+          user_id: user.id,
+          account_id: smFrom,
+          transaction_type: "debit",
+          category: smMethod.name,
+          description: `[${smMethod.name}] To ${displayName} — ${detailString}${smNote ? ` — ${smNote}` : ""}${smVariant ? ` (${smVariant === "gs" ? "Goods & Services" : "Friends & Family"})` : ""}`,
+          amount: amt,
+          balance_after: fromAcc.balance,
+          status: "pending",
+          reference_number: ref,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+
+      supabase.functions.invoke("send-transfer-confirmation", {
+        body: {
+          type: smMethod.name,
+          amount: amtDisplay,
+          currency: currency.code,
+          recipient: displayName,
+          recipientEmail: smEmail,
+          scheme: smMethod.name,
+          region: currency.name,
+          settlement: smMethod.settlement,
+          details,
+          memo: smNote || undefined,
+          reference: ref,
+        },
+      }).catch((e) => console.error("confirmation email failed", e));
+
+      const { data: profileRow } = await supabase.auth.getUser();
+      const senderName = (profileRow?.user?.user_metadata?.full_name as string) || (profileRow?.user?.email ?? "You");
+
+      setReceipt({
+        method: smMethod,
+        amount: amtDisplay,
+        currencyCode: currency.code,
+        currencySymbol: currency.symbol,
+        senderName,
+        recipientName: displayName,
+        recipientEmail: smEmail,
+        fields: details,
+        note: smNote || undefined,
+        variant: smVariant || undefined,
+        reference: ref,
+        timestamp: new Date().toISOString(),
+      });
+
+      toast({
+        title: `${smMethod.name} sent — Pending approval`,
+        description: `Ref ${ref}. Receipt emailed to ${smEmail}.`,
+      });
+      setSmAmount(""); setSmRecipient(""); setSmEmail(""); setSmFields({}); setSmNote(""); setSmVariant("");
+      fetchPending();
+    } catch (err: any) {
+      toast({ title: "Submission failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSmLoading(false);
+    }
+  };
+
+
     e.preventDefault();
     if (!zFrom || !zAmount || !zRecipient || !zContact) {
       toast({ title: "Missing details", description: "Please complete all required fields.", variant: "destructive" });
