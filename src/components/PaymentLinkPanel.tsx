@@ -47,8 +47,6 @@ export const PaymentLinkPanel = () => {
       return;
     }
     setLoading(true);
-    // Realistic 2s send simulation
-    await new Promise((r) => setTimeout(r, 2000));
 
     const { data: userData } = await supabase.auth.getUser();
     const senderName =
@@ -65,10 +63,46 @@ export const PaymentLinkPanel = () => {
     };
     const token = encodeToken(payload);
     const link = `${window.location.origin}/claim?token=${token}`;
+    const reference = `PL-${payload.id.slice(0, 8).toUpperCase()}`;
 
-    setLoading(false);
-    setPreview({ payload, link });
-    toast({ title: "Payment link sent", description: `Email delivered to ${email}.` });
+    try {
+      const { data, error } = await supabase.functions.invoke("send-transfer-confirmation", {
+        body: {
+          type: "Payment Link",
+          scheme: "Payment Link",
+          amount: amt,
+          currency: country,
+          recipient: name,
+          recipientEmail: email,
+          reference,
+          status: "pending",
+          memo: `Claim your funds: ${link}`,
+          details: {
+            "Claim Link": link,
+            "Receiver": name,
+            "Receiver Email": email,
+          },
+        },
+      });
+      if (error) throw error;
+      setPreview({ payload, link });
+      toast({
+        title: "Payment link sent",
+        description: (data as any)?.recipientSent
+          ? `Email delivered to ${email}.`
+          : `Sent — receiver email could not be delivered, share the link manually.`,
+      });
+    } catch (e: any) {
+      console.error("payment link email failed", e);
+      setPreview({ payload, link });
+      toast({
+        title: "Link created, email failed",
+        description: "Copy the link below and share it with the receiver.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const copyLink = async () => {
