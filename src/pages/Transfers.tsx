@@ -505,9 +505,9 @@ const Transfers = () => {
                       <Input value={smRecipient} onChange={(e) => setSmRecipient(e.target.value)} placeholder="Jane Doe" />
                     </div>
                     <div className="sm:col-span-2">
-                      <Label>Recipient Email <span className="text-destructive">*</span></Label>
+                      <Label>Recipient Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
                       <Input type="email" value={smEmail} onChange={(e) => setSmEmail(e.target.value)} placeholder="name@email.com" />
-                      <p className="mt-1 text-[11px] text-muted-foreground">Receipt will be emailed to this address.</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">If provided, the recipient will receive a matching receipt with pending status.</p>
                     </div>
 
                     {smMethod.variants && (
