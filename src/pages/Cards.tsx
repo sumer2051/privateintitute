@@ -96,6 +96,11 @@ const Cards = () => {
   const [pinDialog, setPinDialog] = useState<DerivedCard | null>(null);
   const [replaceDialog, setReplaceDialog] = useState<DerivedCard | null>(null);
   const [travelDialog, setTravelDialog] = useState<DerivedCard | null>(null);
+  const [verifyState, setVerifyState] = useState<{ purpose: string; title: string; description: string; onOk: () => void } | null>(null);
+
+  const guard = (purpose: string, title: string, description: string, onOk: () => void) => {
+    setVerifyState({ purpose, title, description, onOk });
+  };
 
   useEffect(() => {
     (async () => {
