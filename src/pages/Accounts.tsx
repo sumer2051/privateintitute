@@ -209,33 +209,33 @@ const Accounts = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Total Deposits</span>
-              <span className="font-semibold text-success">
-                {formatCurrency(
-                  accounts
-                    .filter((a) => a.account_type !== "credit")
-                    .reduce((sum, a) => sum + a.balance, 0)
-                )}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Credit Balance</span>
-              <span className="font-semibold text-destructive">
-                {formatCurrency(accounts.filter((a) => a.account_type === "credit").reduce((sum, a) => sum + a.balance, 0))}
-              </span>
-            </div>
-            <div className="flex justify-between items-center pt-3 border-t">
-              <span className="font-semibold text-secondary">Net Worth</span>
-              <span className="text-lg md:text-xl font-bold text-secondary">
-                {formatCurrency(
-                  accounts.filter((a) => a.account_type !== "credit").reduce((sum, a) => sum + a.balance, 0) -
-                    accounts.filter((a) => a.account_type === "credit").reduce((sum, a) => sum + a.balance, 0)
-                )}
-              </span>
-            </div>
-          </div>
+          {(() => {
+            const deposits = accounts.filter((a) => a.account_type !== "credit").reduce((s, a) => s + a.balance, 0);
+            const credit = accounts.filter((a) => a.account_type === "credit").reduce((s, a) => s + a.balance, 0);
+            const net = deposits - credit;
+            return (
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Total Deposits</span>
+                  <span className="font-semibold text-success">
+                    <CountUp value={deposits} format={formatCurrency} />
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Credit Balance</span>
+                  <span className="font-semibold text-destructive">
+                    <CountUp value={credit} format={formatCurrency} />
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-3 border-t">
+                  <span className="font-semibold text-secondary">Net Worth</span>
+                  <span className="text-lg md:text-xl font-bold text-secondary">
+                    <CountUp value={net} format={formatCurrency} />
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
         </CardContent>
         </Card>
       </div>
