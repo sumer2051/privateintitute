@@ -65,6 +65,18 @@ const Transfers = () => {
   const [zMemo, setZMemo] = useState("");
   const [zLoading, setZLoading] = useState(false);
 
+  // Country-driven Send Money (per top currency switcher)
+  const [smFrom, setSmFrom] = useState("");
+  const [smMethodId, setSmMethodId] = useState<string>("");
+  const [smAmount, setSmAmount] = useState("");
+  const [smRecipient, setSmRecipient] = useState("");
+  const [smEmail, setSmEmail] = useState("");
+  const [smFields, setSmFields] = useState<Record<string, string>>({});
+  const [smNote, setSmNote] = useState("");
+  const [smVariant, setSmVariant] = useState<string>("");
+  const [smLoading, setSmLoading] = useState(false);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
 
