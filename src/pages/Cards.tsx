@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { VerifyCodeDialog } from "@/components/VerifyCodeDialog";
 
 interface Account {
   id: string;
@@ -95,6 +96,11 @@ const Cards = () => {
   const [pinDialog, setPinDialog] = useState<DerivedCard | null>(null);
   const [replaceDialog, setReplaceDialog] = useState<DerivedCard | null>(null);
   const [travelDialog, setTravelDialog] = useState<DerivedCard | null>(null);
+  const [verifyState, setVerifyState] = useState<{ purpose: string; title: string; description: string; onOk: () => void } | null>(null);
+
+  const guard = (purpose: string, title: string, description: string, onOk: () => void) => {
+    setVerifyState({ purpose, title, description, onOk });
+  };
 
   useEffect(() => {
     (async () => {
@@ -282,7 +288,18 @@ const Cards = () => {
               variant="outline"
               size="sm"
               className="flex-col h-auto py-2"
-              onClick={() => setRevealed((p) => ({ ...p, [c.id]: !p[c.id] }))}
+              onClick={() => {
+                if (isRevealed) {
+                  setRevealed((p) => ({ ...p, [c.id]: false }));
+                } else {
+                  guard(
+                    `revealing card •••• ${c.last4}`,
+                    "Verify to reveal card",
+                    `We emailed a 6-digit security code to unmask card •••• ${c.last4}.`,
+                    () => setRevealed((p) => ({ ...p, [c.id]: true })),
+                  );
+                }
+              }}
             >
               {isRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               <span className="mt-1 text-[10px]">{isRevealed ? "Hide" : "Reveal"}</span>
@@ -308,7 +325,14 @@ const Cards = () => {
               variant="outline"
               size="sm"
               className="flex-col h-auto py-2"
-              onClick={() => setPinDialog(c)}
+              onClick={() =>
+                guard(
+                  `viewing PIN for card •••• ${c.last4}`,
+                  "Verify to view PIN",
+                  `We emailed a 6-digit code to display the PIN for card •••• ${c.last4}.`,
+                  () => setPinDialog(c),
+                )
+              }
             >
               <KeyRound className="h-4 w-4" />
               <span className="mt-1 text-[10px]">PIN</span>
@@ -317,7 +341,14 @@ const Cards = () => {
               variant="outline"
               size="sm"
               className="flex-col h-auto py-2"
-              onClick={() => setReplaceDialog(c)}
+              onClick={() =>
+                guard(
+                  `replacing card •••• ${c.last4}`,
+                  "Verify to replace card",
+                  `Confirm the 6-digit code we emailed you to order a replacement for card •••• ${c.last4}.`,
+                  () => setReplaceDialog(c),
+                )
+              }
             >
               <RefreshCw className="h-4 w-4" />
               <span className="mt-1 text-[10px]">Replace</span>
@@ -358,7 +389,18 @@ const Cards = () => {
             </div>
 
             <div className="flex flex-wrap gap-2 pt-2">
-              <Button variant="secondary" size="sm" onClick={() => copy("Card number", c.fullNumber)}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() =>
+                  guard(
+                    `copying card •••• ${c.last4}`,
+                    "Verify to copy card number",
+                    `Enter the 6-digit code we emailed to copy the full number of card •••• ${c.last4}.`,
+                    () => copy("Card number", c.fullNumber),
+                  )
+                }
+              >
                 <Copy className="mr-1 h-3.5 w-3.5" /> Copy number
               </Button>
               <Button variant="secondary" size="sm" onClick={() => setTravelDialog(c)}>
@@ -404,10 +446,16 @@ const Cards = () => {
         <Button
           className="mt-2"
           onClick={() =>
-            toast({
-              title: "Request received",
-              description: `A ${kind} card request has been submitted. Support will follow up shortly.`,
-            })
+            guard(
+              `requesting a new ${kind} card`,
+              "Verify to request a new card",
+              "For your security, enter the 6-digit code we emailed before we submit your card request.",
+              () =>
+                toast({
+                  title: "Request received",
+                  description: `A ${kind} card request has been submitted. Support will follow up shortly.`,
+                }),
+            )
           }
         >
           Request {kind} card
@@ -433,10 +481,16 @@ const Cards = () => {
             <Button
               variant="outline"
               onClick={() =>
-                toast({
-                  title: "New card requested",
-                  description: "A specialist will contact you to complete issuance.",
-                })
+                guard(
+                  "requesting a new card",
+                  "Verify to request a new card",
+                  "For your security, enter the 6-digit code we emailed you before we submit a new card request.",
+                  () =>
+                    toast({
+                      title: "New card requested",
+                      description: "A specialist will contact you to complete issuance.",
+                    }),
+                )
               }
             >
               + Request new card
@@ -610,6 +664,18 @@ const Cards = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <VerifyCodeDialog
+        open={!!verifyState}
+        onOpenChange={(o) => !o && setVerifyState(null)}
+        purpose={verifyState?.purpose || ""}
+        title={verifyState?.title}
+        description={verifyState?.description}
+        onVerified={() => {
+          const fn = verifyState?.onOk;
+          setVerifyState(null);
+          fn?.();
+        }}
+      />
     </AuthLayout>
   );
 };

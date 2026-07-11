@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowUpDown, Download, TrendingUp, Sparkles } from "lucide-react";
+import { ArrowUpDown, Download, TrendingUp, Sparkles, Camera, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { CountUp } from "@/components/CountUp";
@@ -25,7 +25,48 @@ const Accounts = () => {
   const [displayName, setDisplayName] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [transferOpen, setTransferOpen] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please choose an image.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Too large", description: "Max 5MB.", variant: "destructive" });
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) throw new Error("Not signed in");
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${uid}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, {
+        upsert: true,
+        cacheControl: "3600",
+      });
+      if (upErr) throw upErr;
+      const { error: profErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: path })
+        .eq("id", uid);
+      if (profErr) throw profErr;
+      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60);
+      if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+      toast({ title: "Profile photo updated", description: "Your new photo has been saved." });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   useEffect(() => {
     fetchAccounts();
@@ -110,12 +151,37 @@ const Accounts = () => {
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-accent/20 blur-3xl" />
         <div className="relative flex items-center gap-3 md:gap-4">
-          <Avatar className="h-12 w-12 md:h-16 md:w-16 ring-2 ring-primary/40 shadow-md shrink-0">
-            <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-display text-base md:text-xl font-bold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingAvatar}
+            className="group relative shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary transition-transform hover:scale-105 active:scale-95"
+            aria-label="Change profile photo"
+          >
+            <Avatar className="h-12 w-12 md:h-16 md:w-16 ring-2 ring-primary/40 shadow-md">
+              <AvatarImage src={avatarUrl} alt={displayName} />
+              <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-display text-base md:text-xl font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <span className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              {uploadingAvatar ? (
+                <Loader2 className="h-5 w-5 text-white animate-spin" />
+              ) : (
+                <Camera className="h-4 w-4 md:h-5 md:w-5 text-white" />
+              )}
+            </span>
+            <span className="absolute -bottom-1 -right-1 flex h-5 w-5 md:h-6 md:w-6 items-center justify-center rounded-full bg-primary text-white shadow-md ring-2 ring-background">
+              <Camera className="h-2.5 w-2.5 md:h-3 md:w-3" />
+            </span>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarUpload}
+          />
           <div className="flex-1 min-w-0">
             <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1">
               <Sparkles className="h-3 w-3" /> {greeting}
