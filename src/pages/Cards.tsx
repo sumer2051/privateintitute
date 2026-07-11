@@ -446,10 +446,16 @@ const Cards = () => {
         <Button
           className="mt-2"
           onClick={() =>
-            toast({
-              title: "Request received",
-              description: `A ${kind} card request has been submitted. Support will follow up shortly.`,
-            })
+            guard(
+              `requesting a new ${kind} card`,
+              "Verify to request a new card",
+              "For your security, enter the 6-digit code we emailed before we submit your card request.",
+              () =>
+                toast({
+                  title: "Request received",
+                  description: `A ${kind} card request has been submitted. Support will follow up shortly.`,
+                }),
+            )
           }
         >
           Request {kind} card
