@@ -62,47 +62,62 @@ All colors MUST be HSL.
   }
 
 .dark {
-    --background: 222 84% 5%;
+    --background: 230 40% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 217 33% 13%;
+    --card: 228 33% 11%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 217 33% 13%;
+    --popover: 228 33% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 3 82% 53%;
+    --primary: 3 90% 62%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 33% 18%;
+    --secondary: 224 40% 20%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 18%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 225 25% 16%;
+    --muted-foreground: 215 25% 72%;
 
-    --accent: 275 38% 46%;
+    --accent: 275 65% 62%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 151 100% 27%;
+    --success: 151 70% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 25 100% 50%;
+    --warning: 35 100% 60%;
     --warning-foreground: 0 0% 100%;
 
-    --destructive: 0 63% 31%;
+    --destructive: 0 75% 55%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
-    --ring: 3 82% 53%;
-    --sidebar-background: 240 5.9% 10%;
+    --border: 225 25% 20%;
+    --input: 225 25% 20%;
+    --ring: 3 90% 62%;
+    --sidebar-background: 230 40% 8%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 224.3 76.3% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent: 225 25% 16%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-border: 225 25% 18%;
+    --sidebar-ring: 217.2 91.2% 65%;
+  }
+
+  .dark body {
+    background:
+      radial-gradient(1200px 600px at 10% -10%, hsl(275 65% 62% / 0.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, hsl(3 90% 62% / 0.10), transparent 60%),
+      radial-gradient(900px 500px at 50% 120%, hsl(224 60% 40% / 0.15), transparent 60%),
+      hsl(var(--background));
+  }
+  .dark .bg-card {
+    background: linear-gradient(180deg, hsl(228 33% 12%) 0%, hsl(228 33% 10%) 100%);
+    box-shadow: 0 1px 0 hsl(225 25% 24% / 0.6) inset, 0 8px 32px rgba(0, 0, 0, 0.35);
+  }
+  .dark .border {
+    border-color: hsl(225 25% 22%);
   }
 }
 
