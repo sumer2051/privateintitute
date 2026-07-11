@@ -826,6 +826,8 @@ const Transfers = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <TransferReceipt open={!!receipt} onClose={() => setReceipt(null)} receipt={receipt} />
     </AuthLayout>
   );
 };
