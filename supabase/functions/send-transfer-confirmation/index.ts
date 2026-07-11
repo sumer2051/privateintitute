@@ -69,6 +69,8 @@ function renderEmail(opts: {
   detail?: string; // legacy fallback
   memo?: string;
   reference: string;
+  audience?: "sender" | "recipient";
+  senderName?: string;
 }) {
   const code = (opts.currency || "USD").toUpperCase();
   const locale = CURRENCY_LOCALES[code] || "en-US";
