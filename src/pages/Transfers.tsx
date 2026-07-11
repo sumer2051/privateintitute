@@ -349,7 +349,7 @@ const Transfers = () => {
 
       toast({
         title: `${smMethod.name} sent — Pending approval`,
-        description: `Ref ${ref}. Receipt emailed to ${smEmail}.`,
+        description: smEmail ? `Ref ${ref}. Receipts emailed to you and ${smEmail}.` : `Ref ${ref}. Receipt emailed to you.`,
       });
       setSmAmount(""); setSmRecipient(""); setSmEmail(""); setSmFields({}); setSmNote(""); setSmVariant("");
       fetchPending();
