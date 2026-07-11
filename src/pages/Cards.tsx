@@ -389,7 +389,18 @@ const Cards = () => {
             </div>
 
             <div className="flex flex-wrap gap-2 pt-2">
-              <Button variant="secondary" size="sm" onClick={() => copy("Card number", c.fullNumber)}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() =>
+                  guard(
+                    `copying card •••• ${c.last4}`,
+                    "Verify to copy card number",
+                    `Enter the 6-digit code we emailed to copy the full number of card •••• ${c.last4}.`,
+                    () => copy("Card number", c.fullNumber),
+                  )
+                }
+              >
                 <Copy className="mr-1 h-3.5 w-3.5" /> Copy number
               </Button>
               <Button variant="secondary" size="sm" onClick={() => setTravelDialog(c)}>
