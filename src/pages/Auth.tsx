@@ -238,6 +238,32 @@ const Auth = () => {
           </CardContent>
         </div>
       </Card>
+
+      <Dialog open={tfaOpen} onOpenChange={setTfaOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Two-Factor Verification</DialogTitle>
+            <DialogDescription>
+              A 6-digit code was sent to <span className="font-semibold text-secondary">{tfaDest}</span>. Verification is optional — you may skip this time.
+            </DialogDescription>
+          </DialogHeader>
+          <div>
+            <Label htmlFor="tfa">Verification Code</Label>
+            <Input
+              id="tfa"
+              value={tfaInput}
+              onChange={(e) => setTfaInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="123456"
+              inputMode="numeric"
+              className="text-center text-2xl tracking-[0.5em] font-mono"
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="ghost" onClick={skipTfa}>Skip this time</Button>
+            <Button onClick={verifyTfa}>Verify & Continue</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
