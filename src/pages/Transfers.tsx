@@ -866,6 +866,7 @@ const Transfers = () => {
       </Dialog>
 
       <TransferReceipt open={!!receipt} onClose={() => setReceipt(null)} receipt={receipt} />
+      <TransferPinGate ref={pinRef} />
     </AuthLayout>
   );
 };
