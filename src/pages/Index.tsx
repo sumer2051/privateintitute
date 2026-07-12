@@ -129,11 +129,11 @@ const Index = () => {
     if (account === "both") {
       const checking = accounts.find(a => a.account_type === "checking");
       const savings = accounts.find(a => a.account_type === "savings");
-      if (checking) await supabase.from("accounts").update({ balance: checking.balance + amount }).eq("id", checking.id);
-      if (savings) await supabase.from("accounts").update({ balance: savings.balance + amount }).eq("id", savings.id);
+      if (checking) await supabase.rpc("adjust_account_balance", { p_account: checking.id, p_delta: amount });
+      if (savings) await supabase.rpc("adjust_account_balance", { p_account: savings.id, p_delta: amount });
     } else {
       const acc = accounts.find(a => a.id === account);
-      if (acc) await supabase.from("accounts").update({ balance: acc.balance + amount }).eq("id", acc.id);
+      if (acc) await supabase.rpc("adjust_account_balance", { p_account: acc.id, p_delta: amount });
     }
     
     showNotification("Funds Added", `$${amount.toFixed(2)} added successfully`, "success");
