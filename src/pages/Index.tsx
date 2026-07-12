@@ -89,8 +89,12 @@ const Index = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
+    setSignOutDialogOpen(false);
+    setSigningOut(true);
+    setTimeout(async () => {
+      await supabase.auth.signOut();
+      navigate("/auth");
+    }, 480);
   };
 
   const showNotification = (title: string, message: string, type: "success" | "error" | "warning" | "info") => {
