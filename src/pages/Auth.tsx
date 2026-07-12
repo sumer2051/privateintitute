@@ -455,6 +455,8 @@ const Auth = () => {
               <ShieldCheck className="h-3.5 w-3.5 text-success" />
               <span>Secure encrypted access · Private portal demo</span>
             </div>
+            </>
+            )}
           </CardContent>
         </div>
       </Card>
