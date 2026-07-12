@@ -65,6 +65,26 @@ const Auth = () => {
     })();
   }, [inviteToken]);
 
+  // Auto-redirect to sign-in when the email gets verified (in this or another tab)
+  useEffect(() => {
+    if (!pendingVerificationEmail) return;
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const verified = session?.user?.email_confirmed_at || (session?.user as any)?.confirmed_at;
+      if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") && verified) {
+        await supabase.auth.signOut();
+        setPendingVerificationEmail(null);
+        setUnverifiedEmail(null);
+        setIsLogin(true);
+        setPassword("");
+        toast({
+          title: "Email verified",
+          description: "Your account is activated. Please sign in to continue.",
+        });
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [pendingVerificationEmail, toast]);
+
   const proceedAfterLogin = () => {
     toast({ title: "Welcome back!", description: "You have successfully logged in." });
     if (nextPath) {
