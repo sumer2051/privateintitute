@@ -634,13 +634,13 @@ const Transfers = () => {
             <Card className="border-primary/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Building className="h-5 w-5 text-primary" />External Bank Transfer</CardTitle>
-                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-success" />
-                  Transfers to outside banks are reviewed by our support team before release.
-                </p>
+                <div className="flex items-start gap-2 rounded-lg border border-success/20 bg-success/5 p-3 text-xs text-muted-foreground">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                  <p>Transfers to outside banks are reviewed by our support team before release.</p>
+                </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-xs">
                   <Globe2 className="h-3.5 w-3.5 text-primary" />
-                  <span className="font-medium">{currency.flag} {currency.code} · {profile.scheme}</span>
+                  <span className="font-medium">{currency.code} · {profile.scheme}</span>
                   <span className="text-muted-foreground">· {profile.region}</span>
                   <Badge variant="secondary" className="ml-auto">{profile.settlement}</Badge>
                 </div>
@@ -649,7 +649,7 @@ const Transfers = () => {
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground">
                     Transfer style for {currency.code}
                   </Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {schemes.map((s) => {
                       const active = s.id === profile.id;
                       return (
@@ -657,7 +657,7 @@ const Transfers = () => {
                           key={s.id}
                           type="button"
                           onClick={() => { setSchemeId(s.id); setExtFields({}); }}
-                          className={`text-left rounded-lg border px-3 py-2 transition ${
+                          className={`text-left rounded-xl border px-3 py-3 transition-all active:scale-[0.98] ${
                             active
                               ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/40"
                               : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
@@ -665,7 +665,7 @@ const Transfers = () => {
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-semibold text-sm text-secondary">{s.scheme}</span>
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.settlement}</span>
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{s.settlement}</span>
                           </div>
                           {s.tagline && (
                             <p className="text-[11px] text-muted-foreground mt-0.5">{s.tagline}</p>
