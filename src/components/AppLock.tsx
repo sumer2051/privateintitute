@@ -50,6 +50,8 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
   const [shake, setShake] = useState(false);
   const { toast } = useToast();
   const [splashDone, setSplashDone] = useState(false);
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   // Auth state
   useEffect(() => {
