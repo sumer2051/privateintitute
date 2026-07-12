@@ -112,8 +112,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
             <NotificationsBell />
 
 
-            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={handleSignOut} title="Sign Out" disabled={signingOut}>
-              <LogOut className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
+              {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
             </Button>
           </div>
         </div>
