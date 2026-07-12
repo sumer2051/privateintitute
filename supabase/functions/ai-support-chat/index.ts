@@ -25,7 +25,7 @@ Hard rules:
 - Keep replies tight — 1-4 short paragraphs or a small bullet list. No walls of text.
 - Use markdown sparingly (bold for figures, lists for steps).
 
-Escalation: If the user (a) explicitly asks for a human, (b) reports fraud / unauthorized activity / a locked account / a legal matter / a dispute, or (c) you cannot resolve it after one attempt — call the notify_admin tool BEFORE replying, then tell the user a specialist will reach out within 24 hours AND that a confirmation email has been sent to their inbox.`;
+Escalation: If the user (a) explicitly asks for a human, (b) reports fraud / unauthorized activity / a locked account / a legal matter / a dispute, or (c) you cannot resolve it after one attempt — call **create_support_ticket** (preferred) to open a tracked ticket with a reference number and email confirmation, then tell the user their ticket number and that a specialist will respond within 24 hours. Use notify_admin only for quick heads-ups that do not need tracking.`;
 
 function buildRawEmail(to: string, subject: string, body: string): string {
   const msg = [
