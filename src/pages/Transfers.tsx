@@ -501,9 +501,9 @@ const Transfers = () => {
                               {m.glyph}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="text-sm font-semibold text-secondary truncate">{m.name}</div>
-                                <div className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{m.settlement}</div>
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="text-sm font-semibold text-secondary leading-tight">{m.name}</div>
+                                <div className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5">{m.settlement}</div>
                               </div>
                               <p className="text-xs text-muted-foreground truncate">{m.tagline}</p>
                             </div>
