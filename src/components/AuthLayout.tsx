@@ -52,6 +52,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "transfers", label: "Transfers", path: "/transfers" },
     { id: "billpay", label: "Bill Pay", path: "/billpay" },
     { id: "overview", label: "Overview", path: "/overview" },
+    { id: "support", label: "Support", path: "/support" },
     { id: "settings", label: "Settings", path: "/settings" },
   ];
 
