@@ -32,6 +32,19 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const [signingOut, setSigningOut] = useState(false);
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [roles, setRoles] = useState<string[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadRoles = async (uid: string | undefined) => {
+      if (!uid) { if (mounted) setRoles([]); return; }
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+      if (mounted) setRoles(((data as any[]) || []).map((r) => r.role));
+    };
+    supabase.auth.getSession().then(({ data: { session } }) => loadRoles(session?.user?.id));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => loadRoles(session?.user?.id));
+    return () => { mounted = false; sub.subscription.unsubscribe(); };
+  }, []);
 
   useEffect(() => {
     const handler = () => setChatOpen(true);
