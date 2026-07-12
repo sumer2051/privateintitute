@@ -128,6 +128,65 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_calls: {
+        Row: {
+          agent_notes: string | null
+          assigned_to: string | null
+          created_at: string
+          customer_name: string
+          email: string
+          id: string
+          phone: string
+          reason: string
+          scheduled_at: string
+          status: string
+          ticket_id: string | null
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_notes?: string | null
+          assigned_to?: string | null
+          created_at?: string
+          customer_name: string
+          email: string
+          id?: string
+          phone: string
+          reason: string
+          scheduled_at: string
+          status?: string
+          ticket_id?: string | null
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_notes?: string | null
+          assigned_to?: string | null
+          created_at?: string
+          customer_name?: string
+          email?: string
+          id?: string
+          phone?: string
+          reason?: string
+          scheduled_at?: string
+          status?: string
+          ticket_id?: string | null
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_calls_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheduled_payments: {
         Row: {
           account_id: string
@@ -175,6 +234,95 @@ export type Database = {
             columns: ["payee_id"]
             isOneToOne: false
             referencedRelation: "payees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          ai_summary: string | null
+          assigned_to: string | null
+          category: string | null
+          created_at: string
+          customer_email: string
+          customer_name: string
+          description: string
+          id: string
+          priority: string
+          source: string
+          status: string
+          subject: string
+          ticket_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          description: string
+          id?: string
+          priority?: string
+          source?: string
+          status?: string
+          subject: string
+          ticket_number?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_summary?: string | null
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          description?: string
+          id?: string
+          priority?: string
+          source?: string
+          status?: string
+          subject?: string
+          ticket_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ticket_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sender_id: string | null
+          sender_type: string
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sender_id?: string | null
+          sender_type: string
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sender_id?: string | null
+          sender_type?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
         ]
@@ -229,6 +377,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       zelle_contacts: {
         Row: {
           contact_email: string | null
@@ -261,10 +430,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_ticket_number: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_support_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "support" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -391,6 +568,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "support", "user"],
+    },
   },
 } as const

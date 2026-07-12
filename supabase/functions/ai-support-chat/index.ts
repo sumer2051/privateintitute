@@ -25,7 +25,7 @@ Hard rules:
 - Keep replies tight — 1-4 short paragraphs or a small bullet list. No walls of text.
 - Use markdown sparingly (bold for figures, lists for steps).
 
-Escalation: If the user (a) explicitly asks for a human, (b) reports fraud / unauthorized activity / a locked account / a legal matter / a dispute, or (c) you cannot resolve it after one attempt — call the notify_admin tool BEFORE replying, then tell the user a specialist will reach out within 24 hours AND that a confirmation email has been sent to their inbox.`;
+Escalation: If the user (a) explicitly asks for a human, (b) reports fraud / unauthorized activity / a locked account / a legal matter / a dispute, or (c) you cannot resolve it after one attempt — call **create_support_ticket** (preferred) to open a tracked ticket with a reference number and email confirmation, then tell the user their ticket number and that a specialist will respond within 24 hours. Use notify_admin only for quick heads-ups that do not need tracking.`;
 
 function buildRawEmail(to: string, subject: string, body: string): string {
   const msg = [
@@ -191,6 +191,24 @@ Deno.serve(async (req) => {
           },
         },
       },
+      {
+        type: "function",
+        function: {
+          name: "create_support_ticket",
+          description: "Create a formal, tracked support ticket. Prefer this over notify_admin when the user wants a reference number, or the issue needs follow-up (fraud, disputes, account access, unresolved questions).",
+          parameters: {
+            type: "object",
+            properties: {
+              subject: { type: "string", description: "Short subject line." },
+              description: { type: "string", description: "Full description of the issue in the user's own words." },
+              summary: { type: "string", description: "One-line AI summary." },
+              priority: { type: "string", enum: ["low","medium","high","urgent"] },
+              category: { type: "string", description: "account, transfers, cards, security, fraud, billing, or other" },
+            },
+            required: ["subject", "description", "priority"],
+          },
+        },
+      },
     ];
 
     const contextBlock = userContext
@@ -280,6 +298,50 @@ Deno.serve(async (req) => {
                 tool_call_id: tc.id,
                 content: JSON.stringify({ ok: false, error: (e as Error).message }),
               });
+            }
+          } else if (tc.function?.name === "create_support_ticket") {
+            let args: any = {};
+            try { args = JSON.parse(tc.function.arguments || "{}"); } catch {}
+            try {
+              const { data: ticket, error: tErr } = await supabase
+                .from("support_tickets")
+                .insert({
+                  user_id: userId,
+                  customer_name: userName,
+                  customer_email: userEmail,
+                  subject: String(args.subject || "Support request").slice(0, 200),
+                  description: String(args.description || "").slice(0, 5000),
+                  ai_summary: args.summary ? String(args.summary).slice(0, 2000) : null,
+                  priority: ["low","medium","high","urgent"].includes(args.priority) ? args.priority : "medium",
+                  category: args.category ? String(args.category).slice(0, 80) : null,
+                  source: "ai",
+                })
+                .select()
+                .single();
+              if (tErr) throw new Error(tErr.message);
+              await supabase.from("ticket_messages").insert({
+                ticket_id: ticket.id,
+                sender_type: "customer",
+                sender_id: userId,
+                message: String(args.description || ""),
+              });
+              try {
+                await sendUserConfirmationEmail(
+                  `Ticket ${ticket.ticket_number}\n\n${args.summary || args.description}`,
+                  userEmail, userName
+                );
+                await sendAdminEmail(
+                  `Ticket ${ticket.ticket_number} — ${args.subject}\n\n${args.description}`,
+                  userEmail, userName, args.priority === "urgent" ? "high" : "normal"
+                );
+              } catch (e) { console.error("ticket emails failed", (e as Error).message); }
+              convo.push({
+                role: "tool",
+                tool_call_id: tc.id,
+                content: JSON.stringify({ ok: true, ticket_number: ticket.ticket_number, message: `Ticket ${ticket.ticket_number} created. Tell the user this exact number.` }),
+              });
+            } catch (e) {
+              convo.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify({ ok: false, error: (e as Error).message }) });
             }
           } else {
             convo.push({

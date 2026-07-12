@@ -11,6 +11,8 @@ import Transfers from "./pages/Transfers";
 import BillPay from "./pages/BillPay";
 import Cards from "./pages/Cards";
 import Settings from "./pages/Settings";
+import Support from "./pages/Support";
+import AdminSupport from "./pages/AdminSupport";
 import NotFound from "./pages/NotFound";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -37,6 +39,8 @@ const App = () => (
             <Route path="/billpay" element={<ProtectedRoute><BillPay /></ProtectedRoute>} />
             <Route path="/cards" element={<ProtectedRoute><Cards /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+            <Route path="/admin/support" element={<ProtectedRoute><AdminSupport /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
