@@ -29,6 +29,9 @@ const Auth = () => {
   const [inviteChecking, setInviteChecking] = useState(!!inviteToken);
   const [inviteValid, setInviteValid] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const passwordValid = password.length >= 6;
