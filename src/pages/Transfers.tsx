@@ -109,6 +109,7 @@ const Transfers = () => {
   const handleInternalTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fromAccount || !toAccount || !amount) return;
+    if (!(await requirePin())) return;
     setLoading(true);
     try {
       const transferAmountDisplay = parseFloat(amount);
