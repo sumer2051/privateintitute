@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -15,18 +15,47 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const rawNext = searchParams.get("next");
   const nextPath = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
+  const inviteToken = searchParams.get("invite");
+  const invitedEmail = searchParams.get("email");
   const { toast } = useToast();
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [isLogin, setIsLogin] = useState(!inviteToken);
+  const [email, setEmail] = useState(invitedEmail || "");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [inviteChecking, setInviteChecking] = useState(!!inviteToken);
+  const [inviteValid, setInviteValid] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
 
   // 2FA prompt state (post-login, optional)
   const [tfaOpen, setTfaOpen] = useState(false);
   const [tfaCode, setTfaCode] = useState("");
   const [tfaInput, setTfaInput] = useState("");
   const [tfaDest, setTfaDest] = useState("");
+
+  // Validate invitation token on load
+  useEffect(() => {
+    if (!inviteToken) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from("invitations")
+        .select("email, status, expires_at")
+        .eq("token", inviteToken)
+        .maybeSingle();
+      if (error || !data) {
+        setInviteError("This invitation link is invalid.");
+      } else if (data.status !== "pending") {
+        setInviteError(`This invitation has already been ${data.status}.`);
+      } else if (new Date(data.expires_at) < new Date()) {
+        setInviteError("This invitation has expired. Ask your admin for a new one.");
+      } else {
+        setInviteValid(true);
+        setEmail(data.email);
+      }
+      setInviteChecking(false);
+    })();
+  }, [inviteToken]);
 
   const proceedAfterLogin = () => {
     toast({ title: "Welcome back!", description: "You have successfully logged in." });
@@ -36,6 +65,7 @@ const Auth = () => {
       navigate("/accounts");
     }
   };
+
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +103,12 @@ const Auth = () => {
 
         proceedAfterLogin();
       } else {
+        if (!inviteToken || !inviteValid) {
+          throw new Error("Signup is invite-only. Please use the link from your invitation email.");
+        }
+        if (invitedEmail && email.trim().toLowerCase() !== invitedEmail.toLowerCase()) {
+          throw new Error("This invitation was issued to a different email address.");
+        }
         const signupRedirect = nextPath
           ? `${window.location.origin}${nextPath}`
           : `${window.location.origin}/`;
@@ -80,7 +116,7 @@ const Auth = () => {
           email,
           password,
           options: {
-            data: { full_name: fullName },
+            data: { full_name: fullName, invite_token: inviteToken },
             emailRedirectTo: signupRedirect,
           },
         });
@@ -88,6 +124,7 @@ const Auth = () => {
         toast({ title: "Account created!", description: "You can now log in with your credentials." });
         setIsLogin(true);
       }
+
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
@@ -156,14 +193,30 @@ const Auth = () => {
               Wealth · Trust · Legacy
             </p>
             <CardDescription className="text-center pt-2">
-              {isLogin ? "Sign in to access your private portfolio" : "Create your private banking account"}
+              {isLogin ? "Sign in to access your private portfolio" : "Complete your invited account setup"}
             </CardDescription>
             <p className="mx-auto max-w-xs text-center text-xs leading-relaxed text-muted-foreground">
-              Independent private banking portal. Not affiliated with Bank of America or any other financial institution.
+              Independent private banking portal. Access is by invitation only.
             </p>
           </CardHeader>
 
           <CardContent>
+            {inviteToken && inviteChecking && (
+              <div className="mb-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-center text-sm text-muted-foreground">
+                Verifying invitation...
+              </div>
+            )}
+            {inviteToken && !inviteChecking && inviteError && (
+              <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-center text-sm text-destructive">
+                {inviteError}
+              </div>
+            )}
+            {inviteToken && inviteValid && !isLogin && (
+              <div className="mb-4 rounded-md border border-success/40 bg-success/10 p-3 text-center text-xs text-success">
+                ✓ Invitation verified for {email}
+              </div>
+            )}
+
             <form onSubmit={handleAuth} className="space-y-4">
               {!isLogin && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -222,14 +275,21 @@ const Auth = () => {
             </form>
 
             <div className="mt-4 text-center">
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-sm text-primary hover:underline transition-colors"
-              >
-                {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-              </button>
+              {isLogin ? (
+                <p className="text-xs text-muted-foreground">
+                  New here? Access is <span className="font-semibold text-primary">invite-only</span>. Use the link from your invitation email.
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(true)}
+                  className="text-sm text-primary hover:underline transition-colors"
+                >
+                  Already have an account? Sign in
+                </button>
+              )}
             </div>
+
 
             <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground border-t pt-4">
               <ShieldCheck className="h-3.5 w-3.5 text-success" />

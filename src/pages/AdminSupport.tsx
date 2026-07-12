@@ -133,7 +133,12 @@ export default function AdminSupport() {
   return (
     <AuthLayout>
       <div className="mx-auto max-w-6xl p-4 md:p-6 space-y-6">
-        <h1 className="text-2xl md:text-3xl font-bold">Admin · Support</h1>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <h1 className="text-2xl md:text-3xl font-bold">Admin · Support</h1>
+          <Button variant="outline" size="sm" onClick={() => navigate("/admin/invitations")}>
+            Manage invitations
+          </Button>
+        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Stat label="Active tickets" value={stats.open} icon={<Ticket className="h-4 w-4" />} />
