@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, User, Moon, Sun, LogOut } from "lucide-react";
+import { Bell, Search, User, Moon, Sun, LogOut, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,14 @@ import { NotificationToast } from "@/components/NotificationToast";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type Page = "overview" | "accounts" | "transfers" | "billpay" | "security" | "support";
 
