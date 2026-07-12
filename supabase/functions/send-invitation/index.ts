@@ -9,18 +9,22 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+
     const authHeader = req.headers.get('Authorization') || '';
     const jwt = authHeader.replace('Bearer ', '');
     if (!jwt) return json({ error: 'Unauthorized' }, 401);
 
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
-    const { data: userRes } = await admin.auth.getUser(jwt);
+    const { data: userRes, error: userErr } = await admin.auth.getUser(jwt);
+    if (userErr) return json({ error: 'Your session expired. Please sign in again and retry.' }, 401);
     const caller = userRes?.user;
     if (!caller) return json({ error: 'Unauthorized' }, 401);
 
     // Verify admin
-    const { data: roles } = await admin
+    const { data: roles, error: roleErr } = await admin
       .from('user_roles').select('role').eq('user_id', caller.id);
+    if (roleErr) return json({ error: `Unable to verify admin access: ${roleErr.message}` }, 500);
     const isAdmin = (roles || []).some((r: any) => r.role === 'admin');
     if (!isAdmin) return json({ error: 'Admin only' }, 403);
 
@@ -40,7 +44,7 @@ Deno.serve(async (req) => {
       .insert({ email, role, note, invited_by: caller.id })
       .select('*')
       .single();
-    if (insErr) return json({ error: insErr.message }, 400);
+    if (insErr) return json({ error: `Unable to create invitation: ${insErr.message}` }, 400);
 
     const link = `${appOrigin || 'https://privateintitute.lovable.app'}/auth?invite=${inv.token}&email=${encodeURIComponent(email)}`;
 
