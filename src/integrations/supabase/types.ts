@@ -141,6 +141,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          transfer_pin_hash: string | null
           two_factor_enabled: boolean
           two_factor_method: string | null
           updated_at: string | null
@@ -154,6 +155,7 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          transfer_pin_hash?: string | null
           two_factor_enabled?: boolean
           two_factor_method?: string | null
           updated_at?: string | null
@@ -167,6 +169,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          transfer_pin_hash?: string | null
           two_factor_enabled?: boolean
           two_factor_method?: string | null
           updated_at?: string | null
@@ -487,7 +490,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_transfer_pin: { Args: never; Returns: boolean }
       is_support_staff: { Args: { _user_id: string }; Returns: boolean }
+      set_transfer_pin: { Args: { _pin: string }; Returns: boolean }
+      verify_transfer_pin: { Args: { _pin: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "support" | "user"
