@@ -482,7 +482,7 @@ const Transfers = () => {
               <CardContent className="space-y-5">
                 <div>
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground">Choose a method</Label>
-                  <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {methods.map((m) => {
                       const active = m.id === smMethod.id;
                       return (
@@ -490,22 +490,24 @@ const Transfers = () => {
                           key={m.id}
                           type="button"
                           onClick={() => { setSmMethodId(m.id); setSmFields({}); setSmVariant(""); }}
-                          className={`text-left rounded-xl border p-3 transition ${
+                          className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
                             active
-                              ? "border-primary ring-2 ring-primary/40 bg-primary/5"
+                              ? "border-primary ring-2 ring-primary/40 bg-primary/5 shadow-sm"
                               : "border-border hover:border-primary/40 hover:bg-muted/50"
                           }`}
                         >
-                          <div className="flex items-center gap-2">
-                            <div className={`h-9 w-9 rounded-lg bg-gradient-to-br ${m.accent} text-white font-bold flex items-center justify-center shadow-sm`}>
+                          <div className="flex items-center gap-3">
+                            <div className={`h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br ${m.accent} text-white text-lg font-bold flex items-center justify-center shadow-sm`}>
                               {m.glyph}
                             </div>
-                            <div className="min-w-0">
-                              <div className="text-sm font-semibold text-secondary truncate">{m.name}</div>
-                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">{m.settlement}</div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="text-sm font-semibold text-secondary truncate">{m.name}</div>
+                                <div className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{m.settlement}</div>
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate">{m.tagline}</p>
                             </div>
                           </div>
-                          <p className="mt-1.5 text-[11px] text-muted-foreground line-clamp-2">{m.tagline}</p>
                         </button>
                       );
                     })}
