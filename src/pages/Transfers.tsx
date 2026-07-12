@@ -420,6 +420,7 @@ const Transfers = () => {
       });
       setZAmount(""); setZRecipient(""); setZContact(""); setZMemo("");
       if (data) setSelectedTx(data as PendingTx);
+      fetchAccounts();
       fetchPending();
     } catch (err: any) {
       toast({ title: "Submission failed", description: err.message, variant: "destructive" });
