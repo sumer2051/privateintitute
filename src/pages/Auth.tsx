@@ -252,6 +252,77 @@ const Auth = () => {
           </CardHeader>
 
           <CardContent>
+            {pendingVerificationEmail ? (
+              <div className="space-y-5 animate-in fade-in zoom-in-95 duration-300">
+                <div className="flex flex-col items-center text-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-primary/30 blur-xl animate-pulse" />
+                    <div className="relative rounded-full bg-primary/10 p-3 ring-2 ring-primary/40">
+                      <MailCheck className="h-8 w-8 text-primary" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-display text-lg font-semibold text-secondary">Activate your account</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      We sent a secure activation link to{" "}
+                      <span className="font-semibold text-secondary">{pendingVerificationEmail}</span>.
+                      Please click the link to verify your email before signing in for the first time.
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Didn't get it? Check spam, or resend the link below.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => handleResendVerification(pendingVerificationEmail)}
+                    disabled={resending}
+                    variant="outline"
+                    className="w-full h-11"
+                  >
+                    {resending ? (
+                      <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Resending...</>
+                    ) : (
+                      <><Mail className="h-4 w-4 mr-2" /> Resend verification email</>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => { setPendingVerificationEmail(null); setIsLogin(true); }}
+                    className="w-full"
+                  >
+                    Back to sign in
+                  </Button>
+                </div>
+              </div>
+            ) : (
+            <>
+            {unverifiedEmail && (
+              <div className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-amber-700 dark:text-amber-400">Email verification required</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Your account is created but not yet activated. Please open the activation link we sent to <span className="font-semibold">{unverifiedEmail}</span>.
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResendVerification(unverifiedEmail)}
+                      disabled={resending}
+                      className="mt-2 h-8"
+                    >
+                      {resending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Mail className="h-3 w-3 mr-1.5" />}
+                      Resend verification email
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
             {inviteToken && inviteChecking && (
               <div className="mb-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-center text-sm text-muted-foreground">
                 Verifying invitation...
