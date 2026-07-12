@@ -101,7 +101,15 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [phase, user]);
 
-
+  const handleLockedSignOut = async () => {
+    setSignOutDialogOpen(false);
+    setSigningOut(true);
+    setTimeout(async () => {
+      localStorage.removeItem(PASSCODE_KEY);
+      await supabase.auth.signOut();
+      window.location.reload();
+    }, 480);
+  };
 
   const rejectWithShake = (msg: string) => {
     setError(msg);
