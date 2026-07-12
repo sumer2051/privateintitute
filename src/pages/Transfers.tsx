@@ -387,7 +387,7 @@ const Transfers = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
       const newBal = fromAcc.balance - amt;
-      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", zFrom);
+      await supabase.rpc("adjust_account_balance", { p_account: zFrom, p_delta: -amt });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
