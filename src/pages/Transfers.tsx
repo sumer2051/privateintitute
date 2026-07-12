@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { TransferPinGate, type PinGateHandle } from "@/components/TransferPinGate";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
