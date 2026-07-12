@@ -358,6 +358,7 @@ const Transfers = () => {
         description: smEmail ? `Ref ${ref}. Receipts emailed to you and ${smEmail}.` : `Ref ${ref}. Receipt emailed to you.`,
       });
       setSmAmount(""); setSmRecipient(""); setSmEmail(""); setSmFields({}); setSmNote(""); setSmVariant("");
+      fetchAccounts();
       fetchPending();
     } catch (err: any) {
       toast({ title: "Submission failed", description: err.message, variant: "destructive" });
