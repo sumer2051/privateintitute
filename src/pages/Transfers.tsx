@@ -387,6 +387,7 @@ const Transfers = () => {
       toast({ title: "Insufficient funds", variant: "destructive" });
       return;
     }
+    if (!(await requirePin())) return;
     setZLoading(true);
     try {
       const ref = genRef("ZEL");
