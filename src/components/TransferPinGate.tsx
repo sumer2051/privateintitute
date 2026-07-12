@@ -41,7 +41,7 @@ export const TransferPinGate = forwardRef<PinGateHandle>((_, ref) => {
         // If a previous gate is still open, cancel it.
         if (resolver.current) resolver.current(false);
         resolver.current = resolve;
-        const { data, error } = await supabase.rpc("has_transfer_pin");
+        const { data, error } = await (supabase as any).rpc("has_transfer_pin");
         if (error) {
           // Fail closed and let the user try to set one.
           setMode("set");
@@ -58,14 +58,14 @@ export const TransferPinGate = forwardRef<PinGateHandle>((_, ref) => {
       if (!/^\d{4,6}$/.test(pin)) return setError("PIN must be 4–6 digits");
       if (pin !== confirm) return setError("PINs do not match");
       setBusy(true);
-      const { error } = await supabase.rpc("set_transfer_pin", { _pin: pin });
+      const { error } = await (supabase as any).rpc("set_transfer_pin", { _pin: pin });
       setBusy(false);
       if (error) return setError(error.message);
       finish(true);
     } else {
       if (!/^\d{4,6}$/.test(pin)) return setError("Enter your 4–6 digit PIN");
       setBusy(true);
-      const { data, error } = await supabase.rpc("verify_transfer_pin", { _pin: pin });
+      const { data, error } = await (supabase as any).rpc("verify_transfer_pin", { _pin: pin });
       setBusy(false);
       if (error) return setError(error.message);
       if (!data) return setError("Incorrect PIN");
