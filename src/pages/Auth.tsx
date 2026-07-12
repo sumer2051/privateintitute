@@ -275,14 +275,21 @@ const Auth = () => {
             </form>
 
             <div className="mt-4 text-center">
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-sm text-primary hover:underline transition-colors"
-              >
-                {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-              </button>
+              {isLogin ? (
+                <p className="text-xs text-muted-foreground">
+                  New here? Access is <span className="font-semibold text-primary">invite-only</span>. Use the link from your invitation email.
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(true)}
+                  className="text-sm text-primary hover:underline transition-colors"
+                >
+                  Already have an account? Sign in
+                </button>
+              )}
             </div>
+
 
             <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground border-t pt-4">
               <ShieldCheck className="h-3.5 w-3.5 text-success" />
