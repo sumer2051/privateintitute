@@ -354,8 +354,33 @@ const Auth = () => {
               </div>
             )}
             {inviteToken && inviteValid && !isLogin && (
-              <div className="mb-4 rounded-md border border-success/40 bg-success/10 p-3 text-center text-xs text-success">
-                ✓ Invitation verified for {email}
+              <div className="mb-4 overflow-hidden rounded-lg border border-success/40 bg-gradient-to-br from-success/10 via-primary/5 to-accent/10 p-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                <div className="flex items-start gap-3">
+                  <div className="relative shrink-0">
+                    <div className="absolute inset-0 rounded-full bg-success/30 blur-md animate-pulse" />
+                    <div className="relative rounded-full bg-success/15 p-2 ring-2 ring-success/40">
+                      <CheckCircle2 className="h-5 w-5 text-success" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display text-sm font-semibold text-secondary">
+                      Welcome to <span className="text-primary">BoA</span> private institute
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Your invitation for{" "}
+                      <span className="font-semibold text-secondary break-all">{email}</span>{" "}
+                      is verified. Finish creating your account below to unlock your private portfolio.
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                        <Sparkles className="h-3 w-3" /> Invite verified
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent">
+                        <ShieldCheck className="h-3 w-3" /> Private & secure
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

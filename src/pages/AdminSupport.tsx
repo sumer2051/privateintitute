@@ -44,9 +44,9 @@ export default function AdminSupport() {
 
   useEffect(() => {
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate("/auth"); return; }
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { navigate("/auth"); return; }
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
       const roles = (data || []).map((r: any) => r.role);
       setAllowed(roles.includes("admin") || roles.includes("support"));
     })();

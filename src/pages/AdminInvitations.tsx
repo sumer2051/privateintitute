@@ -34,9 +34,11 @@ export default function AdminInvitations() {
 
   useEffect(() => {
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate("/auth"); return; }
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+      // ProtectedRoute already guarantees a signed-in user is present; just
+      // re-check the role so we know what to render.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { navigate("/auth"); return; }
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
       setAllowed(((data as any[]) || []).some(r => r.role === "admin"));
     })();
   }, [navigate]);

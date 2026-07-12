@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { TransferPinGate, type PinGateHandle } from "@/components/TransferPinGate";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +39,8 @@ const genRef = (prefix: string) =>
   `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
 const Transfers = () => {
+  const pinRef = useRef<PinGateHandle>(null);
+  const requirePin = async () => (await pinRef.current?.ensure()) === true;
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [pending, setPending] = useState<PendingTx[]>([]);
   const [selectedTx, setSelectedTx] = useState<PendingTx | null>(null);
@@ -106,6 +109,7 @@ const Transfers = () => {
   const handleInternalTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fromAccount || !toAccount || !amount) return;
+    if (!(await requirePin())) return;
     setLoading(true);
     try {
       const transferAmountDisplay = parseFloat(amount);
@@ -189,6 +193,7 @@ const Transfers = () => {
       toast({ title: "Insufficient funds", variant: "destructive" });
       return;
     }
+    if (!(await requirePin())) return;
     setExtLoading(true);
     try {
       const ref = genRef("EXT");
@@ -286,6 +291,7 @@ const Transfers = () => {
       toast({ title: "Insufficient funds", variant: "destructive" });
       return;
     }
+    if (!(await requirePin())) return;
     setSmLoading(true);
     try {
       const ref = genRef(smMethod.id.toUpperCase().slice(0, 4));
@@ -381,6 +387,7 @@ const Transfers = () => {
       toast({ title: "Insufficient funds", variant: "destructive" });
       return;
     }
+    if (!(await requirePin())) return;
     setZLoading(true);
     try {
       const ref = genRef("ZEL");
@@ -859,6 +866,7 @@ const Transfers = () => {
       </Dialog>
 
       <TransferReceipt open={!!receipt} onClose={() => setReceipt(null)} receipt={receipt} />
+      <TransferPinGate ref={pinRef} />
     </AuthLayout>
   );
 };

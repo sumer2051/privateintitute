@@ -32,6 +32,19 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const [signingOut, setSigningOut] = useState(false);
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [roles, setRoles] = useState<string[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadRoles = async (uid: string | undefined) => {
+      if (!uid) { if (mounted) setRoles([]); return; }
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+      if (mounted) setRoles(((data as any[]) || []).map((r) => r.role));
+    };
+    supabase.auth.getSession().then(({ data: { session } }) => loadRoles(session?.user?.id));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => loadRoles(session?.user?.id));
+    return () => { mounted = false; sub.subscription.unsubscribe(); };
+  }, []);
 
   useEffect(() => {
     const handler = () => setChatOpen(true);
@@ -56,6 +69,9 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     }, 480);
   };
 
+  const isAdmin = roles.includes("admin");
+  const isSupportStaff = isAdmin || roles.includes("support");
+
   const navItems = [
     { id: "accounts", label: "Accounts", path: "/accounts" },
     { id: "cards", label: "Cards", path: "/cards" },
@@ -64,6 +80,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "overview", label: "Overview", path: "/overview" },
     { id: "support", label: "Support", path: "/support" },
     { id: "settings", label: "Settings", path: "/settings" },
+    ...(isSupportStaff ? [{ id: "admin-support", label: "Admin · Tickets", path: "/admin/support" }] : []),
+    ...(isAdmin ? [{ id: "admin-invitations", label: "Admin · Invites", path: "/admin/invitations" }] : []),
   ];
 
   return (
