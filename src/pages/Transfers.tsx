@@ -504,7 +504,7 @@ const Transfers = () => {
                               <div className="text-sm font-semibold text-secondary leading-tight">{m.name}</div>
                               <p className="text-xs text-muted-foreground truncate">{m.tagline}</p>
                             </div>
-                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5">{m.settlement}</div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5 min-w-fit">{m.settlement}</div>
                           </div>
                         </button>
                       );
