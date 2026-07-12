@@ -299,6 +299,8 @@ const Transfers = () => {
       const details = Object.fromEntries(detailPairs);
       const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail || "recipient";
 
+      const newBal = fromAcc.balance - amt;
+      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", smFrom);
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -308,7 +310,7 @@ const Transfers = () => {
           category: smMethod.name,
           description: `[${smMethod.name}] To ${displayName} — ${detailString}${smNote ? ` — ${smNote}` : ""}${smVariant ? ` (${smVariant === "gs" ? "Goods & Services" : "Friends & Family"})` : ""}`,
           amount: amt,
-          balance_after: fromAcc.balance,
+          balance_after: newBal,
           status: "pending",
           reference_number: ref,
         })
