@@ -143,6 +143,35 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
       <main className="container mx-auto px-3 md:px-4 py-4 md:py-8">{children}</main>
 
+      <Dialog open={signOutDialogOpen} onOpenChange={setSignOutDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign out?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to sign out? You will need to log in again to access your accounts.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSignOutDialogOpen(false)} disabled={signingOut}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleSignOut} disabled={signingOut}>
+              {signingOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Sign Out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {signingOut && (
+        <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+            <p className="text-sm font-medium text-secondary">Signing you out...</p>
+          </div>
+        </div>
+      )}
+
       <AiChatWidget open={chatOpen} onOpenChange={setChatOpen} />
     </div>
   );
