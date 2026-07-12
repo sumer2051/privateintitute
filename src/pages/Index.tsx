@@ -155,7 +155,11 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
+    <div
+      className={`min-h-screen bg-background transition-colors duration-300 ${
+        signingOut ? "animate-fade-out-scale" : "animate-in fade-in duration-500"
+      }`}
+    >
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-card shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
