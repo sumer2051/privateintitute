@@ -191,6 +191,24 @@ Deno.serve(async (req) => {
           },
         },
       },
+      {
+        type: "function",
+        function: {
+          name: "create_support_ticket",
+          description: "Create a formal, tracked support ticket. Prefer this over notify_admin when the user wants a reference number, or the issue needs follow-up (fraud, disputes, account access, unresolved questions).",
+          parameters: {
+            type: "object",
+            properties: {
+              subject: { type: "string", description: "Short subject line." },
+              description: { type: "string", description: "Full description of the issue in the user's own words." },
+              summary: { type: "string", description: "One-line AI summary." },
+              priority: { type: "string", enum: ["low","medium","high","urgent"] },
+              category: { type: "string", description: "account, transfers, cards, security, fraud, billing, or other" },
+            },
+            required: ["subject", "description", "priority"],
+          },
+        },
+      },
     ];
 
     const contextBlock = userContext
