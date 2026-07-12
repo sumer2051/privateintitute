@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Search, Moon, Sun, LogOut } from "lucide-react";
+import { Bell, Search, Moon, Sun, LogOut, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,14 @@ import logo from "@/assets/logo.png";
 import { AiChatWidget } from "@/components/AiChatWidget";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { CurrencySelector } from "@/components/CurrencySelector";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
