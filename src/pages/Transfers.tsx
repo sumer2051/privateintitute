@@ -300,7 +300,7 @@ const Transfers = () => {
       const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail || "recipient";
 
       const newBal = fromAcc.balance - amt;
-      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", smFrom);
+      await supabase.rpc("adjust_account_balance", { p_account: smFrom, p_delta: -amt });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
