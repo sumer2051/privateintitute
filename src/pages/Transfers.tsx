@@ -241,6 +241,7 @@ const Transfers = () => {
       });
       setExtAmount(""); setExtRecipient(""); setExtFields({}); setExtMemo("");
       if (data) setSelectedTx(data as PendingTx);
+      fetchAccounts();
       fetchPending();
     } catch (err: any) {
       toast({ title: "Submission failed", description: err.message, variant: "destructive" });
