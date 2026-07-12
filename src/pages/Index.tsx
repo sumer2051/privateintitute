@@ -117,7 +117,7 @@ const Index = () => {
     const fromAcc = accounts.find(a => a.id === fromAccount);
     if (!fromAcc) return;
 
-    await supabase.from("accounts").update({ balance: fromAcc.balance - amount }).eq("id", fromAccount);
+    await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: -amount });
     setShowZelleModal(false);
     showNotification("Zelle Transfer Sent", `$${amount.toFixed(2)} sent with Zelle`, "success");
     fetchAccounts();
