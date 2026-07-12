@@ -48,6 +48,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   }, [darkMode]);
 
   const handleSignOut = async () => {
+    setSignOutDialogOpen(false);
     setSigningOut(true);
     setTimeout(async () => {
       await supabase.auth.signOut();
