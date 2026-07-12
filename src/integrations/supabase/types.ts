@@ -475,6 +475,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      adjust_account_balance: {
+        Args: { p_account: string; p_delta: number }
+        Returns: number
+      }
       generate_ticket_number: { Args: never; Returns: string }
       has_role: {
         Args: {
