@@ -430,12 +430,32 @@ const Transfers = () => {
         </div>
 
         <Tabs defaultValue="send" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
-            <TabsTrigger value="send"><Sparkles className="mr-2 h-4 w-4" />Send Money</TabsTrigger>
-            <TabsTrigger value="link"><Link2 className="mr-2 h-4 w-4" />Payment Link</TabsTrigger>
-            <TabsTrigger value="internal"><ArrowRightLeft className="mr-2 h-4 w-4" />Between Accounts</TabsTrigger>
-            <TabsTrigger value="external"><Building className="mr-2 h-4 w-4" />External</TabsTrigger>
-            <TabsTrigger value="zelle"><Send className="mr-2 h-4 w-4" />Zelle</TabsTrigger>
+          <TabsList className="flex w-full overflow-x-auto gap-2 rounded-xl bg-muted/50 p-2 sm:grid sm:grid-cols-5 sm:overflow-visible scrollbar-none">
+            <TabsTrigger value="send" className="shrink-0 gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary">
+              <Sparkles className="h-4 w-4 shrink-0" />
+              <span className="sm:hidden">Send</span>
+              <span className="hidden sm:inline">Send Money</span>
+            </TabsTrigger>
+            <TabsTrigger value="link" className="shrink-0 gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary">
+              <Link2 className="h-4 w-4 shrink-0" />
+              <span className="sm:hidden">Link</span>
+              <span className="hidden sm:inline">Payment Link</span>
+            </TabsTrigger>
+            <TabsTrigger value="internal" className="shrink-0 gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary">
+              <ArrowRightLeft className="h-4 w-4 shrink-0" />
+              <span className="sm:hidden">Between</span>
+              <span className="hidden sm:inline">Between Accounts</span>
+            </TabsTrigger>
+            <TabsTrigger value="external" className="shrink-0 gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary">
+              <Building className="h-4 w-4 shrink-0" />
+              <span className="sm:hidden">External</span>
+              <span className="hidden sm:inline">External</span>
+            </TabsTrigger>
+            <TabsTrigger value="zelle" className="shrink-0 gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary">
+              <Send className="h-4 w-4 shrink-0" />
+              <span className="sm:hidden">Zelle</span>
+              <span className="hidden sm:inline">Zelle</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="link">
@@ -444,20 +464,25 @@ const Transfers = () => {
 
           <TabsContent value="send">
             <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  Send Money · {currency.flag} {currency.name}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <Globe2 className="h-3.5 w-3.5 text-primary" />
+              <CardHeader className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Send Money
+                  </CardTitle>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                    <Globe2 className="h-3.5 w-3.5" />
+                    {currency.code} · {currency.name}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">
                   Methods below match the country selected in the top currency switcher.
                 </p>
               </CardHeader>
               <CardContent className="space-y-5">
                 <div>
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground">Choose a method</Label>
-                  <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {methods.map((m) => {
                       const active = m.id === smMethod.id;
                       return (
@@ -465,22 +490,22 @@ const Transfers = () => {
                           key={m.id}
                           type="button"
                           onClick={() => { setSmMethodId(m.id); setSmFields({}); setSmVariant(""); }}
-                          className={`text-left rounded-xl border p-3 transition ${
+                          className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
                             active
-                              ? "border-primary ring-2 ring-primary/40 bg-primary/5"
+                              ? "border-primary ring-2 ring-primary/40 bg-primary/5 shadow-sm"
                               : "border-border hover:border-primary/40 hover:bg-muted/50"
                           }`}
                         >
-                          <div className="flex items-center gap-2">
-                            <div className={`h-9 w-9 rounded-lg bg-gradient-to-br ${m.accent} text-white font-bold flex items-center justify-center shadow-sm`}>
+                          <div className="grid grid-cols-[auto_1fr_auto] items-start gap-3">
+                            <div className={`h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br ${m.accent} text-white text-lg font-bold flex items-center justify-center shadow-sm`}>
                               {m.glyph}
                             </div>
                             <div className="min-w-0">
-                              <div className="text-sm font-semibold text-secondary truncate">{m.name}</div>
-                              <div className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">{m.settlement}</div>
+                              <div className="text-sm font-semibold text-secondary leading-tight">{m.name}</div>
+                              <p className="text-xs text-muted-foreground truncate">{m.tagline}</p>
                             </div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5 min-w-fit">{m.settlement}</div>
                           </div>
-                          <p className="mt-1.5 text-[11px] text-muted-foreground line-clamp-2">{m.tagline}</p>
                         </button>
                       );
                     })}
@@ -607,13 +632,13 @@ const Transfers = () => {
             <Card className="border-primary/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Building className="h-5 w-5 text-primary" />External Bank Transfer</CardTitle>
-                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-success" />
-                  Transfers to outside banks are reviewed by our support team before release.
-                </p>
+                <div className="flex items-start gap-2 rounded-lg border border-success/20 bg-success/5 p-3 text-xs text-muted-foreground">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                  <p>Transfers to outside banks are reviewed by our support team before release.</p>
+                </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-xs">
                   <Globe2 className="h-3.5 w-3.5 text-primary" />
-                  <span className="font-medium">{currency.flag} {currency.code} · {profile.scheme}</span>
+                  <span className="font-medium">{currency.code} · {profile.scheme}</span>
                   <span className="text-muted-foreground">· {profile.region}</span>
                   <Badge variant="secondary" className="ml-auto">{profile.settlement}</Badge>
                 </div>
@@ -622,7 +647,7 @@ const Transfers = () => {
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground">
                     Transfer style for {currency.code}
                   </Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {schemes.map((s) => {
                       const active = s.id === profile.id;
                       return (
@@ -630,15 +655,15 @@ const Transfers = () => {
                           key={s.id}
                           type="button"
                           onClick={() => { setSchemeId(s.id); setExtFields({}); }}
-                          className={`text-left rounded-lg border px-3 py-2 transition ${
+                          className={`text-left rounded-xl border px-3 py-3 transition-all active:scale-[0.98] ${
                             active
                               ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/40"
                               : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
                           }`}
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-semibold text-sm text-secondary">{s.scheme}</span>
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.settlement}</span>
+                          <div className="grid grid-cols-[1fr_auto] items-start gap-2">
+                            <span className="font-semibold text-sm text-secondary leading-tight">{s.scheme}</span>
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5">{s.settlement}</span>
                           </div>
                           {s.tagline && (
                             <p className="text-[11px] text-muted-foreground mt-0.5">{s.tagline}</p>
