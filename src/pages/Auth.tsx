@@ -193,14 +193,30 @@ const Auth = () => {
               Wealth · Trust · Legacy
             </p>
             <CardDescription className="text-center pt-2">
-              {isLogin ? "Sign in to access your private portfolio" : "Create your private banking account"}
+              {isLogin ? "Sign in to access your private portfolio" : "Complete your invited account setup"}
             </CardDescription>
             <p className="mx-auto max-w-xs text-center text-xs leading-relaxed text-muted-foreground">
-              Independent private banking portal. Not affiliated with Bank of America or any other financial institution.
+              Independent private banking portal. Access is by invitation only.
             </p>
           </CardHeader>
 
           <CardContent>
+            {inviteToken && inviteChecking && (
+              <div className="mb-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-center text-sm text-muted-foreground">
+                Verifying invitation...
+              </div>
+            )}
+            {inviteToken && !inviteChecking && inviteError && (
+              <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-center text-sm text-destructive">
+                {inviteError}
+              </div>
+            )}
+            {inviteToken && inviteValid && !isLogin && (
+              <div className="mb-4 rounded-md border border-success/40 bg-success/10 p-3 text-center text-xs text-success">
+                ✓ Invitation verified for {email}
+              </div>
+            )}
+
             <form onSubmit={handleAuth} className="space-y-4">
               {!isLogin && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
