@@ -464,13 +464,18 @@ const Transfers = () => {
 
           <TabsContent value="send">
             <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  Send Money · {currency.flag} {currency.name}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <Globe2 className="h-3.5 w-3.5 text-primary" />
+              <CardHeader className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Send Money
+                  </CardTitle>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                    <Globe2 className="h-3.5 w-3.5" />
+                    {currency.code} · {currency.name}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">
                   Methods below match the country selected in the top currency switcher.
                 </p>
               </CardHeader>
