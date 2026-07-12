@@ -204,7 +204,7 @@ const Transfers = () => {
       const details = Object.fromEntries(detailPairs);
 
       const newBal = fromAcc.balance - amt;
-      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", extFrom);
+      await supabase.rpc("adjust_account_balance", { p_account: extFrom, p_delta: -amt });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
