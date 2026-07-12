@@ -58,9 +58,24 @@ export default function AdminInvitations() {
       const { data, error } = await supabase.functions.invoke("send-invitation", {
         body: { email: email.trim(), role, note: note.trim() || null, origin: window.location.origin },
       });
-      if (error) throw error;
+      if (error) {
+        let message = error.message || "Failed to send invite";
+        const context = (error as any).context;
+        if (context && typeof context.json === "function") {
+          try {
+            const details = await context.json();
+            message = details?.error || details?.message || message;
+          } catch {
+            // Keep the SDK error message if the response body is not JSON.
+          }
+        }
+        throw new Error(message);
+      }
       if ((data as any)?.error) throw new Error((data as any).error);
       const emailed = (data as any)?.email_sent;
+      if ((data as any)?.email_sent === false) {
+        console.warn("Invitation email was not delivered", (data as any)?.email_error);
+      }
       toast.success(emailed ? "Invitation sent" : "Invitation created (email failed — copy link manually)");
       setEmail(""); setNote("");
       load();
