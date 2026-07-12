@@ -193,6 +193,7 @@ const Transfers = () => {
       toast({ title: "Insufficient funds", variant: "destructive" });
       return;
     }
+    if (!(await requirePin())) return;
     setExtLoading(true);
     try {
       const ref = genRef("EXT");
