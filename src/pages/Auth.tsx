@@ -34,6 +34,29 @@ const Auth = () => {
   const [tfaInput, setTfaInput] = useState("");
   const [tfaDest, setTfaDest] = useState("");
 
+  // Validate invitation token on load
+  useEffect(() => {
+    if (!inviteToken) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from("invitations")
+        .select("email, status, expires_at")
+        .eq("token", inviteToken)
+        .maybeSingle();
+      if (error || !data) {
+        setInviteError("This invitation link is invalid.");
+      } else if (data.status !== "pending") {
+        setInviteError(`This invitation has already been ${data.status}.`);
+      } else if (new Date(data.expires_at) < new Date()) {
+        setInviteError("This invitation has expired. Ask your admin for a new one.");
+      } else {
+        setInviteValid(true);
+        setEmail(data.email);
+      }
+      setInviteChecking(false);
+    })();
+  }, [inviteToken]);
+
   const proceedAfterLogin = () => {
     toast({ title: "Welcome back!", description: "You have successfully logged in." });
     if (nextPath) {
@@ -42,6 +65,7 @@ const Auth = () => {
       navigate("/accounts");
     }
   };
+
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
