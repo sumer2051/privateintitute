@@ -34,6 +34,8 @@ const Index = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
 
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showZelleModal, setShowZelleModal] = useState(false);
