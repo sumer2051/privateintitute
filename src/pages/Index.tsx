@@ -213,8 +213,8 @@ const Index = () => {
               </Badge>
             </Button>
 
-            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign Out">
-              <LogOut className="h-5 w-5" />
+            <Button variant="ghost" size="icon" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
+              {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
             </Button>
           </div>
         </div>
