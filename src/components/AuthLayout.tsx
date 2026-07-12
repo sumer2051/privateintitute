@@ -69,6 +69,9 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     }, 480);
   };
 
+  const isAdmin = roles.includes("admin");
+  const isSupportStaff = isAdmin || roles.includes("support");
+
   const navItems = [
     { id: "accounts", label: "Accounts", path: "/accounts" },
     { id: "cards", label: "Cards", path: "/cards" },
@@ -77,6 +80,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "overview", label: "Overview", path: "/overview" },
     { id: "support", label: "Support", path: "/support" },
     { id: "settings", label: "Settings", path: "/settings" },
+    ...(isSupportStaff ? [{ id: "admin-support", label: "Admin · Tickets", path: "/admin/support" }] : []),
+    ...(isAdmin ? [{ id: "admin-invitations", label: "Admin · Invites", path: "/admin/invitations" }] : []),
   ];
 
   return (
