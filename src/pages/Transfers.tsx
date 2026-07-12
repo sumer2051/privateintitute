@@ -452,10 +452,6 @@ const Transfers = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="link">
-            <PaymentLinkPanel />
-          </TabsContent>
-
           <TabsContent value="send">
             <Card className="border-primary/20">
               <CardHeader className="space-y-3">
