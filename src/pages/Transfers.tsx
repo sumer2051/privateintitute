@@ -203,6 +203,8 @@ const Transfers = () => {
       const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
       const details = Object.fromEntries(detailPairs);
 
+      const newBal = fromAcc.balance - amt;
+      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", extFrom);
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -212,7 +214,7 @@ const Transfers = () => {
           category: "External Transfer",
           description: `[${profile.scheme}] To ${extRecipient} — ${detailString}${extMemo ? ` — ${extMemo}` : ""}`,
           amount: amt,
-          balance_after: fromAcc.balance,
+          balance_after: newBal,
           status: "pending",
           reference_number: ref,
         })
@@ -239,6 +241,7 @@ const Transfers = () => {
       });
       setExtAmount(""); setExtRecipient(""); setExtFields({}); setExtMemo("");
       if (data) setSelectedTx(data as PendingTx);
+      fetchAccounts();
       fetchPending();
     } catch (err: any) {
       toast({ title: "Submission failed", description: err.message, variant: "destructive" });
@@ -296,6 +299,8 @@ const Transfers = () => {
       const details = Object.fromEntries(detailPairs);
       const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail || "recipient";
 
+      const newBal = fromAcc.balance - amt;
+      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", smFrom);
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -305,7 +310,7 @@ const Transfers = () => {
           category: smMethod.name,
           description: `[${smMethod.name}] To ${displayName} — ${detailString}${smNote ? ` — ${smNote}` : ""}${smVariant ? ` (${smVariant === "gs" ? "Goods & Services" : "Friends & Family"})` : ""}`,
           amount: amt,
-          balance_after: fromAcc.balance,
+          balance_after: newBal,
           status: "pending",
           reference_number: ref,
         })
@@ -353,6 +358,7 @@ const Transfers = () => {
         description: smEmail ? `Ref ${ref}. Receipts emailed to you and ${smEmail}.` : `Ref ${ref}. Receipt emailed to you.`,
       });
       setSmAmount(""); setSmRecipient(""); setSmEmail(""); setSmFields({}); setSmNote(""); setSmVariant("");
+      fetchAccounts();
       fetchPending();
     } catch (err: any) {
       toast({ title: "Submission failed", description: err.message, variant: "destructive" });
@@ -380,6 +386,8 @@ const Transfers = () => {
       const ref = genRef("ZEL");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
+      const newBal = fromAcc.balance - amt;
+      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", zFrom);
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -389,7 +397,7 @@ const Transfers = () => {
           category: "Zelle",
           description: `Zelle to ${zRecipient} (${zContact})${zMemo ? ` — ${zMemo}` : ""}`,
           amount: amt,
-          balance_after: fromAcc.balance,
+          balance_after: newBal,
           status: "pending",
           reference_number: ref,
         })
@@ -412,6 +420,7 @@ const Transfers = () => {
       });
       setZAmount(""); setZRecipient(""); setZContact(""); setZMemo("");
       if (data) setSelectedTx(data as PendingTx);
+      fetchAccounts();
       fetchPending();
     } catch (err: any) {
       toast({ title: "Submission failed", description: err.message, variant: "destructive" });
