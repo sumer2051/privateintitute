@@ -661,7 +661,7 @@ const Transfers = () => {
                               : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
                           }`}
                         >
-                          <div className="flex items-start justify-between gap-2">
+                          <div className="grid grid-cols-[1fr_auto] items-start gap-2">
                             <span className="font-semibold text-sm text-secondary leading-tight">{s.scheme}</span>
                             <span className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5">{s.settlement}</span>
                           </div>
