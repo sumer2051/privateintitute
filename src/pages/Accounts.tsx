@@ -358,7 +358,7 @@ const Accounts = () => {
         onSubmit={async ({ fromAccount, amount }) => {
           const from = accounts.find((a) => a.id === fromAccount);
           if (from) {
-            await supabase.from("accounts").update({ balance: from.balance - amount }).eq("id", fromAccount);
+            await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: -amount });
             fetchAccounts();
           }
           setTransferOpen(false);
