@@ -159,6 +159,30 @@ const Auth = () => {
     }
   };
 
+  const handleResendVerification = async (targetEmail: string) => {
+    if (!targetEmail) return;
+    setResending(true);
+    try {
+      const redirect = nextPath
+        ? `${window.location.origin}${nextPath}`
+        : `${window.location.origin}/`;
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: targetEmail,
+        options: { emailRedirectTo: redirect },
+      });
+      if (error) throw error;
+      toast({
+        title: "Verification email sent",
+        description: `We resent the activation link to ${targetEmail}.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Couldn't resend", description: err.message, variant: "destructive" });
+    } finally {
+      setResending(false);
+    }
+  };
+
   const verifyTfa = () => {
     if (tfaInput.trim() !== tfaCode) {
       toast({ title: "Invalid code", description: "Please try again.", variant: "destructive" });
