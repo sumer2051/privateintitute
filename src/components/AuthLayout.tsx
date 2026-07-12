@@ -30,6 +30,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     typeof document !== "undefined" && document.documentElement.classList.contains("dark")
   );
   const [signingOut, setSigningOut] = useState(false);
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
