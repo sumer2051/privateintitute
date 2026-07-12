@@ -115,8 +115,8 @@ const Transfers = () => {
       if (!fromAcc || !toAcc) throw new Error("Invalid accounts");
       if (fromAcc.balance < transferAmount) throw new Error("Insufficient funds");
 
-      await supabase.from("accounts").update({ balance: fromAcc.balance - transferAmount }).eq("id", fromAccount);
-      await supabase.from("accounts").update({ balance: toAcc.balance + transferAmount }).eq("id", toAccount);
+      await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: -transferAmount });
+      await supabase.rpc("adjust_account_balance", { p_account: toAccount, p_delta: transferAmount });
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
