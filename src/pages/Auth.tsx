@@ -38,20 +38,19 @@ const Auth = () => {
   useEffect(() => {
     if (!inviteToken) return;
     (async () => {
-      const { data, error } = await supabase
-        .from("invitations")
-        .select("email, status, expires_at")
-        .eq("token", inviteToken)
-        .maybeSingle();
-      if (error || !data) {
-        setInviteError("This invitation link is invalid.");
-      } else if (data.status !== "pending") {
-        setInviteError(`This invitation has already been ${data.status}.`);
-      } else if (new Date(data.expires_at) < new Date()) {
+      const { data, error } = await supabase.functions.invoke("validate-invitation", {
+        body: { token: inviteToken },
+      });
+
+      if (error || !(data as any)?.valid) {
+        setInviteError((data as any)?.message || "This invitation link is invalid.");
+      } else if ((data as any).status !== "pending") {
+        setInviteError(`This invitation has already been ${(data as any).status}.`);
+      } else if (new Date((data as any).expires_at) < new Date()) {
         setInviteError("This invitation has expired. Ask your admin for a new one.");
       } else {
         setInviteValid(true);
-        setEmail(data.email);
+        setEmail((data as any).email);
       }
       setInviteChecking(false);
     })();
