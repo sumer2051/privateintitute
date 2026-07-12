@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Search, Moon, Sun, LogOut } from "lucide-react";
+import { Bell, Search, Moon, Sun, LogOut, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,14 @@ import logo from "@/assets/logo.png";
 import { AiChatWidget } from "@/components/AiChatWidget";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { CurrencySelector } from "@/components/CurrencySelector";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -22,6 +30,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     typeof document !== "undefined" && document.documentElement.classList.contains("dark")
   );
   const [signingOut, setSigningOut] = useState(false);
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
@@ -39,6 +48,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   }, [darkMode]);
 
   const handleSignOut = async () => {
+    setSignOutDialogOpen(false);
     setSigningOut(true);
     setTimeout(async () => {
       await supabase.auth.signOut();
@@ -102,8 +112,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
             <NotificationsBell />
 
 
-            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={handleSignOut} title="Sign Out" disabled={signingOut}>
-              <LogOut className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
+              {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
             </Button>
           </div>
         </div>
@@ -132,6 +142,35 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
       </header>
 
       <main className="container mx-auto px-3 md:px-4 py-4 md:py-8">{children}</main>
+
+      <Dialog open={signOutDialogOpen} onOpenChange={setSignOutDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign out?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to sign out? You will need to log in again to access your accounts.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSignOutDialogOpen(false)} disabled={signingOut}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleSignOut} disabled={signingOut}>
+              {signingOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Sign Out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {signingOut && (
+        <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+            <p className="text-sm font-medium text-secondary">Signing you out...</p>
+          </div>
+        </div>
+      )}
 
       <AiChatWidget open={chatOpen} onOpenChange={setChatOpen} />
     </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, User, Moon, Sun, LogOut } from "lucide-react";
+import { Bell, Search, User, Moon, Sun, LogOut, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,14 @@ import { NotificationToast } from "@/components/NotificationToast";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type Page = "overview" | "accounts" | "transfers" | "billpay" | "security" | "support";
 
@@ -26,6 +34,8 @@ const Index = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
 
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showZelleModal, setShowZelleModal] = useState(false);
@@ -79,8 +89,12 @@ const Index = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
+    setSignOutDialogOpen(false);
+    setSigningOut(true);
+    setTimeout(async () => {
+      await supabase.auth.signOut();
+      navigate("/auth");
+    }, 480);
   };
 
   const showNotification = (title: string, message: string, type: "success" | "error" | "warning" | "info") => {
@@ -141,7 +155,11 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
+    <div
+      className={`min-h-screen bg-background transition-colors duration-300 ${
+        signingOut ? "animate-fade-out-scale" : "animate-in fade-in duration-500"
+      }`}
+    >
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-card shadow-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -199,8 +217,8 @@ const Index = () => {
               </Badge>
             </Button>
 
-            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign Out">
-              <LogOut className="h-5 w-5" />
+            <Button variant="ghost" size="icon" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
+              {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
             </Button>
           </div>
         </div>
@@ -291,6 +309,35 @@ const Index = () => {
         type={notification.type}
         onClose={() => setNotification({ ...notification, show: false })}
       />
+
+      <Dialog open={signOutDialogOpen} onOpenChange={setSignOutDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign out?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to sign out? You will need to log in again to access your accounts.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSignOutDialogOpen(false)} disabled={signingOut}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleSignOut} disabled={signingOut}>
+              {signingOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Sign Out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {signingOut && (
+        <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+            <p className="text-sm font-medium text-secondary">Signing you out...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
