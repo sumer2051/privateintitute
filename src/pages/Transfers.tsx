@@ -203,6 +203,8 @@ const Transfers = () => {
       const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
       const details = Object.fromEntries(detailPairs);
 
+      const newBal = fromAcc.balance - amt;
+      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", extFrom);
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -212,7 +214,7 @@ const Transfers = () => {
           category: "External Transfer",
           description: `[${profile.scheme}] To ${extRecipient} — ${detailString}${extMemo ? ` — ${extMemo}` : ""}`,
           amount: amt,
-          balance_after: fromAcc.balance,
+          balance_after: newBal,
           status: "pending",
           reference_number: ref,
         })
