@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ShieldCheck, Lock, Sparkles } from "lucide-react";
+import { ShieldCheck, Lock, Sparkles, Eye, EyeOff, Mail, User, CheckCircle2, AlertCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import logo from "@/assets/logo.png";
 
@@ -23,9 +23,15 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
   const [inviteChecking, setInviteChecking] = useState(!!inviteToken);
   const [inviteValid, setInviteValid] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const passwordValid = password.length >= 6;
 
 
   // 2FA prompt state (post-login, optional)
@@ -216,49 +222,87 @@ const Auth = () => {
               </div>
             )}
 
-            <form onSubmit={handleAuth} className="space-y-4">
+            <form onSubmit={handleAuth} className="space-y-5">
               {!isLogin && (
-                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    placeholder="John Doe"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    className="transition-all focus:ring-2 focus:ring-primary/50"
-                  />
+                <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Label htmlFor="fullName" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Full Name</Label>
+                  <div className="relative group">
+                    <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <Input
+                      id="fullName"
+                      placeholder="John Doe"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="pl-10 h-11 transition-all focus:ring-2 focus:ring-primary/40 focus:border-primary/60 hover:border-primary/30"
+                    />
+                  </div>
                 </div>
               )}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="transition-all focus:ring-2 focus:ring-primary/50"
-                />
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Email Address</Label>
+                <div className="relative group">
+                  <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => setEmailTouched(true)}
+                    required
+                    aria-invalid={emailTouched && !emailValid}
+                    className={`pl-10 pr-10 h-11 transition-all focus:ring-2 focus:ring-primary/40 focus:border-primary/60 hover:border-primary/30 ${emailTouched && !emailValid ? "border-destructive/60 focus:ring-destructive/30" : ""}`}
+                  />
+                  {emailTouched && email && (
+                    emailValid
+                      ? <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-success animate-in fade-in zoom-in-50" />
+                      : <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive animate-in fade-in zoom-in-50" />
+                  )}
+                </div>
+                {emailTouched && email && !emailValid && (
+                  <p className="text-xs text-destructive animate-in fade-in slide-in-from-top-1">Please enter a valid email address.</p>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="transition-all focus:ring-2 focus:ring-primary/50"
-                />
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Password</Label>
+                  {!isLogin && <span className="text-[10px] text-muted-foreground">Min. 6 characters</span>}
+                </div>
+                <div className="relative group">
+                  <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onBlur={() => setPasswordTouched(true)}
+                    required
+                    minLength={6}
+                    aria-invalid={passwordTouched && !passwordValid}
+                    className={`pl-10 pr-10 h-11 transition-all focus:ring-2 focus:ring-primary/40 focus:border-primary/60 hover:border-primary/30 ${passwordTouched && !passwordValid ? "border-destructive/60 focus:ring-destructive/30" : ""}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none focus:text-primary"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {passwordTouched && !passwordValid && (
+                  <p className="text-xs text-destructive animate-in fade-in slide-in-from-top-1">Password must be at least 6 characters.</p>
+                )}
               </div>
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-primary via-primary to-accent hover:opacity-90 shadow-lg hover:shadow-primary/40 transition-all duration-300 hover:scale-[1.02]"
+                className="group relative w-full h-11 overflow-hidden bg-gradient-to-r from-primary via-primary to-accent hover:shadow-lg hover:shadow-primary/40 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:hover:scale-100"
                 disabled={loading}
               >
+                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-700" />
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
@@ -273,7 +317,7 @@ const Auth = () => {
               </Button>
             </form>
 
-            <div className="mt-4 text-center">
+            <div className="mt-5 text-center">
               {isLogin ? (
                 <p className="text-xs text-muted-foreground">
                   New here? Access is <span className="font-semibold text-primary">invite-only</span>. Use the link from your invitation email.
