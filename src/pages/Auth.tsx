@@ -103,6 +103,12 @@ const Auth = () => {
 
         proceedAfterLogin();
       } else {
+        if (!inviteToken || !inviteValid) {
+          throw new Error("Signup is invite-only. Please use the link from your invitation email.");
+        }
+        if (invitedEmail && email.trim().toLowerCase() !== invitedEmail.toLowerCase()) {
+          throw new Error("This invitation was issued to a different email address.");
+        }
         const signupRedirect = nextPath
           ? `${window.location.origin}${nextPath}`
           : `${window.location.origin}/`;
@@ -110,7 +116,7 @@ const Auth = () => {
           email,
           password,
           options: {
-            data: { full_name: fullName },
+            data: { full_name: fullName, invite_token: inviteToken },
             emailRedirectTo: signupRedirect,
           },
         });
@@ -118,6 +124,7 @@ const Auth = () => {
         toast({ title: "Account created!", description: "You can now log in with your credentials." });
         setIsLogin(true);
       }
+
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
