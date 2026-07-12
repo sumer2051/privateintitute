@@ -291,6 +291,7 @@ const Transfers = () => {
       toast({ title: "Insufficient funds", variant: "destructive" });
       return;
     }
+    if (!(await requirePin())) return;
     setSmLoading(true);
     try {
       const ref = genRef(smMethod.id.toUpperCase().slice(0, 4));
