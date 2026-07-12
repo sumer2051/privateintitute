@@ -81,8 +81,16 @@ const Auth = () => {
 
     try {
       if (isLogin) {
+        setUnverifiedEmail(null);
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          const msg = (error.message || "").toLowerCase();
+          if (msg.includes("email not confirmed") || msg.includes("not confirmed") || msg.includes("email_not_confirmed")) {
+            setUnverifiedEmail(email);
+            throw new Error("Your email hasn't been verified yet. Please check your inbox for the activation link.");
+          }
+          throw error;
+        }
 
         // Check 2FA preference
         const userId = data.user?.id;
@@ -120,7 +128,7 @@ const Auth = () => {
         const signupRedirect = nextPath
           ? `${window.location.origin}${nextPath}`
           : `${window.location.origin}/`;
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -129,9 +137,20 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast({ title: "Account created!", description: "You can now log in with your credentials." });
-        setIsLogin(true);
+
+        // If email confirmation is required, session will be null
+        if (!data.session) {
+          setPendingVerificationEmail(email);
+          toast({
+            title: "Check your inbox",
+            description: "We sent you a secure activation link to verify your email.",
+          });
+        } else {
+          toast({ title: "Account created!", description: "You can now log in with your credentials." });
+          setIsLogin(true);
+        }
       }
+
 
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
