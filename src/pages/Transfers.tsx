@@ -39,6 +39,8 @@ const genRef = (prefix: string) =>
   `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
 const Transfers = () => {
+  const pinRef = useRef<PinGateHandle>(null);
+  const requirePin = async () => (await pinRef.current?.ensure()) === true;
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [pending, setPending] = useState<PendingTx[]>([]);
   const [selectedTx, setSelectedTx] = useState<PendingTx | null>(null);
