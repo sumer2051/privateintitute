@@ -386,6 +386,8 @@ const Transfers = () => {
       const ref = genRef("ZEL");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
+      const newBal = fromAcc.balance - amt;
+      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", zFrom);
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -395,7 +397,7 @@ const Transfers = () => {
           category: "Zelle",
           description: `Zelle to ${zRecipient} (${zContact})${zMemo ? ` — ${zMemo}` : ""}`,
           amount: amt,
-          balance_after: fromAcc.balance,
+          balance_after: newBal,
           status: "pending",
           reference_number: ref,
         })
