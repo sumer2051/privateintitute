@@ -15,12 +15,18 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const rawNext = searchParams.get("next");
   const nextPath = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
+  const inviteToken = searchParams.get("invite");
+  const invitedEmail = searchParams.get("email");
   const { toast } = useToast();
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [isLogin, setIsLogin] = useState(!inviteToken);
+  const [email, setEmail] = useState(invitedEmail || "");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [inviteChecking, setInviteChecking] = useState(!!inviteToken);
+  const [inviteValid, setInviteValid] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
 
   // 2FA prompt state (post-login, optional)
   const [tfaOpen, setTfaOpen] = useState(false);
