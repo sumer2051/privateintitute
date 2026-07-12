@@ -106,7 +106,7 @@ const Index = () => {
     const fromAcc = accounts.find(a => a.id === fromAccount);
     if (!fromAcc) return;
 
-    await supabase.from("accounts").update({ balance: fromAcc.balance - amount }).eq("id", fromAccount);
+    await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: -amount });
     setShowTransferModal(false);
     showNotification("External Transfer Sent", `$${amount.toFixed(2)} sent successfully`, "success");
     fetchAccounts();
@@ -117,7 +117,7 @@ const Index = () => {
     const fromAcc = accounts.find(a => a.id === fromAccount);
     if (!fromAcc) return;
 
-    await supabase.from("accounts").update({ balance: fromAcc.balance - amount }).eq("id", fromAccount);
+    await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: -amount });
     setShowZelleModal(false);
     showNotification("Zelle Transfer Sent", `$${amount.toFixed(2)} sent with Zelle`, "success");
     fetchAccounts();
@@ -129,11 +129,11 @@ const Index = () => {
     if (account === "both") {
       const checking = accounts.find(a => a.account_type === "checking");
       const savings = accounts.find(a => a.account_type === "savings");
-      if (checking) await supabase.from("accounts").update({ balance: checking.balance + amount }).eq("id", checking.id);
-      if (savings) await supabase.from("accounts").update({ balance: savings.balance + amount }).eq("id", savings.id);
+      if (checking) await supabase.rpc("adjust_account_balance", { p_account: checking.id, p_delta: amount });
+      if (savings) await supabase.rpc("adjust_account_balance", { p_account: savings.id, p_delta: amount });
     } else {
       const acc = accounts.find(a => a.id === account);
-      if (acc) await supabase.from("accounts").update({ balance: acc.balance + amount }).eq("id", acc.id);
+      if (acc) await supabase.rpc("adjust_account_balance", { p_account: acc.id, p_delta: amount });
     }
     
     showNotification("Funds Added", `$${amount.toFixed(2)} added successfully`, "success");

@@ -115,8 +115,8 @@ const Transfers = () => {
       if (!fromAcc || !toAcc) throw new Error("Invalid accounts");
       if (fromAcc.balance < transferAmount) throw new Error("Insufficient funds");
 
-      await supabase.from("accounts").update({ balance: fromAcc.balance - transferAmount }).eq("id", fromAccount);
-      await supabase.from("accounts").update({ balance: toAcc.balance + transferAmount }).eq("id", toAccount);
+      await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: -transferAmount });
+      await supabase.rpc("adjust_account_balance", { p_account: toAccount, p_delta: transferAmount });
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
@@ -204,7 +204,7 @@ const Transfers = () => {
       const details = Object.fromEntries(detailPairs);
 
       const newBal = fromAcc.balance - amt;
-      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", extFrom);
+      await supabase.rpc("adjust_account_balance", { p_account: extFrom, p_delta: -amt });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -300,7 +300,7 @@ const Transfers = () => {
       const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail || "recipient";
 
       const newBal = fromAcc.balance - amt;
-      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", smFrom);
+      await supabase.rpc("adjust_account_balance", { p_account: smFrom, p_delta: -amt });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -387,7 +387,7 @@ const Transfers = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
       const newBal = fromAcc.balance - amt;
-      await supabase.from("accounts").update({ balance: newBal, available_balance: newBal }).eq("id", zFrom);
+      await supabase.rpc("adjust_account_balance", { p_account: zFrom, p_delta: -amt });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
