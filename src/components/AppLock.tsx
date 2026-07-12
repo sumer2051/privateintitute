@@ -27,7 +27,7 @@ async function sha256(text: string): Promise<string> {
 
 type Phase = "splash" | "setup" | "confirm" | "locked" | "ready";
 
-const PUBLIC_PATHS = ["/claim", "/auth", "/.lovable/oauth/consent"];
+const PUBLIC_PATHS = ["/auth", "/.lovable/oauth/consent"];
 
 export const AppLock = ({ children }: { children: React.ReactNode }) => {
   const isPublic =
