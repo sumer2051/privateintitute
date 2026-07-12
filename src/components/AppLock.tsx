@@ -269,18 +269,39 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
             variant="ghost"
             size="sm"
             className="text-white/70 hover:text-white"
-            onClick={async () => {
-              const yes = window.confirm(
-                "This will sign you out and clear your passcode. You'll need to log in again."
-              );
-              if (!yes) return;
-              localStorage.removeItem(PASSCODE_KEY);
-              await supabase.auth.signOut();
-              window.location.reload();
-            }}
+            onClick={() => setSignOutDialogOpen(true)}
+            disabled={signingOut}
           >
+            {signingOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Forgot passcode? Sign out
           </Button>
+        </div>
+      )}
+
+      <Dialog open={signOutDialogOpen} onOpenChange={setSignOutDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign out and clear passcode?</DialogTitle>
+            <DialogDescription>
+              This will sign you out and remove your saved passcode. You will need to log in again.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSignOutDialogOpen(false)} disabled={signingOut}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleLockedSignOut} disabled={signingOut}>
+              {signingOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Sign Out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {signingOut && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300">
+          <div className="h-10 w-10 rounded-full border-4 border-white border-t-transparent animate-spin" />
+          <p className="text-sm font-medium text-white">Signing you out...</p>
         </div>
       )}
     </div>
