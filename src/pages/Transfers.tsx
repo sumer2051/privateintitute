@@ -429,16 +429,11 @@ const Transfers = () => {
         </div>
 
         <Tabs defaultValue="send" className="w-full">
-          <TabsList className="flex w-full overflow-x-auto gap-2 rounded-xl bg-muted/50 p-2 sm:grid sm:grid-cols-5 sm:overflow-visible scrollbar-none">
+          <TabsList className="flex w-full overflow-x-auto gap-2 rounded-xl bg-muted/50 p-2 sm:grid sm:grid-cols-4 sm:overflow-visible scrollbar-none">
             <TabsTrigger value="send" className="shrink-0 gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary">
               <Sparkles className="h-4 w-4 shrink-0" />
               <span className="sm:hidden">Send</span>
               <span className="hidden sm:inline">Send Money</span>
-            </TabsTrigger>
-            <TabsTrigger value="link" className="shrink-0 gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary">
-              <Link2 className="h-4 w-4 shrink-0" />
-              <span className="sm:hidden">Link</span>
-              <span className="hidden sm:inline">Payment Link</span>
             </TabsTrigger>
             <TabsTrigger value="internal" className="shrink-0 gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary">
               <ArrowRightLeft className="h-4 w-4 shrink-0" />
