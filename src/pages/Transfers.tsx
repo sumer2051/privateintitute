@@ -496,17 +496,15 @@ const Transfers = () => {
                               : "border-border hover:border-primary/40 hover:bg-muted/50"
                           }`}
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="grid grid-cols-[auto_1fr_auto] items-start gap-3">
                             <div className={`h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br ${m.accent} text-white text-lg font-bold flex items-center justify-center shadow-sm`}>
                               {m.glyph}
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-0.5">
-                                <div className="text-sm font-semibold text-secondary leading-tight">{m.name}</div>
-                                <div className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5">{m.settlement}</div>
-                              </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-semibold text-secondary leading-tight">{m.name}</div>
                               <p className="text-xs text-muted-foreground truncate">{m.tagline}</p>
                             </div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5">{m.settlement}</div>
                           </div>
                         </button>
                       );
