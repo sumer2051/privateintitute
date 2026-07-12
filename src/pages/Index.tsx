@@ -106,7 +106,7 @@ const Index = () => {
     const fromAcc = accounts.find(a => a.id === fromAccount);
     if (!fromAcc) return;
 
-    await supabase.from("accounts").update({ balance: fromAcc.balance - amount }).eq("id", fromAccount);
+    await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: -amount });
     setShowTransferModal(false);
     showNotification("External Transfer Sent", `$${amount.toFixed(2)} sent successfully`, "success");
     fetchAccounts();
