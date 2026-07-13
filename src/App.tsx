@@ -14,6 +14,7 @@ import Settings from "./pages/Settings";
 import Support from "./pages/Support";
 import AdminSupport from "./pages/AdminSupport";
 import AdminInvitations from "./pages/AdminInvitations";
+import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
             <Route path="/admin/support" element={<ProtectedRoute><AdminSupport /></ProtectedRoute>} />
             <Route path="/admin/invitations" element={<ProtectedRoute><AdminInvitations /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

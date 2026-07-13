@@ -482,6 +482,24 @@ export type Database = {
         Args: { p_account: string; p_delta: number }
         Returns: number
       }
+      admin_adjust_account_balance: {
+        Args: { p_account: string; p_delta: number; p_note?: string }
+        Returns: number
+      }
+      admin_grant_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user: string
+        }
+        Returns: boolean
+      }
+      admin_revoke_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user: string
+        }
+        Returns: boolean
+      }
       generate_ticket_number: { Args: never; Returns: string }
       has_role: {
         Args: {
