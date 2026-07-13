@@ -14,6 +14,7 @@ import Settings from "./pages/Settings";
 import Support from "./pages/Support";
 import AdminSupport from "./pages/AdminSupport";
 import AdminInvitations from "./pages/AdminInvitations";
+import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
