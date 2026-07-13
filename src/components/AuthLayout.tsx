@@ -81,6 +81,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "support", label: "Support", path: "/support" },
     { id: "settings", label: "Settings", path: "/settings" },
     ...(isSupportStaff ? [{ id: "admin-support", label: "Admin · Tickets", path: "/admin/support" }] : []),
+    ...(isAdmin ? [{ id: "admin-users", label: "Admin · Users", path: "/admin/users" }] : []),
     ...(isAdmin ? [{ id: "admin-invitations", label: "Admin · Invites", path: "/admin/invitations" }] : []),
   ];
 
