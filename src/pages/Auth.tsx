@@ -121,16 +121,27 @@ const Auth = () => {
             .eq("id", userId)
             .maybeSingle();
           if (prof && (prof as any).two_factor_enabled) {
-            const method = (prof as any).two_factor_method || "sms";
-            const dest = method === "sms" ? ((prof as any).phone || email) : email;
-            const code = Math.floor(100000 + Math.random() * 900000).toString();
-            setTfaCode(code);
-            setTfaDest(dest);
+            const { data: sendRes, error: sendErr } = await supabase.functions.invoke(
+              "send-verification-code",
+              { body: { purpose: "sign-in verification" } }
+            );
+            if (sendErr || !sendRes?.ok) {
+              toast({
+                title: "Could not send code",
+                description: sendErr?.message || sendRes?.error || "Please try again.",
+                variant: "destructive",
+              });
+              await supabase.auth.signOut();
+              setLoading(false);
+              return;
+            }
+            setTfaCode(String(sendRes.code));
+            setTfaDest(sendRes.sentTo || email);
             setTfaInput("");
             setTfaOpen(true);
             toast({
               title: "Verification code sent",
-              description: `Code sent to ${dest}. (Demo code: ${code})`,
+              description: `We emailed a 6-digit code to ${sendRes.sentTo || email}.`,
             });
             setLoading(false);
             return;
