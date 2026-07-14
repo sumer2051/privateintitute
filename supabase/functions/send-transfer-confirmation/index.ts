@@ -285,20 +285,18 @@ Deno.serve(async (req) => {
     const effectiveStatus: "pending" | "completed" = status === "completed" ? "completed" : "pending";
 
     async function sendOne(to: string, subject: string, html: string) {
-      const raw = buildHtmlEmail({ to, subject, html });
-      const r = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
+      const r = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "X-Connection-Api-Key": GOOGLE_MAIL_API_KEY,
+          Authorization: `Bearer ${RESEND_API_KEY}`,
         },
-        body: JSON.stringify({ raw }),
+        body: JSON.stringify({ from: FROM_EMAIL, to: [to], subject, html }),
       });
       if (!r.ok) {
         const t = await r.text();
-        console.error(`gmail send failed to ${to}`, r.status, t);
-        throw new Error(`Gmail ${r.status}: ${t}`);
+        console.error(`resend send failed to ${to}`, r.status, t);
+        throw new Error(`Resend ${r.status}: ${t}`);
       }
     }
 
