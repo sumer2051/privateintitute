@@ -1,47 +1,37 @@
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
-const GOOGLE_MAIL_API_KEY = Deno.env.get("GOOGLE_MAIL_API_KEY")!;
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
+// Email sender — now backed by Resend (replaces prior Gmail connector).
+// Exports kept as `sendEmail` / `brandedEmail` for backwards compatibility
+// with existing callers across the edge functions.
 
-function buildRawEmail(to: string, subject: string, html: string, from?: string) {
-  const boundary = "boa_" + Math.random().toString(36).slice(2);
-  const lines = [
-    from ? `From: ${from}` : "",
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    "MIME-Version: 1.0",
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
-    "",
-    `--${boundary}`,
-    'Content-Type: text/plain; charset="UTF-8"',
-    "",
-    html.replace(/<[^>]+>/g, ""),
-    "",
-    `--${boundary}`,
-    'Content-Type: text/html; charset="UTF-8"',
-    "",
-    html,
-    "",
-    `--${boundary}--`,
-  ].filter(Boolean);
-  const msg = lines.join("\r\n");
-  return btoa(unescape(encodeURIComponent(msg)))
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+const DEFAULT_FROM =
+  Deno.env.get("RESEND_FROM_EMAIL") ||
+  "BoA private institute <onboarding@resend.dev>";
 
-export async function sendEmail(to: string, subject: string, html: string) {
-  const raw = buildRawEmail(to, subject, html);
-  const res = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
+export async function sendEmail(
+  to: string,
+  subject: string,
+  html: string,
+  from?: string,
+) {
+  if (!RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is not configured");
+  }
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": GOOGLE_MAIL_API_KEY,
+      Authorization: `Bearer ${RESEND_API_KEY}`,
     },
-    body: JSON.stringify({ raw }),
+    body: JSON.stringify({
+      from: from || DEFAULT_FROM,
+      to: [to],
+      subject,
+      html,
+    }),
   });
   if (!res.ok) {
     const t = await res.text();
-    throw new Error(`Gmail send failed ${res.status}: ${t}`);
+    throw new Error(`Resend send failed ${res.status}: ${t}`);
   }
   return await res.json();
 }
