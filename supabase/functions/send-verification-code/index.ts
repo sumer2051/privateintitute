@@ -1,38 +1,9 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendEmail } from "../_shared/gmail.ts";
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
-const GOOGLE_MAIL_API_KEY = Deno.env.get("GOOGLE_MAIL_API_KEY")!;
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
 const BRAND = "BoA private institute";
 const LOGO_URL = "https://boaprivatebank.lovable.app/logo.png";
-
-function encodeRaw(msg: string) {
-  const bytes = new TextEncoder().encode(msg);
-  let bin = "";
-  bytes.forEach((b) => (bin += String.fromCharCode(b)));
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function buildRaw(to: string, subject: string, html: string) {
-  const boundary = "bnd_" + Math.random().toString(36).slice(2);
-  const msg = [
-    `To: ${to}`,
-    `From: ${BRAND} <security@boaprivateinstitute.com>`,
-    `Subject: ${subject}`,
-    "MIME-Version: 1.0",
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
-    "",
-    `--${boundary}`,
-    `Content-Type: text/html; charset="UTF-8"`,
-    "Content-Transfer-Encoding: 7bit",
-    "",
-    html,
-    `--${boundary}--`,
-    "",
-  ].join("\r\n");
-  return encodeRaw(msg);
-}
 
 function tpl(code: string, purpose: string) {
   return `<!doctype html><html><body style="margin:0;background:#f4f6fb;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#0f172a;">
@@ -68,20 +39,15 @@ Deno.serve(async (req) => {
     const { purpose } = await req.json().catch(() => ({ purpose: "account verification" }));
     const code = String(Math.floor(100000 + Math.random() * 900000));
 
-    const raw = buildRaw(user.email, `${BRAND} security code: ${code}`, tpl(code, String(purpose || "account verification")));
-    const r = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": GOOGLE_MAIL_API_KEY,
-      },
-      body: JSON.stringify({ raw }),
-    });
-    if (!r.ok) {
-      const t = await r.text();
-      console.error("gmail send failed", r.status, t);
-      return new Response(JSON.stringify({ error: `Gmail ${r.status}: ${t}` }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    try {
+      await sendEmail(
+        user.email,
+        `${BRAND} security code: ${code}`,
+        tpl(code, String(purpose || "account verification")),
+      );
+    } catch (err) {
+      console.error("resend send failed", (err as Error).message);
+      return new Response(JSON.stringify({ error: (err as Error).message }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     // Return code so client can verify locally (mock-bank UX).
     return new Response(JSON.stringify({ ok: true, code, sentTo: user.email }), {
