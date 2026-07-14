@@ -1,38 +1,12 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
-const GOOGLE_MAIL_API_KEY = Deno.env.get("GOOGLE_MAIL_API_KEY")!;
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+const FROM_EMAIL =
+  Deno.env.get("RESEND_FROM_EMAIL") ||
+  "BoA private institute <onboarding@resend.dev>";
 const LOGO_URL = "https://boaprivatebank.lovable.app/logo.png";
 const BRAND = "BoA private institute";
-
-function encodeRaw(msg: string) {
-  const bytes = new TextEncoder().encode(msg);
-  let bin = "";
-  bytes.forEach((b) => (bin += String.fromCharCode(b)));
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function buildHtmlEmail(opts: { to: string; subject: string; html: string }) {
-  const boundary = "boa_boundary_" + Math.random().toString(36).slice(2);
-  const msg = [
-    `To: ${opts.to}`,
-    `From: ${BRAND} <support@boaprivateinstitute.com>`,
-    `Subject: ${opts.subject}`,
-    "MIME-Version: 1.0",
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
-    "",
-    `--${boundary}`,
-    `Content-Type: text/html; charset="UTF-8"`,
-    "Content-Transfer-Encoding: 7bit",
-    "",
-    opts.html,
-    `--${boundary}--`,
-    "",
-  ].join("\r\n");
-  return encodeRaw(msg);
-}
 
 function escapeHtml(s: string) {
   return String(s)
