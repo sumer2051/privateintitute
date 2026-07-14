@@ -26,33 +26,16 @@ Hard rules:
 
 Escalation: If the user (a) explicitly asks for a human, (b) reports fraud / unauthorized activity / a locked account / a legal matter / a dispute, or (c) you cannot resolve it after one attempt — call **create_support_ticket** (preferred) to open a tracked ticket with a reference number and email confirmation, then tell the user their ticket number and that a specialist will respond within 24 hours. Use notify_admin only for quick heads-ups that do not need tracking.`;
 
-function buildRawEmail(to: string, subject: string, body: string): string {
-  const msg = [
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    "Content-Type: text/plain; charset=\"UTF-8\"",
-    "",
-    body,
-  ].join("\r\n");
-  return btoa(msg).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+function textToHtml(body: string) {
+  const esc = body
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  return `<pre style="font-family:Inter,Arial,sans-serif;white-space:pre-wrap;font-size:14px;color:#111827;">${esc}</pre>`;
 }
 
 async function gmailSend(to: string, subject: string, body: string) {
-  const raw = buildRawEmail(to, subject, body);
-  const res = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": GOOGLE_MAIL_API_KEY,
-    },
-    body: JSON.stringify({ raw }),
-  });
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`Gmail send failed ${res.status}: ${t}`);
-  }
-  return await res.json();
+  return await sendEmail(to, subject, textToHtml(body));
 }
 
 async function sendAdminEmail(summary: string, userEmail: string, userName: string, urgency: string) {
