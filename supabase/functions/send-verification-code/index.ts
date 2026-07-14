@@ -39,20 +39,15 @@ Deno.serve(async (req) => {
     const { purpose } = await req.json().catch(() => ({ purpose: "account verification" }));
     const code = String(Math.floor(100000 + Math.random() * 900000));
 
-    const raw = buildRaw(user.email, `${BRAND} security code: ${code}`, tpl(code, String(purpose || "account verification")));
-    const r = await fetch(`${GATEWAY_URL}/users/me/messages/send`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": GOOGLE_MAIL_API_KEY,
-      },
-      body: JSON.stringify({ raw }),
-    });
-    if (!r.ok) {
-      const t = await r.text();
-      console.error("gmail send failed", r.status, t);
-      return new Response(JSON.stringify({ error: `Gmail ${r.status}: ${t}` }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    try {
+      await sendEmail(
+        user.email,
+        `${BRAND} security code: ${code}`,
+        tpl(code, String(purpose || "account verification")),
+      );
+    } catch (err) {
+      console.error("resend send failed", (err as Error).message);
+      return new Response(JSON.stringify({ error: (err as Error).message }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     // Return code so client can verify locally (mock-bank UX).
     return new Response(JSON.stringify({ ok: true, code, sentTo: user.email }), {
