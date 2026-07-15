@@ -156,6 +156,39 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
             <NotificationsBell />
 
+            {hasStaffAccess && (
+              <Button
+                variant={staffMode ? "default" : "outline"}
+                size="sm"
+                className="hidden md:inline-flex h-9 gap-1.5"
+                onClick={() => {
+                  const next = !staffMode;
+                  setStaffMode(next);
+                  if (!next) navigate("/accounts");
+                }}
+                title={staffMode ? "Exit staff mode" : "Enter staff mode"}
+              >
+                {staffMode ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                {staffMode ? "Staff on" : "Staff mode"}
+              </Button>
+            )}
+            {hasStaffAccess && (
+              <Button
+                variant={staffMode ? "default" : "outline"}
+                size="icon"
+                className="md:hidden h-9 w-9"
+                onClick={() => {
+                  const next = !staffMode;
+                  setStaffMode(next);
+                  if (!next) navigate("/accounts");
+                }}
+                title={staffMode ? "Exit staff mode" : "Enter staff mode"}
+              >
+                {staffMode ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+              </Button>
+            )}
+
+
 
             <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
               {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
