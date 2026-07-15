@@ -34,6 +34,10 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [roles, setRoles] = useState<string[]>([]);
+  const [staffMode, setStaffMode] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem("staffMode") === "1";
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -46,6 +50,12 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => loadRoles(session?.user?.id));
     return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("staffMode", staffMode ? "1" : "0");
+    }
+  }, [staffMode]);
 
   useEffect(() => {
     const handler = () => setChatOpen(true);
@@ -71,9 +81,12 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   };
 
   const isAdmin = roles.includes("admin");
-  const isSupportStaff = isAdmin || roles.includes("support");
+  const isSupport = roles.includes("support");
+  const isTxSupport = roles.includes("tx_support");
+  const hasStaffAccess = isAdmin || isSupport || isTxSupport;
+  const showStaff = hasStaffAccess && staffMode;
 
-  const navItems = [
+  const userNav = [
     { id: "accounts", label: "Accounts", path: "/accounts" },
     { id: "cards", label: "Cards", path: "/cards" },
     { id: "transfers", label: "Transfers", path: "/transfers" },
@@ -81,10 +94,22 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "overview", label: "Overview", path: "/overview" },
     { id: "support", label: "Support", path: "/support" },
     { id: "settings", label: "Settings", path: "/settings" },
-    ...(isSupportStaff ? [{ id: "admin-support", label: "Admin · Tickets", path: "/admin/support" }] : []),
+  ];
+
+  const staffNav = [
+    ...((isAdmin || isSupport) ? [{ id: "admin-support", label: "Admin · Tickets", path: "/admin/support" }] : []),
+    ...((isAdmin || isTxSupport) ? [{ id: "admin-transactions", label: "Admin · Transactions", path: "/admin/transactions" }] : []),
     ...(isAdmin ? [{ id: "admin-users", label: "Admin · Users", path: "/admin/users" }] : []),
     ...(isAdmin ? [{ id: "admin-invitations", label: "Admin · Invites", path: "/admin/invitations" }] : []),
   ];
+
+  // tx_support is restricted: no balances, no transfers, no bill pay, no cards
+  const restrictedForTxOnly = isTxSupport && !isAdmin && !isSupport;
+  const filteredUserNav = restrictedForTxOnly
+    ? userNav.filter((i) => ["settings", "support"].includes(i.id))
+    : userNav;
+
+  const navItems = showStaff ? [...filteredUserNav, ...staffNav] : filteredUserNav;
 
   return (
     <div
