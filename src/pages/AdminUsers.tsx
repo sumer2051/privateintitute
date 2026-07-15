@@ -207,6 +207,7 @@ export default function AdminUsers() {
                             <span className="text-xs text-muted-foreground truncate">{p.email}</span>
                             {ur.includes("admin") && <Badge className="bg-primary text-primary-foreground">admin</Badge>}
                             {ur.includes("support") && <Badge variant="outline">support</Badge>}
+                            {ur.includes("tx_support") && <Badge variant="outline" className="border-purple-400 text-purple-700">tx support</Badge>}
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
                             Joined {new Date(p.created_at).toLocaleDateString()} · {accs.length} account{accs.length===1?"":"s"}
@@ -214,6 +215,9 @@ export default function AdminUsers() {
                         </div>
                         <div className="flex gap-2 flex-wrap">
                           <Button size="sm" variant="outline" onClick={() => setSelected(p)}>Manage</Button>
+                          <Button size="sm" variant={ur.includes("tx_support") ? "ghost" : "outline"} onClick={() => toggleRole(p.id, "tx_support", !ur.includes("tx_support"))}>
+                            {ur.includes("tx_support") ? "Remove tx support" : "Make tx support"}
+                          </Button>
                           <Button size="sm" variant={ur.includes("support") ? "ghost" : "outline"} onClick={() => toggleRole(p.id, "support", !ur.includes("support"))}>
                             {ur.includes("support") ? <><ShieldOff className="h-3.5 w-3.5 mr-1"/>Remove support</> : <><ShieldCheck className="h-3.5 w-3.5 mr-1"/>Make support</>}
                           </Button>
