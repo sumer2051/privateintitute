@@ -133,7 +133,7 @@ export default function AdminUsers() {
     load();
   };
 
-  const toggleRole = async (uid: string, role: "admin" | "support", enable: boolean) => {
+  const toggleRole = async (uid: string, role: "admin" | "support" | "tx_support", enable: boolean) => {
     const fn = enable ? "admin_grant_role" : "admin_revoke_role";
     const { error } = await supabase.rpc(fn, { p_user: uid, p_role: role });
     if (error) { toast.error(error.message); return; }
