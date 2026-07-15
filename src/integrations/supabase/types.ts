@@ -500,6 +500,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      admin_update_transaction_status: {
+        Args: { p_status: string; p_tx: string }
+        Returns: boolean
+      }
       generate_ticket_number: { Args: never; Returns: string }
       has_role: {
         Args: {
