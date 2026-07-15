@@ -159,9 +159,10 @@ export default function AdminInvitations() {
                 <Select value={role} onValueChange={(v) => setRole(v as any)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="support">Support</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="user">User (customer)</SelectItem>
+                    <SelectItem value="tx_support">Transaction Support (status changes only)</SelectItem>
+                    <SelectItem value="support">Support (tickets & chat)</SelectItem>
+                    <SelectItem value="admin">Admin (full access)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
