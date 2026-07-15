@@ -28,7 +28,7 @@ export default function AdminInvitations() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [rows, setRows] = useState<Inv[]>([]);
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"user" | "support" | "admin">("user");
+  const [role, setRole] = useState<"user" | "support" | "tx_support" | "admin">("user");
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
 
