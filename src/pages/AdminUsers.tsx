@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null };
-type Role = { user_id: string; role: "admin" | "support" | "user" };
+type Role = { user_id: string; role: "admin" | "support" | "tx_support" | "user" };
 type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
 
 const TX_STATUSES = ["pending", "processing", "under_review", "completed", "failed", "cancelled"] as const;
@@ -133,7 +133,7 @@ export default function AdminUsers() {
     load();
   };
 
-  const toggleRole = async (uid: string, role: "admin" | "support", enable: boolean) => {
+  const toggleRole = async (uid: string, role: "admin" | "support" | "tx_support", enable: boolean) => {
     const fn = enable ? "admin_grant_role" : "admin_revoke_role";
     const { error } = await supabase.rpc(fn, { p_user: uid, p_role: role });
     if (error) { toast.error(error.message); return; }
@@ -207,6 +207,7 @@ export default function AdminUsers() {
                             <span className="text-xs text-muted-foreground truncate">{p.email}</span>
                             {ur.includes("admin") && <Badge className="bg-primary text-primary-foreground">admin</Badge>}
                             {ur.includes("support") && <Badge variant="outline">support</Badge>}
+                            {ur.includes("tx_support") && <Badge variant="outline" className="border-purple-400 text-purple-700">tx support</Badge>}
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
                             Joined {new Date(p.created_at).toLocaleDateString()} · {accs.length} account{accs.length===1?"":"s"}
@@ -214,6 +215,9 @@ export default function AdminUsers() {
                         </div>
                         <div className="flex gap-2 flex-wrap">
                           <Button size="sm" variant="outline" onClick={() => setSelected(p)}>Manage</Button>
+                          <Button size="sm" variant={ur.includes("tx_support") ? "ghost" : "outline"} onClick={() => toggleRole(p.id, "tx_support", !ur.includes("tx_support"))}>
+                            {ur.includes("tx_support") ? "Remove tx support" : "Make tx support"}
+                          </Button>
                           <Button size="sm" variant={ur.includes("support") ? "ghost" : "outline"} onClick={() => toggleRole(p.id, "support", !ur.includes("support"))}>
                             {ur.includes("support") ? <><ShieldOff className="h-3.5 w-3.5 mr-1"/>Remove support</> : <><ShieldCheck className="h-3.5 w-3.5 mr-1"/>Make support</>}
                           </Button>
