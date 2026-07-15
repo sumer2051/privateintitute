@@ -46,6 +46,8 @@ export default function AdminUsers() {
   const [adjustAmount, setAdjustAmount] = useState("");
   const [adjustNote, setAdjustNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [userTx, setUserTx] = useState<Tx[]>([]);
+  const [txBusy, setTxBusy] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
