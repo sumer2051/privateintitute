@@ -14,6 +14,25 @@ import { useNavigate } from "react-router-dom";
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null };
 type Role = { user_id: string; role: "admin" | "support" | "user" };
+type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
+
+const TX_STATUSES = ["pending", "processing", "under_review", "completed", "failed", "cancelled"] as const;
+const STATUS_LABEL: Record<string,string> = {
+  pending: "Pending",
+  processing: "Processing",
+  under_review: "Under review",
+  completed: "Successful",
+  failed: "Failed",
+  cancelled: "Cancelled",
+};
+const STATUS_COLOR: Record<string,string> = {
+  pending: "bg-amber-100 text-amber-800",
+  processing: "bg-blue-100 text-blue-800",
+  under_review: "bg-purple-100 text-purple-800",
+  completed: "bg-emerald-100 text-emerald-800",
+  failed: "bg-red-100 text-red-800",
+  cancelled: "bg-muted text-muted-foreground",
+};
 
 export default function AdminUsers() {
   const navigate = useNavigate();
