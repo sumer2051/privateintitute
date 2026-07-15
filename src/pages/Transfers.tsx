@@ -89,19 +89,25 @@ const Transfers = () => {
   }, []);
 
   const fetchAccounts = async () => {
-    const { data } = await supabase.from("accounts").select("id, account_name, account_number, balance");
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase.from("accounts").select("id, account_name, account_number, balance").eq("user_id", user.id);
     if (data) setAccounts(data);
   };
 
   const fetchPending = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
     const { data } = await supabase
       .from("transactions")
       .select("id, account_id, category, description, amount, status, reference_number, created_at")
+      .eq("user_id", user.id)
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(20);
     if (data) setPending(data as PendingTx[]);
   };
+
 
   // Balances are stored in USD; format() converts to the selected currency for display.
   const formatCurrency = (usdAmount: number) => format(usdAmount);
