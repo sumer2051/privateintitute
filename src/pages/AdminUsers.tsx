@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null };
-type Role = { user_id: string; role: "admin" | "support" | "user" };
+type Role = { user_id: string; role: "admin" | "support" | "tx_support" | "user" };
 type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
 
 const TX_STATUSES = ["pending", "processing", "under_review", "completed", "failed", "cancelled"] as const;
