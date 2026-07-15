@@ -71,6 +71,29 @@ export default function AdminUsers() {
 
   useEffect(() => { if (allowed) load(); }, [allowed]);
 
+  useEffect(() => {
+    if (!selected) { setUserTx([]); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("transactions")
+        .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+        .eq("user_id", selected.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      setUserTx((data as Tx[]) || []);
+    })();
+  }, [selected]);
+
+  const updateTxStatus = async (tx: Tx, status: string) => {
+    setTxBusy(tx.id);
+    const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: tx.id, p_status: status });
+    setTxBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Marked ${STATUS_LABEL[status] || status}`);
+    setUserTx(prev => prev.map(t => t.id === tx.id ? { ...t, status } : t));
+  };
+
+
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
     if (!term) return profiles;
