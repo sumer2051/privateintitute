@@ -231,7 +231,8 @@ export default function AdminUsers() {
         </Card>
 
         <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+
             <DialogHeader>
               <DialogTitle>{selected?.full_name || selected?.email}</DialogTitle>
               <DialogDescription>{selected?.email}{selected?.phone ? ` · ${selected.phone}` : ""}</DialogDescription>
