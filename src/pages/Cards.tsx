@@ -115,6 +115,7 @@ const Cards = () => {
       const { data } = await supabase
         .from("accounts")
         .select("*")
+        .eq("user_id", userRes.user!.id)
         .order("created_at", { ascending: true });
       setAccounts(data || []);
       setLoading(false);

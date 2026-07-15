@@ -14,6 +14,25 @@ import { useNavigate } from "react-router-dom";
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null };
 type Role = { user_id: string; role: "admin" | "support" | "user" };
+type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
+
+const TX_STATUSES = ["pending", "processing", "under_review", "completed", "failed", "cancelled"] as const;
+const STATUS_LABEL: Record<string,string> = {
+  pending: "Pending",
+  processing: "Processing",
+  under_review: "Under review",
+  completed: "Successful",
+  failed: "Failed",
+  cancelled: "Cancelled",
+};
+const STATUS_COLOR: Record<string,string> = {
+  pending: "bg-amber-100 text-amber-800",
+  processing: "bg-blue-100 text-blue-800",
+  under_review: "bg-purple-100 text-purple-800",
+  completed: "bg-emerald-100 text-emerald-800",
+  failed: "bg-red-100 text-red-800",
+  cancelled: "bg-muted text-muted-foreground",
+};
 
 export default function AdminUsers() {
   const navigate = useNavigate();
@@ -27,6 +46,8 @@ export default function AdminUsers() {
   const [adjustAmount, setAdjustAmount] = useState("");
   const [adjustNote, setAdjustNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [userTx, setUserTx] = useState<Tx[]>([]);
+  const [txBusy, setTxBusy] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -49,6 +70,29 @@ export default function AdminUsers() {
   };
 
   useEffect(() => { if (allowed) load(); }, [allowed]);
+
+  useEffect(() => {
+    if (!selected) { setUserTx([]); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("transactions")
+        .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+        .eq("user_id", selected.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      setUserTx((data as Tx[]) || []);
+    })();
+  }, [selected]);
+
+  const updateTxStatus = async (tx: Tx, status: string) => {
+    setTxBusy(tx.id);
+    const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: tx.id, p_status: status });
+    setTxBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Marked ${STATUS_LABEL[status] || status}`);
+    setUserTx(prev => prev.map(t => t.id === tx.id ? { ...t, status } : t));
+  };
+
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -187,7 +231,8 @@ export default function AdminUsers() {
         </Card>
 
         <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+
             <DialogHeader>
               <DialogTitle>{selected?.full_name || selected?.email}</DialogTitle>
               <DialogDescription>{selected?.email}{selected?.phone ? ` · ${selected.phone}` : ""}</DialogDescription>
@@ -213,9 +258,50 @@ export default function AdminUsers() {
                 );
               })}
             </div>
+
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-secondary">Recent transactions</h3>
+                <span className="text-xs text-muted-foreground">{userTx.length} shown</span>
+              </div>
+              {userTx.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4 border rounded-lg">No transactions yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {userTx.map(tx => (
+                    <div key={tx.id} className="border rounded-lg p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-secondary text-sm truncate">{tx.description || tx.category || "Transaction"}</span>
+                          <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${STATUS_COLOR[tx.status] || "bg-muted"}`}>
+                            {STATUS_LABEL[tx.status] || tx.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {new Date(tx.created_at).toLocaleString()} {tx.reference_number ? `· ${tx.reference_number}` : ""}
+                        </p>
+                      </div>
+                      <div className={`text-sm font-semibold ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
+                        {Number(tx.amount) < 0 ? "-" : "+"}${Math.abs(Number(tx.amount)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
+                      </div>
+                      <Select value={tx.status} onValueChange={(v) => updateTxStatus(tx, v)} disabled={txBusy === tx.id}>
+                        <SelectTrigger className="h-8 w-full md:w-40 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {TX_STATUSES.map(s => (
+                            <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <DialogFooter>
               <Button variant="outline" onClick={() => setSelected(null)}>Close</Button>
             </DialogFooter>
+
           </DialogContent>
         </Dialog>
 

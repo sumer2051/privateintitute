@@ -81,7 +81,9 @@ const Index = () => {
   }, [darkMode]);
 
   const fetchAccounts = async () => {
-    const { data } = await supabase.from("accounts").select("*").order("created_at");
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setLoading(false); return; }
+    const { data } = await supabase.from("accounts").select("*").eq("user_id", user.id).order("created_at");
     if (data) {
       setAccounts(data);
     }
