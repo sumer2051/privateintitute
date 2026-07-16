@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShieldAlert, ScrollText, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-type Log = { id: string; actor_id: string; action: string; target_type: string | null; target_id: string | null; details: any; created_at: string };
+type Log = { id: string; actor_id: string; action: string; target_type: string | null; target_id: string | null; meta: any; created_at: string };
 type Profile = { id: string; email: string; full_name: string | null };
 
 export default function AdminAuditLog() {
@@ -51,7 +51,7 @@ export default function AdminAuditLog() {
       return l.action.toLowerCase().includes(term) ||
         (l.target_type || "").toLowerCase().includes(term) ||
         (actor?.email || "").toLowerCase().includes(term) ||
-        JSON.stringify(l.details || {}).toLowerCase().includes(term);
+        JSON.stringify(l.meta || {}).toLowerCase().includes(term);
     });
   }, [logs, q, profiles]);
 
@@ -90,8 +90,8 @@ export default function AdminAuditLog() {
                         <span className="ml-auto text-xs text-muted-foreground">{new Date(l.created_at).toLocaleString()}</span>
                       </div>
                       <p className="text-sm mt-1"><span className="font-medium text-secondary">{actor?.full_name || actor?.email || l.actor_id.slice(0, 8)}</span></p>
-                      {l.details && Object.keys(l.details).length > 0 && (
-                        <pre className="text-[11px] bg-muted rounded p-2 mt-2 overflow-x-auto">{JSON.stringify(l.details, null, 2)}</pre>
+                      {l.meta && Object.keys(l.meta).length > 0 && (
+                        <pre className="text-[11px] bg-muted rounded p-2 mt-2 overflow-x-auto">{JSON.stringify(l.meta, null, 2)}</pre>
                       )}
                     </div>
                   );
