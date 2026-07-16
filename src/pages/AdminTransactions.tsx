@@ -81,11 +81,15 @@ export default function AdminTransactions() {
   const update = async (tx: Tx, status: string) => {
     setBusy(tx.id);
     const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: tx.id, p_status: status });
+    if (error) { setBusy(null); return toast.error(error.message); }
+    supabase.functions.invoke("send-transaction-status-update", {
+      body: { transactionId: tx.id, status },
+    }).catch((e) => console.error("status email failed", e));
     setBusy(null);
-    if (error) return toast.error(error.message);
-    toast.success(`Marked ${STATUS_LABEL[status]}`);
+    toast.success(`Marked ${STATUS_LABEL[status]} · notifications sent`);
     setTxs(prev => prev.map(t => t.id === tx.id ? { ...t, status } : t));
   };
+
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
