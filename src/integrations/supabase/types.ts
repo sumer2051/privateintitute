@@ -25,6 +25,7 @@ export type Database = {
           credit_limit: number | null
           id: string
           is_active: boolean | null
+          is_frozen: boolean
           updated_at: string | null
           user_id: string
         }
@@ -38,6 +39,7 @@ export type Database = {
           credit_limit?: number | null
           id?: string
           is_active?: boolean | null
+          is_frozen?: boolean
           updated_at?: string | null
           user_id: string
         }
@@ -51,8 +53,42 @@ export type Database = {
           credit_limit?: number | null
           id?: string
           is_active?: boolean | null
+          is_frozen?: boolean
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      announcements: {
+        Row: {
+          active: boolean
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          severity: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          severity?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          severity?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -141,6 +177,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          staff_pin_hash: string | null
           transfer_pin_hash: string | null
           two_factor_enabled: boolean
           two_factor_method: string | null
@@ -155,6 +192,7 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          staff_pin_hash?: string | null
           transfer_pin_hash?: string | null
           two_factor_enabled?: boolean
           two_factor_method?: string | null
@@ -169,6 +207,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          staff_pin_hash?: string | null
           transfer_pin_hash?: string | null
           two_factor_enabled?: boolean
           two_factor_method?: string | null
@@ -286,6 +325,36 @@ export type Database = {
           },
         ]
       }
+      staff_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          meta: Json
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           ai_summary: string | null
@@ -384,6 +453,8 @@ export type Database = {
           created_at: string | null
           description: string
           id: string
+          recipient_email: string | null
+          recipient_name: string | null
           reference_number: string | null
           status: string | null
           transaction_type: string
@@ -397,6 +468,8 @@ export type Database = {
           created_at?: string | null
           description: string
           id?: string
+          recipient_email?: string | null
+          recipient_name?: string | null
           reference_number?: string | null
           status?: string | null
           transaction_type: string
@@ -410,6 +483,8 @@ export type Database = {
           created_at?: string | null
           description?: string
           id?: string
+          recipient_email?: string | null
+          recipient_name?: string | null
           reference_number?: string | null
           status?: string | null
           transaction_type?: string
@@ -500,6 +575,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      admin_set_account_frozen: {
+        Args: { p_account: string; p_frozen: boolean; p_reason?: string }
+        Returns: boolean
+      }
       admin_update_transaction_status: {
         Args: { p_status: string; p_tx: string }
         Returns: boolean
@@ -512,9 +591,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_staff_pin: { Args: never; Returns: boolean }
       has_transfer_pin: { Args: never; Returns: boolean }
       is_support_staff: { Args: { _user_id: string }; Returns: boolean }
+      log_staff_action: {
+        Args: {
+          _action: string
+          _meta?: Json
+          _target_id: string
+          _target_type: string
+        }
+        Returns: undefined
+      }
+      set_staff_pin: { Args: { _pin: string }; Returns: boolean }
       set_transfer_pin: { Args: { _pin: string }; Returns: boolean }
+      verify_staff_pin: { Args: { _pin: string }; Returns: boolean }
       verify_transfer_pin: { Args: { _pin: string }; Returns: boolean }
     }
     Enums: {
