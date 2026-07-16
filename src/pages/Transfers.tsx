@@ -325,10 +325,13 @@ const Transfers = () => {
           balance_after: newBal,
           status: "pending",
           reference_number: ref,
+          recipient_email: smEmail || null,
+          recipient_name: smRecipient || null,
         })
         .select()
         .single();
       if (error) throw error;
+
 
       supabase.functions.invoke("send-transfer-confirmation", {
         body: {
