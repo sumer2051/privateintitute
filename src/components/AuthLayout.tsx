@@ -60,11 +60,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("staffMode", staffMode ? "1" : "0");
-    }
-  }, [staffMode]);
+  // Staff mode is session-only and gated by PIN — nothing to persist.
+
 
   useEffect(() => {
     const handler = () => setChatOpen(true);
