@@ -61,7 +61,7 @@ export default function AdminUsers() {
   const load = async () => {
     const [{ data: p }, { data: a }, { data: r }] = await Promise.all([
       supabase.from("profiles").select("id,email,full_name,phone,created_at").order("created_at", { ascending: false }),
-      supabase.from("accounts").select("id,user_id,account_type,account_name,account_number,balance,available_balance,credit_limit"),
+      supabase.from("accounts").select("id,user_id,account_type,account_name,account_number,balance,available_balance,credit_limit,is_frozen"),
       supabase.from("user_roles").select("user_id,role"),
     ]);
     setProfiles((p as Profile[]) || []);
