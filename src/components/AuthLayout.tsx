@@ -73,6 +73,24 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   }, []);
 
   useEffect(() => {
+    supabase
+      .from("announcements")
+      .select("id,title,body,severity")
+      .eq("active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => setAnnouncement((data as any) || null));
+  }, []);
+
+  const dismissAnnouncement = () => {
+    if (!announcement) return;
+    window.localStorage.setItem("dismissedAnnouncementId", announcement.id);
+    setDismissedAnnouncementId(announcement.id);
+  };
+
+
+  useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
     } else {
