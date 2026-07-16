@@ -16,6 +16,9 @@ import AdminSupport from "./pages/AdminSupport";
 import AdminInvitations from "./pages/AdminInvitations";
 import AdminUsers from "./pages/AdminUsers";
 import AdminTransactions from "./pages/AdminTransactions";
+import AdminAnnouncements from "./pages/AdminAnnouncements";
+import AdminAuditLog from "./pages/AdminAuditLog";
+
 import NotFound from "./pages/NotFound";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
