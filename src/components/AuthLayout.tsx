@@ -189,9 +189,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 size="sm"
                 className="hidden md:inline-flex h-9 gap-1.5"
                 onClick={() => {
-                  const next = !staffMode;
-                  setStaffMode(next);
-                  if (!next) navigate("/accounts");
+                  if (staffMode) { setStaffMode(false); navigate("/accounts"); }
+                  else setPinOpen(true);
                 }}
                 title={staffMode ? "Exit staff mode" : "Enter staff mode"}
               >
@@ -205,15 +204,15 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 size="icon"
                 className="md:hidden h-9 w-9"
                 onClick={() => {
-                  const next = !staffMode;
-                  setStaffMode(next);
-                  if (!next) navigate("/accounts");
+                  if (staffMode) { setStaffMode(false); navigate("/accounts"); }
+                  else setPinOpen(true);
                 }}
                 title={staffMode ? "Exit staff mode" : "Enter staff mode"}
               >
                 {staffMode ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
               </Button>
             )}
+
 
 
 
