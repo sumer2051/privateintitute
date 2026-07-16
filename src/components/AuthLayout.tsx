@@ -37,9 +37,16 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const [chatOpen, setChatOpen] = useState(false);
   const [roles, setRoles] = useState<string[]>([]);
   const [staffMode, setStaffMode] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("staffMode") === "1";
+    // Never persist staff mode across reloads — always require the PIN again.
+    return false;
   });
+  const [pinOpen, setPinOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState<{ id: string; title: string; body: string; severity: string } | null>(null);
+  const [dismissedAnnouncementId, setDismissedAnnouncementId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem("dismissedAnnouncementId");
+  });
+
 
   useEffect(() => {
     let mounted = true;
