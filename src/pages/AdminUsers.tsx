@@ -12,7 +12,7 @@ import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet,
 import { useNavigate } from "react-router-dom";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string };
-type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null };
+type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
 type Role = { user_id: string; role: "admin" | "support" | "tx_support" | "user" };
 type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
 
@@ -61,7 +61,7 @@ export default function AdminUsers() {
   const load = async () => {
     const [{ data: p }, { data: a }, { data: r }] = await Promise.all([
       supabase.from("profiles").select("id,email,full_name,phone,created_at").order("created_at", { ascending: false }),
-      supabase.from("accounts").select("id,user_id,account_type,account_name,account_number,balance,available_balance,credit_limit"),
+      supabase.from("accounts").select("id,user_id,account_type,account_name,account_number,balance,available_balance,credit_limit,is_frozen"),
       supabase.from("user_roles").select("user_id,role"),
     ]);
     setProfiles((p as Profile[]) || []);
@@ -87,11 +87,22 @@ export default function AdminUsers() {
   const updateTxStatus = async (tx: Tx, status: string) => {
     setTxBusy(tx.id);
     const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: tx.id, p_status: status });
+    if (error) { setTxBusy(null); toast.error(error.message); return; }
+    supabase.functions.invoke("send-transaction-status-update", {
+      body: { transactionId: tx.id, status },
+    }).catch((e) => console.error("status email failed", e));
     setTxBusy(null);
-    if (error) { toast.error(error.message); return; }
-    toast.success(`Marked ${STATUS_LABEL[status] || status}`);
+    toast.success(`Marked ${STATUS_LABEL[status] || status} · notifications sent`);
     setUserTx(prev => prev.map(t => t.id === tx.id ? { ...t, status } : t));
   };
+
+  const toggleFreeze = async (acc: Account, freeze: boolean) => {
+    const { error } = await supabase.rpc("admin_set_account_frozen", { p_account: acc.id, p_frozen: freeze, p_reason: null });
+    if (error) { toast.error(error.message); return; }
+    toast.success(freeze ? "Account frozen" : "Account unfrozen");
+    load();
+  };
+
 
 
   const filtered = useMemo(() => {
@@ -248,7 +259,10 @@ export default function AdminUsers() {
                   <div key={acc.id} className="flex items-center gap-3 border rounded-lg p-3">
                     <Icon className="h-5 w-5 text-primary" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-secondary capitalize">{acc.account_name} <span className="text-xs text-muted-foreground">••••{acc.account_number.slice(-4)}</span></p>
+                      <p className="font-semibold text-secondary capitalize flex items-center gap-2">
+                        {acc.account_name} <span className="text-xs text-muted-foreground">••••{acc.account_number.slice(-4)}</span>
+                        {acc.is_frozen && <Badge variant="destructive" className="text-[10px]">Frozen</Badge>}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {acc.account_type === "credit"
                           ? `Used $${Number(acc.balance).toLocaleString()} · Available $${Number(acc.available_balance).toLocaleString()} · Limit $${Number(acc.credit_limit||0).toLocaleString()}`
@@ -258,10 +272,14 @@ export default function AdminUsers() {
                     <Button size="sm" variant="outline" onClick={() => openAdjust(acc)}>
                       <DollarSign className="h-3.5 w-3.5 mr-1" /> Adjust
                     </Button>
+                    <Button size="sm" variant={acc.is_frozen ? "default" : "outline"} onClick={() => toggleFreeze(acc, !acc.is_frozen)}>
+                      {acc.is_frozen ? "Unfreeze" : "Freeze"}
+                    </Button>
                   </div>
                 );
               })}
             </div>
+
 
             <div className="mt-6">
               <div className="flex items-center justify-between mb-2">

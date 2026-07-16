@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Search, Moon, Sun, LogOut, Loader2 } from "lucide-react";
+import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { AiChatWidget } from "@/components/AiChatWidget";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Shield, ShieldCheck } from "lucide-react";
+import { StaffPinDialog } from "@/components/StaffPinDialog";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ interface AuthLayoutProps {
   onPageChange?: (page: string) => void;
 }
 
+
 export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutProps) => {
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(() =>
@@ -35,9 +37,16 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const [chatOpen, setChatOpen] = useState(false);
   const [roles, setRoles] = useState<string[]>([]);
   const [staffMode, setStaffMode] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("staffMode") === "1";
+    // Never persist staff mode across reloads — always require the PIN again.
+    return false;
   });
+  const [pinOpen, setPinOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState<{ id: string; title: string; body: string; severity: string } | null>(null);
+  const [dismissedAnnouncementId, setDismissedAnnouncementId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem("dismissedAnnouncementId");
+  });
+
 
   useEffect(() => {
     let mounted = true;
@@ -51,17 +60,32 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("staffMode", staffMode ? "1" : "0");
-    }
-  }, [staffMode]);
+  // Staff mode is session-only and gated by PIN — nothing to persist.
+
 
   useEffect(() => {
     const handler = () => setChatOpen(true);
     window.addEventListener("open-ai-chat", handler);
     return () => window.removeEventListener("open-ai-chat", handler);
   }, []);
+
+  useEffect(() => {
+    supabase
+      .from("announcements")
+      .select("id,title,body,severity")
+      .eq("active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => setAnnouncement((data as any) || null));
+  }, []);
+
+  const dismissAnnouncement = () => {
+    if (!announcement) return;
+    window.localStorage.setItem("dismissedAnnouncementId", announcement.id);
+    setDismissedAnnouncementId(announcement.id);
+  };
+
 
   useEffect(() => {
     if (darkMode) {
@@ -101,7 +125,10 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     ...((isAdmin || isTxSupport) ? [{ id: "admin-transactions", label: "Admin · Transactions", path: "/admin/transactions" }] : []),
     ...(isAdmin ? [{ id: "admin-users", label: "Admin · Users", path: "/admin/users" }] : []),
     ...(isAdmin ? [{ id: "admin-invitations", label: "Admin · Invites", path: "/admin/invitations" }] : []),
+    ...(isAdmin ? [{ id: "admin-announcements", label: "Admin · Broadcast", path: "/admin/announcements" }] : []),
+    ...(isAdmin ? [{ id: "admin-audit", label: "Admin · Audit log", path: "/admin/audit" }] : []),
   ];
+
 
   // tx_support is restricted: no balances, no transfers, no bill pay, no cards
   const restrictedForTxOnly = isTxSupport && !isAdmin && !isSupport;
@@ -162,9 +189,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 size="sm"
                 className="hidden md:inline-flex h-9 gap-1.5"
                 onClick={() => {
-                  const next = !staffMode;
-                  setStaffMode(next);
-                  if (!next) navigate("/accounts");
+                  if (staffMode) { setStaffMode(false); navigate("/accounts"); }
+                  else setPinOpen(true);
                 }}
                 title={staffMode ? "Exit staff mode" : "Enter staff mode"}
               >
@@ -178,15 +204,15 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 size="icon"
                 className="md:hidden h-9 w-9"
                 onClick={() => {
-                  const next = !staffMode;
-                  setStaffMode(next);
-                  if (!next) navigate("/accounts");
+                  if (staffMode) { setStaffMode(false); navigate("/accounts"); }
+                  else setPinOpen(true);
                 }}
                 title={staffMode ? "Exit staff mode" : "Enter staff mode"}
               >
                 {staffMode ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
               </Button>
             )}
+
 
 
 
@@ -219,7 +245,33 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
         </nav>
       </header>
 
+      {announcement && dismissedAnnouncementId !== announcement.id && (
+        <div
+          className={`border-b px-4 py-2.5 flex items-start gap-3 text-sm ${
+            announcement.severity === "critical"
+              ? "bg-destructive/10 border-destructive/30 text-destructive"
+              : announcement.severity === "warning"
+              ? "bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+              : "bg-primary/5 border-primary/20 text-secondary"
+          }`}
+        >
+          {announcement.severity === "critical" ? (
+            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+          ) : announcement.severity === "warning" ? (
+            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+          ) : (
+            <Megaphone className="h-4 w-4 mt-0.5 shrink-0" />
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold">{announcement.title}</p>
+            <p className="text-xs opacity-90 whitespace-pre-line">{announcement.body}</p>
+          </div>
+          <button onClick={dismissAnnouncement} className="text-xs uppercase tracking-wider opacity-70 hover:opacity-100">Dismiss</button>
+        </div>
+      )}
+
       <main className="container mx-auto px-3 md:px-4 py-4 md:py-8">{children}</main>
+
 
       <Dialog open={signOutDialogOpen} onOpenChange={setSignOutDialogOpen}>
         <DialogContent>
@@ -251,6 +303,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
       )}
 
       <AiChatWidget open={chatOpen} onOpenChange={setChatOpen} />
+      <StaffPinDialog open={pinOpen} onOpenChange={setPinOpen} onVerified={() => setStaffMode(true)} />
     </div>
   );
 };
+
