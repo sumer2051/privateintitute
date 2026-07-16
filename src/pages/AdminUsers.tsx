@@ -259,7 +259,10 @@ export default function AdminUsers() {
                   <div key={acc.id} className="flex items-center gap-3 border rounded-lg p-3">
                     <Icon className="h-5 w-5 text-primary" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-secondary capitalize">{acc.account_name} <span className="text-xs text-muted-foreground">••••{acc.account_number.slice(-4)}</span></p>
+                      <p className="font-semibold text-secondary capitalize flex items-center gap-2">
+                        {acc.account_name} <span className="text-xs text-muted-foreground">••••{acc.account_number.slice(-4)}</span>
+                        {acc.is_frozen && <Badge variant="destructive" className="text-[10px]">Frozen</Badge>}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {acc.account_type === "credit"
                           ? `Used $${Number(acc.balance).toLocaleString()} · Available $${Number(acc.available_balance).toLocaleString()} · Limit $${Number(acc.credit_limit||0).toLocaleString()}`
@@ -269,10 +272,14 @@ export default function AdminUsers() {
                     <Button size="sm" variant="outline" onClick={() => openAdjust(acc)}>
                       <DollarSign className="h-3.5 w-3.5 mr-1" /> Adjust
                     </Button>
+                    <Button size="sm" variant={acc.is_frozen ? "default" : "outline"} onClick={() => toggleFreeze(acc, !acc.is_frozen)}>
+                      {acc.is_frozen ? "Unfreeze" : "Freeze"}
+                    </Button>
                   </div>
                 );
               })}
             </div>
+
 
             <div className="mt-6">
               <div className="flex items-center justify-between mb-2">
