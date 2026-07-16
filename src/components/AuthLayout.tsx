@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Search, Moon, Sun, LogOut, Loader2 } from "lucide-react";
+import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { AiChatWidget } from "@/components/AiChatWidget";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Shield, ShieldCheck } from "lucide-react";
+import { StaffPinDialog } from "@/components/StaffPinDialog";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ interface AuthLayoutProps {
   currentPage?: string;
   onPageChange?: (page: string) => void;
 }
+
 
 export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutProps) => {
   const navigate = useNavigate();
