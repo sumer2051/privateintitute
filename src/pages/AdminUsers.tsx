@@ -87,11 +87,22 @@ export default function AdminUsers() {
   const updateTxStatus = async (tx: Tx, status: string) => {
     setTxBusy(tx.id);
     const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: tx.id, p_status: status });
+    if (error) { setTxBusy(null); toast.error(error.message); return; }
+    supabase.functions.invoke("send-transaction-status-update", {
+      body: { transactionId: tx.id, status },
+    }).catch((e) => console.error("status email failed", e));
     setTxBusy(null);
-    if (error) { toast.error(error.message); return; }
-    toast.success(`Marked ${STATUS_LABEL[status] || status}`);
+    toast.success(`Marked ${STATUS_LABEL[status] || status} · notifications sent`);
     setUserTx(prev => prev.map(t => t.id === tx.id ? { ...t, status } : t));
   };
+
+  const toggleFreeze = async (acc: Account, freeze: boolean) => {
+    const { error } = await supabase.rpc("admin_set_account_frozen", { p_account: acc.id, p_frozen: freeze, p_reason: null });
+    if (error) { toast.error(error.message); return; }
+    toast.success(freeze ? "Account frozen" : "Account unfrozen");
+    load();
+  };
+
 
 
   const filtered = useMemo(() => {
