@@ -125,7 +125,10 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     ...((isAdmin || isTxSupport) ? [{ id: "admin-transactions", label: "Admin · Transactions", path: "/admin/transactions" }] : []),
     ...(isAdmin ? [{ id: "admin-users", label: "Admin · Users", path: "/admin/users" }] : []),
     ...(isAdmin ? [{ id: "admin-invitations", label: "Admin · Invites", path: "/admin/invitations" }] : []),
+    ...(isAdmin ? [{ id: "admin-announcements", label: "Admin · Broadcast", path: "/admin/announcements" }] : []),
+    ...(isAdmin ? [{ id: "admin-audit", label: "Admin · Audit log", path: "/admin/audit" }] : []),
   ];
+
 
   // tx_support is restricted: no balances, no transfers, no bill pay, no cards
   const restrictedForTxOnly = isTxSupport && !isAdmin && !isSupport;
