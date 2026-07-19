@@ -1,9 +1,9 @@
-import { Check, ChevronDown, Globe, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Globe, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CURRENCIES, useCurrency } from "@/contexts/CurrencyContext";
 import { cn } from "@/lib/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 
 interface Props {
@@ -15,6 +15,14 @@ export const CurrencySelector = ({ variant = "default", className }: Props) => {
   const { currency, setCurrencyCode } = useCurrency();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
+  const [celebration, setCelebration] = useState<{ code: string; name: string; flag: string } | null>(null);
+
+  useEffect(() => {
+    if (!celebration) return;
+    const timer = setTimeout(() => setCelebration(null), 2200);
+    return () => clearTimeout(timer);
+  }, [celebration]);
+
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
