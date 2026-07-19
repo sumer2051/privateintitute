@@ -119,6 +119,36 @@ export const CurrencySelector = ({ variant = "default", className }: Props) => {
           Live conversion · Transfers adapt to local scheme automatically.
         </div>
       </PopoverContent>
+
+      {celebration && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/95 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300">
+          <div className="relative flex w-full max-w-md flex-col items-center px-6 text-center">
+            <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-tr from-primary/20 via-accent/20 to-primary/20 blur-3xl" />
+            <div className="mb-6 flex h-40 w-40 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/15 via-accent/10 to-primary/15 shadow-2xl ring-1 ring-primary/20 animate-in zoom-in duration-500">
+              <span className="text-8xl drop-shadow-lg">{celebration.flag}</span>
+            </div>
+            <p className="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
+              Welcome to
+            </p>
+            <h2 className="font-display text-4xl font-bold tracking-tight text-secondary md:text-5xl animate-in fade-in slide-in-from-bottom-3 duration-500">
+              {celebration.code}
+            </h2>
+            <p className="mt-3 text-lg text-muted-foreground animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {celebration.name}
+            </p>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4 h-9 w-9 rounded-full opacity-60 hover:opacity-100"
+              onClick={() => setCelebration(null)}
+              aria-label="Close welcome overlay"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      )}
     </Popover>
   );
 };
+
