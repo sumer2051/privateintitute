@@ -86,7 +86,9 @@ export const CurrencySelector = ({ variant = "default", className }: Props) => {
                   setCurrencyCode(c.code);
                   setOpen(false);
                   setQ("");
+                  setCelebration({ code: c.code, name: c.name, flag: c.flag });
                 }}
+
                 className={cn(
                   "group flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition-all",
                   active
