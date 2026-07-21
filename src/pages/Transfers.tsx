@@ -428,6 +428,8 @@ const Transfers = () => {
           balance_after: newBal,
           status: "pending",
           reference_number: ref,
+          recipient_email: zContact.includes("@") ? zContact : null,
+          recipient_name: zRecipient || null,
         })
         .select()
         .single();
@@ -438,14 +440,18 @@ const Transfers = () => {
           amount: amtDisplay,
           currency: currency.code,
           recipient: zRecipient,
+          recipientEmail: zContact.includes("@") ? zContact : undefined,
           detail: `${zContact}${zMemo ? ` — ${zMemo}` : ""}`,
+          memo: zMemo || undefined,
           reference: ref,
+          status: "pending",
         },
       }).catch((e) => console.error("confirmation email failed", e));
       toast({
         title: "Zelle submitted — Pending approval",
         description: `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
       });
+
       setZAmount(""); setZRecipient(""); setZContact(""); setZMemo("");
       if (data) setSelectedTx(data as PendingTx);
       fetchAccounts();
