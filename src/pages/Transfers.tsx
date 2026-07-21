@@ -139,7 +139,7 @@ const Transfers = () => {
           account_id: fromAccount,
           transaction_type: "debit",
           category: "Transfer Out",
-          description: `Transfer to ${toAcc.account_name}`,
+          description: `Transfer to ${toAcc.account_name}${intNote ? ` — ${intNote}` : ""}`,
           amount: transferAmount,
           balance_after: fromAcc.balance - transferAmount,
           status: "completed",
@@ -150,7 +150,7 @@ const Transfers = () => {
           account_id: toAccount,
           transaction_type: "credit",
           category: "Transfer In",
-          description: `Transfer from ${fromAcc.account_name}`,
+          description: `Transfer from ${fromAcc.account_name}${intNote ? ` — ${intNote}` : ""}`,
           amount: transferAmount,
           balance_after: toAcc.balance + transferAmount,
           status: "completed",
@@ -160,9 +160,11 @@ const Transfers = () => {
 
       toast({ title: "Transfer Successful", description: `Transferred ${formatCurrency(transferAmount)}` });
       setAmount("");
+      setIntNote("");
       fetchAccounts();
     } catch (error: any) {
       toast({ title: "Transfer Failed", description: error.message, variant: "destructive" });
+
     } finally {
       setLoading(false);
     }
