@@ -759,10 +759,16 @@ const Transfers = () => {
                       </div>
                     ))}
                     <div className="sm:col-span-2">
-                      <Label>Memo (optional)</Label>
+                      <Label>Recipient Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
+                      <Input type="email" value={extEmail} onChange={(e) => setExtEmail(e.target.value)} placeholder="name@email.com" />
+                      <p className="mt-1 text-[11px] text-muted-foreground">If provided, a matching pending receipt will be emailed to the recipient.</p>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Note / Memo <span className="text-xs text-muted-foreground">(optional)</span></Label>
                       <Input value={extMemo} onChange={(e) => setExtMemo(e.target.value)} placeholder="Invoice #123" />
                     </div>
                   </div>
+
                   <Button type="submit" className="w-full" disabled={extLoading}>
                     {extLoading ? "Submitting..." : `Submit ${profile.scheme} for Approval`}
                   </Button>
