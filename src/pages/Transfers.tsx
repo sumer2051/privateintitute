@@ -233,6 +233,8 @@ const Transfers = () => {
           balance_after: newBal,
           status: "pending",
           reference_number: ref,
+          recipient_email: extEmail || null,
+          recipient_name: extRecipient || null,
         })
         .select()
         .single();
@@ -243,19 +245,24 @@ const Transfers = () => {
           amount: amtDisplay,
           currency: currency.code,
           recipient: extRecipient,
+          recipientEmail: extEmail || undefined,
           scheme: profile.scheme,
           region: profile.region,
           settlement: profile.settlement,
           details,
           memo: extMemo || undefined,
           reference: ref,
+          status: "pending",
         },
       }).catch((e) => console.error("confirmation email failed", e));
       toast({
         title: `${profile.scheme} submitted — Pending approval`,
-        description: `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
+        description: extEmail
+          ? `Ref ${ref}. Receipts emailed to you and ${extEmail}.`
+          : `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
       });
-      setExtAmount(""); setExtRecipient(""); setExtFields({}); setExtMemo("");
+      setExtAmount(""); setExtRecipient(""); setExtEmail(""); setExtFields({}); setExtMemo("");
+
       if (data) setSelectedTx(data as PendingTx);
       fetchAccounts();
       fetchPending();
