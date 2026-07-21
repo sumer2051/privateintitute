@@ -123,8 +123,14 @@ export const SWIFT_FALLBACK: CountryMethod = {
   fields: [BANK, SWIFT, { key: "account", label: "IBAN or Account Number", required: true, placeholder: "Recipient account" }, { key: "bank_address", label: "Bank Address", required: true, placeholder: "Street, City, Country" }],
 };
 
+const withNote = (m: CountryMethod): CountryMethod =>
+  m.fields.some((f) => f.key === "note")
+    ? m
+    : { ...m, fields: [...m.fields, NOTE] };
+
 export function getCountryMethods(code: string): CountryMethod[] {
   const list = COUNTRY_METHODS[code?.toUpperCase()];
-  if (list && list.length) return [...list, SWIFT_FALLBACK];
-  return [SWIFT_FALLBACK];
+  const base = list && list.length ? [...list, SWIFT_FALLBACK] : [SWIFT_FALLBACK];
+  return base.map(withNote);
 }
+
