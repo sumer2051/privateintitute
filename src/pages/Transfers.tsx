@@ -49,12 +49,14 @@ const Transfers = () => {
   const [fromAccount, setFromAccount] = useState("");
   const [toAccount, setToAccount] = useState("");
   const [amount, setAmount] = useState("");
+  const [intNote, setIntNote] = useState("");
   const [loading, setLoading] = useState(false);
 
   // External — dynamic per-currency banking profile
   const [extFrom, setExtFrom] = useState("");
   const [extAmount, setExtAmount] = useState("");
   const [extRecipient, setExtRecipient] = useState("");
+  const [extEmail, setExtEmail] = useState("");
   const [extFields, setExtFields] = useState<Record<string, string>>({});
   const [extMemo, setExtMemo] = useState("");
   const [extLoading, setExtLoading] = useState(false);
@@ -67,6 +69,7 @@ const Transfers = () => {
   const [zContact, setZContact] = useState("");
   const [zMemo, setZMemo] = useState("");
   const [zLoading, setZLoading] = useState(false);
+
 
   // Country-driven Send Money (per top currency switcher)
   const [smFrom, setSmFrom] = useState("");
@@ -136,7 +139,7 @@ const Transfers = () => {
           account_id: fromAccount,
           transaction_type: "debit",
           category: "Transfer Out",
-          description: `Transfer to ${toAcc.account_name}`,
+          description: `Transfer to ${toAcc.account_name}${intNote ? ` — ${intNote}` : ""}`,
           amount: transferAmount,
           balance_after: fromAcc.balance - transferAmount,
           status: "completed",
@@ -147,7 +150,7 @@ const Transfers = () => {
           account_id: toAccount,
           transaction_type: "credit",
           category: "Transfer In",
-          description: `Transfer from ${fromAcc.account_name}`,
+          description: `Transfer from ${fromAcc.account_name}${intNote ? ` — ${intNote}` : ""}`,
           amount: transferAmount,
           balance_after: toAcc.balance + transferAmount,
           status: "completed",
@@ -157,9 +160,11 @@ const Transfers = () => {
 
       toast({ title: "Transfer Successful", description: `Transferred ${formatCurrency(transferAmount)}` });
       setAmount("");
+      setIntNote("");
       fetchAccounts();
     } catch (error: any) {
       toast({ title: "Transfer Failed", description: error.message, variant: "destructive" });
+
     } finally {
       setLoading(false);
     }
@@ -228,6 +233,8 @@ const Transfers = () => {
           balance_after: newBal,
           status: "pending",
           reference_number: ref,
+          recipient_email: extEmail || null,
+          recipient_name: extRecipient || null,
         })
         .select()
         .single();
@@ -238,19 +245,24 @@ const Transfers = () => {
           amount: amtDisplay,
           currency: currency.code,
           recipient: extRecipient,
+          recipientEmail: extEmail || undefined,
           scheme: profile.scheme,
           region: profile.region,
           settlement: profile.settlement,
           details,
           memo: extMemo || undefined,
           reference: ref,
+          status: "pending",
         },
       }).catch((e) => console.error("confirmation email failed", e));
       toast({
         title: `${profile.scheme} submitted — Pending approval`,
-        description: `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
+        description: extEmail
+          ? `Ref ${ref}. Receipts emailed to you and ${extEmail}.`
+          : `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
       });
-      setExtAmount(""); setExtRecipient(""); setExtFields({}); setExtMemo("");
+      setExtAmount(""); setExtRecipient(""); setExtEmail(""); setExtFields({}); setExtMemo("");
+
       if (data) setSelectedTx(data as PendingTx);
       fetchAccounts();
       fetchPending();
@@ -416,6 +428,8 @@ const Transfers = () => {
           balance_after: newBal,
           status: "pending",
           reference_number: ref,
+          recipient_email: zContact.includes("@") ? zContact : null,
+          recipient_name: zRecipient || null,
         })
         .select()
         .single();
@@ -426,14 +440,18 @@ const Transfers = () => {
           amount: amtDisplay,
           currency: currency.code,
           recipient: zRecipient,
+          recipientEmail: zContact.includes("@") ? zContact : undefined,
           detail: `${zContact}${zMemo ? ` — ${zMemo}` : ""}`,
+          memo: zMemo || undefined,
           reference: ref,
+          status: "pending",
         },
       }).catch((e) => console.error("confirmation email failed", e));
       toast({
         title: "Zelle submitted — Pending approval",
         description: `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
       });
+
       setZAmount(""); setZRecipient(""); setZContact(""); setZMemo("");
       if (data) setSelectedTx(data as PendingTx);
       fetchAccounts();
@@ -635,6 +653,11 @@ const Transfers = () => {
                     <Label>Amount</Label>
                     <Input type="number" step="0.01" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
                   </div>
+                  <div>
+                    <Label>Note <span className="text-xs text-muted-foreground">(optional)</span></Label>
+                    <Input value={intNote} onChange={(e) => setIntNote(e.target.value)} placeholder="e.g. Savings top-up" />
+                  </div>
+
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Processing..." : "Transfer Now"}
                   </Button>
@@ -736,10 +759,16 @@ const Transfers = () => {
                       </div>
                     ))}
                     <div className="sm:col-span-2">
-                      <Label>Memo (optional)</Label>
+                      <Label>Recipient Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
+                      <Input type="email" value={extEmail} onChange={(e) => setExtEmail(e.target.value)} placeholder="name@email.com" />
+                      <p className="mt-1 text-[11px] text-muted-foreground">If provided, a matching pending receipt will be emailed to the recipient.</p>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Note / Memo <span className="text-xs text-muted-foreground">(optional)</span></Label>
                       <Input value={extMemo} onChange={(e) => setExtMemo(e.target.value)} placeholder="Invoice #123" />
                     </div>
                   </div>
+
                   <Button type="submit" className="w-full" disabled={extLoading}>
                     {extLoading ? "Submitting..." : `Submit ${profile.scheme} for Approval`}
                   </Button>
