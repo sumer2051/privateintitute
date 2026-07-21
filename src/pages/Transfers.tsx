@@ -49,12 +49,14 @@ const Transfers = () => {
   const [fromAccount, setFromAccount] = useState("");
   const [toAccount, setToAccount] = useState("");
   const [amount, setAmount] = useState("");
+  const [intNote, setIntNote] = useState("");
   const [loading, setLoading] = useState(false);
 
   // External — dynamic per-currency banking profile
   const [extFrom, setExtFrom] = useState("");
   const [extAmount, setExtAmount] = useState("");
   const [extRecipient, setExtRecipient] = useState("");
+  const [extEmail, setExtEmail] = useState("");
   const [extFields, setExtFields] = useState<Record<string, string>>({});
   const [extMemo, setExtMemo] = useState("");
   const [extLoading, setExtLoading] = useState(false);
@@ -67,6 +69,7 @@ const Transfers = () => {
   const [zContact, setZContact] = useState("");
   const [zMemo, setZMemo] = useState("");
   const [zLoading, setZLoading] = useState(false);
+
 
   // Country-driven Send Money (per top currency switcher)
   const [smFrom, setSmFrom] = useState("");
