@@ -653,6 +653,11 @@ const Transfers = () => {
                     <Label>Amount</Label>
                     <Input type="number" step="0.01" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
                   </div>
+                  <div>
+                    <Label>Note <span className="text-xs text-muted-foreground">(optional)</span></Label>
+                    <Input value={intNote} onChange={(e) => setIntNote(e.target.value)} placeholder="e.g. Savings top-up" />
+                  </div>
+
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Processing..." : "Transfer Now"}
                   </Button>
