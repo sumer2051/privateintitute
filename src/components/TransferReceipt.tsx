@@ -44,7 +44,82 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   const style = method.receiptStyle;
   const amountStr = fmt(amount, currencyCode);
   const isCashApp = method.id === "cashapp";
+  const isPayPal = method.id === "paypal" || method.id === "paypal_uk" || method.id === "paypal_eu";
   const displayTo = recipientName || fields.handle || fields.recipient_name || recipientEmail || "recipient";
+
+  if (isPayPal && !showFullReceipt) {
+    const firstName = (recipientName || displayTo).split(" ")[0];
+    return (
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent className="max-w-md p-0 overflow-hidden border-0 bg-white sm:rounded-2xl [&>button]:hidden">
+          <div className="relative flex min-h-[620px] flex-col bg-white">
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center text-neutral-700 hover:text-black"
+            >
+              <X className="h-6 w-6" strokeWidth={2} />
+            </button>
+
+            <div className="px-6 pt-24 pb-10 text-center">
+              <div className="flex items-center justify-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#00857A]">
+                  <Check className="h-4 w-4 text-[#00857A]" strokeWidth={3} />
+                </div>
+                <h1 className="text-[34px] font-bold tracking-tight text-black">
+                  {amountStr} <span className="font-semibold">sent</span>
+                </h1>
+              </div>
+              <p className="mt-3 text-[17px] text-neutral-800">
+                We'll let {firstName} know.
+              </p>
+            </div>
+
+            <div className="relative flex-1 bg-[#f2efe9]">
+              <div className="absolute -top-16 left-1/2 h-32 w-[140%] -translate-x-1/2 rounded-[100%] bg-white" />
+              <div className="absolute left-4 top-16 h-3 w-3 rounded-full bg-black/5" />
+              <div className="absolute right-6 top-10 h-2 w-2 rounded-full bg-black/5" />
+              <div className="absolute left-10 bottom-24 h-16 w-16 rounded-full bg-black/[0.04]" />
+              <div className="absolute right-6 bottom-32 h-14 w-14 rounded-full bg-black/[0.04]" />
+
+              <div className="relative flex flex-col items-center px-6 pt-6 pb-8">
+                <div className="mb-6 flex h-[130px] w-[210px] flex-col justify-between rounded-xl bg-gradient-to-br from-[#0070ba] to-[#1546a0] p-4 shadow-lg">
+                  <div className="text-[28px] font-extrabold italic tracking-tight text-[#5ec0ff]" style={{ fontFamily: "Georgia, serif" }}>
+                    PayPal
+                  </div>
+                  <div className="flex items-end justify-end gap-1">
+                    <span className="mr-1 text-[9px] font-semibold uppercase tracking-wider text-white/90">debit</span>
+                    <div className="relative h-6 w-10">
+                      <div className="absolute left-0 h-6 w-6 rounded-full bg-[#eb001b]" />
+                      <div className="absolute right-0 h-6 w-6 rounded-full bg-[#f79e1b] mix-blend-multiply" />
+                    </div>
+                  </div>
+                </div>
+
+                <p className="max-w-[300px] text-center text-[17px] leading-snug text-black">
+                  Did you know you could get a debit card and use your PayPal balance at stores and ATMs?
+                </p>
+
+                <button
+                  onClick={() => setShowFullReceipt(true)}
+                  className="mt-8 w-full max-w-[360px] rounded-full bg-black py-4 text-[17px] font-semibold text-white hover:bg-neutral-800 transition-colors"
+                >
+                  View Receipt
+                </button>
+                <button
+                  onClick={onClose}
+                  className="mt-4 text-[17px] font-bold text-black hover:opacity-70"
+                >
+                  Not now
+                </button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
 
   if (isCashApp && !showFullReceipt) {
     return (
