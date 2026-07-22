@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, ShieldCheck, ArrowRight, Sparkles } from "lucide-react";
+import { Check, ShieldCheck, ArrowRight, Sparkles, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { CountryMethod } from "@/lib/country-methods";
 
 export interface ReceiptData {
@@ -32,10 +33,56 @@ const fmt = (n: number, code: string) => {
 };
 
 export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
+  const [showFullReceipt, setShowFullReceipt] = useState(false);
+
+  useEffect(() => {
+    if (open) setShowFullReceipt(false);
+  }, [open, receipt?.reference]);
+
   if (!receipt) return null;
   const { method, amount, currencyCode, senderName, recipientName, recipientEmail, fields, note, variant, reference, timestamp } = receipt;
   const style = method.receiptStyle;
   const amountStr = fmt(amount, currencyCode);
+  const isCashApp = method.id === "cashapp";
+  const displayTo = recipientName || fields.handle || fields.recipient_name || recipientEmail || "recipient";
+
+  if (isCashApp && !showFullReceipt) {
+    return (
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent className="max-w-md p-0 overflow-hidden border-0 bg-black text-white sm:rounded-2xl [&>button]:hidden">
+          <div className="flex min-h-[560px] flex-col px-6 pb-6 pt-5">
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="mb-6 flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
+            >
+              <X className="h-6 w-6" strokeWidth={2.5} />
+            </button>
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#00D64F] animate-in zoom-in-50 duration-300">
+              <Check className="h-9 w-9 text-black" strokeWidth={3.5} />
+            </div>
+            <h1 className="mt-6 text-[34px] font-bold leading-[1.15] tracking-tight">
+              You sent {amountStr} to {displayTo}
+            </h1>
+            <div className="mt-auto space-y-3 pt-8">
+              <button
+                onClick={() => setShowFullReceipt(true)}
+                className="w-full rounded-full bg-[#1f1f1f] py-4 text-[17px] font-semibold text-white hover:bg-[#2a2a2a] transition-colors"
+              >
+                Receipt
+              </button>
+              <button
+                onClick={onClose}
+                className="w-full rounded-full bg-white py-4 text-[17px] font-semibold text-black hover:bg-white/90 transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
