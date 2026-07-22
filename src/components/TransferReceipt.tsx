@@ -45,7 +45,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   const amountStr = fmt(amount, currencyCode);
   const isCashApp = method.id === "cashapp";
   const isPayPal = method.id === "paypal" || method.id === "paypal_uk" || method.id === "paypal_eu";
-  const displayTo = recipientName || fields.handle || fields.recipient_name || recipientEmail || "recipient";
+  const displayTo = recipientName || fields.handle || fields.recipient_name || fields.email || fields.wallet_id || fields.upi_id || fields.pix_key || fields.payid || recipientEmail || "recipient";
 
   if (isPayPal && !showFullReceipt) {
     const firstName = (recipientName || displayTo).split(" ")[0];
