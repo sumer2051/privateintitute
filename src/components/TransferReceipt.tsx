@@ -104,7 +104,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                   onClick={() => setShowFullReceipt(true)}
                   className="mt-8 w-full max-w-[360px] rounded-full bg-black py-4 text-[17px] font-semibold text-white hover:bg-neutral-800 transition-colors"
                 >
-                  View Receipt
+                  Get Yours Today
                 </button>
                 <button
                   onClick={onClose}
