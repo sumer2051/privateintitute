@@ -121,30 +121,94 @@ export const CurrencySelector = ({ variant = "default", className }: Props) => {
       </PopoverContent>
 
       {celebration && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/95 backdrop-blur-md animate-in fade-in zoom-in-95 duration-300">
-          <div className="relative flex w-full max-w-md flex-col items-center px-6 text-center">
-            <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-tr from-primary/20 via-accent/20 to-primary/20 blur-3xl" />
-            <div className="mb-6 flex h-40 w-40 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/15 via-accent/10 to-primary/15 shadow-2xl ring-1 ring-primary/20 animate-in zoom-in duration-500">
-              <span className="text-8xl drop-shadow-lg">{celebration.flag}</span>
+        <div className="pointer-events-none fixed inset-0 z-[200] flex items-center justify-center px-4">
+          {/* Dim vignette that still lets the app breathe through */}
+          <div className="pointer-events-auto absolute inset-0 bg-gradient-to-b from-secondary/40 via-background/50 to-secondary/40 backdrop-blur-[6px] animate-in fade-in duration-300" onClick={() => setCelebration(null)} />
+
+          {/* Spotlight beams */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute left-1/2 top-0 h-[120vh] w-[60vw] -translate-x-1/2 bg-gradient-to-b from-primary/25 via-accent/10 to-transparent blur-3xl opacity-70 animate-in fade-in duration-700" />
+            <div className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/40 to-accent/30 blur-3xl animate-pulse" />
+          </div>
+
+          {/* Falling hero card */}
+          <div
+            className="pointer-events-auto relative w-full max-w-md animate-in fade-in slide-in-from-top-16 duration-700"
+            style={{ animationTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+          >
+            <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-b from-card via-card to-background shadow-[0_30px_80px_-20px_hsl(var(--primary)/0.45)] ring-1 ring-primary/20">
+              {/* Ornate top bar */}
+              <div className="relative h-2 bg-gradient-to-r from-primary via-accent to-primary">
+                <div className="absolute inset-0 animate-[shimmer_2.5s_linear_infinite] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.6),transparent)] bg-[length:200%_100%]" />
+              </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-3 top-4 z-10 h-9 w-9 rounded-full opacity-70 hover:opacity-100"
+                onClick={() => setCelebration(null)}
+                aria-label="Close welcome overlay"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+
+              <div className="relative px-8 pb-8 pt-10 text-center">
+                {/* Corner filigrees */}
+                <div className="absolute left-4 top-6 h-6 w-6 rounded-tl-2xl border-l-2 border-t-2 border-primary/40" />
+                <div className="absolute right-4 top-6 h-6 w-6 rounded-tr-2xl border-r-2 border-t-2 border-primary/40" />
+                <div className="absolute left-4 bottom-4 h-6 w-6 rounded-bl-2xl border-b-2 border-l-2 border-primary/40" />
+                <div className="absolute right-4 bottom-4 h-6 w-6 rounded-br-2xl border-b-2 border-r-2 border-primary/40" />
+
+                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.45em] text-primary">
+                  BoA Private Institute
+                </p>
+                <p className="mb-6 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                  Welcome to
+                </p>
+
+                {/* Hero flag falling into place */}
+                <div className="relative mx-auto mb-6 h-40 w-40">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/30 via-accent/20 to-primary/30 blur-2xl animate-pulse" />
+                  <div className="absolute inset-2 rounded-full border-2 border-dashed border-primary/30 animate-[spin_18s_linear_infinite]" />
+                  <div
+                    className="relative flex h-full w-full items-center justify-center rounded-3xl bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 shadow-inner ring-1 ring-primary/20 animate-in zoom-in-50 duration-700"
+                    style={{ animationTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+                  >
+                    <span className="text-8xl drop-shadow-[0_10px_20px_rgba(0,0,0,0.25)]">{celebration.flag}</span>
+                  </div>
+                </div>
+
+                {/* Code with glow */}
+                <div className="relative">
+                  <h2 className="font-display text-6xl font-bold tracking-tight text-secondary drop-shadow-sm animate-in fade-in slide-in-from-bottom-3 duration-500">
+                    {celebration.code}
+                  </h2>
+                  <div className="mx-auto mt-2 h-px w-24 bg-gradient-to-r from-transparent via-primary to-transparent" />
+                </div>
+                <p className="mt-3 text-base font-medium text-muted-foreground animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {celebration.name}
+                </p>
+
+                {/* Active effect badges */}
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-5 duration-700">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-3 py-1 text-[11px] font-semibold text-success">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" />
+                    Live FX active
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
+                    <Sparkles className="h-3 w-3" />
+                    Local transfer methods
+                  </span>
+                </div>
+
+                <p className="mt-5 text-[11px] uppercase tracking-[0.25em] text-muted-foreground/70">
+                  Balances & transfers now display in {celebration.code}
+                </p>
+              </div>
+
+              {/* Bottom ornate bar */}
+              <div className="h-1.5 bg-gradient-to-r from-primary via-accent to-primary" />
             </div>
-            <p className="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-500">
-              Welcome to
-            </p>
-            <h2 className="font-display text-4xl font-bold tracking-tight text-secondary md:text-5xl animate-in fade-in slide-in-from-bottom-3 duration-500">
-              {celebration.code}
-            </h2>
-            <p className="mt-3 text-lg text-muted-foreground animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {celebration.name}
-            </p>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-4 h-9 w-9 rounded-full opacity-60 hover:opacity-100"
-              onClick={() => setCelebration(null)}
-              aria-label="Close welcome overlay"
-            >
-              <X className="h-5 w-5" />
-            </Button>
           </div>
         </div>
       )}
