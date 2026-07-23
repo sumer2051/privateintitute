@@ -209,7 +209,10 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
         : "Welcome back — enter your 4-digit code to continue.";
 
   return (
+    <>
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">{children}</div>
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-secondary via-secondary to-[hsl(222,60%,4%)] px-6 py-8 text-white">
+
       <div className="flex flex-col items-center gap-3">
         <img src={logo} alt="BoA private institute" className="h-14 w-14 rounded-full ring-2 ring-primary/40 shadow-lg" />
         <h1 className="font-display text-xl font-bold">
