@@ -308,5 +308,7 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
         </div>
       )}
     </div>
+    </>
   );
+
 };
