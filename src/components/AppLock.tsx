@@ -88,10 +88,25 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
     setPhase("locked");
   }, [splashDone, authChecked, user, phase]);
 
-  // Re-lock when tab regains focus if a passcode exists AND user is signed in
+  // Re-lock when tab regains focus AFTER being hidden for a while.
+  // Short backgrounds (switching apps to copy an account #, etc.) must NOT
+  // wipe in-progress form state on pages like Transfers.
   useEffect(() => {
+    const GRACE_MS = 2 * 60 * 1000; // 2 minutes
+    let hiddenAt: number | null = null;
     const onVis = () => {
-      if (document.visibilityState === "visible" && phase === "ready" && user && localStorage.getItem(PASSCODE_KEY)) {
+      if (document.visibilityState === "hidden") {
+        hiddenAt = Date.now();
+        return;
+      }
+      const away = hiddenAt ? Date.now() - hiddenAt : 0;
+      hiddenAt = null;
+      if (
+        away >= GRACE_MS &&
+        phase === "ready" &&
+        user &&
+        localStorage.getItem(PASSCODE_KEY)
+      ) {
         setCode("");
         setError("");
         setPhase("locked");
@@ -100,6 +115,7 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [phase, user]);
+
 
   const handleLockedSignOut = async () => {
     setSignOutDialogOpen(false);
