@@ -99,6 +99,49 @@ export default function AdminUsers() {
     setUserTx(prev => prev.map(t => t.id === tx.id ? { ...t, status } : t));
   };
 
+  const reloadUserTx = async (uid: string) => {
+    const { data } = await supabase
+      .from("transactions")
+      .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setUserTx((data as Tx[]) || []);
+  };
+
+  const submitDeposit = async () => {
+    if (!depositAccount) return;
+    const amt = parseFloat(depositAmount);
+    if (!amt || amt <= 0 || Number.isNaN(amt)) { toast.error("Enter a positive amount"); return; }
+    if (!depositReason.trim()) { toast.error("Add a reason for the deposit"); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_post_pending_deposit", {
+      p_account: depositAccount.id,
+      p_amount: amt,
+      p_reason: depositReason.trim(),
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Pending deposit posted · user notified");
+    setDepositAccount(null);
+    setDepositAmount("");
+    setDepositReason("");
+    if (selected) reloadUserTx(selected.id);
+  };
+
+  const completeDeposit = async (tx: Tx) => {
+    setTxBusy(tx.id);
+    const { error } = await supabase.rpc("admin_complete_pending_deposit", { p_tx: tx.id });
+    if (error) { setTxBusy(null); toast.error(error.message); return; }
+    supabase.functions.invoke("send-transaction-status-update", {
+      body: { transactionId: tx.id, status: "completed" },
+    }).catch(() => {});
+    setTxBusy(null);
+    toast.success("Deposit completed · balance credited");
+    if (selected) reloadUserTx(selected.id);
+    load();
+  };
+
   const toggleFreeze = async (acc: Account, freeze: boolean) => {
     const { error } = await supabase.rpc("admin_set_account_frozen", { p_account: acc.id, p_frozen: freeze, p_reason: null });
     if (error) { toast.error(error.message); return; }
