@@ -48,6 +48,9 @@ export default function AdminUsers() {
   const [busy, setBusy] = useState(false);
   const [userTx, setUserTx] = useState<Tx[]>([]);
   const [txBusy, setTxBusy] = useState<string | null>(null);
+  const [depositAccount, setDepositAccount] = useState<Account | null>(null);
+  const [depositAmount, setDepositAmount] = useState("");
+  const [depositReason, setDepositReason] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -94,6 +97,49 @@ export default function AdminUsers() {
     setTxBusy(null);
     toast.success(`Marked ${STATUS_LABEL[status] || status} · notifications sent`);
     setUserTx(prev => prev.map(t => t.id === tx.id ? { ...t, status } : t));
+  };
+
+  const reloadUserTx = async (uid: string) => {
+    const { data } = await supabase
+      .from("transactions")
+      .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setUserTx((data as Tx[]) || []);
+  };
+
+  const submitDeposit = async () => {
+    if (!depositAccount) return;
+    const amt = parseFloat(depositAmount);
+    if (!amt || amt <= 0 || Number.isNaN(amt)) { toast.error("Enter a positive amount"); return; }
+    if (!depositReason.trim()) { toast.error("Add a reason for the deposit"); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_post_pending_deposit", {
+      p_account: depositAccount.id,
+      p_amount: amt,
+      p_reason: depositReason.trim(),
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Pending deposit posted · user notified");
+    setDepositAccount(null);
+    setDepositAmount("");
+    setDepositReason("");
+    if (selected) reloadUserTx(selected.id);
+  };
+
+  const completeDeposit = async (tx: Tx) => {
+    setTxBusy(tx.id);
+    const { error } = await supabase.rpc("admin_complete_pending_deposit", { p_tx: tx.id });
+    if (error) { setTxBusy(null); toast.error(error.message); return; }
+    supabase.functions.invoke("send-transaction-status-update", {
+      body: { transactionId: tx.id, status: "completed" },
+    }).catch(() => {});
+    setTxBusy(null);
+    toast.success("Deposit completed · balance credited");
+    if (selected) reloadUserTx(selected.id);
+    load();
   };
 
   const toggleFreeze = async (acc: Account, freeze: boolean) => {
@@ -272,6 +318,11 @@ export default function AdminUsers() {
                     <Button size="sm" variant="outline" onClick={() => openAdjust(acc)}>
                       <DollarSign className="h-3.5 w-3.5 mr-1" /> Adjust
                     </Button>
+                    {acc.account_type !== "credit" && (
+                      <Button size="sm" variant="outline" className="border-emerald-400 text-emerald-700 hover:bg-emerald-50" onClick={() => { setDepositAccount(acc); setDepositAmount(""); setDepositReason(""); }}>
+                        Post deposit
+                      </Button>
+                    )}
                     <Button size="sm" variant={acc.is_frozen ? "default" : "outline"} onClick={() => toggleFreeze(acc, !acc.is_frozen)}>
                       {acc.is_frozen ? "Unfreeze" : "Freeze"}
                     </Button>
@@ -314,6 +365,16 @@ export default function AdminUsers() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {tx.category === "Pending Deposit" && tx.status !== "completed" && (
+                        <Button
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                          disabled={txBusy === tx.id}
+                          onClick={() => completeDeposit(tx)}
+                        >
+                          Complete deposit
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -348,6 +409,33 @@ export default function AdminUsers() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setAdjustAccount(null)} disabled={busy}>Cancel</Button>
               <Button onClick={submitAdjust} disabled={busy}>{busy ? "Applying..." : "Apply"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!depositAccount} onOpenChange={(o) => !o && setDepositAccount(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Post pending deposit</DialogTitle>
+              <DialogDescription>
+                {depositAccount?.account_name} ••••{depositAccount?.account_number.slice(-4)}. The user will see a pending notification. Balance is credited only when you mark it complete.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
+                <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason (shown to user)</label>
+                <Input placeholder="e.g. Incoming wire from Chase — pending compliance review" value={depositReason} onChange={e => setDepositReason(e.target.value)} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDepositAccount(null)} disabled={busy}>Cancel</Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={submitDeposit} disabled={busy}>
+                {busy ? "Posting..." : "Post pending deposit"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
