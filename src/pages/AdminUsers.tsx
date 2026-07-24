@@ -412,6 +412,33 @@ export default function AdminUsers() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <Dialog open={!!depositAccount} onOpenChange={(o) => !o && setDepositAccount(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Post pending deposit</DialogTitle>
+              <DialogDescription>
+                {depositAccount?.account_name} ••••{depositAccount?.account_number.slice(-4)}. The user will see a pending notification. Balance is credited only when you mark it complete.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
+                <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason (shown to user)</label>
+                <Input placeholder="e.g. Incoming wire from Chase — pending compliance review" value={depositReason} onChange={e => setDepositReason(e.target.value)} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDepositAccount(null)} disabled={busy}>Cancel</Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={submitDeposit} disabled={busy}>
+                {busy ? "Posting..." : "Post pending deposit"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AuthLayout>
   );
