@@ -318,6 +318,11 @@ export default function AdminUsers() {
                     <Button size="sm" variant="outline" onClick={() => openAdjust(acc)}>
                       <DollarSign className="h-3.5 w-3.5 mr-1" /> Adjust
                     </Button>
+                    {acc.account_type !== "credit" && (
+                      <Button size="sm" variant="outline" className="border-emerald-400 text-emerald-700 hover:bg-emerald-50" onClick={() => { setDepositAccount(acc); setDepositAmount(""); setDepositReason(""); }}>
+                        Post deposit
+                      </Button>
+                    )}
                     <Button size="sm" variant={acc.is_frozen ? "default" : "outline"} onClick={() => toggleFreeze(acc, !acc.is_frozen)}>
                       {acc.is_frozen ? "Unfreeze" : "Freeze"}
                     </Button>
