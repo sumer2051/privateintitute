@@ -365,6 +365,16 @@ export default function AdminUsers() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {tx.category === "Pending Deposit" && tx.status !== "completed" && (
+                        <Button
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                          disabled={txBusy === tx.id}
+                          onClick={() => completeDeposit(tx)}
+                        >
+                          Complete deposit
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
