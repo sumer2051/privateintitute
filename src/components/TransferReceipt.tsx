@@ -45,7 +45,65 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   const amountStr = fmt(amount, currencyCode);
   const isCashApp = method.id === "cashapp";
   const isPayPal = method.id === "paypal" || method.id === "paypal_uk" || method.id === "paypal_eu";
+  const isZelle = method.id === "zelle";
   const displayTo = recipientName || fields.handle || fields.recipient_name || fields.email || fields.wallet_id || fields.upi_id || fields.pix_key || fields.payid || recipientEmail || "recipient";
+
+  if (isZelle && !showFullReceipt) {
+    const nameUpper = (recipientName || fields.recipient_name || displayTo).toUpperCase();
+    const firstName = nameUpper.split(" ")[0];
+    const initials = nameUpper.split(" ").map(s => s[0]).filter(Boolean).slice(0, 2).join("");
+    const contact = fields.email || fields.phone || recipientEmail || "";
+    return (
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent className="max-w-md p-0 overflow-hidden border-0 bg-[#f4f5f7] sm:rounded-2xl [&>button]:hidden">
+          <div className="flex min-h-[640px] flex-col">
+            <div className="flex items-center justify-between bg-[#2a5c99] px-4 py-3 text-white">
+              <div className="flex flex-col gap-1">
+                <span className="block h-0.5 w-5 bg-white" />
+                <span className="block h-0.5 w-5 bg-white" />
+                <span className="block h-0.5 w-5 bg-white" />
+              </div>
+              <div className="text-[15px] font-semibold tracking-wide">PAYMENT SENT</div>
+              <div className="w-5" />
+            </div>
+
+            <div className="flex flex-1 flex-col items-center px-6 pt-8 pb-6 text-center">
+              <h1 className="text-[32px] font-normal text-neutral-900">Sent {amountStr}</h1>
+
+              <div className="relative mt-6 mb-4">
+                <div className="flex h-[130px] w-[130px] items-center justify-center rounded-full bg-neutral-300 text-[42px] font-medium text-neutral-800">
+                  {initials || "•"}
+                </div>
+                <div className="absolute -bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow">
+                  <span className="text-[18px] font-black italic text-[#6d1ed4]" style={{ fontFamily: "Georgia, serif" }}>z</span>
+                </div>
+              </div>
+
+              <div className="text-[26px] font-normal leading-tight text-neutral-900">to {nameUpper}</div>
+              <div className="mt-1 text-[15px] italic text-neutral-500">Enrolled as {nameUpper}</div>
+              {contact && <div className="mt-2 text-[19px] text-neutral-900 break-all">{contact}</div>}
+
+              <p className="mt-6 max-w-[300px] text-[15px] italic leading-snug text-neutral-600">
+                The money will be available in {firstName}'s account shortly, typically in minutes.
+              </p>
+
+              <div className="mt-auto w-full pt-10">
+                <div className="text-center text-[13px] text-neutral-500">
+                  Confirmation: {reference}
+                </div>
+                <button
+                  onClick={() => setShowFullReceipt(true)}
+                  className="mt-4 w-full rounded-md bg-[#2a5c99] py-4 text-[16px] font-semibold tracking-wider text-white hover:bg-[#234f83] transition-colors"
+                >
+                  ALL DONE
+                </button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   if (isPayPal && !showFullReceipt) {
     const firstName = (recipientName || displayTo).split(" ")[0];
