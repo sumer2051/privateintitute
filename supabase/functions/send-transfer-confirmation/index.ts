@@ -54,34 +54,77 @@ const rowsHtml = (rows: [string, string][], labelColor = "#6a7590") =>
     `<tr><td style="color:${labelColor};padding:5px 0;width:42%;font-size:13px;">${escapeHtml(k)}</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${escapeHtml(v)}</td></tr>`
   ).join("");
 
-// ---------- Cash App template ----------
+// ---------- Cash App template (matches in-app + status-update style) ----------
 function cashappTemplate(c: Ctx) {
-  const initial = escapeHtml((c.audience === "sender" ? c.recipientName : c.senderName)[0]?.toUpperCase() || "$");
-  const verb = c.audience === "sender" ? `You sent` : `${escapeHtml(c.senderName)} sent you`;
-  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f6f6f6;font-family:'Cash Sans',-apple-system,Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:24px 0;background:#f6f6f6;"><tr><td align="center">
-  <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:20px;overflow:hidden;">
-    <tr><td style="padding:20px 24px;border-bottom:1px solid #eee;text-align:center;">
-      <div style="font-size:26px;font-weight:900;color:#00d64f;letter-spacing:-1px;">$cash</div>
-      <div style="font-size:10px;letter-spacing:2px;color:#888;text-transform:uppercase;margin-top:2px;">via ${BRAND}</div>
-    </td></tr>
-    <tr><td style="padding:28px 32px;">
-      ${pendingBanner(c.status)}
-      <div style="text-align:center;padding:8px 0 24px;">
-        <div style="position:relative;display:inline-block;">
-          <div style="width:88px;height:88px;border-radius:50%;background:#00d64f;color:#fff;font-size:44px;font-weight:900;line-height:88px;text-align:center;margin:0 auto;">${initial}</div>
-          <img src="${LOGO_URL}" width="28" height="28" style="position:absolute;bottom:-4px;right:-4px;border-radius:50%;background:#fff;padding:2px;border:2px solid #fff;" alt="${BRAND}" />
-        </div>
-        <div style="margin-top:16px;color:#555;font-size:14px;">${verb}</div>
-        <div style="font-size:56px;font-weight:900;color:#00d64f;letter-spacing:-2px;margin:6px 0 4px;">${c.amountStr}</div>
-        <div style="color:#333;font-size:15px;font-weight:600;">${c.audience === "sender" ? `to ${escapeHtml(c.recipientName)}` : `from ${escapeHtml(c.senderName)}`}</div>
-        ${c.memo ? `<div style="margin-top:14px;display:inline-block;background:#f0f0f0;color:#333;padding:8px 14px;border-radius:999px;font-size:13px;">"${escapeHtml(c.memo)}"</div>` : ""}
+  const headerName = c.audience === "recipient" ? c.senderName : c.recipientName;
+  const initial = escapeHtml((headerName || "$").trim()[0]?.toUpperCase() || "$");
+  const sign = c.audience === "recipient" ? "+" : "-";
+  const amountStr = `${sign}${c.amountStr.replace(/^-/, "")}`;
+  const statusMeta = c.status === "completed"
+    ? { label: "Complete", sub: "Payment received", icon: "✓", color: "#00a63e", bg: "#e6f9ee" }
+    : { label: "Pending", sub: "Awaiting review", icon: "⏳", color: "#8a6d00", bg: "#fff7d6" };
+  const dateStr = new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const category = c.detailRows.find(([k]) => /account|from|deposited/i.test(k))?.[1] || "Cash balance";
+
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#eeeeee;font-family:'Cash Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#000;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#eeeeee;padding:24px 0;"><tr><td align="center">
+  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;">
+    <tr><td style="padding:8px 24px 20px;">
+      <div style="font-size:28px;font-weight:900;color:#00d64f;letter-spacing:-1px;">
+        <span style="display:inline-block;transform:rotate(-8deg);margin-right:2px;">'</span>Cash App
       </div>
-      <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #eee;padding-top:14px;">
-        ${rowsHtml([...c.detailRows, ["Reference", c.reference], ["Status", c.status === "pending" ? "Pending review" : "Completed"]])}
+    </td></tr>
+    <tr><td style="background:#ffffff;border-radius:14px;padding:28px 28px 24px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:#d9d9d9;color:#555;font-size:32px;font-weight:800;line-height:72px;text-align:center;margin:0 0 18px;">${initial}</div>
+      <div style="font-size:34px;font-weight:900;line-height:1.15;letter-spacing:-0.5px;">${escapeHtml(headerName || "—")}</div>
+      <div style="font-size:16px;color:#8a8a8a;margin-top:10px;">${dateStr}</div>
+      ${c.memo ? `<div style="font-size:16px;color:#8a8a8a;margin-top:4px;">For ${escapeHtml(c.memo)}</div>` : ""}
+      <div style="font-size:54px;font-weight:900;color:#000;margin:20px 0 6px;letter-spacing:-2px;">${amountStr}</div>
+      <div style="height:1px;background:#e5e5e5;margin:18px 0 22px;"></div>
+
+      <div style="font-size:22px;font-weight:800;margin-bottom:14px;">Transaction details</div>
+
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="36" valign="top" style="padding:6px 0;">
+            <div style="width:26px;height:26px;border-radius:50%;background:${statusMeta.bg};color:${statusMeta.color};font-size:16px;font-weight:900;line-height:26px;text-align:center;">${statusMeta.icon}</div>
+          </td>
+          <td style="padding:6px 0;">
+            <div style="font-size:17px;font-weight:800;color:${statusMeta.color};">${statusMeta.label}</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">${statusMeta.sub}</div>
+          </td>
+        </tr>
+        <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
+
+        <tr>
+          <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">👤</td>
+          <td style="padding:6px 0;">
+            <div style="font-size:17px;font-weight:800;">Payment between</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">Recipient: ${escapeHtml(c.recipientName || "—")}</div>
+            <div style="font-size:14px;color:#8a8a8a;">Sender: ${escapeHtml(c.senderName || "—")}</div>
+          </td>
+        </tr>
+        <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
+
+        <tr>
+          <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">$</td>
+          <td style="padding:6px 0;">
+            <div style="font-size:17px;font-weight:800;">${c.audience === "recipient" ? "Deposited to" : "Paid from"}</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">${escapeHtml(category)}</div>
+          </td>
+        </tr>
+        <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
+
+        <tr>
+          <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">🧾</td>
+          <td style="padding:6px 0;">
+            <div style="font-size:17px;font-weight:800;">Transaction number</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">#${escapeHtml(c.reference)}</div>
+          </td>
+        </tr>
       </table>
     </td></tr>
-    <tr><td style="background:#fafafa;padding:16px;text-align:center;font-size:11px;color:#999;">© ${new Date().getFullYear()} ${BRAND} · Cash App styled receipt</td></tr>
+    <tr><td style="padding:16px 8px;text-align:center;font-size:11px;color:#8a8a8a;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
   </table>
 </td></tr></table></body></html>`;
 }
