@@ -1,31 +1,152 @@
-// Sends branded status-change confirmation emails to the sender and (if set)
-// the recipient captured on the original transfer.
+// Sends Cash App-styled status update emails to sender and (if present) recipient
+// whenever admin/staff move a transaction between workflow statuses.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { sendEmail, brandedEmail } from "../_shared/gmail.ts";
 
-const STATUS_COPY: Record<string, { label: string; note: string }> = {
-  pending: { label: "Pending", note: "Your transfer is awaiting review by our compliance specialists." },
-  processing: { label: "Processing", note: "Good news — our team has picked up your transfer and it is now being processed." },
-  under_review: { label: "Under Review", note: "Your transfer is currently under review. You may be contacted for additional verification." },
-  completed: { label: "Successful", note: "Your transfer has been approved and settled successfully." },
-  failed: { label: "Failed", note: "Unfortunately your transfer could not be completed. No further action is required — please contact support if you have questions." },
-  cancelled: { label: "Cancelled", note: "Your transfer has been cancelled. If this was unexpected, please reach out to support." },
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+const FROM_EMAIL =
+  Deno.env.get("RESEND_FROM_EMAIL") ||
+  "BoA private institute <onboarding@resend.dev>";
+const BRAND = "BoA private institute";
+
+function esc(s: string) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+type StatusKey = "pending" | "processing" | "under_review" | "completed" | "failed" | "cancelled";
+
+const STATUS_META: Record<StatusKey, { label: string; sub: string; icon: string; color: string; bg: string }> = {
+  pending:      { label: "Pending",      sub: "Awaiting review",                       icon: "⏳", color: "#8a6d00", bg: "#fff7d6" },
+  processing:   { label: "Processing",   sub: "Your payment is being processed",       icon: "⟳", color: "#0b62d6", bg: "#e6f0ff" },
+  under_review: { label: "Under review", sub: "Compliance is reviewing this payment",  icon: "🔍", color: "#6b21a8", bg: "#f3e8ff" },
+  completed:    { label: "Complete",     sub: "Payment received",                      icon: "✓", color: "#00a63e", bg: "#e6f9ee" },
+  failed:       { label: "Failed",       sub: "Payment could not be completed",        icon: "✕", color: "#b91c1c", bg: "#fee2e2" },
+  cancelled:    { label: "Cancelled",    sub: "Payment was cancelled",                 icon: "⊘", color: "#525252", bg: "#f0f0f0" },
 };
+
+function fmtMoney(n: number) {
+  return `$${Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function cashAppStatusEmail(opts: {
+  audience: "sender" | "recipient";
+  senderName: string;
+  recipientName: string;
+  amount: number;
+  memo: string;
+  status: StatusKey;
+  reference: string;
+  category: string;
+  dateStr: string;
+  adminNote?: string;
+}) {
+  const { audience, senderName, recipientName, amount, memo, status, reference, category, dateStr, adminNote } = opts;
+  const meta = STATUS_META[status];
+  const sign = audience === "recipient" ? "+" : "-";
+  const amountStr = `${sign}${fmtMoney(amount)}`;
+  const amountColor = audience === "recipient" ? "#000000" : "#000000";
+  const headerName = audience === "recipient" ? senderName : recipientName;
+  const initial = (headerName || "$").trim()[0]?.toUpperCase() || "$";
+  const subLine = audience === "sender" && status === "completed" ? "Payment sent" : meta.sub;
+
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#eeeeee;font-family:'Cash Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#000;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#eeeeee;padding:24px 0;"><tr><td align="center">
+  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;">
+    <tr><td style="padding:8px 24px 20px;">
+      <div style="font-size:28px;font-weight:900;color:#00d64f;letter-spacing:-1px;">
+        <span style="display:inline-block;transform:rotate(-8deg);margin-right:2px;">'</span>Cash App
+      </div>
+    </td></tr>
+    <tr><td style="background:#ffffff;border-radius:14px;padding:28px 28px 24px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:#d9d9d9;color:#555;font-size:32px;font-weight:800;line-height:72px;text-align:center;margin:0 0 18px;">${esc(initial)}</div>
+      <div style="font-size:34px;font-weight:900;line-height:1.15;letter-spacing:-0.5px;">${esc(headerName || "—")}</div>
+      <div style="font-size:16px;color:#8a8a8a;margin-top:10px;">${esc(dateStr)}</div>
+      ${memo ? `<div style="font-size:16px;color:#8a8a8a;margin-top:4px;">For ${esc(memo)}</div>` : ""}
+      <div style="font-size:54px;font-weight:900;color:${amountColor};margin:20px 0 6px;letter-spacing:-2px;">${amountStr}</div>
+      <div style="height:1px;background:#e5e5e5;margin:18px 0 22px;"></div>
+
+      <div style="font-size:22px;font-weight:800;margin-bottom:14px;">Transaction details</div>
+
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="36" valign="top" style="padding:6px 0;">
+            <div style="width:26px;height:26px;border-radius:50%;background:${meta.bg};color:${meta.color};font-size:16px;font-weight:900;line-height:26px;text-align:center;">${meta.icon}</div>
+          </td>
+          <td style="padding:6px 0;">
+            <div style="font-size:17px;font-weight:800;color:${meta.color};">${esc(meta.label)}</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">${esc(subLine)}</div>
+          </td>
+        </tr>
+        <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
+
+        <tr>
+          <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">👤</td>
+          <td style="padding:6px 0;">
+            <div style="font-size:17px;font-weight:800;">Payment between</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">Recipient: ${esc(recipientName || "—")}</div>
+            <div style="font-size:14px;color:#8a8a8a;">Sender: ${esc(senderName || "—")}</div>
+          </td>
+        </tr>
+        <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
+
+        <tr>
+          <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">$</td>
+          <td style="padding:6px 0;">
+            <div style="font-size:17px;font-weight:800;">${audience === "recipient" ? "Deposited to" : "Paid from"}</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">${esc(category || "Cash balance")}</div>
+          </td>
+        </tr>
+        <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
+
+        <tr>
+          <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">🧾</td>
+          <td style="padding:6px 0;">
+            <div style="font-size:17px;font-weight:800;">Transaction number</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">#${esc(reference)}</div>
+          </td>
+        </tr>
+
+        ${adminNote ? `
+        <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
+        <tr>
+          <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">💬</td>
+          <td style="padding:6px 0;">
+            <div style="font-size:17px;font-weight:800;">Note from support</div>
+            <div style="font-size:14px;color:#555;margin-top:2px;line-height:1.5;">${esc(adminNote)}</div>
+          </td>
+        </tr>` : ""}
+      </table>
+
+      <div style="margin-top:26px;font-size:12px;color:#a0a0a0;line-height:1.5;">
+        This is a Cash App-styled receipt from ${BRAND}. Status updates are issued whenever your transfer progresses through review.
+      </div>
+    </td></tr>
+    <tr><td style="padding:16px 8px;text-align:center;font-size:11px;color:#8a8a8a;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
+  </table>
+</td></tr></table></body></html>`;
+}
+
+async function resendSend(to: string, subject: string, html: string) {
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
+    body: JSON.stringify({ from: FROM_EMAIL, to: [to], subject, html }),
+  });
+  if (!r.ok) {
+    const t = await r.text();
+    throw new Error(`Resend ${r.status}: ${t}`);
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const body = await req.json().catch(() => ({}));
-    const { transactionId, status } = body as { transactionId?: string; status?: string };
-    if (!transactionId || !status) {
-      return new Response(JSON.stringify({ error: "transactionId and status required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const copy = STATUS_COPY[status];
-    if (!copy) {
-      return new Response(JSON.stringify({ error: "invalid status" }), {
+    const { transactionId, status, note } = body as { transactionId?: string; status?: StatusKey; note?: string };
+    if (!transactionId || !status || !(status in STATUS_META)) {
+      return new Response(JSON.stringify({ error: "transactionId and valid status required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -48,44 +169,37 @@ Deno.serve(async (req) => {
       .eq("id", tx.user_id)
       .maybeSingle();
 
-    const amt = Number(tx.amount || 0);
-    const amtStr = `$${Math.abs(amt).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-    const rows = `
-      <table style="width:100%;border-collapse:collapse;margin-top:8px">
-        <tr><td style="padding:6px 0;color:#6b7280;font-size:12px">Reference</td><td style="padding:6px 0;text-align:right;font-weight:600">${tx.reference_number || tx.id.slice(0,8)}</td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280;font-size:12px">Amount</td><td style="padding:6px 0;text-align:right;font-weight:600">${amtStr}</td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280;font-size:12px">Type</td><td style="padding:6px 0;text-align:right">${tx.category || "Transfer"}</td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280;font-size:12px">Date</td><td style="padding:6px 0;text-align:right">${new Date(tx.created_at as string).toLocaleString()}</td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280;font-size:12px">New status</td><td style="padding:6px 0;text-align:right"><span style="background:#0b1e3f;color:#fff;padding:4px 10px;border-radius:999px;font-size:11px;text-transform:uppercase;letter-spacing:.05em">${copy.label}</span></td></tr>
-      </table>`;
-
-    const senderName = profile?.full_name || "Valued Customer";
-    const senderBody = `
-      <p>Hi ${senderName},</p>
-      <p>${copy.note}</p>
-      ${rows}
-      <p style="margin-top:16px">${tx.description || ""}</p>`;
-
-    const recipientBody = `
-      <p>Hi${tx.recipient_name ? " " + tx.recipient_name : ""},</p>
-      <p>A transfer sent to you from <strong>${senderName}</strong> has an updated status.</p>
-      ${rows}
-      <p style="margin-top:16px;color:#6b7280;font-size:12px">If you were not expecting this transfer, you can safely ignore this message.</p>`;
+    const senderName = profile?.full_name || "Customer";
+    const recipientName = tx.recipient_name || (tx.description || "").replace(/^.*?to\s+/i, "").trim() || "Recipient";
+    const amount = Number(tx.amount || 0);
+    const memo = (tx.description || "").slice(0, 140);
+    const reference = tx.reference_number || tx.id.slice(0, 8).toUpperCase();
+    const category = tx.category || "Cash balance";
+    const dateStr = new Date(tx.created_at as string).toLocaleDateString(undefined, {
+      month: "short", day: "numeric", year: "numeric",
+    });
+    const adminNote = typeof note === "string" ? note.trim().slice(0, 500) : "";
+    const meta = STATUS_META[status];
 
     const jobs: Promise<unknown>[] = [];
     if (profile?.email) {
-      jobs.push(sendEmail(
+      jobs.push(resendSend(
         profile.email,
-        `Your transfer is now ${copy.label} — ${tx.reference_number || tx.id.slice(0, 8)}`,
-        brandedEmail(`Transfer ${copy.label}`, senderBody, "This is an automated notification from BoA private institute."),
+        `Payment ${meta.label.toLowerCase()} · ${reference}`,
+        cashAppStatusEmail({
+          audience: "sender", senderName, recipientName, amount, memo, status,
+          reference, category, dateStr, adminNote,
+        }),
       ));
     }
     if (tx.recipient_email) {
-      jobs.push(sendEmail(
+      jobs.push(resendSend(
         tx.recipient_email,
-        `Incoming transfer update — ${copy.label}`,
-        brandedEmail(`Transfer ${copy.label}`, recipientBody, "This is an automated notification from BoA private institute."),
+        status === "completed" ? `Payment received · ${reference}` : `Payment ${meta.label.toLowerCase()} · ${reference}`,
+        cashAppStatusEmail({
+          audience: "recipient", senderName, recipientName, amount, memo, status,
+          reference, category, dateStr, adminNote,
+        }),
       ));
     }
     const results = await Promise.allSettled(jobs);
