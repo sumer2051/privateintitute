@@ -79,11 +79,16 @@ export default function AdminTransactions() {
   useEffect(() => { if (allowed) load(); }, [allowed]);
 
   const update = async (tx: Tx, status: string) => {
+    const note = window.prompt(
+      `Add a note for the customer about moving this transfer to "${STATUS_LABEL[status] || status}" (optional):`,
+      "",
+    );
+    if (note === null) return; // cancelled
     setBusy(tx.id);
     const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: tx.id, p_status: status });
     if (error) { setBusy(null); return toast.error(error.message); }
     supabase.functions.invoke("send-transaction-status-update", {
-      body: { transactionId: tx.id, status },
+      body: { transactionId: tx.id, status, note: note.trim() || undefined },
     }).catch((e) => console.error("status email failed", e));
     setBusy(null);
     toast.success(`Marked ${STATUS_LABEL[status]} · notifications sent`);
