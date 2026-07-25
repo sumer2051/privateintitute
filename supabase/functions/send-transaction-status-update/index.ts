@@ -120,7 +120,7 @@ function cashAppStatusEmail(opts: {
       </table>
 
       <div style="margin-top:26px;font-size:12px;color:#a0a0a0;line-height:1.5;">
-        This is a Cash App-styled receipt from ${BRAND}. Status updates are issued whenever your transfer progresses through review.
+        Status updates are issued whenever your transfer progresses through review.
       </div>
     </td></tr>
     <tr><td style="padding:16px 8px;text-align:center;font-size:11px;color:#8a8a8a;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
