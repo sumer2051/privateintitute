@@ -247,31 +247,70 @@ function paypalTemplate(c: Ctx) {
 </td></tr></table></body></html>`;
 }
 
-// ---------- Venmo ----------
+// ---------- Venmo (matches native Venmo "Balance transfer sent" email) ----------
 function venmoTemplate(c: Ctx) {
-  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;color:#2f3033;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:24px 0;"><tr><td align="center">
-  <table width="560" cellpadding="0" cellspacing="0" style="border:1px solid #eee;border-radius:14px;overflow:hidden;position:relative;">
-    <tr><td style="background:#3d95ce;padding:20px 24px;position:relative;">
-      <img src="${LOGO_URL}" width="160" height="160" style="position:absolute;right:8px;top:8px;opacity:0.1;" alt="" />
-      <div style="color:#fff;font-size:24px;font-weight:800;letter-spacing:-0.5px;">venmo</div>
-      <div style="color:#d4e9f7;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-top:2px;">via ${BRAND}</div>
-    </td></tr>
-    <tr><td style="padding:24px 28px;">
-      ${pendingBanner(c.status)}
-      <div style="font-size:15px;color:#2f3033;">
-        <strong>${escapeHtml(c.audience === "sender" ? c.senderName : c.senderName)}</strong> paid <strong>${escapeHtml(c.recipientName)}</strong>
+  const initiatedOn = new Date().toLocaleString("en-US", {
+    month: "short", day: "numeric", year: "numeric",
+    hour: "numeric", minute: "2-digit", hour12: true, timeZoneName: "short",
+  });
+  const txId = c.reference.replace(/[^A-Za-z0-9]/g, "").padEnd(19, "0").slice(0, 19);
+  const from = `Venmo balance ${escapeHtml(c.senderName)}`;
+  const destination = `Venmo balance ${escapeHtml(c.recipientName)}`;
+  const label = (t: string) => `<div style="font-size:12px;font-weight:700;letter-spacing:0.5px;color:#2f3033;text-transform:uppercase;margin-top:22px;">${t}</div>`;
+  const value = (t: string) => `<div style="font-size:16px;color:#2f3033;margin-top:4px;line-height:1.4;">${t}</div>`;
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;color:#2f3033;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:24px 0;background:#ffffff;"><tr><td align="center">
+  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;padding:0 24px;">
+    <tr><td style="padding:8px 0 24px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:#008cff;text-align:center;line-height:72px;">
+        <span style="color:#ffffff;font-size:38px;font-weight:900;font-style:italic;font-family:'Helvetica Neue',Arial,sans-serif;letter-spacing:-1px;">v</span>
       </div>
-      ${c.memo ? `<div style="margin-top:8px;color:#6b6f76;font-size:14px;">${escapeHtml(c.memo)}</div>` : ""}
-      <div style="margin-top:16px;font-size:32px;font-weight:800;color:#008cff;">- ${c.amountStr}</div>
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;border-top:1px solid #eee;padding-top:12px;">
-        ${rowsHtml([...c.detailRows, ["Reference", c.reference], ["Status", c.status === "pending" ? "Pending" : "Completed"]])}
-      </table>
     </td></tr>
-    <tr><td style="background:#f7f8fa;padding:12px;text-align:center;font-size:11px;color:#8b9098;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
+    <tr><td>
+      ${pendingBanner(c.status)}
+      <h1 style="margin:0;font-size:28px;font-weight:400;color:#2f3033;letter-spacing:-0.3px;">Balance transfer Sent</h1>
+      <div style="margin-top:14px;font-size:16px;color:#2f3033;">Initiated on ${escapeHtml(initiatedOn)}</div>
+
+      ${label("Transfer amount")}
+      ${value(escapeHtml(c.amountStr))}
+
+      ${label("From")}
+      ${value(from)}
+
+      ${label("Destination")}
+      ${value(destination)}
+
+      ${label("Transaction ID")}
+      ${value(txId)}
+
+      <div style="margin-top:32px;font-size:15px;color:#2f3033;line-height:1.55;">
+        Transfers are reviewed which may result in delays or funds being frozen or removed from your Venmo account. <a href="#" style="color:#008cff;text-decoration:none;">Learn more</a>.
+      </div>
+      <div style="margin-top:16px;font-size:15px;color:#2f3033;line-height:1.55;">
+        You can see the status of your transfers by visiting your <a href="#" style="color:#008cff;text-decoration:none;">Account Statement</a>.
+      </div>
+      <div style="margin-top:16px;font-size:15px;color:#2f3033;line-height:1.55;">
+        Important: This transfer was initiated by ${escapeHtml(c.senderName)}. If you didn't make this request, please visit our Help Center at <a href="#" style="color:#008cff;text-decoration:none;">help.venmo.com</a> or call <a href="#" style="color:#008cff;text-decoration:none;">(855) 812-4430</a>.
+      </div>
+      <div style="margin-top:16px;font-size:15px;color:#2f3033;line-height:1.55;">
+        For any issues, including the recipient not receiving funds, please visit our Help Center at <a href="#" style="color:#008cff;text-decoration:none;">help.venmo.com</a> or call <a href="#" style="color:#008cff;text-decoration:none;">(855) 812-4430</a>.
+      </div>
+
+      <div style="margin-top:28px;font-size:13px;color:#8b9098;line-height:1.55;">
+        Venmo is a service of PayPal, Inc., a licensed provider of money transfer services. All money transmission is provided by PayPal, Inc. pursuant to PayPal, Inc.'s <a href="#" style="color:#8b9098;text-decoration:underline;">licenses</a>.
+      </div>
+      <div style="margin-top:12px;font-size:13px;color:#8b9098;line-height:1.55;">
+        PayPal is located at <a href="#" style="color:#8b9098;text-decoration:underline;">2211 North First Street, San Jose, CA 95131</a>.
+      </div>
+
+      <div style="margin-top:28px;padding-bottom:24px;">
+        <span style="color:#008cff;font-size:32px;font-weight:900;font-style:italic;letter-spacing:-1px;font-family:'Helvetica Neue',Arial,sans-serif;">venmo</span>
+      </div>
+    </td></tr>
   </table>
 </td></tr></table></body></html>`;
 }
+
 
 // ---------- Generic bank / SWIFT / SEPA / Wire ----------
 function bankTemplate(c: Ctx) {
