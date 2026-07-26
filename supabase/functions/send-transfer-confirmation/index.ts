@@ -129,46 +129,70 @@ function cashappTemplate(c: Ctx) {
 </td></tr></table></body></html>`;
 }
 
-// ---------- Zelle template ----------
+// ---------- Zelle template (matches screenshot) ----------
 function zelleTemplate(c: Ctx) {
-  const verb = c.audience === "sender" ? "Payment sent" : "You've received money";
-  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f2fa;font-family:Helvetica,Arial,sans-serif;color:#1a1a1a;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 0;"><tr><td align="center">
-  <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(107,70,193,0.12);position:relative;">
-    <tr><td style="background:linear-gradient(135deg,#6b46c1 0%,#4c1d95 100%);padding:24px 32px;position:relative;">
-      <img src="${LOGO_URL}" width="180" height="180" style="position:absolute;right:10px;top:10px;opacity:0.08;" alt="" />
-      <div style="color:#fff;font-size:22px;font-weight:800;letter-spacing:0.5px;">Zelle®</div>
-      <div style="color:#e9d8fd;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;margin-top:2px;">Powered by ${BRAND}</div>
-    </td></tr>
-    <tr><td style="padding:28px 32px;">
-      ${pendingBanner(c.status)}
-      <h1 style="margin:0 0 6px;font-size:20px;color:#4c1d95;">${verb}</h1>
-      <p style="margin:0 0 20px;color:#4a4a4a;font-size:14px;line-height:1.5;">
-        ${c.audience === "sender"
-          ? `Hi ${escapeHtml(c.senderName)}, your Zelle® payment to <strong>${escapeHtml(c.recipientName)}</strong> is on its way.`
-          : `Hi ${escapeHtml(c.recipientName)}, <strong>${escapeHtml(c.senderName)}</strong> sent you money with Zelle®.`}
-      </p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="border:2px solid #6b46c1;border-radius:10px;">
-        <tr><td style="padding:18px 20px;background:#f5f0ff;border-bottom:1px solid #e0d4f7;">
-          <div style="font-size:11px;letter-spacing:2px;color:#6b46c1;text-transform:uppercase;font-weight:700;">Amount</div>
-          <div style="font-size:34px;font-weight:800;color:#4c1d95;margin-top:4px;">${c.amountStr}</div>
+  const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  const senderUpper = escapeHtml((c.senderName || "").toUpperCase());
+  const recipUpper = escapeHtml((c.recipientName || "").toUpperCase());
+  const headline = c.audience === "recipient"
+    ? `${senderUpper} sent you money`
+    : `You sent ${recipUpper} money`;
+  const subHeadline = c.audience === "recipient"
+    ? `${escapeHtml(c.senderName)} is registered with a Zelle® member bank that supports payments in real time, so your money will usually be available in a few moments.`
+    : `Your Zelle® payment to ${escapeHtml(c.recipientName)} has been submitted.`;
+
+  const row = (label: string, value: string) => `
+    <tr><td style="padding:14px 0 10px;border-bottom:1px solid #d9d9d9;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:14px;color:#4a4a4a;">${escapeHtml(label)}</td>
+        <td align="right" style="font-size:15px;font-weight:700;color:#000;">${escapeHtml(value)}</td>
+      </tr></table>
+    </td></tr>`;
+
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff;font-family:Arial,Helvetica,sans-serif;color:#111;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:0;">
+  <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+    <tr><td style="background:#e5e7eb;height:22px;line-height:22px;font-size:0;">&nbsp;</td></tr>
+    <tr><td style="background:#1a55c9;padding:28px 22px 40px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:2px;">
+        <tr><td style="padding:26px 26px 8px;">
+          <span style="display:inline-block;background:#e9eaec;color:#111;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;">Zelle<sup style="font-size:9px;">®</sup> payment</span>
         </td></tr>
-        <tr><td style="padding:18px 20px;">
+        <tr><td style="padding:14px 26px 6px;">
+          <h1 style="margin:0;font-size:26px;line-height:1.2;font-weight:800;color:#111;">${headline}</h1>
+        </td></tr>
+        <tr><td style="padding:14px 26px 4px;font-size:14px;color:#4a4a4a;">Here are the details:</td></tr>
+        <tr><td style="padding:6px 26px 8px;">
           <table width="100%" cellpadding="0" cellspacing="0">
-            ${rowsHtml([
-              [c.audience === "sender" ? "Recipient" : "Sender", c.audience === "sender" ? c.recipientName : c.senderName],
-              ...c.detailRows,
-              ...(c.memo ? [["Memo", c.memo] as [string, string]] : []),
-              ...(c.settlement ? [["Delivery", c.settlement] as [string, string]] : []),
-              ["Reference", c.reference],
-              ["Status", c.status === "pending" ? "Pending approval" : "Sent"],
-            ], "#6b46c1")}
+            ${row("Amount", c.amountStr)}
+            ${row("Sent on", dateStr)}
+            ${row("Transaction number", c.reference)}
+            ${row("Memo", c.memo || "N/A")}
           </table>
         </td></tr>
+        <tr><td style="padding:18px 26px 6px;font-size:13px;color:#3a3a3a;line-height:1.55;">
+          ${subHeadline}
+        </td></tr>
+        ${c.memo ? `<tr><td style="padding:10px 26px 0;font-size:20px;font-weight:700;color:#111;">Note : ${escapeHtml(c.memo)}</td></tr>` : ""}
+        <tr><td style="padding:16px 26px 28px;">
+          <a href="https://www.zellepay.com" style="display:inline-block;background:#1a55c9;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:11px 20px;border-radius:4px;">Go to Zelle®</a>
+        </td></tr>
       </table>
-      <p style="margin:20px 0 0;font-size:12px;color:#777;line-height:1.5;">Zelle® and the Zelle® related marks are wholly owned by Early Warning Services, LLC and are used herein under license. This is an independent portal styled receipt from ${BRAND}.</p>
     </td></tr>
-    <tr><td style="background:#4c1d95;color:#e9d8fd;padding:14px;text-align:center;font-size:11px;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
+    <tr><td style="padding:18px 24px 6px;font-size:12px;color:#4a4a4a;line-height:1.55;">
+      Questions? Visit <a href="#" style="color:#1a55c9;">zellepay.com/support</a> or contact us at 1-800-935-9935
+    </td></tr>
+    <tr><td style="padding:6px 24px 18px;font-size:12px;color:#4a4a4a;line-height:1.55;">
+      See how to help keep your money safe using Zelle® <a href="#" style="color:#1a55c9;">zellepay.com/use-zelle-safely</a>
+    </td></tr>
+    <tr><td style="padding:6px 24px 22px;font-size:12px;color:#4a4a4a;line-height:1.55;">
+      Securely access your accounts in the ${BRAND} app.
+    </td></tr>
+    <tr><td style="background:#f2f2f2;padding:12px 24px;font-size:11px;letter-spacing:1.5px;color:#6a6a6a;">ABOUT THIS MESSAGE</td></tr>
+    <tr><td style="padding:14px 24px 24px;font-size:11px;color:#8a8a8a;line-height:1.55;">
+      Zelle® and the Zelle® related marks are wholly owned by Early Warning Services, LLC and are used herein under license. Reference ${escapeHtml(c.reference)} · Status ${c.status === "pending" ? "Pending" : "Sent"}<br/>
+      © ${new Date().getFullYear()} ${BRAND}
+    </td></tr>
   </table>
 </td></tr></table></body></html>`;
 }
