@@ -1,5 +1,6 @@
-// Sends Cash App-styled status update emails to sender and (if present) recipient
+// Sends brand-styled status update emails to sender and (if present) recipient
 // whenever admin/staff move a transaction between workflow statuses.
+// The email style matches the transfer method used (Cash App, Venmo, PayPal, Zelle, or generic bank).
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
@@ -8,6 +9,7 @@ const FROM_EMAIL =
   Deno.env.get("RESEND_FROM_EMAIL") ||
   "BoA private institute <onboarding@resend.dev>";
 const BRAND = "BoA private institute";
+const LOGO_URL = "https://boaprivatebank.lovable.app/logo.png";
 
 function esc(s: string) {
   return String(s ?? "")
@@ -30,7 +32,7 @@ function fmtMoney(n: number) {
   return `$${Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function cashAppStatusEmail(opts: {
+type Ctx = {
   audience: "sender" | "recipient";
   senderName: string;
   recipientName: string;
@@ -41,15 +43,16 @@ function cashAppStatusEmail(opts: {
   category: string;
   dateStr: string;
   adminNote?: string;
-}) {
-  const { audience, senderName, recipientName, amount, memo, status, reference, category, dateStr, adminNote } = opts;
-  const meta = STATUS_META[status];
-  const sign = audience === "recipient" ? "+" : "-";
-  const amountStr = `${sign}${fmtMoney(amount)}`;
-  const amountColor = audience === "recipient" ? "#000000" : "#000000";
-  const headerName = audience === "recipient" ? senderName : recipientName;
+};
+
+// ---------- Cash App status email ----------
+function cashappStatusEmail(c: Ctx) {
+  const meta = STATUS_META[c.status];
+  const sign = c.audience === "recipient" ? "+" : "-";
+  const amountStr = `${sign}${fmtMoney(c.amount)}`;
+  const headerName = c.audience === "recipient" ? c.senderName : c.recipientName;
   const initial = (headerName || "$").trim()[0]?.toUpperCase() || "$";
-  const subLine = audience === "sender" && status === "completed" ? "Payment sent" : meta.sub;
+  const subLine = c.audience === "sender" && c.status === "completed" ? "Payment sent" : meta.sub;
 
   return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#eeeeee;font-family:'Cash Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#000;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#eeeeee;padding:24px 0;"><tr><td align="center">
@@ -62,13 +65,11 @@ function cashAppStatusEmail(opts: {
     <tr><td style="background:#ffffff;border-radius:14px;padding:28px 28px 24px;">
       <div style="width:72px;height:72px;border-radius:50%;background:#d9d9d9;color:#555;font-size:32px;font-weight:800;line-height:72px;text-align:center;margin:0 0 18px;">${esc(initial)}</div>
       <div style="font-size:34px;font-weight:900;line-height:1.15;letter-spacing:-0.5px;">${esc(headerName || "—")}</div>
-      <div style="font-size:16px;color:#8a8a8a;margin-top:10px;">${esc(dateStr)}</div>
-      ${memo ? `<div style="font-size:16px;color:#8a8a8a;margin-top:4px;">For ${esc(memo)}</div>` : ""}
-      <div style="font-size:54px;font-weight:900;color:${amountColor};margin:20px 0 6px;letter-spacing:-2px;">${amountStr}</div>
+      <div style="font-size:16px;color:#8a8a8a;margin-top:10px;">${esc(c.dateStr)}</div>
+      ${c.memo ? `<div style="font-size:16px;color:#8a8a8a;margin-top:4px;">For ${esc(c.memo)}</div>` : ""}
+      <div style="font-size:54px;font-weight:900;color:#000;margin:20px 0 6px;letter-spacing:-2px;">${amountStr}</div>
       <div style="height:1px;background:#e5e5e5;margin:18px 0 22px;"></div>
-
       <div style="font-size:22px;font-weight:800;margin-bottom:14px;">Transaction details</div>
-
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
           <td width="36" valign="top" style="padding:6px 0;">
@@ -80,45 +81,40 @@ function cashAppStatusEmail(opts: {
           </td>
         </tr>
         <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
-
         <tr>
           <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">👤</td>
           <td style="padding:6px 0;">
             <div style="font-size:17px;font-weight:800;">Payment between</div>
-            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">Recipient: ${esc(recipientName || "—")}</div>
-            <div style="font-size:14px;color:#8a8a8a;">Sender: ${esc(senderName || "—")}</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">Recipient: ${esc(c.recipientName || "—")}</div>
+            <div style="font-size:14px;color:#8a8a8a;">Sender: ${esc(c.senderName || "—")}</div>
           </td>
         </tr>
         <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
-
         <tr>
           <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">$</td>
           <td style="padding:6px 0;">
-            <div style="font-size:17px;font-weight:800;">${audience === "recipient" ? "Deposited to" : "Paid from"}</div>
-            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">${esc(category || "Cash balance")}</div>
+            <div style="font-size:17px;font-weight:800;">${c.audience === "recipient" ? "Deposited to" : "Paid from"}</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">${esc(c.category || "Cash balance")}</div>
           </td>
         </tr>
         <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
-
         <tr>
           <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">🧾</td>
           <td style="padding:6px 0;">
             <div style="font-size:17px;font-weight:800;">Transaction number</div>
-            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">#${esc(reference)}</div>
+            <div style="font-size:14px;color:#8a8a8a;margin-top:2px;">#${esc(c.reference)}</div>
           </td>
         </tr>
-
-        ${adminNote ? `
+        ${c.adminNote ? `
         <tr><td colspan="2" style="padding:6px 0;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
         <tr>
           <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">💬</td>
           <td style="padding:6px 0;">
             <div style="font-size:17px;font-weight:800;">Note from support</div>
-            <div style="font-size:14px;color:#555;margin-top:2px;line-height:1.5;">${esc(adminNote)}</div>
+            <div style="font-size:14px;color:#555;margin-top:2px;line-height:1.5;">${esc(c.adminNote)}</div>
           </td>
         </tr>` : ""}
       </table>
-
       <div style="margin-top:26px;font-size:12px;color:#a0a0a0;line-height:1.5;">
         Status updates are issued whenever your transfer progresses through review.
       </div>
@@ -126,6 +122,269 @@ function cashAppStatusEmail(opts: {
     <tr><td style="padding:16px 8px;text-align:center;font-size:11px;color:#8a8a8a;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
   </table>
 </td></tr></table></body></html>`;
+}
+
+// ---------- Venmo status email (matches native "Balance transfer" style) ----------
+function venmoStatusEmail(c: Ctx) {
+  const meta = STATUS_META[c.status];
+  const amountStr = `${c.audience === "recipient" ? "+" : "-"}${fmtMoney(c.amount)}`;
+  const txId = c.reference.replace(/[^A-Za-z0-9]/g, "").padEnd(19, "0").slice(0, 19);
+  const from = `Venmo balance ${esc(c.senderName)}`;
+  const destination = `Venmo balance ${esc(c.recipientName)}`;
+  const label = (t: string) => `<div style="font-size:12px;font-weight:700;letter-spacing:0.5px;color:#2f3033;text-transform:uppercase;margin-top:22px;">${t}</div>`;
+  const value = (t: string) => `<div style="font-size:16px;color:#2f3033;margin-top:4px;line-height:1.4;">${t}</div>`;
+
+  const heading = c.status === "completed"
+    ? "Balance transfer Complete"
+    : c.status === "failed"
+      ? "Balance transfer Failed"
+      : c.status === "cancelled"
+        ? "Balance transfer Cancelled"
+        : c.status === "under_review"
+          ? "Balance transfer Under Review"
+          : c.status === "processing"
+            ? "Balance transfer Processing"
+            : "Balance transfer Pending";
+
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;color:#2f3033;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:24px 0;background:#ffffff;"><tr><td align="center">
+  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;padding:0 24px;">
+    <tr><td style="padding:8px 0 24px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:#008cff;text-align:center;line-height:72px;">
+        <span style="color:#ffffff;font-size:38px;font-weight:900;font-style:italic;font-family:'Helvetica Neue',Arial,sans-serif;letter-spacing:-1px;">v</span>
+      </div>
+    </td></tr>
+    <tr><td>
+      <h1 style="margin:0;font-size:28px;font-weight:400;color:#2f3033;letter-spacing:-0.3px;">${heading}</h1>
+      <div style="margin-top:14px;font-size:16px;color:#2f3033;">Updated on ${esc(c.dateStr)}</div>
+
+      <div style="margin-top:22px;display:inline-block;padding:8px 14px;border-radius:999px;background:${meta.bg};color:${meta.color};font-size:13px;font-weight:800;">
+        <span style="margin-right:6px;">${meta.icon}</span>${esc(meta.label)} · ${esc(meta.sub)}
+      </div>
+
+      ${label("Transfer amount")}
+      ${value(esc(amountStr))}
+
+      ${label("From")}
+      ${value(from)}
+
+      ${label("Destination")}
+      ${value(destination)}
+
+      ${label("Transaction ID")}
+      ${value(txId)}
+
+      ${c.memo ? `${label("Note")}${value(esc(c.memo))}` : ""}
+      ${c.adminNote ? `${label("Note from support")}${value(esc(c.adminNote))}` : ""}
+
+      <div style="margin-top:32px;font-size:15px;color:#2f3033;line-height:1.55;">
+        Transfers are reviewed which may result in delays or funds being frozen or removed from your Venmo account. <a href="#" style="color:#008cff;text-decoration:none;">Learn more</a>.
+      </div>
+      <div style="margin-top:16px;font-size:15px;color:#2f3033;line-height:1.55;">
+        You can see the status of your transfers by visiting your <a href="#" style="color:#008cff;text-decoration:none;">Account Statement</a>.
+      </div>
+      <div style="margin-top:16px;font-size:15px;color:#2f3033;line-height:1.55;">
+        Important: This transfer was initiated by ${esc(c.senderName)}. If you didn't make this request, please visit our Help Center at <a href="#" style="color:#008cff;text-decoration:none;">help.venmo.com</a> or call <a href="#" style="color:#008cff;text-decoration:none;">(855) 812-4430</a>.
+      </div>
+      <div style="margin-top:16px;font-size:15px;color:#2f3033;line-height:1.55;">
+        For any issues, including the recipient not receiving funds, please visit our Help Center at <a href="#" style="color:#008cff;text-decoration:none;">help.venmo.com</a> or call <a href="#" style="color:#008cff;text-decoration:none;">(855) 812-4430</a>.
+      </div>
+      <div style="margin-top:28px;font-size:13px;color:#8b9098;line-height:1.55;">
+        Venmo is a service of PayPal, Inc., a licensed provider of money transfer services. All money transmission is provided by PayPal, Inc. pursuant to PayPal, Inc.'s <a href="#" style="color:#8b9098;text-decoration:underline;">licenses</a>.
+      </div>
+      <div style="margin-top:12px;font-size:13px;color:#8b9098;line-height:1.55;">
+        PayPal is located at <a href="#" style="color:#8b9098;text-decoration:underline;">2211 North First Street, San Jose, CA 95131</a>.
+      </div>
+      <div style="margin-top:28px;padding-bottom:24px;">
+        <span style="color:#008cff;font-size:32px;font-weight:900;font-style:italic;letter-spacing:-1px;font-family:'Helvetica Neue',Arial,sans-serif;">venmo</span>
+      </div>
+    </td></tr>
+  </table>
+</td></tr></table></body></html>`;
+}
+
+// ---------- PayPal status email ----------
+function paypalStatusEmail(c: Ctx) {
+  const meta = STATUS_META[c.status];
+  const amountStr = fmtMoney(c.amount);
+  const headline = c.audience === "sender"
+    ? `Your payment to ${esc(c.recipientName)} is ${esc(meta.label.toLowerCase())}`
+    : `Payment from ${esc(c.senderName)} is ${esc(meta.label.toLowerCase())}`;
+  const greetingName = c.audience === "sender" ? c.senderName : c.recipientName;
+  const paypalLogo = `<span style="font-size:28px;font-weight:900;font-style:italic;letter-spacing:-1.5px;line-height:1;"><span style="color:#003087;">Pay</span><span style="color:#009cde;">Pal</span></span>`;
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f2f2f2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#000;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f2;padding:24px 0;"><tr><td align="center">
+  <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+    <tr><td style="padding:16px 24px;">${paypalLogo}</td></tr>
+    <tr><td style="padding:8px 24px 4px;text-align:center;font-size:14px;color:#6c7378;">Hello, ${esc(greetingName)}</td></tr>
+    <tr><td style="padding:24px;">
+      <div style="display:inline-block;padding:6px 12px;border-radius:999px;background:${meta.bg};color:${meta.color};font-size:12px;font-weight:800;margin-bottom:12px;">
+        ${meta.icon} ${esc(meta.label)}
+      </div>
+      <h1 style="margin:0;font-size:36px;line-height:1.1;font-weight:900;color:#000;letter-spacing:-1px;">${headline}</h1>
+    </td></tr>
+    <tr><td style="padding:0 16px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:14px;">
+        <tr><td style="padding:28px 28px 8px;">
+          <div style="font-size:16px;font-weight:800;color:#000;">Amount</div>
+          <div style="font-size:16px;color:#2c2e2f;margin-top:4px;">${amountStr}</div>
+        </td></tr>
+        <tr><td style="padding:16px 28px 8px;">
+          <div style="font-size:16px;font-weight:800;color:#000;">Transaction date</div>
+          <div style="font-size:16px;color:#2c2e2f;margin-top:4px;">${esc(c.dateStr)}</div>
+        </td></tr>
+        <tr><td style="padding:16px 28px 8px;">
+          <div style="font-size:16px;font-weight:800;color:#000;">Transaction ID</div>
+          <div style="font-size:16px;color:#2c2e2f;margin-top:4px;font-family:monospace;">${esc(c.reference)}</div>
+        </td></tr>
+        <tr><td style="padding:16px 28px 8px;">
+          <div style="font-size:16px;font-weight:800;color:#000;">Status</div>
+          <div style="font-size:16px;color:${meta.color};margin-top:4px;font-weight:700;">${esc(meta.label)} — ${esc(meta.sub)}</div>
+        </td></tr>
+        ${c.memo ? `<tr><td style="padding:16px 28px 8px;">
+          <div style="font-size:18px;color:#000;border-bottom:1px solid #d0d0d0;padding-bottom:6px;">Note : ${esc(c.memo)}</div>
+        </td></tr>` : ""}
+        ${c.adminNote ? `<tr><td style="padding:16px 28px 8px;">
+          <div style="font-size:14px;font-weight:800;color:#000;">Note from support</div>
+          <div style="font-size:15px;color:#2c2e2f;margin-top:4px;line-height:1.5;">${esc(c.adminNote)}</div>
+        </td></tr>` : ""}
+        <tr><td style="padding:24px 28px 32px;text-align:center;">
+          <a href="https://www.paypal.com" style="display:inline-block;background:#000;color:#fff;text-decoration:none;font-weight:700;font-size:17px;padding:16px 56px;border-radius:999px;">Go to PayPal</a>
+        </td></tr>
+        <tr><td style="padding:8px 0 28px;text-align:center;">${paypalLogo}</td></tr>
+      </table>
+    </td></tr>
+    <tr><td style="padding:20px 24px;text-align:center;font-size:11px;color:#8a8a8a;line-height:1.5;">
+      Ref ${esc(c.reference)} · © ${new Date().getFullYear()} ${BRAND}
+    </td></tr>
+  </table>
+</td></tr></table></body></html>`;
+}
+
+// ---------- Zelle status email ----------
+function zelleStatusEmail(c: Ctx) {
+  const meta = STATUS_META[c.status];
+  const amountStr = fmtMoney(c.amount);
+  const senderUpper = esc((c.senderName || "").toUpperCase());
+  const recipUpper = esc((c.recipientName || "").toUpperCase());
+  const headline = c.audience === "recipient"
+    ? `${senderUpper} — payment ${esc(meta.label.toLowerCase())}`
+    : `Your payment to ${recipUpper} is ${esc(meta.label.toLowerCase())}`;
+
+  const row = (label: string, value: string) => `
+    <tr><td style="padding:14px 0 10px;border-bottom:1px solid #d9d9d9;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:14px;color:#4a4a4a;">${esc(label)}</td>
+        <td align="right" style="font-size:15px;font-weight:700;color:#000;">${esc(value)}</td>
+      </tr></table>
+    </td></tr>`;
+
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff;font-family:Arial,Helvetica,sans-serif;color:#111;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:0;">
+  <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+    <tr><td style="background:#e5e7eb;height:22px;line-height:22px;font-size:0;">&nbsp;</td></tr>
+    <tr><td style="background:#1a55c9;padding:28px 22px 40px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:2px;">
+        <tr><td style="padding:26px 26px 8px;">
+          <span style="display:inline-block;background:#e9eaec;color:#111;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;">Zelle<sup style="font-size:9px;">®</sup> payment</span>
+          <span style="display:inline-block;margin-left:8px;padding:6px 12px;border-radius:999px;background:${meta.bg};color:${meta.color};font-size:12px;font-weight:800;">${meta.icon} ${esc(meta.label)}</span>
+        </td></tr>
+        <tr><td style="padding:14px 26px 6px;">
+          <h1 style="margin:0;font-size:24px;line-height:1.2;font-weight:800;color:#111;">${headline}</h1>
+        </td></tr>
+        <tr><td style="padding:14px 26px 4px;font-size:14px;color:#4a4a4a;">Here are the details:</td></tr>
+        <tr><td style="padding:6px 26px 8px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            ${row("Amount", amountStr)}
+            ${row("Updated on", c.dateStr)}
+            ${row("Transaction number", c.reference)}
+            ${row("Status", `${meta.label} — ${meta.sub}`)}
+            ${row("Memo", c.memo || "N/A")}
+          </table>
+        </td></tr>
+        ${c.adminNote ? `<tr><td style="padding:12px 26px 0;font-size:14px;color:#3a3a3a;line-height:1.55;">
+          <strong>Note from support:</strong> ${esc(c.adminNote)}
+        </td></tr>` : ""}
+        <tr><td style="padding:16px 26px 28px;">
+          <a href="https://www.zellepay.com" style="display:inline-block;background:#1a55c9;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:11px 20px;border-radius:4px;">Go to Zelle®</a>
+        </td></tr>
+      </table>
+    </td></tr>
+    <tr><td style="padding:18px 24px 6px;font-size:12px;color:#4a4a4a;line-height:1.55;">
+      Questions? Visit <a href="#" style="color:#1a55c9;">zellepay.com/support</a> or contact us at 1-800-935-9935
+    </td></tr>
+    <tr><td style="background:#f2f2f2;padding:12px 24px;font-size:11px;letter-spacing:1.5px;color:#6a6a6a;">ABOUT THIS MESSAGE</td></tr>
+    <tr><td style="padding:14px 24px 24px;font-size:11px;color:#8a8a8a;line-height:1.55;">
+      Zelle® and the Zelle® related marks are wholly owned by Early Warning Services, LLC and are used herein under license. Reference ${esc(c.reference)}<br/>
+      © ${new Date().getFullYear()} ${BRAND}
+    </td></tr>
+  </table>
+</td></tr></table></body></html>`;
+}
+
+// ---------- Generic bank status email ----------
+function bankStatusEmail(c: Ctx, scheme: string) {
+  const meta = STATUS_META[c.status];
+  const amountStr = fmtMoney(c.amount);
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f6fb;font-family:Helvetica,Arial,sans-serif;color:#1a2238;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 0;"><tr><td align="center">
+  <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(10,20,50,0.08);">
+    <tr><td style="background:linear-gradient(135deg,#0a1a3f 0%,#142a63 100%);padding:24px 32px;color:#fff;">
+      <table cellpadding="0" cellspacing="0"><tr>
+        <td style="padding-right:14px;"><img src="${LOGO_URL}" width="46" height="46" style="border-radius:50%;background:#fff;padding:2px;" alt="${BRAND}"/></td>
+        <td><div style="font-size:18px;font-weight:700;">${BRAND}</div>
+          <div style="font-size:11px;letter-spacing:3px;color:#c9b27c;text-transform:uppercase;margin-top:2px;">Wealth · Trust · Legacy</div></td>
+      </tr></table>
+    </td></tr>
+    <tr><td style="padding:28px 32px;">
+      <div style="display:inline-block;padding:6px 12px;border-radius:999px;background:${meta.bg};color:${meta.color};font-size:12px;font-weight:800;margin-bottom:12px;">
+        ${meta.icon} ${esc(meta.label)} — ${esc(meta.sub)}
+      </div>
+      <h1 style="margin:0 0 6px;font-size:20px;color:#0a1a3f;">${esc(scheme)} status update</h1>
+      <p style="margin:0 0 18px;color:#3a4660;font-size:14px;line-height:1.55;">
+        ${c.audience === "sender"
+          ? `Hi ${esc(c.senderName)}, your <strong>${esc(scheme)}</strong> transfer to <strong>${esc(c.recipientName)}</strong> has been moved to <strong>${esc(meta.label)}</strong>.`
+          : `Hi ${esc(c.recipientName)}, the <strong>${esc(scheme)}</strong> transfer from <strong>${esc(c.senderName)}</strong> has been moved to <strong>${esc(meta.label)}</strong>.`}
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e6e9f2;border-radius:8px;">
+        <tr><td style="padding:14px 18px;background:#f7f9fc;border-bottom:1px solid #e6e9f2;font-size:11px;letter-spacing:2px;color:#5a6680;text-transform:uppercase;">Transfer summary</td></tr>
+        <tr><td style="padding:16px 18px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;width:42%;">Amount</td><td style="font-weight:800;font-size:20px;color:#0a1a3f;padding:5px 0;">${amountStr}</td></tr>
+            <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Scheme</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(scheme)}</td></tr>
+            <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">${c.audience === "sender" ? "Recipient" : "Sender"}</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.audience === "sender" ? c.recipientName : c.senderName)}</td></tr>
+            <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Updated on</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.dateStr)}</td></tr>
+            <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Reference</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.reference)}</td></tr>
+            ${c.memo ? `<tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Memo</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.memo)}</td></tr>` : ""}
+          </table>
+        </td></tr>
+      </table>
+      ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Note from support:</strong> ${esc(c.adminNote)}</div>` : ""}
+    </td></tr>
+    <tr><td style="background:#0a1a3f;color:#c9c9d4;padding:16px;text-align:center;font-size:11px;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
+  </table>
+</td></tr></table></body></html>`;
+}
+
+function detectScheme(description: string | null, category: string | null): string {
+  const hay = `${description || ""} ${category || ""}`.toLowerCase();
+  if (hay.includes("cash app") || hay.includes("cashapp")) return "Cash App";
+  if (hay.includes("venmo")) return "Venmo";
+  if (hay.includes("paypal")) return "PayPal";
+  if (hay.includes("zelle")) return "Zelle";
+  // Try bracket prefix "[Scheme Name] ..."
+  const m = /^\[([^\]]+)\]/.exec(description || "");
+  if (m) return m[1];
+  return "Bank Transfer";
+}
+
+function renderEmail(scheme: string, c: Ctx): string {
+  const s = scheme.toLowerCase();
+  if (s.includes("cash app") || s === "cashapp") return cashappStatusEmail(c);
+  if (s.includes("venmo")) return venmoStatusEmail(c);
+  if (s.includes("paypal")) return paypalStatusEmail(c);
+  if (s.includes("zelle")) return zelleStatusEmail(c);
+  return bankStatusEmail(c, scheme);
 }
 
 async function resendSend(to: string, subject: string, html: string) {
@@ -170,42 +429,46 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     const senderName = profile?.full_name || "Customer";
-    const recipientName = tx.recipient_name || (tx.description || "").replace(/^.*?to\s+/i, "").trim() || "Recipient";
+    const recipientName = tx.recipient_name || (tx.description || "").replace(/^\[[^\]]+\]\s*/, "").replace(/^.*?to\s+/i, "").trim() || "Recipient";
     const amount = Number(tx.amount || 0);
-    const memo = (tx.description || "").slice(0, 140);
+    const memo = (tx.description || "").replace(/^\[[^\]]+\]\s*/, "").slice(0, 140);
     const reference = tx.reference_number || tx.id.slice(0, 8).toUpperCase();
     const category = tx.category || "Cash balance";
-    const dateStr = new Date(tx.created_at as string).toLocaleDateString(undefined, {
+    const dateStr = new Date().toLocaleDateString(undefined, {
       month: "short", day: "numeric", year: "numeric",
     });
     const adminNote = typeof note === "string" ? note.trim().slice(0, 500) : "";
     const meta = STATUS_META[status];
+    const scheme = detectScheme(tx.description, tx.category);
+
+    const baseCtx: Omit<Ctx, "audience"> = {
+      senderName, recipientName, amount, memo, status,
+      reference, category, dateStr, adminNote,
+    };
 
     const jobs: Promise<unknown>[] = [];
     if (profile?.email) {
+      const ctx: Ctx = { ...baseCtx, audience: "sender" };
       jobs.push(resendSend(
         profile.email,
-        `Payment ${meta.label.toLowerCase()} · ${reference}`,
-        cashAppStatusEmail({
-          audience: "sender", senderName, recipientName, amount, memo, status,
-          reference, category, dateStr, adminNote,
-        }),
+        `${scheme} ${meta.label.toLowerCase()} · ${reference}`,
+        renderEmail(scheme, ctx),
       ));
     }
     if (tx.recipient_email) {
+      const ctx: Ctx = { ...baseCtx, audience: "recipient" };
       jobs.push(resendSend(
         tx.recipient_email,
-        status === "completed" ? `Payment received · ${reference}` : `Payment ${meta.label.toLowerCase()} · ${reference}`,
-        cashAppStatusEmail({
-          audience: "recipient", senderName, recipientName, amount, memo, status,
-          reference, category, dateStr, adminNote,
-        }),
+        status === "completed"
+          ? `${scheme} received · ${reference}`
+          : `${scheme} ${meta.label.toLowerCase()} · ${reference}`,
+        renderEmail(scheme, ctx),
       ));
     }
     const results = await Promise.allSettled(jobs);
     const failed = results.filter(r => r.status === "rejected").map(r => (r as PromiseRejectedResult).reason?.message || String((r as PromiseRejectedResult).reason));
 
-    return new Response(JSON.stringify({ ok: true, sent: results.length - failed.length, failed }), {
+    return new Response(JSON.stringify({ ok: true, sent: results.length - failed.length, failed, scheme }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
