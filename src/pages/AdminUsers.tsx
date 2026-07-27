@@ -497,13 +497,30 @@ export default function AdminUsers() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
-                <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Deposit type</label>
+                  <Select value={depositType} onValueChange={setDepositType}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["ACH","Wire","Check","Cash","Internal Transfer","Payroll","Refund","Other"].map(t => (
+                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
+                  <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+                </div>
               </div>
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason (shown to user)</label>
-                <Input placeholder="e.g. Incoming wire from Chase — pending compliance review" value={depositReason} onChange={e => setDepositReason(e.target.value)} />
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Coming from</label>
+                <Input placeholder="e.g. Chase Bank · Payroll · John Smith" value={depositSource} onChange={e => setDepositSource(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason / description (shown to user)</label>
+                <Input placeholder="e.g. Incoming wire — pending compliance review" value={depositReason} onChange={e => setDepositReason(e.target.value)} />
               </div>
             </div>
             <DialogFooter>
@@ -515,17 +532,24 @@ export default function AdminUsers() {
                   const amt = parseFloat(depositAmount);
                   if (!amt || amt <= 0 || Number.isNaN(amt)) { toast.error("Enter a positive amount"); return; }
                   if (!depositReason.trim()) { toast.error("Add a reason for the deposit"); return; }
+                  if (!depositSource.trim()) { toast.error("Enter where the deposit is coming from"); return; }
                   setBusy(true);
-                  const { error } = await supabase.rpc("admin_post_pending_deposit", {
+                  const composed = buildDepositReason(depositType, depositSource, depositReason);
+                  const { data: newTxId, error } = await supabase.rpc("admin_post_pending_deposit", {
                     p_account: quickDepositAccountId,
                     p_amount: amt,
-                    p_reason: depositReason.trim(),
+                    p_reason: composed,
                   });
                   setBusy(false);
                   if (error) { toast.error(error.message); return; }
-                  toast.success("Pending deposit posted · user notified");
+                  if (newTxId) {
+                    supabase.functions.invoke("send-transaction-status-update", {
+                      body: { transactionId: newTxId, status: "pending", note: `Pending ${depositType} deposit from ${depositSource.trim()}` },
+                    }).catch((e) => console.error("deposit email failed", e));
+                  }
+                  toast.success("Pending deposit posted · user notified by email");
                   setQuickDepositOpen(false);
-                  setDepositAmount(""); setDepositReason("");
+                  setDepositAmount(""); setDepositReason(""); setDepositSource(""); setDepositType("ACH");
                   load();
                 }}
               >
@@ -540,17 +564,34 @@ export default function AdminUsers() {
             <DialogHeader>
               <DialogTitle>Post pending deposit</DialogTitle>
               <DialogDescription>
-                {depositAccount?.account_name} ••••{depositAccount?.account_number.slice(-4)}. The user will see a pending notification. Balance is credited only when you mark it complete.
+                {depositAccount?.account_name} ••••{depositAccount?.account_number.slice(-4)}. The user will see a pending notification and receive an email. Balance is credited only when you mark it complete.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
-                <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Deposit type</label>
+                  <Select value={depositType} onValueChange={setDepositType}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["ACH","Wire","Check","Cash","Internal Transfer","Payroll","Refund","Other"].map(t => (
+                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
+                  <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+                </div>
               </div>
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason (shown to user)</label>
-                <Input placeholder="e.g. Incoming wire from Chase — pending compliance review" value={depositReason} onChange={e => setDepositReason(e.target.value)} />
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Coming from</label>
+                <Input placeholder="e.g. Chase Bank · Payroll · John Smith" value={depositSource} onChange={e => setDepositSource(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason / description (shown to user)</label>
+                <Input placeholder="e.g. Incoming wire — pending compliance review" value={depositReason} onChange={e => setDepositReason(e.target.value)} />
               </div>
             </div>
             <DialogFooter>
