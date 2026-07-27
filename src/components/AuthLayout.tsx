@@ -11,6 +11,7 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Shield, ShieldCheck } from "lucide-react";
 import { StaffPinDialog } from "@/components/StaffPinDialog";
+import { AchOneTimeDialog } from "@/components/AchOneTimeDialog";
 import {
   Dialog,
   DialogContent,
