@@ -51,6 +51,8 @@ export default function AdminUsers() {
   const [depositAccount, setDepositAccount] = useState<Account | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [depositReason, setDepositReason] = useState("");
+  const [depositType, setDepositType] = useState<string>("ACH");
+  const [depositSource, setDepositSource] = useState("");
   const [quickDepositOpen, setQuickDepositOpen] = useState(false);
   const [quickDepositUserId, setQuickDepositUserId] = useState<string>("");
   const [quickDepositAccountId, setQuickDepositAccountId] = useState<string>("");
