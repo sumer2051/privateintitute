@@ -11,6 +11,7 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Shield, ShieldCheck } from "lucide-react";
 import { StaffPinDialog } from "@/components/StaffPinDialog";
+import { AchOneTimeDialog } from "@/components/AchOneTimeDialog";
 import {
   Dialog,
   DialogContent,
@@ -304,6 +305,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
       <AiChatWidget open={chatOpen} onOpenChange={setChatOpen} />
       <StaffPinDialog open={pinOpen} onOpenChange={setPinOpen} onVerified={() => setStaffMode(true)} />
+      <AchOneTimeDialog />
     </div>
   );
 };
