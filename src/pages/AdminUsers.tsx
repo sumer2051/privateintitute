@@ -51,6 +51,9 @@ export default function AdminUsers() {
   const [depositAccount, setDepositAccount] = useState<Account | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [depositReason, setDepositReason] = useState("");
+  const [quickDepositOpen, setQuickDepositOpen] = useState(false);
+  const [quickDepositUserId, setQuickDepositUserId] = useState<string>("");
+  const [quickDepositAccountId, setQuickDepositAccountId] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -88,12 +91,28 @@ export default function AdminUsers() {
   }, [selected]);
 
   const updateTxStatus = async (tx: Tx, status: string) => {
+    const isPendingDeposit = tx.category === "Pending Deposit";
     const note = window.prompt(
       `Add a note for the customer about moving this transfer to "${STATUS_LABEL[status] || status}" (optional):`,
       "",
     );
     if (note === null) return;
     setTxBusy(tx.id);
+
+    // For pending deposits moving to "completed", use the RPC that credits balance.
+    if (isPendingDeposit && status === "completed") {
+      const { error } = await supabase.rpc("admin_complete_pending_deposit", { p_tx: tx.id });
+      if (error) { setTxBusy(null); toast.error(error.message); return; }
+      supabase.functions.invoke("send-transaction-status-update", {
+        body: { transactionId: tx.id, status, note: note.trim() || undefined },
+      }).catch((e) => console.error("status email failed", e));
+      setTxBusy(null);
+      toast.success("Deposit completed · balance credited · user notified");
+      if (selected) reloadUserTx(selected.id);
+      load();
+      return;
+    }
+
     const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: tx.id, p_status: status });
     if (error) { setTxBusy(null); toast.error(error.message); return; }
     supabase.functions.invoke("send-transaction-status-update", {
@@ -246,9 +265,17 @@ export default function AdminUsers() {
           <CardHeader>
             <div className="flex flex-col md:flex-row md:items-center gap-3 md:justify-between">
               <CardTitle>All users</CardTitle>
-              <div className="relative w-full md:w-72">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-9" placeholder="Search email or name" value={q} onChange={e => setQ(e.target.value)} />
+              <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                <Button
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  onClick={() => { setQuickDepositOpen(true); setQuickDepositUserId(""); setQuickDepositAccountId(""); setDepositAmount(""); setDepositReason(""); }}
+                >
+                  <DollarSign className="h-4 w-4 mr-1" /> Post deposit
+                </Button>
+                <div className="relative w-full md:w-72">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input className="pl-9" placeholder="Search email or name" value={q} onChange={e => setQ(e.target.value)} />
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -414,6 +441,77 @@ export default function AdminUsers() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setAdjustAccount(null)} disabled={busy}>Cancel</Button>
               <Button onClick={submitAdjust} disabled={busy}>{busy ? "Applying..." : "Apply"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={quickDepositOpen} onOpenChange={(o) => !o && setQuickDepositOpen(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Post deposit to any user</DialogTitle>
+              <DialogDescription>
+                Choose a customer and one of their deposit accounts. It appears as a pending deposit and only credits the balance when you mark it complete.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">User</label>
+                <Select value={quickDepositUserId} onValueChange={(v) => { setQuickDepositUserId(v); setQuickDepositAccountId(""); }}>
+                  <SelectTrigger><SelectValue placeholder="Select user" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {profiles.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.full_name || p.email} — {p.email}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Account</label>
+                <Select value={quickDepositAccountId} onValueChange={setQuickDepositAccountId} disabled={!quickDepositUserId}>
+                  <SelectTrigger><SelectValue placeholder={quickDepositUserId ? "Select account" : "Pick a user first"} /></SelectTrigger>
+                  <SelectContent>
+                    {accountsFor(quickDepositUserId).filter(a => a.account_type !== "credit").map(a => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.account_name} ••••{a.account_number.slice(-4)} · ${Number(a.balance).toLocaleString()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
+                <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason (shown to user)</label>
+                <Input placeholder="e.g. Incoming wire from Chase — pending compliance review" value={depositReason} onChange={e => setDepositReason(e.target.value)} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setQuickDepositOpen(false)} disabled={busy}>Cancel</Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                disabled={busy || !quickDepositAccountId}
+                onClick={async () => {
+                  const amt = parseFloat(depositAmount);
+                  if (!amt || amt <= 0 || Number.isNaN(amt)) { toast.error("Enter a positive amount"); return; }
+                  if (!depositReason.trim()) { toast.error("Add a reason for the deposit"); return; }
+                  setBusy(true);
+                  const { error } = await supabase.rpc("admin_post_pending_deposit", {
+                    p_account: quickDepositAccountId,
+                    p_amount: amt,
+                    p_reason: depositReason.trim(),
+                  });
+                  setBusy(false);
+                  if (error) { toast.error(error.message); return; }
+                  toast.success("Pending deposit posted · user notified");
+                  setQuickDepositOpen(false);
+                  setDepositAmount(""); setDepositReason("");
+                  load();
+                }}
+              >
+                {busy ? "Posting..." : "Post pending deposit"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
