@@ -88,12 +88,28 @@ export default function AdminUsers() {
   }, [selected]);
 
   const updateTxStatus = async (tx: Tx, status: string) => {
+    const isPendingDeposit = tx.category === "Pending Deposit";
     const note = window.prompt(
       `Add a note for the customer about moving this transfer to "${STATUS_LABEL[status] || status}" (optional):`,
       "",
     );
     if (note === null) return;
     setTxBusy(tx.id);
+
+    // For pending deposits moving to "completed", use the RPC that credits balance.
+    if (isPendingDeposit && status === "completed") {
+      const { error } = await supabase.rpc("admin_complete_pending_deposit", { p_tx: tx.id });
+      if (error) { setTxBusy(null); toast.error(error.message); return; }
+      supabase.functions.invoke("send-transaction-status-update", {
+        body: { transactionId: tx.id, status, note: note.trim() || undefined },
+      }).catch((e) => console.error("status email failed", e));
+      setTxBusy(null);
+      toast.success("Deposit completed · balance credited · user notified");
+      if (selected) reloadUserTx(selected.id);
+      load();
+      return;
+    }
+
     const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: tx.id, p_status: status });
     if (error) { setTxBusy(null); toast.error(error.message); return; }
     supabase.functions.invoke("send-transaction-status-update", {
