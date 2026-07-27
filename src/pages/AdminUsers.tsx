@@ -445,6 +445,77 @@ export default function AdminUsers() {
           </DialogContent>
         </Dialog>
 
+        <Dialog open={quickDepositOpen} onOpenChange={(o) => !o && setQuickDepositOpen(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Post deposit to any user</DialogTitle>
+              <DialogDescription>
+                Choose a customer and one of their deposit accounts. It appears as a pending deposit and only credits the balance when you mark it complete.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">User</label>
+                <Select value={quickDepositUserId} onValueChange={(v) => { setQuickDepositUserId(v); setQuickDepositAccountId(""); }}>
+                  <SelectTrigger><SelectValue placeholder="Select user" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {profiles.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.full_name || p.email} — {p.email}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Account</label>
+                <Select value={quickDepositAccountId} onValueChange={setQuickDepositAccountId} disabled={!quickDepositUserId}>
+                  <SelectTrigger><SelectValue placeholder={quickDepositUserId ? "Select account" : "Pick a user first"} /></SelectTrigger>
+                  <SelectContent>
+                    {accountsFor(quickDepositUserId).filter(a => a.account_type !== "credit").map(a => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.account_name} ••••{a.account_number.slice(-4)} · ${Number(a.balance).toLocaleString()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
+                <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason (shown to user)</label>
+                <Input placeholder="e.g. Incoming wire from Chase — pending compliance review" value={depositReason} onChange={e => setDepositReason(e.target.value)} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setQuickDepositOpen(false)} disabled={busy}>Cancel</Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                disabled={busy || !quickDepositAccountId}
+                onClick={async () => {
+                  const amt = parseFloat(depositAmount);
+                  if (!amt || amt <= 0 || Number.isNaN(amt)) { toast.error("Enter a positive amount"); return; }
+                  if (!depositReason.trim()) { toast.error("Add a reason for the deposit"); return; }
+                  setBusy(true);
+                  const { error } = await supabase.rpc("admin_post_pending_deposit", {
+                    p_account: quickDepositAccountId,
+                    p_amount: amt,
+                    p_reason: depositReason.trim(),
+                  });
+                  setBusy(false);
+                  if (error) { toast.error(error.message); return; }
+                  toast.success("Pending deposit posted · user notified");
+                  setQuickDepositOpen(false);
+                  setDepositAmount(""); setDepositReason("");
+                  load();
+                }}
+              >
+                {busy ? "Posting..." : "Post pending deposit"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={!!depositAccount} onOpenChange={(o) => !o && setDepositAccount(null)}>
           <DialogContent>
             <DialogHeader>
