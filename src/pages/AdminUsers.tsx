@@ -135,23 +135,40 @@ export default function AdminUsers() {
     setUserTx((data as Tx[]) || []);
   };
 
+  const buildDepositReason = (type: string, source: string, reason: string) => {
+    const parts: string[] = [];
+    if (type) parts.push(`[${type}]`);
+    if (source.trim()) parts.push(`From ${source.trim()}`);
+    if (reason.trim()) parts.push(`— ${reason.trim()}`);
+    return parts.join(" ").slice(0, 240);
+  };
+
   const submitDeposit = async () => {
     if (!depositAccount) return;
     const amt = parseFloat(depositAmount);
     if (!amt || amt <= 0 || Number.isNaN(amt)) { toast.error("Enter a positive amount"); return; }
     if (!depositReason.trim()) { toast.error("Add a reason for the deposit"); return; }
+    if (!depositSource.trim()) { toast.error("Enter where the deposit is coming from"); return; }
     setBusy(true);
-    const { error } = await supabase.rpc("admin_post_pending_deposit", {
+    const composed = buildDepositReason(depositType, depositSource, depositReason);
+    const { data: newTxId, error } = await supabase.rpc("admin_post_pending_deposit", {
       p_account: depositAccount.id,
       p_amount: amt,
-      p_reason: depositReason.trim(),
+      p_reason: composed,
     });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Pending deposit posted · user notified");
+    if (newTxId) {
+      supabase.functions.invoke("send-transaction-status-update", {
+        body: { transactionId: newTxId, status: "pending", note: `Pending ${depositType} deposit from ${depositSource.trim()}` },
+      }).catch((e) => console.error("deposit email failed", e));
+    }
+    toast.success("Pending deposit posted · user notified by email");
     setDepositAccount(null);
     setDepositAmount("");
     setDepositReason("");
+    setDepositSource("");
+    setDepositType("ACH");
     if (selected) reloadUserTx(selected.id);
   };
 
