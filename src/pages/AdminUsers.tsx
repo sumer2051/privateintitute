@@ -51,6 +51,9 @@ export default function AdminUsers() {
   const [depositAccount, setDepositAccount] = useState<Account | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [depositReason, setDepositReason] = useState("");
+  const [quickDepositOpen, setQuickDepositOpen] = useState(false);
+  const [quickDepositUserId, setQuickDepositUserId] = useState<string>("");
+  const [quickDepositAccountId, setQuickDepositAccountId] = useState<string>("");
 
   useEffect(() => {
     (async () => {
