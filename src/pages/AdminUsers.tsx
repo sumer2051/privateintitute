@@ -287,7 +287,7 @@ export default function AdminUsers() {
               <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                 <Button
                   className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                  onClick={() => { setQuickDepositOpen(true); setQuickDepositUserId(""); setQuickDepositAccountId(""); setDepositAmount(""); setDepositReason(""); }}
+                  onClick={() => { setQuickDepositOpen(true); setQuickDepositUserId(""); setQuickDepositAccountId(""); setDepositAmount(""); setDepositReason(""); setDepositSource(""); setDepositType("ACH"); }}
                 >
                   <DollarSign className="h-4 w-4 mr-1" /> Post deposit
                 </Button>
