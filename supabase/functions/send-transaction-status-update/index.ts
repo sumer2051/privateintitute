@@ -366,13 +366,62 @@ function bankStatusEmail(c: Ctx, scheme: string) {
 </td></tr></table></body></html>`;
 }
 
+// ---------- Deposit credit email (admin-posted deposits) ----------
+function depositEmail(c: Ctx) {
+  const meta = STATUS_META[c.status];
+  const amountStr = fmtMoney(c.amount);
+  const credited = c.status === "completed";
+  const headline = credited
+    ? `Deposit credited — ${amountStr}`
+    : `Deposit ${esc(meta.label.toLowerCase())} — ${amountStr}`;
+  const explain = credited
+    ? `Your account has been credited with <strong>${amountStr}</strong>. Funds are now available in your ${esc(c.category || "account")}.`
+    : `A deposit of <strong>${amountStr}</strong> is currently <strong>${esc(meta.label)}</strong>. ${esc(meta.sub)}. You'll be notified again once funds are credited.`;
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f6fb;font-family:Helvetica,Arial,sans-serif;color:#1a2238;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 0;"><tr><td align="center">
+  <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(10,20,50,0.08);">
+    <tr><td style="background:linear-gradient(135deg,#0a1a3f 0%,#142a63 100%);padding:24px 32px;color:#fff;">
+      <table cellpadding="0" cellspacing="0"><tr>
+        <td style="padding-right:14px;"><img src="${LOGO_URL}" width="46" height="46" style="border-radius:50%;background:#fff;padding:2px;" alt="${BRAND}"/></td>
+        <td><div style="font-size:18px;font-weight:700;">${BRAND}</div>
+          <div style="font-size:11px;letter-spacing:3px;color:#c9b27c;text-transform:uppercase;margin-top:2px;">Deposit notification</div></td>
+      </tr></table>
+    </td></tr>
+    <tr><td style="padding:28px 32px;">
+      <div style="display:inline-block;padding:6px 12px;border-radius:999px;background:${credited ? "#e6f9ee" : meta.bg};color:${credited ? "#00a63e" : meta.color};font-size:12px;font-weight:800;margin-bottom:12px;">
+        ${credited ? "✓ CREDITED" : `${meta.icon} ${esc(meta.label.toUpperCase())}`}
+      </div>
+      <h1 style="margin:0 0 6px;font-size:26px;color:#0a1a3f;letter-spacing:-0.5px;">${headline}</h1>
+      <p style="margin:0 0 18px;color:#3a4660;font-size:14px;line-height:1.55;">Hi ${esc(c.senderName)}, ${explain}</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e6e9f2;border-radius:8px;">
+        <tr><td style="padding:14px 18px;background:#f7f9fc;border-bottom:1px solid #e6e9f2;font-size:11px;letter-spacing:2px;color:#5a6680;text-transform:uppercase;">Deposit details</td></tr>
+        <tr><td style="padding:16px 18px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;width:42%;">Amount</td><td style="font-weight:800;font-size:22px;color:#00a63e;padding:5px 0;">+${amountStr}</td></tr>
+            <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Deposited to</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.category || "Account")}</td></tr>
+            <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Status</td><td style="padding:5px 0;font-weight:700;font-size:13px;color:${credited ? "#00a63e" : meta.color};">${esc(meta.label)} — ${credited ? "Funds available" : esc(meta.sub)}</td></tr>
+            <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Updated on</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.dateStr)}</td></tr>
+            <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Reference</td><td style="padding:5px 0;font-weight:600;font-size:13px;font-family:monospace;">${esc(c.reference)}</td></tr>
+            ${c.memo ? `<tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Details</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.memo)}</td></tr>` : ""}
+          </table>
+        </td></tr>
+      </table>
+      ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Note from support:</strong> ${esc(c.adminNote)}</div>` : ""}
+      <p style="margin:20px 0 0;font-size:12px;color:#6a7590;line-height:1.55;">If you didn't expect this deposit, please contact support immediately.</p>
+    </td></tr>
+    <tr><td style="background:#0a1a3f;color:#c9c9d4;padding:16px;text-align:center;font-size:11px;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
+  </table>
+</td></tr></table></body></html>`;
+}
+
 function detectScheme(description: string | null, category: string | null): string {
+  const cat = (category || "").toLowerCase();
+  if (cat.includes("deposit")) return "Deposit";
   const hay = `${description || ""} ${category || ""}`.toLowerCase();
   if (hay.includes("cash app") || hay.includes("cashapp")) return "Cash App";
   if (hay.includes("venmo")) return "Venmo";
   if (hay.includes("paypal")) return "PayPal";
   if (hay.includes("zelle")) return "Zelle";
-  // Try bracket prefix "[Scheme Name] ..."
   const m = /^\[([^\]]+)\]/.exec(description || "");
   if (m) return m[1];
   return "Bank Transfer";
@@ -380,6 +429,7 @@ function detectScheme(description: string | null, category: string | null): stri
 
 function renderEmail(scheme: string, c: Ctx): string {
   const s = scheme.toLowerCase();
+  if (s === "deposit" || s.includes("deposit")) return depositEmail(c);
   if (s.includes("cash app") || s === "cashapp") return cashappStatusEmail(c);
   if (s.includes("venmo")) return venmoStatusEmail(c);
   if (s.includes("paypal")) return paypalStatusEmail(c);
