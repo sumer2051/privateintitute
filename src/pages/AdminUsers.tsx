@@ -265,9 +265,17 @@ export default function AdminUsers() {
           <CardHeader>
             <div className="flex flex-col md:flex-row md:items-center gap-3 md:justify-between">
               <CardTitle>All users</CardTitle>
-              <div className="relative w-full md:w-72">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-9" placeholder="Search email or name" value={q} onChange={e => setQ(e.target.value)} />
+              <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                <Button
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  onClick={() => { setQuickDepositOpen(true); setQuickDepositUserId(""); setQuickDepositAccountId(""); setDepositAmount(""); setDepositReason(""); }}
+                >
+                  <DollarSign className="h-4 w-4 mr-1" /> Post deposit
+                </Button>
+                <div className="relative w-full md:w-72">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input className="pl-9" placeholder="Search email or name" value={q} onChange={e => setQ(e.target.value)} />
+                </div>
               </div>
             </div>
           </CardHeader>
