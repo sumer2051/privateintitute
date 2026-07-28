@@ -396,10 +396,6 @@ const Transfers = () => {
         timestamp: new Date().toISOString(),
       });
 
-      toast({
-        title: `${smMethod.name} sent — Pending approval`,
-        description: effEmail ? `Ref ${ref}. Receipts emailed to you and ${effEmail}.` : `Ref ${ref}. Receipt emailed to you.`,
-      });
       setSmAmount(""); setSmRecipient(""); setSmEmail(""); setSmFields({}); setSmNote(""); setSmVariant("");
       fetchAccounts();
       fetchPending();
