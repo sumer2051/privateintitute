@@ -1027,6 +1027,34 @@ const Transfers = () => {
           setZelleOpen(false);
         }}
       />
+      <MethodPayDialog
+        open={methodOpen}
+        onOpenChange={setMethodOpen}
+        method={smMethod}
+        amount={smAmount}
+        setAmount={setSmAmount}
+        note={smNote}
+        setNote={setSmNote}
+        email={smEmail}
+        setEmail={setSmEmail}
+        recipient={smRecipient}
+        setRecipient={setSmRecipient}
+        fields={smFields}
+        setFields={setSmFields}
+        variant={smVariant}
+        setVariant={setSmVariant}
+        fromAccount={smFrom}
+        setFromAccount={setSmFrom}
+        accounts={accounts}
+        formatCurrency={formatCurrency}
+        loading={smLoading}
+        currencySymbol={currency.symbol}
+        currencyCode={currency.code}
+        onSubmit={async () => {
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          setMethodOpen(false);
+        }}
+      />
       <TransferPinGate ref={pinRef} />
     </AuthLayout>
   );
