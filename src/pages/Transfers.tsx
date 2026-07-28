@@ -20,6 +20,7 @@ import { CashAppPayDialog } from "@/components/CashAppPayDialog";
 import { PayPalPayDialog } from "@/components/PayPalPayDialog";
 import { VenmoPayDialog } from "@/components/VenmoPayDialog";
 import { ZellePayDialog } from "@/components/ZellePayDialog";
+import { MethodPayDialog } from "@/components/MethodPayDialog";
 
 interface Account {
   id: string;
