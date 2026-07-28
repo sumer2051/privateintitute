@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info } from "lucide-react";
+import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info, Wallet, CreditCard, ArrowLeftRight, Receipt, LayoutDashboard, LifeBuoy, Settings as SettingsIcon, ShieldAlert, Users, Mail, Megaphone as MegaphoneIcon, ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -112,22 +112,22 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const showStaff = hasStaffAccess && staffMode;
 
   const userNav = [
-    { id: "accounts", label: "Accounts", path: "/accounts" },
-    { id: "cards", label: "Cards", path: "/cards" },
-    { id: "transfers", label: "Transfers", path: "/transfers" },
-    { id: "billpay", label: "Bill Pay", path: "/billpay" },
-    { id: "overview", label: "Overview", path: "/overview" },
-    { id: "support", label: "Support", path: "/support" },
-    { id: "settings", label: "Settings", path: "/settings" },
+    { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet },
+    { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard },
+    { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight },
+    { id: "billpay", label: "Bill Pay", path: "/billpay", Icon: Receipt },
+    { id: "overview", label: "Overview", path: "/overview", Icon: LayoutDashboard },
+    { id: "support", label: "Support", path: "/support", Icon: LifeBuoy },
+    { id: "settings", label: "Settings", path: "/settings", Icon: SettingsIcon },
   ];
 
   const staffNav = [
-    ...((isAdmin || isSupport) ? [{ id: "admin-support", label: "Admin · Tickets", path: "/admin/support" }] : []),
-    ...((isAdmin || isTxSupport) ? [{ id: "admin-transactions", label: "Admin · Transactions", path: "/admin/transactions" }] : []),
-    ...(isAdmin ? [{ id: "admin-users", label: "Admin · Users", path: "/admin/users" }] : []),
-    ...(isAdmin ? [{ id: "admin-invitations", label: "Admin · Invites", path: "/admin/invitations" }] : []),
-    ...(isAdmin ? [{ id: "admin-announcements", label: "Admin · Broadcast", path: "/admin/announcements" }] : []),
-    ...(isAdmin ? [{ id: "admin-audit", label: "Admin · Audit log", path: "/admin/audit" }] : []),
+    ...((isAdmin || isSupport) ? [{ id: "admin-support", label: "Tickets", path: "/admin/support", Icon: LifeBuoy }] : []),
+    ...((isAdmin || isTxSupport) ? [{ id: "admin-transactions", label: "Transactions", path: "/admin/transactions", Icon: ArrowLeftRight }] : []),
+    ...(isAdmin ? [{ id: "admin-users", label: "Users", path: "/admin/users", Icon: Users }] : []),
+    ...(isAdmin ? [{ id: "admin-invitations", label: "Invites", path: "/admin/invitations", Icon: Mail }] : []),
+    ...(isAdmin ? [{ id: "admin-announcements", label: "Broadcast", path: "/admin/announcements", Icon: MegaphoneIcon }] : []),
+    ...(isAdmin ? [{ id: "admin-audit", label: "Audit", path: "/admin/audit", Icon: ScrollText }] : []),
   ];
 
 
@@ -224,24 +224,56 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
         </div>
 
         <nav className="border-t bg-card">
-          <div className="container mx-auto flex gap-1 overflow-x-auto px-3 md:px-4 scrollbar-none">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  if (item.path) navigate(item.path);
-                  if (onPageChange) onPageChange(item.id);
-                }}
-                className={`whitespace-nowrap border-b-2 px-4 md:px-6 py-2.5 md:py-3 text-xs md:text-sm font-semibold transition-all ${
-
-                  currentPage === item.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-secondary hover:border-primary hover:text-primary"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+          <div className="container mx-auto relative px-3 md:px-4">
+            <button
+              type="button"
+              aria-label="Scroll navigation left"
+              onClick={() => {
+                const el = document.getElementById("primary-nav-scroller");
+                if (el) el.scrollBy({ left: -160, behavior: "smooth" });
+              }}
+              className="absolute left-0 top-1/2 z-10 -translate-y-1/2 hidden sm:flex h-8 w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div
+              id="primary-nav-scroller"
+              className="flex gap-1 overflow-x-auto scroll-smooth px-8 sm:px-10 scrollbar-none"
+            >
+              {navItems.map((item) => {
+                const Icon = (item as any).Icon;
+                const active = currentPage === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      if (item.path) navigate(item.path);
+                      if (onPageChange) onPageChange(item.id);
+                    }}
+                    className={`group flex shrink-0 flex-col items-center gap-0.5 whitespace-nowrap border-b-2 px-3 md:px-5 py-2 md:py-2.5 text-[10px] md:text-xs font-semibold transition-all ${
+                      active
+                        ? "border-primary text-primary"
+                        : "border-transparent text-secondary hover:border-primary hover:text-primary"
+                    }`}
+                    title={item.label}
+                  >
+                    {Icon ? <Icon className={`h-5 w-5 ${active ? "text-primary" : "text-secondary group-hover:text-primary"}`} /> : null}
+                    <span className="leading-none">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              aria-label="Scroll navigation right"
+              onClick={() => {
+                const el = document.getElementById("primary-nav-scroller");
+                if (el) el.scrollBy({ left: 160, behavior: "smooth" });
+              }}
+              className="absolute right-0 top-1/2 z-10 -translate-y-1/2 hidden sm:flex h-8 w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
         </nav>
       </header>
