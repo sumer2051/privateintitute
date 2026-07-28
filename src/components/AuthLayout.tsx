@@ -114,10 +114,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet },
     { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard },
     { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight },
-    { id: "billpay", label: "Bill Pay", path: "/billpay", Icon: Receipt },
-    { id: "overview", label: "Overview", path: "/overview", Icon: LayoutDashboard },
-    { id: "support", label: "Support", path: "/support", Icon: LifeBuoy },
-    { id: "settings", label: "Settings", path: "/settings", Icon: SettingsIcon },
+    { id: "overview", label: "Support", path: "/overview", Icon: LifeBuoy },
+    { id: "billpay", label: "Settings", path: "/billpay", Icon: SettingsIcon },
   ];
 
   const staffNav = [
