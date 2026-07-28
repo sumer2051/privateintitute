@@ -86,9 +86,10 @@ export const MethodPayDialog = ({
     setFields((prev) => ({ ...prev, [key]: val }));
   };
 
+  const hasEmailField = method.fields.some((f) => f.key === "email");
   const requiredFieldsOk = method.fields.every((f) => {
     if (!f.required) return true;
-    if (f.key === "email") return email.trim().length > 0;
+    if (f.key === "email") return true; // email is always optional
     if (f.key === "recipient_name") return recipient.trim().length > 0;
     if (f.key === "note") return note.trim().length > 0;
     return (fields[f.key] ?? "").trim().length > 0;
@@ -218,7 +219,7 @@ export const MethodPayDialog = ({
               return (
                 <div key={f.key}>
                   <label className="text-sm font-semibold text-black block mb-1.5">
-                    {f.label}{f.required && <span className="text-red-500"> *</span>}
+                    {f.label}{f.required && f.key !== "email" && <span className="text-red-500"> *</span>}
                   </label>
                   <input
                     type={f.inputMode === "email" ? "email" : "text"}
@@ -241,6 +242,23 @@ export const MethodPayDialog = ({
                 </div>
               );
             })}
+
+            {!hasEmailField && (
+              <div>
+                <label className="text-sm font-semibold text-black block mb-1.5">Recipient Email</label>
+                <input
+                  type="email"
+                  inputMode="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@email.com"
+                  className="w-full h-12 px-3 rounded-xl border border-gray-300 bg-white outline-none text-sm text-black placeholder:text-gray-400 focus:ring-2 transition-all"
+                  style={{ ["--tw-ring-color" as string]: `${from}33` }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = from)}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#d1d5db")}
+                />
+              </div>
+            )}
 
             {method.variants && (
               <div>

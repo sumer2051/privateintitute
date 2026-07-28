@@ -44,7 +44,7 @@ export const VenmoPayDialog = ({
     ? Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : "";
 
-  const canSend = fromAccount && amount && parseFloat(amount) > 0 && email.trim();
+  const canSend = fromAccount && amount && parseFloat(amount) > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
