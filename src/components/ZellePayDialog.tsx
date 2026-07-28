@@ -69,7 +69,7 @@ export const ZellePayDialog = ({
               <X className="h-4 w-4 text-white" strokeWidth={2.5} />
             </button>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-extrabold tracking-tight italic">Zelle</span>
+              <span className="text-2xl font-extrabold tracking-tight italic">BUSINESS ZELLE</span>
               <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-white">
                 <Check className="h-3 w-3" style={{ color: ZELLE_PURPLE }} strokeWidth={4} />
               </span>
