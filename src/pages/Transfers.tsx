@@ -22,6 +22,7 @@ interface Account {
   id: string;
   account_name: string;
   account_number: string;
+  account_type: string;
   balance: number;
 }
 
