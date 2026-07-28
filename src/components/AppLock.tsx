@@ -170,13 +170,15 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
   };
 
   const press = (n: string) => {
-    if (code.length >= PASSCODE_LEN) return;
-    const next = code + n;
-    setCode(next);
     setError("");
-    if (next.length === PASSCODE_LEN) {
-      setTimeout(() => submitCode(next), 120);
-    }
+    setCode((prev) => {
+      if (prev.length >= PASSCODE_LEN) return prev;
+      const next = prev + n;
+      if (next.length === PASSCODE_LEN) {
+        setTimeout(() => submitCode(next), 120);
+      }
+      return next;
+    });
   };
   const backspace = () => setCode((c) => c.slice(0, -1));
 
