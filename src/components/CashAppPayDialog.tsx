@@ -154,7 +154,7 @@ export const CashAppPayDialog = ({
             </div>
           </div>
         ) : (
-          <div className="bg-white text-black flex flex-col">
+          <div className="bg-white text-black flex flex-col h-full sm:h-auto overflow-y-auto">
             {/* Top brand header */}
             <div className="pt-5 pb-3 px-5 flex items-center justify-center gap-2">
               <span
