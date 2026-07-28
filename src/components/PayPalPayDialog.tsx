@@ -131,13 +131,38 @@ export const PayPalPayDialog = ({
           "sm:!w-full sm:!h-auto sm:!max-h-[92vh] sm:!max-w-[420px] sm:!rounded-[2rem] sm:shadow-2xl"
         )}
       >
-        <div className="flex flex-col h-full sm:h-auto sm:max-h-[92vh] overflow-y-auto bg-white">
+        <div
+          className="relative flex flex-col h-full sm:h-auto sm:max-h-[92vh] overflow-y-auto"
+          style={{
+            background:
+              "radial-gradient(120% 60% at 50% 0%, rgba(0,112,186,0.10) 0%, rgba(0,48,135,0.04) 40%, #ffffff 75%)",
+          }}
+        >
+          {/* Soft brand glow behind the header */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 h-56 w-72 rounded-full blur-3xl opacity-40"
+            style={{ background: "radial-gradient(circle, rgba(0,112,186,0.35) 0%, transparent 70%)" }}
+          />
+
           {/* Header */}
-          <div className="pt-5 pb-3 px-4 flex items-center justify-center gap-2">
-            <span className="text-xl font-bold tracking-tight" style={{ color: PAYPAL_BLUE }}>
+          <div className="relative pt-5 pb-3 px-4 flex items-center justify-center gap-2">
+            <span
+              className="text-xl font-bold tracking-tight"
+              style={{
+                color: PAYPAL_BLUE,
+                textShadow: "0 1px 0 rgba(255,255,255,0.9), 0 2px 12px rgba(0,112,186,0.25)",
+              }}
+            >
               BUSINESS PAYPAL
             </span>
-            <span className="relative inline-flex items-center justify-center h-6 w-6 rounded-full" style={{ background: PAYPAL_BLUE }}>
+            <span
+              className="relative inline-flex items-center justify-center h-6 w-6 rounded-full"
+              style={{
+                background: PAYPAL_BLUE,
+                boxShadow: "0 4px 12px rgba(0,112,186,0.45), inset 0 1px 0 rgba(255,255,255,0.25)",
+              }}
+            >
               <Check className="h-3.5 w-3.5 text-white" strokeWidth={4} />
             </span>
           </div>
@@ -251,7 +276,11 @@ export const PayPalPayDialog = ({
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
                 placeholder="e.g. James Robinson"
-                className="w-full h-12 px-3 rounded-lg border border-gray-300 bg-white outline-none text-sm text-black placeholder:text-gray-400 focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                className="w-full h-12 px-3 rounded-lg border border-gray-300 outline-none text-sm text-black placeholder:text-gray-400 focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                style={{
+                  background: "linear-gradient(180deg, #ffffff 0%, #F5F9FD 100%)",
+                  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.05)",
+                }}
               />
             </div>
             <div className="space-y-1">
@@ -262,7 +291,11 @@ export const PayPalPayDialog = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@email.com"
-                  className="w-full h-12 px-3 rounded-lg border border-gray-300 bg-white outline-none text-sm text-black focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                  className="w-full h-12 px-3 rounded-lg border border-gray-300 outline-none text-sm text-black focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                  style={{
+                    background: "linear-gradient(180deg, #ffffff 0%, #F5F9FD 100%)",
+                    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.05)",
+                  }}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full flex items-center justify-center" style={{ background: "#E6F8EC" }}>
                   <Sparkles className="h-3.5 w-3.5" style={{ color: "#00C244" }} />
@@ -276,7 +309,11 @@ export const PayPalPayDialog = ({
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder=""
-                className="w-full h-12 px-3 rounded-lg border border-gray-300 bg-white outline-none text-sm text-black focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                className="w-full h-12 px-3 rounded-lg border border-gray-300 outline-none text-sm text-black focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                style={{
+                  background: "linear-gradient(180deg, #ffffff 0%, #F5F9FD 100%)",
+                  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.05)",
+                }}
               />
             </div>
           </div>
