@@ -534,6 +534,9 @@ const Transfers = () => {
                             if (m.id === "cashapp") {
                               if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setCashAppOpen(true);
+                            } else if (m.id === "paypal" || m.id === "paypal_uk" || m.id === "paypal_eu") {
+                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
+                              setPayPalOpen(true);
                             }
                           }}
                           className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
