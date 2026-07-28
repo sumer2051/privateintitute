@@ -229,7 +229,13 @@ export const VenmoPayDialog = ({
           {/* Recipient Gmail */}
           <div className="px-4 pt-5">
             <label className="text-lg font-bold text-black block mb-2">Recipient Gmail</label>
-            <div className="rounded-2xl border-2 border-black px-4 h-14 flex items-center">
+            <div
+              className="rounded-2xl border-2 border-black px-4 h-14 flex items-center"
+              style={{
+                background: "linear-gradient(180deg, #ffffff 0%, #F6FAFD 100%)",
+                boxShadow: "inset 0 2px 4px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.9)",
+              }}
+            >
               <input
                 type="email"
                 value={email}
@@ -243,7 +249,13 @@ export const VenmoPayDialog = ({
           {/* Note */}
           <div className="px-4 pt-5 pb-6">
             <label className="text-lg font-bold text-black block mb-2">Note</label>
-            <div className="rounded-2xl border-2 border-black px-4 h-14 flex items-center">
+            <div
+              className="rounded-2xl border-2 border-black px-4 h-14 flex items-center"
+              style={{
+                background: "linear-gradient(180deg, #ffffff 0%, #F6FAFD 100%)",
+                boxShadow: "inset 0 2px 4px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.9)",
+              }}
+            >
               <input
                 type="text"
                 value={note}
