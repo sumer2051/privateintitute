@@ -518,9 +518,6 @@ const Transfers = () => {
                     {currency.code} · {currency.name}
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Methods below match the country selected in the top currency switcher.
-                </p>
               </CardHeader>
               <CardContent className="space-y-5">
                 <div>
