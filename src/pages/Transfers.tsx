@@ -16,6 +16,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { getBankingProfile, getBankingSchemes } from "@/lib/bank-profiles";
 import { getCountryMethods, type CountryMethod } from "@/lib/country-methods";
 import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
+import { CashAppPayDialog } from "@/components/CashAppPayDialog";
 
 interface Account {
   id: string;
@@ -82,6 +83,7 @@ const Transfers = () => {
   const [smVariant, setSmVariant] = useState<string>("");
   const [smLoading, setSmLoading] = useState(false);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+  const [cashAppOpen, setCashAppOpen] = useState(false);
 
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
@@ -522,7 +524,15 @@ const Transfers = () => {
                         <button
                           key={m.id}
                           type="button"
-                          onClick={() => { setSmMethodId(m.id); setSmFields({}); setSmVariant(""); }}
+                          onClick={() => {
+                            setSmMethodId(m.id);
+                            setSmFields({});
+                            setSmVariant("");
+                            if (m.id === "cashapp") {
+                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
+                              setCashAppOpen(true);
+                            }
+                          }}
                           className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
                             active
                               ? "border-primary ring-2 ring-primary/40 bg-primary/5 shadow-sm"
@@ -904,6 +914,27 @@ const Transfers = () => {
       </Dialog>
 
       <TransferReceipt open={!!receipt} onClose={() => setReceipt(null)} receipt={receipt} />
+      <CashAppPayDialog
+        open={cashAppOpen}
+        onOpenChange={setCashAppOpen}
+        amount={smAmount}
+        setAmount={setSmAmount}
+        handle={smFields.handle ?? ""}
+        setHandle={(v) => setSmFields((p) => ({ ...p, handle: v }))}
+        note={smNote}
+        setNote={setSmNote}
+        email={smEmail}
+        setEmail={setSmEmail}
+        recipient={smRecipient}
+        setRecipient={setSmRecipient}
+        balanceLabel={`Cash balance: ${formatCurrency(accounts.find((a) => a.id === smFrom)?.balance ?? 0)}`}
+        loading={smLoading}
+        currencySymbol={currency.symbol}
+        onSubmit={async () => {
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          setCashAppOpen(false);
+        }}
+      />
       <TransferPinGate ref={pinRef} />
     </AuthLayout>
   );
