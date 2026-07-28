@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Landmark, ShieldCheck, Clock } from "lucide-react";
+import { Landmark, ShieldCheck, Clock, CheckCircle2, FileText } from "lucide-react";
 
 /**
  * One-time ACH welcome notice. Shows exactly once per user (keyed by user id
- * in localStorage) after they sign in. Never shows again after dismissal.
+ * in localStorage) after they sign in. It explains how incoming ACH deposits
+ * are handled and never shows again after dismissal.
  */
 export const AchOneTimeDialog = () => {
   const [open, setOpen] = useState(false);
@@ -20,7 +21,6 @@ export const AchOneTimeDialog = () => {
       setUserId(uid);
       const key = `ach_notice_seen_${uid}`;
       if (!localStorage.getItem(key)) {
-        // Small delay so it doesn't fight the page load animation.
         setTimeout(() => mounted && setOpen(true), 700);
       }
     });
@@ -34,47 +34,73 @@ export const AchOneTimeDialog = () => {
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) dismiss(); }}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 ring-4 ring-primary/5">
-            <Landmark className="h-7 w-7 text-primary" />
+      <DialogContent className="max-w-md sm:max-w-lg p-0 overflow-hidden">
+        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background p-6 pb-4">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 ring-4 ring-primary/10 shadow-sm">
+            <Landmark className="h-8 w-8 text-primary" />
           </div>
-          <DialogTitle className="text-center font-display text-2xl">Welcome to BoA private institute</DialogTitle>
-          <DialogDescription className="text-center">
-            A quick note on how deposits and ACH transfers work on your account.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3 text-sm">
-          <div className="flex gap-3 rounded-lg border p-3">
-            <Clock className="h-5 w-5 shrink-0 text-primary mt-0.5" />
-            <div>
-              <p className="font-semibold text-secondary">ACH deposits are held pending review</p>
-              <p className="text-muted-foreground text-xs mt-0.5">
-                Incoming ACH credits (payroll, external transfers, wires) appear immediately as <em>Pending</em>. Funds
-                are released to your available balance after our compliance team completes verification, typically
-                within 1–3 business days.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3 rounded-lg border p-3">
-            <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
-            <div>
-              <p className="font-semibold text-secondary">You'll be notified at every step</p>
-              <p className="text-muted-foreground text-xs mt-0.5">
-                Each status change — pending, processing, under review, or successful — is sent to your email and
-                appears in your in‑app notifications with the source, amount, and reference number.
-              </p>
-            </div>
-          </div>
-          <p className="text-[11px] text-muted-foreground text-center pt-1">
-            This message is shown only once. You can always find deposit history in your Accounts screen.
-          </p>
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="text-center font-display text-2xl tracking-tight">
+              Incoming ACH Deposits
+            </DialogTitle>
+            <DialogDescription className="text-center text-sm leading-relaxed">
+              A quick notice about how ACH deposits are credited to your BoA private institute account.
+            </DialogDescription>
+          </DialogHeader>
         </div>
 
-        <DialogFooter>
-          <Button className="w-full" onClick={dismiss}>Got it — don't show again</Button>
-        </DialogFooter>
+        <div className="px-6 py-2 space-y-3 text-sm">
+          <div className="flex gap-3 rounded-lg border p-4 bg-card/50">
+            <Clock className="h-5 w-5 shrink-0 text-primary mt-0.5" />
+            <div>
+              <p className="font-semibold text-foreground">Funds are subject to a standard hold</p>
+              <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
+                Incoming ACH credits — including payroll, direct deposits, and transfers from external banks — are first posted as <strong>Pending</strong>. Funds are released to your available balance after our verification process, typically within <strong>1–3 business days</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 rounded-lg border p-4 bg-card/50">
+            <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
+            <div>
+              <p className="font-semibold text-foreground">Reviewed for your security</p>
+              <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
+                Every deposit is screened for compliance before completion. You will be notified by email and in-app notification once the hold is released or if additional documentation is needed.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 rounded-lg border p-4 bg-card/50">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-primary mt-0.5" />
+            <div>
+              <p className="font-semibold text-foreground">Deposit notifications are automatic</p>
+              <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
+                You will receive updates at each stage: pending, processing, under review, and completed. Completed deposits are credited to your available balance immediately.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 rounded-lg border p-4 bg-muted/40">
+            <FileText className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="font-semibold text-foreground text-xs">Regulatory notice</p>
+              <p className="text-muted-foreground text-[11px] mt-1 leading-relaxed">
+                ACH transactions are processed through the Automated Clearing House network and may be delayed or returned by the originating financial institution. BoA private institute reserves the right to extend the hold period if additional review is required.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 pt-2">
+          <p className="text-[11px] text-muted-foreground text-center mb-4">
+            This notice is shown once. You can always review your deposit history in the Accounts screen.
+          </p>
+          <DialogFooter>
+            <Button className="w-full" onClick={dismiss}>
+              Acknowledge — don't show again
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
