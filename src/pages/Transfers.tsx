@@ -544,6 +544,9 @@ const Transfers = () => {
                             } else if (m.id === "venmo") {
                               if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setVenmoOpen(true);
+                            } else if (m.id === "zelle") {
+                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
+                              setZelleOpen(true);
                             }
                           }}
                           className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
