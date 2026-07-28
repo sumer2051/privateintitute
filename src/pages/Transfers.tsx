@@ -266,12 +266,6 @@ const Transfers = () => {
           status: "pending",
         },
       }).catch((e) => console.error("confirmation email failed", e));
-      toast({
-        title: `${profile.scheme} submitted — Pending approval`,
-        description: extEmail
-          ? `Ref ${ref}. Receipts emailed to you and ${extEmail}.`
-          : `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
-      });
       setExtAmount(""); setExtRecipient(""); setExtEmail(""); setExtFields({}); setExtMemo("");
 
       if (data) setSelectedTx(data as PendingTx);
