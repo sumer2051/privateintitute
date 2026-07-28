@@ -131,7 +131,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   // tx_support is restricted: no balances, no transfers, no bill pay, no cards
   const restrictedForTxOnly = isTxSupport && !isAdmin && !isSupport;
   const filteredUserNav = restrictedForTxOnly
-    ? userNav.filter((i) => ["settings", "support"].includes(i.id))
+    ? userNav.filter((i) => ["overview", "billpay"].includes(i.id))
     : userNav;
 
   const navItems = showStaff ? [...filteredUserNav, ...staffNav] : filteredUserNav;
