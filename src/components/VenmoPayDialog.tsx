@@ -58,13 +58,39 @@ export const VenmoPayDialog = ({
           "sm:!w-full sm:!h-auto sm:!max-h-[92vh] sm:!max-w-[420px] sm:!rounded-[2rem] sm:shadow-2xl"
         )}
       >
-        <div className="flex flex-col h-full sm:h-auto sm:max-h-[92vh] overflow-y-auto bg-white">
+        <div
+          className="relative flex flex-col h-full sm:h-auto sm:max-h-[92vh] overflow-y-auto"
+          style={{
+            background:
+              "radial-gradient(120% 60% at 50% 0%, rgba(61,149,206,0.10) 0%, rgba(61,149,206,0.03) 40%, #ffffff 75%)",
+          }}
+        >
+          {/* Soft brand glow behind the header */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 h-56 w-72 rounded-full blur-3xl opacity-40"
+            style={{ background: "radial-gradient(circle, rgba(61,149,206,0.35) 0%, transparent 70%)" }}
+          />
+
           {/* Header title */}
-          <div className="pt-5 pb-3 px-4 flex items-center justify-center gap-2">
-            <span className="text-2xl font-extrabold tracking-tight italic" style={{ color: VENMO_BLUE, fontFamily: "system-ui" }}>
+          <div className="relative pt-5 pb-3 px-4 flex items-center justify-center gap-2">
+            <span
+              className="text-2xl font-extrabold tracking-tight italic"
+              style={{
+                color: VENMO_BLUE,
+                fontFamily: "system-ui",
+                textShadow: "0 1px 0 rgba(255,255,255,0.9), 0 2px 12px rgba(61,149,206,0.25)",
+              }}
+            >
               BUSINESS VENMO
             </span>
-            <span className="relative inline-flex items-center justify-center h-6 w-6 rounded-full" style={{ background: VENMO_BLUE }}>
+            <span
+              className="relative inline-flex items-center justify-center h-6 w-6 rounded-full"
+              style={{
+                background: VENMO_BLUE,
+                boxShadow: "0 4px 12px rgba(61,149,206,0.45), inset 0 1px 0 rgba(255,255,255,0.25)",
+              }}
+            >
               <Check className="h-3.5 w-3.5 text-white" strokeWidth={4} />
             </span>
           </div>
