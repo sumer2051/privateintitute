@@ -295,12 +295,23 @@ const Transfers = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currency.code]);
 
-  const handleSendMoney = async (e: React.FormEvent) => {
+  const handleSendMoney = async (
+    e: React.FormEvent,
+    overrides?: { fields?: Record<string, string>; recipient?: string; email?: string; note?: string; from?: string; amount?: string; skipFieldValidation?: boolean },
+  ) => {
     e.preventDefault();
-    const missing = smMethod.fields
-      .filter((f) => f.required !== false && !(smFields[f.key] ?? "").trim())
-      .map((f) => f.label);
-    if (!smFrom || !smAmount || missing.length) {
+    const mergedFields = { ...smFields, ...(overrides?.fields ?? {}) };
+    const effRecipient = overrides?.recipient ?? smRecipient;
+    const effEmail = overrides?.email ?? smEmail;
+    const effNote = overrides?.note ?? smNote;
+    const effFrom = overrides?.from ?? smFrom;
+    const effAmount = overrides?.amount ?? smAmount;
+    const missing = overrides?.skipFieldValidation
+      ? []
+      : smMethod.fields
+          .filter((f) => f.required !== false && !(mergedFields[f.key] ?? "").trim())
+          .map((f) => f.label);
+    if (!effFrom || !effAmount || missing.length) {
       toast({
         title: "Missing details",
         description: missing.length ? `Please complete: ${missing.join(", ")}` : "Please complete all required fields.",
@@ -308,13 +319,13 @@ const Transfers = () => {
       });
       return;
     }
-    const amtDisplay = parseFloat(smAmount);
+    const amtDisplay = parseFloat(effAmount);
     if (!(amtDisplay > 0)) {
       toast({ title: "Invalid amount", variant: "destructive" });
       return;
     }
     const amt = toUsd(amtDisplay);
-    const fromAcc = accounts.find((a) => a.id === smFrom);
+    const fromAcc = accounts.find((a) => a.id === effFrom);
     if (!fromAcc) return;
     if (fromAcc.balance < amt) {
       toast({ title: "Insufficient funds", variant: "destructive" });
@@ -328,11 +339,11 @@ const Transfers = () => {
       if (!user) throw new Error("Not signed in");
 
       const detailPairs = smMethod.fields
-        .map((f) => [f.label, (smFields[f.key] ?? "").trim()] as const)
+        .map((f) => [f.label, (mergedFields[f.key] ?? "").trim()] as const)
         .filter(([, v]) => v.length > 0);
       const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
       const details = Object.fromEntries(detailPairs);
-      const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail || "recipient";
+      const displayName = effRecipient || mergedFields.handle || mergedFields.upi_id || mergedFields.pix_key || effEmail || "recipient";
 
       const newBal = fromAcc.balance - amt;
       await supabase.rpc("adjust_account_balance", { p_account: smFrom, p_delta: -amt });
