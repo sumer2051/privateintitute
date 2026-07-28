@@ -172,7 +172,12 @@ export const PayPalPayDialog = ({
                   type="text"
                   inputMode="decimal"
                   value={displayAmount}
-                  readOnly
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/[^0-9.]/g, "");
+                    const parts = v.split(".");
+                    const clean = parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : v;
+                    setAmount(clean);
+                  }}
                   placeholder="0"
                   className="flex-1 bg-transparent outline-none text-4xl font-semibold text-black placeholder:text-gray-300 min-w-0"
                   style={{ fontSize: "2.5rem" }}
