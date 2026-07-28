@@ -943,7 +943,7 @@ const Transfers = () => {
         email={smEmail}
         setEmail={setSmEmail}
         recipient={smRecipient}
-        setRecipient={setSmRecipient}
+        setRecipient={(v) => { setSmRecipient(v); setSmFields((p) => ({ ...p, recipient_name: v })); }}
         balanceLabel={`Checking account balance: ${formatCurrency(accounts.find((a) => a.account_type === "checking")?.balance ?? 0)}`}
         loading={smLoading}
         currencySymbol={currency.symbol}
@@ -962,7 +962,7 @@ const Transfers = () => {
         email={smEmail}
         setEmail={(v) => { setSmEmail(v); setSmFields((prev) => ({ ...prev, email: v })); }}
         recipient={smRecipient}
-        setRecipient={setSmRecipient}
+        setRecipient={(v) => { setSmRecipient(v); setSmFields((p) => ({ ...p, recipient_name: v })); }}
         fromAccount={smFrom}
         setFromAccount={setSmFrom}
         accounts={accounts}
@@ -987,7 +987,7 @@ const Transfers = () => {
         email={smEmail}
         setEmail={(v) => { setSmEmail(v); setSmFields((prev) => ({ ...prev, email: v })); }}
         recipient={smRecipient}
-        setRecipient={setSmRecipient}
+        setRecipient={(v) => { setSmRecipient(v); setSmFields((p) => ({ ...p, recipient_name: v })); }}
         handle={smFields.handle ?? ""}
         setHandle={(v) => setSmFields((p) => ({ ...p, handle: v }))}
         fromAccount={smFrom}
