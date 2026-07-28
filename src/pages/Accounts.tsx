@@ -168,7 +168,7 @@ const Accounts = () => {
 
       <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="flex h-44 md:h-56">
+        <div className="flex h-28 md:h-36">
           <div className="relative w-1/4 overflow-hidden">
             {avatarUrl ? (
               <img
@@ -178,7 +178,7 @@ const Accounts = () => {
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-accent">
-                <span className="font-display text-4xl md:text-6xl font-bold text-primary-foreground">
+                <span className="font-display text-3xl md:text-5xl font-bold text-primary-foreground">
                   {initials}
                 </span>
               </div>
@@ -191,9 +191,9 @@ const Accounts = () => {
               aria-label="Change profile photo"
             >
               {uploadingAvatar ? (
-                <Loader2 className="h-8 w-8 text-white animate-spin" />
+                <Loader2 className="h-6 w-6 text-white animate-spin" />
               ) : (
-                <Camera className="h-8 w-8 text-white" />
+                <Camera className="h-6 w-6 text-white" />
               )}
             </button>
             <input
@@ -204,7 +204,7 @@ const Accounts = () => {
               onChange={handleAvatarUpload}
             />
           </div>
-          <div className="flex w-3/4 flex-col justify-between p-4 md:p-6">
+          <div className="flex w-3/4 flex-col justify-between p-3 md:p-4">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Sparkles className="h-3 w-3 md:h-4 md:w-4" />
               <span className="text-[10px] md:text-xs uppercase tracking-[0.2em]">
