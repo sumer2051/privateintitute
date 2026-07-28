@@ -175,8 +175,6 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               <Input type="search" placeholder="Search accounts, services..." className="w-64 pl-10" />
             </div>
 
-            <CurrencySelector variant="compact" />
-
             <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setDarkMode(!darkMode)}>
               {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
