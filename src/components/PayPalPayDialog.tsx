@@ -256,8 +256,8 @@ export const PayPalPayDialog = ({
             </button>
           </div>
 
-          {/* Keypad */}
-          <div className="mt-auto bg-gray-200 px-2 pb-2 pt-2">
+          {/* Keypad (mobile only) */}
+          <div className="mt-auto bg-gray-200 px-2 pb-2 pt-2 sm:hidden">
             {keys.map((row, i) => (
               <div key={i} className="grid grid-cols-3 gap-1.5 mb-1.5">
                 {row.map((k) => (
