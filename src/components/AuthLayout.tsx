@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info, Wallet, CreditCard, ArrowLeftRight, Receipt, LayoutDashboard, LifeBuoy, Settings as SettingsIcon, ShieldAlert, Users, Mail, Megaphone as MegaphoneIcon, ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
+import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info, Wallet, CreditCard, ArrowLeftRight, LifeBuoy, Settings as SettingsIcon, ShieldAlert, Users, Mail, Megaphone as MegaphoneIcon, ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -114,10 +114,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet },
     { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard },
     { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight },
-    { id: "billpay", label: "Bill Pay", path: "/billpay", Icon: Receipt },
-    { id: "overview", label: "Overview", path: "/overview", Icon: LayoutDashboard },
-    { id: "support", label: "Support", path: "/support", Icon: LifeBuoy },
-    { id: "settings", label: "Settings", path: "/settings", Icon: SettingsIcon },
+    { id: "overview", label: "Support", path: "/overview", Icon: LifeBuoy },
+    { id: "billpay", label: "Settings", path: "/billpay", Icon: SettingsIcon },
   ];
 
   const staffNav = [
@@ -133,7 +131,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   // tx_support is restricted: no balances, no transfers, no bill pay, no cards
   const restrictedForTxOnly = isTxSupport && !isAdmin && !isSupport;
   const filteredUserNav = restrictedForTxOnly
-    ? userNav.filter((i) => ["settings", "support"].includes(i.id))
+    ? userNav.filter((i) => ["overview", "billpay"].includes(i.id))
     : userNav;
 
   const navItems = showStaff ? [...filteredUserNav, ...staffNav] : filteredUserNav;
@@ -239,7 +237,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
             >
               {navItems.map((item) => {
                 const Icon = (item as any).Icon;
-                const active = currentPage === item.id;
+                const active = (currentPage === "support" ? "overview" : currentPage === "settings" ? "billpay" : currentPage) === item.id;
                 return (
                   <button
                     key={item.id}
