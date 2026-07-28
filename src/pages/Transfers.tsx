@@ -927,7 +927,7 @@ const Transfers = () => {
         setEmail={setSmEmail}
         recipient={smRecipient}
         setRecipient={setSmRecipient}
-        balanceLabel={`Cash balance: ${formatCurrency(accounts.find((a) => a.id === smFrom)?.balance ?? 0)}`}
+        balanceLabel={`Checking account balance: ${formatCurrency(accounts.find((a) => a.account_type === "checking")?.balance ?? 0)}`}
         loading={smLoading}
         currencySymbol={currency.symbol}
         onSubmit={async () => {
