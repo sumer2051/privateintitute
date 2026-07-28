@@ -42,7 +42,7 @@ export const ZellePayDialog = ({
   const displayAmount = amount && parseFloat(amount) > 0
     ? Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : "";
-  const canSend = fromAccount && amount && parseFloat(amount) > 0 && email.trim() && recipient.trim();
+  const canSend = fromAccount && amount && parseFloat(amount) > 0 && recipient.trim();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
