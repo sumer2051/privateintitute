@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -105,6 +105,19 @@ const Accounts = () => {
     return "Good Evening";
   })();
 
+  const bouncingName = useMemo(() => {
+    if (!displayName) return null;
+    return displayName.split("").map((char, i) => (
+      <span
+        key={`${char}-${i}`}
+        className="bounce-letter font-display text-xl md:text-4xl font-bold text-secondary"
+        style={{ animationDelay: `${i * 0.07}s` }}
+      >
+        {char === " " ? "\u00A0" : char}
+      </span>
+    ));
+  }, [displayName]);
+
   const fetchAccounts = async () => {
     const start = Date.now();
     try {
@@ -156,7 +169,7 @@ const Accounts = () => {
       <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="flex h-44 md:h-56">
-          <div className="relative w-1/2 overflow-hidden">
+          <div className="relative w-1/4 overflow-hidden">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -191,7 +204,7 @@ const Accounts = () => {
               onChange={handleAvatarUpload}
             />
           </div>
-          <div className="flex w-1/2 flex-col justify-between p-4 md:p-6">
+          <div className="flex w-3/4 flex-col justify-between p-4 md:p-6">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Sparkles className="h-3 w-3 md:h-4 md:w-4" />
               <span className="text-[10px] md:text-xs uppercase tracking-[0.2em]">
@@ -199,15 +212,7 @@ const Accounts = () => {
               </span>
             </div>
             <div className="flex flex-wrap items-end gap-0 leading-none">
-              {displayName.split("").map((char, i) => (
-                <span
-                  key={i}
-                  className="bounce-letter font-display text-xl md:text-4xl font-bold text-secondary"
-                  style={{ animationDelay: `${i * 0.07}s` }}
-                >
-                  {char === " " ? "\u00A0" : char}
-                </span>
-              ))}
+              {bouncingName}
             </div>
           </div>
         </div>
@@ -224,9 +229,9 @@ const Accounts = () => {
           .map((account) => (
             <Card
               key={account.id}
-              className="overflow-hidden rounded-2xl border-0 shadow-lg shadow-primary/10 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              className="overflow-hidden rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-md shadow-lg shadow-primary/10 transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
-              <CardHeader className="relative bg-gradient-to-br from-primary to-primary/85 p-5 md:p-6 text-primary-foreground">
+              <CardHeader className="relative bg-primary/25 backdrop-blur-md border-b border-primary/20 p-5 md:p-6 text-primary-foreground">
                 <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
                 <div className="relative flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -242,7 +247,7 @@ const Accounts = () => {
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="bg-gradient-to-b from-primary/[0.04] to-transparent p-5 md:p-6">
+              <CardContent className="bg-primary/5 backdrop-blur-sm p-5 md:p-6">
                 <div className="space-y-4 md:space-y-5">
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
                     <div>
@@ -304,8 +309,8 @@ const Accounts = () => {
           ))}
       </div>
 
-      <Card className="rounded-2xl border shadow-sm overflow-hidden">
-        <CardHeader className="p-4 md:p-6 bg-gradient-to-r from-primary/5 to-transparent">
+      <Card className="rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-md shadow-sm overflow-hidden">
+        <CardHeader className="p-4 md:p-6 bg-primary/10 backdrop-blur-md border-b border-primary/15">
           <CardTitle className="flex items-center gap-2 text-base md:text-lg">
             <TrendingUp className="h-5 w-5 text-primary" />
             Account Summary
@@ -318,19 +323,19 @@ const Accounts = () => {
             const net = deposits - credit;
             return (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-                <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
+                <div className="rounded-xl border border-primary/10 bg-card/70 backdrop-blur-sm p-3 md:p-4 shadow-sm">
                   <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Total Deposits</p>
                   <p className="mt-1 font-display text-base md:text-2xl font-bold text-success truncate">
                     <CountUp value={deposits} format={formatCurrency} />
                   </p>
                 </div>
-                <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
+                <div className="rounded-xl border border-primary/10 bg-card/70 backdrop-blur-sm p-3 md:p-4 shadow-sm">
                   <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Credit Used</p>
                   <p className="mt-1 font-display text-base md:text-2xl font-bold text-destructive truncate">
                     <CountUp value={credit} format={formatCurrency} />
                   </p>
                 </div>
-                <div className="col-span-2 md:col-span-1 rounded-xl border bg-gradient-to-br from-primary/10 to-accent/10 p-3 md:p-4 shadow-sm">
+                <div className="col-span-2 md:col-span-1 rounded-xl border border-primary/10 bg-gradient-to-br from-primary/10 to-accent/10 backdrop-blur-sm p-3 md:p-4 shadow-sm">
                   <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Net Worth</p>
                   <p className="mt-1 font-display text-lg md:text-2xl font-bold text-secondary truncate">
                     <CountUp value={net} format={formatCurrency} />
