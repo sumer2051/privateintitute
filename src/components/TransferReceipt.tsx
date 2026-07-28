@@ -182,21 +182,25 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   if (isCashApp && !showFullReceipt) {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent className="max-w-md p-0 overflow-hidden border-0 bg-black text-white sm:rounded-2xl [&>button]:hidden">
-          <div className="flex min-h-[560px] flex-col px-6 pb-6 pt-5">
+        <DialogContent
+          className="p-0 gap-0 overflow-hidden border-0 bg-black text-white [&>button]:hidden top-0 left-0 right-0 bottom-0 translate-x-0 translate-y-0 w-screen h-[100dvh] max-w-none rounded-none sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:h-auto sm:max-w-[380px] sm:min-h-[600px] sm:rounded-3xl"
+        >
+          <div className="flex h-full flex-col px-5 pb-5 pt-4 sm:min-h-[600px]">
             <button
               onClick={onClose}
               aria-label="Close"
-              className="mb-6 flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
+              className="mb-4 flex h-9 w-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
             >
               <X className="h-6 w-6" strokeWidth={2.5} />
             </button>
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#00D64F] animate-in zoom-in-50 duration-300">
-              <Check className="h-9 w-9 text-black" strokeWidth={3.5} />
+            <div className="flex-1 flex flex-col">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#00D64F] animate-in zoom-in-50 duration-300">
+                <Check className="h-9 w-9 text-black" strokeWidth={3.5} />
+              </div>
+              <h1 className="mt-6 text-[32px] sm:text-[34px] font-bold leading-[1.15] tracking-tight">
+                You sent {amountStr} to {displayTo}
+              </h1>
             </div>
-            <h1 className="mt-6 text-[34px] font-bold leading-[1.15] tracking-tight">
-              You sent {amountStr} to {displayTo}
-            </h1>
             <div className="mt-auto space-y-3 pt-8">
               <button
                 onClick={() => setShowFullReceipt(true)}
