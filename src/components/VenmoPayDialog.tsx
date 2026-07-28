@@ -114,19 +114,21 @@ export const VenmoPayDialog = ({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[15px] text-black mb-1">Amount</div>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-medium text-black">{currencySymbol}</span>
-                  <div className="flex-1 border border-black rounded-md px-2 py-1">
+                <div className="flex items-center gap-2 min-h-[48px]">
+                  <span className="text-2xl font-medium text-black shrink-0">{currencySymbol}</span>
+                  <div className="flex-1 border border-black rounded-md px-2 py-1.5">
                     <input
                       type="text"
                       inputMode="decimal"
-                      value={displayAmount}
+                      value={amountFocused ? amount : displayAmount}
+                      onFocus={() => setAmountFocused(true)}
+                      onBlur={() => setAmountFocused(false)}
                       onChange={(e) => {
                         const v = e.target.value.replace(/[^0-9.]/g, "");
                         const parts = v.split(".");
                         setAmount(parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : v);
                       }}
-                      placeholder="$0.00"
+                      placeholder="0.00"
                       className="w-full bg-transparent outline-none text-2xl font-medium text-black placeholder:text-gray-400"
                     />
                   </div>
