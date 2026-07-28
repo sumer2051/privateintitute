@@ -949,7 +949,7 @@ const Transfers = () => {
         note={smNote}
         setNote={setSmNote}
         email={smEmail}
-        setEmail={setSmEmail}
+        setEmail={(v) => { setSmEmail(v); setSmFields((prev) => ({ ...prev, email: v })); }}
         recipient={smRecipient}
         setRecipient={setSmRecipient}
         fromAccount={smFrom}
@@ -962,8 +962,6 @@ const Transfers = () => {
         currencySymbol={currency.symbol}
         currencyCode={currency.code}
         onSubmit={async () => {
-          setSmFields((prev) => ({ ...prev, email: smEmail }));
-          await new Promise((r) => setTimeout(r, 0));
           await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
           setPayPalOpen(false);
         }}
