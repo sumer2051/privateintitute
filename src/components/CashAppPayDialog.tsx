@@ -232,22 +232,24 @@ export const CashAppPayDialog = ({
               <ChevronDown className="h-4 w-4 text-black/70" />
             </button>
 
-            <div className="px-5 py-4 space-y-3 border-t border-black/10">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-bold text-black w-28">Gmail. -</span>
+            <div className="px-4 py-4 space-y-4 border-t border-black/10 bg-gray-50/50">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Gmail</label>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
-                  className="flex-1 h-9 px-2 rounded-md border border-black/40 bg-white outline-none text-sm focus:border-black"
+                  placeholder="your.email@gmail.com"
+                  className="w-full h-11 px-3 rounded-lg border border-gray-300 bg-white outline-none text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#00C244] focus:ring-2 focus:ring-[#00C244]/20 transition-all"
                 />
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-bold text-black w-28">Recipient name</span>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Recipient name</label>
                 <input
                   value={recipient}
                   onChange={(e) => setRecipient(e.target.value)}
-                  className="flex-1 h-9 px-2 rounded-md border border-black/40 bg-white outline-none text-sm focus:border-black"
+                  placeholder="Full name on account"
+                  className="w-full h-11 px-3 rounded-lg border border-gray-300 bg-white outline-none text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#00C244] focus:ring-2 focus:ring-[#00C244]/20 transition-all"
                 />
               </div>
             </div>
