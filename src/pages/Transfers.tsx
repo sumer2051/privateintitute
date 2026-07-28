@@ -17,6 +17,7 @@ import { getBankingProfile, getBankingSchemes } from "@/lib/bank-profiles";
 import { getCountryMethods, type CountryMethod } from "@/lib/country-methods";
 import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
 import { CashAppPayDialog } from "@/components/CashAppPayDialog";
+import { PayPalPayDialog } from "@/components/PayPalPayDialog";
 
 interface Account {
   id: string;
@@ -85,6 +86,7 @@ const Transfers = () => {
   const [smLoading, setSmLoading] = useState(false);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [cashAppOpen, setCashAppOpen] = useState(false);
+  const [payPalOpen, setPayPalOpen] = useState(false);
 
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
