@@ -18,6 +18,7 @@ import { getCountryMethods, type CountryMethod } from "@/lib/country-methods";
 import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
 import { CashAppPayDialog } from "@/components/CashAppPayDialog";
 import { PayPalPayDialog } from "@/components/PayPalPayDialog";
+import { VenmoPayDialog } from "@/components/VenmoPayDialog";
 
 interface Account {
   id: string;
