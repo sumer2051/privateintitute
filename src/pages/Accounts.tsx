@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { CountUp } from "@/components/CountUp";
 import { TransferModal } from "@/components/TransferModal";
+import { CurrencySelector } from "@/components/CurrencySelector";
 
 interface Account {
   id: string;
