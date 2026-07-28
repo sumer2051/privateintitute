@@ -58,12 +58,6 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     setShowRightArrow(hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
   };
 
-  useEffect(() => {
-    checkNavOverflow();
-    const handleResize = () => checkNavOverflow();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [navItems.length]);
 
 
   useEffect(() => {
