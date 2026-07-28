@@ -197,13 +197,23 @@ export const PayPalPayDialog = ({
           <div className="px-4 pb-4 space-y-4">
             <h3 className="text-base font-semibold text-black">Optional Fields</h3>
             <div className="space-y-1">
+              <label className="text-sm font-semibold text-black block">Recipient name:</label>
+              <input
+                type="text"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder="e.g. James Robinson"
+                className="w-full h-12 px-3 rounded-lg border border-gray-300 bg-white outline-none text-sm text-black placeholder:text-gray-400 focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+              />
+            </div>
+            <div className="space-y-1">
               <label className="text-sm font-semibold text-black block">Recipient email/gmail:</label>
               <div className="relative">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder=""
+                  placeholder="name@email.com"
                   className="w-full h-12 px-3 rounded-lg border border-gray-300 bg-white outline-none text-sm text-black focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full flex items-center justify-center" style={{ background: "#E6F8EC" }}>
