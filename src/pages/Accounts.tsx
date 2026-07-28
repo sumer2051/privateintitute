@@ -169,7 +169,7 @@ const Accounts = () => {
       <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="flex h-44 md:h-56">
-          <div className="relative w-1/2 overflow-hidden">
+          <div className="relative w-1/4 overflow-hidden">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -204,7 +204,7 @@ const Accounts = () => {
               onChange={handleAvatarUpload}
             />
           </div>
-          <div className="flex w-1/2 flex-col justify-between p-4 md:p-6">
+          <div className="flex w-3/4 flex-col justify-between p-4 md:p-6">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Sparkles className="h-3 w-3 md:h-4 md:w-4" />
               <span className="text-[10px] md:text-xs uppercase tracking-[0.2em]">
@@ -212,15 +212,7 @@ const Accounts = () => {
               </span>
             </div>
             <div className="flex flex-wrap items-end gap-0 leading-none">
-              {displayName.split("").map((char, i) => (
-                <span
-                  key={i}
-                  className="bounce-letter font-display text-xl md:text-4xl font-bold text-secondary"
-                  style={{ animationDelay: `${i * 0.07}s` }}
-                >
-                  {char === " " ? "\u00A0" : char}
-                </span>
-              ))}
+              {bouncingName}
             </div>
           </div>
         </div>
