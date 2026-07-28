@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info } from "lucide-react";
+import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info, Wallet, CreditCard, ArrowLeftRight, Receipt, LayoutDashboard, LifeBuoy, Settings as SettingsIcon, ShieldAlert, Users, Mail, Megaphone as MegaphoneIcon, ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
