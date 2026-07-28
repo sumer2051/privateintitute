@@ -88,6 +88,7 @@ const Transfers = () => {
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [cashAppOpen, setCashAppOpen] = useState(false);
   const [payPalOpen, setPayPalOpen] = useState(false);
+  const [venmoOpen, setVenmoOpen] = useState(false);
 
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
