@@ -20,6 +20,7 @@ import { CashAppPayDialog } from "@/components/CashAppPayDialog";
 import { PayPalPayDialog } from "@/components/PayPalPayDialog";
 import { VenmoPayDialog } from "@/components/VenmoPayDialog";
 import { ZellePayDialog } from "@/components/ZellePayDialog";
+import { MethodPayDialog } from "@/components/MethodPayDialog";
 
 interface Account {
   id: string;
@@ -91,6 +92,7 @@ const Transfers = () => {
   const [payPalOpen, setPayPalOpen] = useState(false);
   const [venmoOpen, setVenmoOpen] = useState(false);
   const [zelleOpen, setZelleOpen] = useState(false);
+  const [methodOpen, setMethodOpen] = useState(false);
 
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
@@ -547,6 +549,9 @@ const Transfers = () => {
                             } else if (m.id === "zelle") {
                               if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setZelleOpen(true);
+                            } else {
+                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
+                              setMethodOpen(true);
                             }
                           }}
                           className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
@@ -1020,6 +1025,34 @@ const Transfers = () => {
         onSubmit={async () => {
           await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
           setZelleOpen(false);
+        }}
+      />
+      <MethodPayDialog
+        open={methodOpen}
+        onOpenChange={setMethodOpen}
+        method={smMethod}
+        amount={smAmount}
+        setAmount={setSmAmount}
+        note={smNote}
+        setNote={setSmNote}
+        email={smEmail}
+        setEmail={setSmEmail}
+        recipient={smRecipient}
+        setRecipient={setSmRecipient}
+        fields={smFields}
+        setFields={setSmFields}
+        variant={smVariant}
+        setVariant={setSmVariant}
+        fromAccount={smFrom}
+        setFromAccount={setSmFrom}
+        accounts={accounts}
+        formatCurrency={formatCurrency}
+        loading={smLoading}
+        currencySymbol={currency.symbol}
+        currencyCode={currency.code}
+        onSubmit={async () => {
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          setMethodOpen(false);
         }}
       />
       <TransferPinGate ref={pinRef} />
