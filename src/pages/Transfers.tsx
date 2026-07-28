@@ -459,11 +459,6 @@ const Transfers = () => {
           status: "pending",
         },
       }).catch((e) => console.error("confirmation email failed", e));
-      toast({
-        title: "Zelle submitted — Pending approval",
-        description: `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
-      });
-
       setZAmount(""); setZRecipient(""); setZContact(""); setZMemo("");
       if (data) setSelectedTx(data as PendingTx);
       fetchAccounts();
