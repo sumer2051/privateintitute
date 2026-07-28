@@ -224,24 +224,56 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
         </div>
 
         <nav className="border-t bg-card">
-          <div className="container mx-auto flex gap-1 overflow-x-auto px-3 md:px-4 scrollbar-none">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  if (item.path) navigate(item.path);
-                  if (onPageChange) onPageChange(item.id);
-                }}
-                className={`whitespace-nowrap border-b-2 px-4 md:px-6 py-2.5 md:py-3 text-xs md:text-sm font-semibold transition-all ${
-
-                  currentPage === item.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-secondary hover:border-primary hover:text-primary"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+          <div className="container mx-auto relative px-3 md:px-4">
+            <button
+              type="button"
+              aria-label="Scroll navigation left"
+              onClick={() => {
+                const el = document.getElementById("primary-nav-scroller");
+                if (el) el.scrollBy({ left: -160, behavior: "smooth" });
+              }}
+              className="absolute left-0 top-1/2 z-10 -translate-y-1/2 hidden sm:flex h-8 w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div
+              id="primary-nav-scroller"
+              className="flex gap-1 overflow-x-auto scroll-smooth px-8 sm:px-10 scrollbar-none"
+            >
+              {navItems.map((item) => {
+                const Icon = (item as any).Icon;
+                const active = currentPage === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      if (item.path) navigate(item.path);
+                      if (onPageChange) onPageChange(item.id);
+                    }}
+                    className={`group flex shrink-0 flex-col items-center gap-0.5 whitespace-nowrap border-b-2 px-3 md:px-5 py-2 md:py-2.5 text-[10px] md:text-xs font-semibold transition-all ${
+                      active
+                        ? "border-primary text-primary"
+                        : "border-transparent text-secondary hover:border-primary hover:text-primary"
+                    }`}
+                    title={item.label}
+                  >
+                    {Icon ? <Icon className={`h-5 w-5 ${active ? "text-primary" : "text-secondary group-hover:text-primary"}`} /> : null}
+                    <span className="leading-none">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              aria-label="Scroll navigation right"
+              onClick={() => {
+                const el = document.getElementById("primary-nav-scroller");
+                if (el) el.scrollBy({ left: 160, behavior: "smooth" });
+              }}
+              className="absolute right-0 top-1/2 z-10 -translate-y-1/2 hidden sm:flex h-8 w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
         </nav>
       </header>
