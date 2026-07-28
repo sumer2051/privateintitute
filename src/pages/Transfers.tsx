@@ -97,7 +97,7 @@ const Transfers = () => {
   const fetchAccounts = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { data } = await supabase.from("accounts").select("id, account_name, account_number, balance").eq("user_id", user.id);
+    const { data } = await supabase.from("accounts").select("id, account_name, account_number, account_type, balance").eq("user_id", user.id);
     if (data) setAccounts(data);
   };
 
