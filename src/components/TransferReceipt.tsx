@@ -194,43 +194,6 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               <h1 className="mt-6 text-[32px] sm:text-[34px] font-bold leading-[1.15] tracking-tight">
                 You sent {amountStr} to {displayTo}
               </h1>
-
-              <div className="mt-6 space-y-3 rounded-2xl bg-[#1f1f1f] p-4 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-white/60">Status</span>
-                  <span className="font-semibold text-[#00D64F]">Pending</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/60">To</span>
-                  <span className="font-semibold text-right">{displayTo}</span>
-                </div>
-                {fields.handle && (
-                  <div className="flex justify-between">
-                    <span className="text-white/60">$Cashtag</span>
-                    <span className="font-semibold">{fields.handle}</span>
-                  </div>
-                )}
-                {recipientEmail && (
-                  <div className="flex justify-between">
-                    <span className="text-white/60">Email</span>
-                    <span className="font-semibold break-all">{recipientEmail}</span>
-                  </div>
-                )}
-                {note && (
-                  <div className="flex justify-between">
-                    <span className="text-white/60">For</span>
-                    <span className="font-semibold text-right">{note}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-white/60">Transaction</span>
-                  <span className="font-mono text-xs">{reference}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/60">Date</span>
-                  <span className="font-semibold">{new Date(timestamp).toLocaleString()}</span>
-                </div>
-              </div>
             </div>
 
             <div className="mt-auto space-y-3 pt-6">
