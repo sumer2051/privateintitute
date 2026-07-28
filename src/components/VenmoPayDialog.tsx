@@ -147,7 +147,7 @@ export const VenmoPayDialog = ({
           <div className="px-4 pt-5">
             <label className="text-lg font-bold text-black block mb-2">From Account</label>
             <Select value={fromAccount} onValueChange={setFromAccount}>
-              <SelectTrigger className="h-14 rounded-2xl border border-gray-200 bg-white px-4 text-left focus:ring-2 focus:ring-[#3D95CE]/20 focus:border-[#3D95CE]">
+              <SelectTrigger className="h-14 rounded-2xl border border-gray-200 bg-white px-4 text-left focus:ring-2 focus:ring-[#3D95CE]/20 focus:border-[#3D95CE] hover:border-[#3D95CE]/60 transition-colors">
                 <SelectValue placeholder="select account" />
               </SelectTrigger>
               <SelectContent>
@@ -158,7 +158,27 @@ export const VenmoPayDialog = ({
                 ))}
               </SelectContent>
             </Select>
+            {(() => {
+              const sel = accounts.find((a) => a.id === fromAccount);
+              if (!sel) return null;
+              return (
+                <div
+                  key={sel.id + sel.balance}
+                  className="mt-2 flex items-center justify-between rounded-xl px-3 py-2 border animate-in fade-in slide-in-from-top-1 duration-300"
+                  style={{ background: "linear-gradient(90deg, #EAF4FB 0%, #F5FAFD 100%)", borderColor: "#CDE4F2" }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full animate-pulse" style={{ background: VENMO_BLUE }} />
+                    <span className="text-[12px] font-medium text-gray-700">Checking account balance</span>
+                  </div>
+                  <span className="text-sm font-bold" style={{ color: VENMO_BLUE }}>
+                    {formatCurrency(sel.balance)}
+                  </span>
+                </div>
+              );
+            })()}
           </div>
+
 
           {/* Recipient Gmail */}
           <div className="px-4 pt-5">
