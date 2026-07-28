@@ -88,11 +88,11 @@ export const CashAppPayDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="p-0 gap-0 overflow-hidden border-0 max-w-[380px] sm:rounded-3xl [&>button]:hidden"
+        className="p-0 gap-0 overflow-hidden border-0 [&>button]:hidden top-0 left-0 right-0 bottom-0 translate-x-0 translate-y-0 w-screen h-[100dvh] max-w-none rounded-none sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:h-auto sm:max-w-[400px] sm:rounded-3xl"
       >
         {step === "amount" ? (
           <div
-            className="flex flex-col text-white"
+            className="flex flex-col text-white h-full sm:h-auto"
             style={{ background: "#00D64F", minHeight: "560px" }}
           >
             <div className="flex items-center justify-between px-5 pt-4">
@@ -154,7 +154,7 @@ export const CashAppPayDialog = ({
             </div>
           </div>
         ) : (
-          <div className="bg-white text-black flex flex-col">
+          <div className="bg-white text-black flex flex-col h-full sm:h-auto overflow-y-auto">
             {/* Top brand header */}
             <div className="pt-5 pb-3 px-5 flex items-center justify-center gap-2">
               <span

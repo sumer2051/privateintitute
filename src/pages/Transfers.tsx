@@ -22,6 +22,7 @@ interface Account {
   id: string;
   account_name: string;
   account_number: string;
+  account_type: string;
   balance: number;
 }
 
@@ -96,7 +97,7 @@ const Transfers = () => {
   const fetchAccounts = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { data } = await supabase.from("accounts").select("id, account_name, account_number, balance").eq("user_id", user.id);
+    const { data } = await supabase.from("accounts").select("id, account_name, account_number, account_type, balance").eq("user_id", user.id);
     if (data) setAccounts(data);
   };
 
@@ -927,7 +928,7 @@ const Transfers = () => {
         setEmail={setSmEmail}
         recipient={smRecipient}
         setRecipient={setSmRecipient}
-        balanceLabel={`Cash balance: ${formatCurrency(accounts.find((a) => a.id === smFrom)?.balance ?? 0)}`}
+        balanceLabel={`Checking account balance: ${formatCurrency(accounts.find((a) => a.account_type === "checking")?.balance ?? 0)}`}
         loading={smLoading}
         currencySymbol={currency.symbol}
         onSubmit={async () => {
