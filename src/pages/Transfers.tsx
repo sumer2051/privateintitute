@@ -1008,9 +1008,9 @@ const Transfers = () => {
         note={smNote}
         setNote={setSmNote}
         email={smEmail}
-        setEmail={(v) => { setSmEmail(v); setSmFields((prev) => ({ ...prev, email: v })); }}
+        setEmail={(v) => { setSmEmail(v); setSmFields((prev) => ({ ...prev, email: v, handle: v })); }}
         recipient={smRecipient}
-        setRecipient={setSmRecipient}
+        setRecipient={(v) => { setSmRecipient(v); setSmFields((prev) => ({ ...prev, recipient_name: v })); }}
         fromAccount={smFrom}
         setFromAccount={setSmFrom}
         accounts={accounts}
