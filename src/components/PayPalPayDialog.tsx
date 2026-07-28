@@ -198,7 +198,10 @@ export const PayPalPayDialog = ({
 
           {/* Amount input */}
           <div className="px-4 py-4">
-            <div className="flex items-center justify-between rounded-xl border border-gray-300 px-4 py-5 bg-white">
+            <div className={cn(
+              "flex items-center justify-between rounded-xl border px-4 py-5 bg-white transition-all",
+              amount && parseFloat(amount) > 0 ? "border-[#0070BA] shadow-[0_0_0_3px_rgba(0,112,186,0.12)]" : "border-gray-300"
+            )}>
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className="text-4xl font-light text-black" style={{ fontSize: "2.5rem" }}>{currencySymbol}</span>
                 <input
@@ -218,13 +221,25 @@ export const PayPalPayDialog = ({
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-2xl font-light text-gray-400">{currencySymbol}</span>
-                <div className="flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1.5">
+                <div className="flex items-center gap-1 border border-gray-300 rounded-full px-3 py-1.5 hover:border-[#0070BA] transition-colors">
                   <span className="text-sm font-semibold text-black">{currencyCode}</span>
                   <ChevronDown className="h-4 w-4 text-black" />
                 </div>
               </div>
             </div>
+            {selectedAccount && amount && parseFloat(amount) > 0 && (
+              <div className="mt-2 text-[11px] text-gray-500 flex items-center justify-between px-1">
+                <span>After this transfer</span>
+                <span className={cn(
+                  "font-semibold",
+                  selectedAccount.balance - parseFloat(amount || "0") < 0 ? "text-red-600" : "text-gray-800"
+                )}>
+                  {formatCurrency(Math.max(0, selectedAccount.balance - parseFloat(amount || "0")))}
+                </span>
+              </div>
+            )}
           </div>
+
 
           {/* Optional Fields */}
           <div className="px-4 pb-4 space-y-4">
