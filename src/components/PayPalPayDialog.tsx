@@ -276,7 +276,11 @@ export const PayPalPayDialog = ({
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
                 placeholder="e.g. James Robinson"
-                className="w-full h-12 px-3 rounded-lg border border-gray-300 bg-white outline-none text-sm text-black placeholder:text-gray-400 focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                className="w-full h-12 px-3 rounded-lg border border-gray-300 outline-none text-sm text-black placeholder:text-gray-400 focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                style={{
+                  background: "linear-gradient(180deg, #ffffff 0%, #F5F9FD 100%)",
+                  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.05)",
+                }}
               />
             </div>
             <div className="space-y-1">
@@ -287,7 +291,11 @@ export const PayPalPayDialog = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@email.com"
-                  className="w-full h-12 px-3 rounded-lg border border-gray-300 bg-white outline-none text-sm text-black focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                  className="w-full h-12 px-3 rounded-lg border border-gray-300 outline-none text-sm text-black focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                  style={{
+                    background: "linear-gradient(180deg, #ffffff 0%, #F5F9FD 100%)",
+                    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.05)",
+                  }}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full flex items-center justify-center" style={{ background: "#E6F8EC" }}>
                   <Sparkles className="h-3.5 w-3.5" style={{ color: "#00C244" }} />
@@ -301,7 +309,11 @@ export const PayPalPayDialog = ({
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder=""
-                className="w-full h-12 px-3 rounded-lg border border-gray-300 bg-white outline-none text-sm text-black focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                className="w-full h-12 px-3 rounded-lg border border-gray-300 outline-none text-sm text-black focus:border-[#0070BA] focus:ring-2 focus:ring-[#0070BA]/20 transition-all"
+                style={{
+                  background: "linear-gradient(180deg, #ffffff 0%, #F5F9FD 100%)",
+                  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.05)",
+                }}
               />
             </div>
           </div>
