@@ -247,7 +247,7 @@ const Accounts = () => {
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="bg-gradient-to-b from-primary/[0.04] to-transparent p-5 md:p-6">
+              <CardContent className="bg-primary/5 backdrop-blur-sm p-5 md:p-6">
                 <div className="space-y-4 md:space-y-5">
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
                     <div>
