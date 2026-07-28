@@ -1000,6 +1000,28 @@ const Transfers = () => {
           setVenmoOpen(false);
         }}
       />
+      <ZellePayDialog
+        open={zelleOpen}
+        onOpenChange={setZelleOpen}
+        amount={smAmount}
+        setAmount={setSmAmount}
+        note={smNote}
+        setNote={setSmNote}
+        email={smEmail}
+        setEmail={(v) => { setSmEmail(v); setSmFields((prev) => ({ ...prev, email: v })); }}
+        recipient={smRecipient}
+        setRecipient={setSmRecipient}
+        fromAccount={smFrom}
+        setFromAccount={setSmFrom}
+        accounts={accounts}
+        formatCurrency={formatCurrency}
+        loading={smLoading}
+        currencySymbol={currency.symbol}
+        onSubmit={async () => {
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          setZelleOpen(false);
+        }}
+      />
       <TransferPinGate ref={pinRef} />
     </AuthLayout>
   );
