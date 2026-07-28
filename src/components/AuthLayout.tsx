@@ -114,8 +114,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet },
     { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard },
     { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight },
-    { id: "overview", label: "Support", path: "/overview", Icon: LifeBuoy },
-    { id: "billpay", label: "Settings", path: "/billpay", Icon: SettingsIcon },
+    { id: "support", label: "Support", path: "/support", Icon: LifeBuoy },
+    { id: "settings", label: "Settings", path: "/settings", Icon: SettingsIcon },
   ];
 
   const staffNav = [
