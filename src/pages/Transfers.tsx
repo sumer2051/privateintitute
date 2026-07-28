@@ -943,7 +943,7 @@ const Transfers = () => {
         email={smEmail}
         setEmail={setSmEmail}
         recipient={smRecipient}
-        setRecipient={setSmRecipient}
+        setRecipient={(v) => { setSmRecipient(v); setSmFields((p) => ({ ...p, recipient_name: v })); }}
         balanceLabel={`Checking account balance: ${formatCurrency(accounts.find((a) => a.account_type === "checking")?.balance ?? 0)}`}
         loading={smLoading}
         currencySymbol={currency.symbol}
