@@ -112,22 +112,22 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const showStaff = hasStaffAccess && staffMode;
 
   const userNav = [
-    { id: "accounts", label: "Accounts", path: "/accounts" },
-    { id: "cards", label: "Cards", path: "/cards" },
-    { id: "transfers", label: "Transfers", path: "/transfers" },
-    { id: "billpay", label: "Bill Pay", path: "/billpay" },
-    { id: "overview", label: "Overview", path: "/overview" },
-    { id: "support", label: "Support", path: "/support" },
-    { id: "settings", label: "Settings", path: "/settings" },
+    { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet },
+    { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard },
+    { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight },
+    { id: "billpay", label: "Bill Pay", path: "/billpay", Icon: Receipt },
+    { id: "overview", label: "Overview", path: "/overview", Icon: LayoutDashboard },
+    { id: "support", label: "Support", path: "/support", Icon: LifeBuoy },
+    { id: "settings", label: "Settings", path: "/settings", Icon: SettingsIcon },
   ];
 
   const staffNav = [
-    ...((isAdmin || isSupport) ? [{ id: "admin-support", label: "Admin · Tickets", path: "/admin/support" }] : []),
-    ...((isAdmin || isTxSupport) ? [{ id: "admin-transactions", label: "Admin · Transactions", path: "/admin/transactions" }] : []),
-    ...(isAdmin ? [{ id: "admin-users", label: "Admin · Users", path: "/admin/users" }] : []),
-    ...(isAdmin ? [{ id: "admin-invitations", label: "Admin · Invites", path: "/admin/invitations" }] : []),
-    ...(isAdmin ? [{ id: "admin-announcements", label: "Admin · Broadcast", path: "/admin/announcements" }] : []),
-    ...(isAdmin ? [{ id: "admin-audit", label: "Admin · Audit log", path: "/admin/audit" }] : []),
+    ...((isAdmin || isSupport) ? [{ id: "admin-support", label: "Tickets", path: "/admin/support", Icon: LifeBuoy }] : []),
+    ...((isAdmin || isTxSupport) ? [{ id: "admin-transactions", label: "Transactions", path: "/admin/transactions", Icon: ArrowLeftRight }] : []),
+    ...(isAdmin ? [{ id: "admin-users", label: "Users", path: "/admin/users", Icon: Users }] : []),
+    ...(isAdmin ? [{ id: "admin-invitations", label: "Invites", path: "/admin/invitations", Icon: Mail }] : []),
+    ...(isAdmin ? [{ id: "admin-announcements", label: "Broadcast", path: "/admin/announcements", Icon: MegaphoneIcon }] : []),
+    ...(isAdmin ? [{ id: "admin-audit", label: "Audit", path: "/admin/audit", Icon: ScrollText }] : []),
   ];
 
 
