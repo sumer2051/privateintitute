@@ -941,6 +941,31 @@ const Transfers = () => {
           setCashAppOpen(false);
         }}
       />
+      <PayPalPayDialog
+        open={payPalOpen}
+        onOpenChange={setPayPalOpen}
+        amount={smAmount}
+        setAmount={setSmAmount}
+        note={smNote}
+        setNote={setSmNote}
+        email={smEmail}
+        setEmail={setSmEmail}
+        recipient={smRecipient}
+        setRecipient={setSmRecipient}
+        fromAccount={smFrom}
+        setFromAccount={setSmFrom}
+        accounts={accounts}
+        formatCurrency={formatCurrency}
+        paymentType={smVariant}
+        setPaymentType={setSmVariant}
+        loading={smLoading}
+        currencySymbol={currency.symbol}
+        currencyCode={currency.code}
+        onSubmit={async () => {
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          setPayPalOpen(false);
+        }}
+      />
       <TransferPinGate ref={pinRef} />
     </AuthLayout>
   );
