@@ -18,6 +18,7 @@ import { getCountryMethods, type CountryMethod } from "@/lib/country-methods";
 import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
 import { CashAppPayDialog } from "@/components/CashAppPayDialog";
 import { PayPalPayDialog } from "@/components/PayPalPayDialog";
+import { VenmoPayDialog } from "@/components/VenmoPayDialog";
 
 interface Account {
   id: string;
@@ -87,6 +88,7 @@ const Transfers = () => {
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [cashAppOpen, setCashAppOpen] = useState(false);
   const [payPalOpen, setPayPalOpen] = useState(false);
+  const [venmoOpen, setVenmoOpen] = useState(false);
 
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
@@ -537,6 +539,9 @@ const Transfers = () => {
                             } else if (m.id === "paypal" || m.id === "paypal_uk" || m.id === "paypal_eu") {
                               if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setPayPalOpen(true);
+                            } else if (m.id === "venmo") {
+                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
+                              setVenmoOpen(true);
                             }
                           }}
                           className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
@@ -964,6 +969,30 @@ const Transfers = () => {
         onSubmit={async () => {
           await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
           setPayPalOpen(false);
+        }}
+      />
+      <VenmoPayDialog
+        open={venmoOpen}
+        onOpenChange={setVenmoOpen}
+        amount={smAmount}
+        setAmount={setSmAmount}
+        note={smNote}
+        setNote={setSmNote}
+        email={smEmail}
+        setEmail={(v) => { setSmEmail(v); setSmFields((prev) => ({ ...prev, email: v })); }}
+        recipient={smRecipient}
+        setRecipient={setSmRecipient}
+        handle={smFields.handle ?? ""}
+        setHandle={(v) => setSmFields((p) => ({ ...p, handle: v }))}
+        fromAccount={smFrom}
+        setFromAccount={setSmFrom}
+        accounts={accounts}
+        formatCurrency={formatCurrency}
+        loading={smLoading}
+        currencySymbol={currency.symbol}
+        onSubmit={async () => {
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          setVenmoOpen(false);
         }}
       />
       <TransferPinGate ref={pinRef} />
