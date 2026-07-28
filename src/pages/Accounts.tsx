@@ -256,63 +256,94 @@ const Accounts = () => {
         );
       })()}
 
-      <div className="grid gap-3 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {accounts.map((account) => (
-          <Card key={account.id} className="overflow-hidden transition-all hover:shadow-md">
-            <CardHeader className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 md:p-6">
-              <CardTitle className="flex items-center justify-between gap-2">
-                <span className="text-base md:text-lg truncate">{account.account_name}</span>
-                <span className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground shrink-0">
-                  {account.account_type}
-                </span>
-              </CardTitle>
-              <p className="text-xs md:text-sm text-muted-foreground">****{account.account_number}</p>
-            </CardHeader>
-            <CardContent className="p-4 md:p-6 md:pt-6">
-              <div className="space-y-3 md:space-y-4">
-                <div>
-                  <p className="text-[11px] md:text-sm text-muted-foreground">Current Balance</p>
-                  <p className="font-display text-2xl md:text-3xl font-bold text-secondary tracking-tight">
-                    <CountUp value={account.balance} format={formatCurrency} />
-                  </p>
-                </div>
-                {account.account_type !== "credit" && (
-                  <div>
-                    <p className="text-[11px] md:text-sm text-muted-foreground">Available</p>
-                    <p className="text-base md:text-xl font-semibold text-foreground">
-                      <CountUp value={account.available_balance} format={formatCurrency} />
+      <div className="grid gap-4 md:gap-6">
+        {accounts
+          .slice()
+          .sort((a, b) => {
+            const order: Record<string, number> = { checking: 1, savings: 2, credit: 3 };
+            return (order[a.account_type] || 99) - (order[b.account_type] || 99);
+          })
+          .map((account) => (
+            <Card
+              key={account.id}
+              className="overflow-hidden rounded-2xl border-0 shadow-lg shadow-primary/10 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              <CardHeader className="relative bg-gradient-to-br from-primary to-primary/85 p-5 md:p-6 text-primary-foreground">
+                <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+                <div className="relative flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <CardTitle className="text-base md:text-xl font-semibold tracking-tight text-primary-foreground">
+                      {account.account_name}
+                    </CardTitle>
+                    <p className="mt-1 text-xs md:text-sm text-primary-foreground/80">
+                      ****{account.account_number}
                     </p>
                   </div>
-                )}
-                <div className="flex gap-2 pt-2 md:pt-4">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="flex-1 h-9 text-xs md:text-sm transition-transform hover:scale-[1.03] hover:shadow-md"
-                    onClick={() => setTransferOpen(true)}
-                  >
-                    <ArrowUpDown className="mr-1 h-4 w-4" />
-                    Transfer
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 h-9 text-xs md:text-sm transition-transform hover:scale-[1.03] hover:shadow-md"
-                    onClick={() =>
-                      toast({
-                        title: "Statement ready",
-                        description: `${account.account_name} statement download started.`,
-                      })
-                    }
-                  >
-                    <Download className="mr-1 h-4 w-4" />
-                    Statement
-                  </Button>
+                  <span className="shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-[10px] md:text-xs font-semibold uppercase tracking-wider text-primary-foreground backdrop-blur-sm">
+                    {account.account_type}
+                  </span>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardHeader>
+              <CardContent className="bg-gradient-to-b from-primary/[0.04] to-transparent p-5 md:p-6">
+                <div className="space-y-4 md:space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
+                        Current Balance
+                      </p>
+                      <p className="mt-0.5 font-display text-3xl md:text-4xl font-bold text-secondary tracking-tight">
+                        <CountUp value={account.balance} format={formatCurrency} />
+                      </p>
+                    </div>
+                    {account.account_type !== "credit" && (
+                      <div className="text-left sm:text-right">
+                        <p className="text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
+                          Available
+                        </p>
+                        <p className="mt-0.5 text-lg md:text-xl font-semibold text-foreground">
+                          <CountUp value={account.available_balance} format={formatCurrency} />
+                        </p>
+                      </div>
+                    )}
+                    {account.account_type === "credit" && (
+                      <div className="text-left sm:text-right">
+                        <p className="text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
+                          Available Credit
+                        </p>
+                        <p className="mt-0.5 text-lg md:text-xl font-semibold text-success">
+                          <CountUp value={account.available_balance} format={formatCurrency} />
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-3 pt-1">
+                    <Button
+                      size="sm"
+                      className="flex-1 h-10 md:h-11 rounded-xl bg-primary text-primary-foreground text-xs md:text-sm font-semibold shadow-md shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/95 hover:shadow-lg active:scale-[0.98]"
+                      onClick={() => setTransferOpen(true)}
+                    >
+                      <ArrowUpDown className="mr-1.5 h-4 w-4" />
+                      Transfer
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 h-10 md:h-11 rounded-xl border-border bg-card text-xs md:text-sm font-semibold transition-all hover:scale-[1.02] hover:bg-accent/5 hover:text-accent active:scale-[0.98]"
+                      onClick={() =>
+                        toast({
+                          title: "Statement ready",
+                          description: `${account.account_name} statement download started.`,
+                        })
+                      }
+                    >
+                      <Download className="mr-1.5 h-4 w-4" />
+                      Statement
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
       </div>
 
       <Card>
