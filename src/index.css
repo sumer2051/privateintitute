@@ -178,6 +178,15 @@ All colors MUST be HSL.
   .animate-roll {
     animation: rollText var(--roll-duration, 8s) linear infinite;
   }
+  @keyframes bounce-letter {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .bounce-letter {
+    display: inline-block;
+    animation: bounce-letter 1.4s ease-in-out infinite;
+    will-change: transform;
+  }
   .scrollbar-none::-webkit-scrollbar { display: none; }
   .scrollbar-none { scrollbar-width: none; }
 }
