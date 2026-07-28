@@ -159,11 +159,16 @@ const Accounts = () => {
   return (
     <AuthLayout currentPage="accounts">
       {loading ? (
-        <div className="space-y-6 animate-pulse">
+        <div className="space-y-5 animate-pulse">
           <div className="h-10 w-64 rounded bg-muted" />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            <div className="h-24 rounded-xl bg-muted" />
+            <div className="h-24 rounded-xl bg-muted" />
+            <div className="col-span-2 md:col-span-1 h-24 rounded-xl bg-muted" />
+          </div>
+          <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-56 rounded-lg bg-muted" />
+              <div key={i} className="h-52 rounded-2xl bg-primary/10" />
             ))}
           </div>
         </div>
