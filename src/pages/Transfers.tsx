@@ -266,12 +266,6 @@ const Transfers = () => {
           status: "pending",
         },
       }).catch((e) => console.error("confirmation email failed", e));
-      toast({
-        title: `${profile.scheme} submitted — Pending approval`,
-        description: extEmail
-          ? `Ref ${ref}. Receipts emailed to you and ${extEmail}.`
-          : `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
-      });
       setExtAmount(""); setExtRecipient(""); setExtEmail(""); setExtFields({}); setExtMemo("");
 
       if (data) setSelectedTx(data as PendingTx);
@@ -402,10 +396,6 @@ const Transfers = () => {
         timestamp: new Date().toISOString(),
       });
 
-      toast({
-        title: `${smMethod.name} sent — Pending approval`,
-        description: effEmail ? `Ref ${ref}. Receipts emailed to you and ${effEmail}.` : `Ref ${ref}. Receipt emailed to you.`,
-      });
       setSmAmount(""); setSmRecipient(""); setSmEmail(""); setSmFields({}); setSmNote(""); setSmVariant("");
       fetchAccounts();
       fetchPending();
@@ -469,11 +459,6 @@ const Transfers = () => {
           status: "pending",
         },
       }).catch((e) => console.error("confirmation email failed", e));
-      toast({
-        title: "Zelle submitted — Pending approval",
-        description: `Ref ${ref}. Confirmation email sent. Support will reach out shortly.`,
-      });
-
       setZAmount(""); setZRecipient(""); setZContact(""); setZMemo("");
       if (data) setSelectedTx(data as PendingTx);
       fetchAccounts();
