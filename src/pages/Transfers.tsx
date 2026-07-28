@@ -1008,7 +1008,7 @@ const Transfers = () => {
         loading={smLoading}
         currencySymbol={currency.symbol}
         onSubmit={async () => {
-          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent, { skipFieldValidation: true });
           setVenmoOpen(false);
         }}
       />
