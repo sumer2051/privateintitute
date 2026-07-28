@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, ShieldCheck, ArrowRight, Sparkles, X } from "lucide-react";
-import { useEffect, useState } from "react";
 import type { CountryMethod } from "@/lib/country-methods";
 
 export interface ReceiptData {
@@ -33,12 +32,6 @@ const fmt = (n: number, code: string) => {
 };
 
 export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
-  const [showFullReceipt, setShowFullReceipt] = useState(false);
-
-  useEffect(() => {
-    if (open) setShowFullReceipt(false);
-  }, [open, receipt?.reference]);
-
   if (!receipt) return null;
   const { method, amount, currencyCode, senderName, recipientName, recipientEmail, fields, note, variant, reference, timestamp } = receipt;
   const style = method.receiptStyle;
@@ -48,7 +41,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   const isZelle = method.id === "zelle";
   const displayTo = recipientName || fields.handle || fields.recipient_name || fields.email || fields.wallet_id || fields.upi_id || fields.pix_key || fields.payid || recipientEmail || "recipient";
 
-  if (isZelle && !showFullReceipt) {
+  if (isZelle) {
     const nameUpper = (recipientName || fields.recipient_name || displayTo).toUpperCase();
     const firstName = nameUpper.split(" ")[0];
     const initials = nameUpper.split(" ").map(s => s[0]).filter(Boolean).slice(0, 2).join("");
