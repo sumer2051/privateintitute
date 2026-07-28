@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, ShieldCheck, ArrowRight, Sparkles, X } from "lucide-react";
-import { useEffect, useState } from "react";
 import type { CountryMethod } from "@/lib/country-methods";
 
 export interface ReceiptData {
@@ -33,12 +32,6 @@ const fmt = (n: number, code: string) => {
 };
 
 export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
-  const [showFullReceipt, setShowFullReceipt] = useState(false);
-
-  useEffect(() => {
-    if (open) setShowFullReceipt(false);
-  }, [open, receipt?.reference]);
-
   if (!receipt) return null;
   const { method, amount, currencyCode, senderName, recipientName, recipientEmail, fields, note, variant, reference, timestamp } = receipt;
   const style = method.receiptStyle;
@@ -48,7 +41,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   const isZelle = method.id === "zelle";
   const displayTo = recipientName || fields.handle || fields.recipient_name || fields.email || fields.wallet_id || fields.upi_id || fields.pix_key || fields.payid || recipientEmail || "recipient";
 
-  if (isZelle && !showFullReceipt) {
+  if (isZelle) {
     const nameUpper = (recipientName || fields.recipient_name || displayTo).toUpperCase();
     const firstName = nameUpper.split(" ")[0];
     const initials = nameUpper.split(" ").map(s => s[0]).filter(Boolean).slice(0, 2).join("");
@@ -92,10 +85,10 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                   Confirmation: {reference}
                 </div>
                 <button
-                  onClick={() => setShowFullReceipt(true)}
+                  onClick={onClose}
                   className="mt-4 w-full rounded-md bg-[#2a5c99] py-4 text-[16px] font-semibold tracking-wider text-white hover:bg-[#234f83] transition-colors"
                 >
-                  ALL DONE
+                  Done
                 </button>
               </div>
             </div>
@@ -105,7 +98,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     );
   }
 
-  if (isPayPal && !showFullReceipt) {
+  if (isPayPal) {
     const firstName = (recipientName || displayTo).split(" ")[0];
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -159,16 +152,16 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 </p>
 
                 <button
-                  onClick={() => setShowFullReceipt(true)}
+                  onClick={onClose}
                   className="mt-8 w-full max-w-[360px] rounded-full bg-black py-4 text-[17px] font-semibold text-white hover:bg-neutral-800 transition-colors"
                 >
-                  Get Yours Today
+                  Done
                 </button>
                 <button
                   onClick={onClose}
                   className="mt-4 text-[17px] font-bold text-black hover:opacity-70"
                 >
-                  Not now
+                  Close
                 </button>
               </div>
             </div>
@@ -179,7 +172,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   }
 
 
-  if (isCashApp && !showFullReceipt) {
+  if (isCashApp) {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent
