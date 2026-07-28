@@ -148,6 +148,13 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
   const navItems = showStaff ? [...filteredUserNav, ...staffNav] : filteredUserNav;
 
+  useEffect(() => {
+    checkNavOverflow();
+    const handleResize = () => checkNavOverflow();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [navItems.length]);
+
   return (
     <div
       className={`min-h-screen bg-background transition-colors duration-300 ${
