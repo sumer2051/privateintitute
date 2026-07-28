@@ -46,6 +46,24 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem("dismissedAnnouncementId");
   });
+  const navRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+
+  const checkNavOverflow = () => {
+    const el = navRef.current;
+    if (!el) return;
+    const hasOverflow = el.scrollWidth > el.clientWidth + 1;
+    setShowLeftArrow(hasOverflow && el.scrollLeft > 1);
+    setShowRightArrow(hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  };
+
+  useEffect(() => {
+    checkNavOverflow();
+    const handleResize = () => checkNavOverflow();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [navItems.length]);
 
 
   useEffect(() => {
