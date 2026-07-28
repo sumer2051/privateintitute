@@ -86,9 +86,10 @@ export const MethodPayDialog = ({
     setFields((prev) => ({ ...prev, [key]: val }));
   };
 
+  const hasEmailField = method.fields.some((f) => f.key === "email");
   const requiredFieldsOk = method.fields.every((f) => {
     if (!f.required) return true;
-    if (f.key === "email") return email.trim().length > 0;
+    if (f.key === "email") return true; // email is always optional
     if (f.key === "recipient_name") return recipient.trim().length > 0;
     if (f.key === "note") return note.trim().length > 0;
     return (fields[f.key] ?? "").trim().length > 0;
