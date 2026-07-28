@@ -238,7 +238,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
             </button>
             <div
               id="primary-nav-scroller"
-              className="flex gap-2 overflow-x-hidden scroll-smooth px-9 md:px-12 scrollbar-none snap-x snap-mandatory"
+              className="flex gap-2 overflow-x-hidden scroll-smooth pl-9 pr-8 md:pl-10 md:pr-8 scrollbar-none snap-x snap-mandatory"
             >
               {navItems.map((item) => {
                 const Icon = (item as any).Icon;
