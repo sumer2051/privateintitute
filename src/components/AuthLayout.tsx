@@ -223,22 +223,22 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
           </div>
         </div>
 
-        <nav className="border-t bg-card">
-          <div className="container mx-auto relative px-3 md:px-4">
+        <nav className="border-t bg-gradient-to-b from-card/80 to-card/40 backdrop-blur">
+          <div className="container mx-auto relative px-2 md:px-4 py-2">
             <button
               type="button"
-              aria-label="Scroll navigation left"
+              aria-label="Show previous navigation items"
               onClick={() => {
                 const el = document.getElementById("primary-nav-scroller");
-                if (el) el.scrollBy({ left: -160, behavior: "smooth" });
+                if (el) el.scrollBy({ left: -(el.clientWidth - 16), behavior: "smooth" });
               }}
-              className="absolute left-0 top-1/2 z-10 -translate-y-1/2 hidden sm:flex h-8 w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary"
+              className="absolute left-1 md:left-2 top-1/2 z-10 -translate-y-1/2 flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <div
               id="primary-nav-scroller"
-              className="flex gap-1 overflow-x-auto scroll-smooth px-8 sm:px-10 scrollbar-none"
+              className="flex gap-2 overflow-x-hidden scroll-smooth pl-9 pr-8 md:pl-10 md:pr-8 scrollbar-none snap-x snap-mandatory"
             >
               {navItems.map((item) => {
                 const Icon = (item as any).Icon;
@@ -250,27 +250,27 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                       if (item.path) navigate(item.path);
                       if (onPageChange) onPageChange(item.id);
                     }}
-                    className={`group flex shrink-0 flex-col items-center gap-0.5 whitespace-nowrap border-b-2 px-3 md:px-5 py-2 md:py-2.5 text-[10px] md:text-xs font-semibold transition-all ${
+                    className={`group flex shrink-0 snap-start flex-col items-center justify-center gap-1 w-[calc(25%-0.375rem)] md:w-[calc(25%-0.375rem)] min-h-[3.25rem] md:min-h-[3.75rem] rounded-xl border px-2 py-2 text-[10px] md:text-xs font-semibold transition-all ${
                       active
-                        ? "border-primary text-primary"
-                        : "border-transparent text-secondary hover:border-primary hover:text-primary"
+                        ? "bg-primary/15 border-primary/60 text-primary shadow"
+                        : "bg-card/50 dark:bg-card/30 backdrop-blur-md border-border/60 text-secondary hover:border-primary/60 hover:text-primary hover:-translate-y-0.5 hover:shadow-md"
                     }`}
                     title={item.label}
                   >
                     {Icon ? <Icon className={`h-5 w-5 ${active ? "text-primary" : "text-secondary group-hover:text-primary"}`} /> : null}
-                    <span className="leading-none">{item.label}</span>
+                    <span className="leading-none truncate w-full text-center">{item.label}</span>
                   </button>
                 );
               })}
             </div>
             <button
               type="button"
-              aria-label="Scroll navigation right"
+              aria-label="Show more navigation items"
               onClick={() => {
                 const el = document.getElementById("primary-nav-scroller");
-                if (el) el.scrollBy({ left: 160, behavior: "smooth" });
+                if (el) el.scrollBy({ left: el.clientWidth - 16, behavior: "smooth" });
               }}
-              className="absolute right-0 top-1/2 z-10 -translate-y-1/2 hidden sm:flex h-8 w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary"
+              className="absolute right-1 md:right-2 top-1/2 z-10 -translate-y-1/2 flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
