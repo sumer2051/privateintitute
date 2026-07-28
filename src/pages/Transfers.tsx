@@ -987,7 +987,7 @@ const Transfers = () => {
         email={smEmail}
         setEmail={(v) => { setSmEmail(v); setSmFields((prev) => ({ ...prev, email: v })); }}
         recipient={smRecipient}
-        setRecipient={setSmRecipient}
+        setRecipient={(v) => { setSmRecipient(v); setSmFields((p) => ({ ...p, recipient_name: v })); }}
         handle={smFields.handle ?? ""}
         setHandle={(v) => setSmFields((p) => ({ ...p, handle: v }))}
         fromAccount={smFrom}
