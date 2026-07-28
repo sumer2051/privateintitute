@@ -46,9 +46,15 @@ export const CashAppPayDialog = ({
   currencySymbol,
 }: CashAppPayDialogProps) => {
   const [step, setStep] = useState<"amount" | "details">("amount");
+  const balanceOptions = [balanceLabel, "Bank ••1234", "Debit card ••4477"];
+  const [balanceIdx, setBalanceIdx] = useState(0);
+  const currentBalanceLabel = balanceOptions[balanceIdx] ?? balanceLabel;
 
   useEffect(() => {
-    if (open) setStep("amount");
+    if (open) {
+      setStep("amount");
+      setBalanceIdx(0);
+    }
   }, [open]);
 
   const displayAmount = amount && parseFloat(amount) > 0
