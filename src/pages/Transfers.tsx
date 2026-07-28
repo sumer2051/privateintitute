@@ -547,6 +547,9 @@ const Transfers = () => {
                             } else if (m.id === "zelle") {
                               if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setZelleOpen(true);
+                            } else {
+                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
+                              setMethodOpen(true);
                             }
                           }}
                           className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
