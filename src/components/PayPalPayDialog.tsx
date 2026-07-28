@@ -111,7 +111,7 @@ export const PayPalPayDialog = ({
     [{ label: ".", value: "." }, { label: "0", value: "0" }, { label: "‹", value: "back" }],
   ];
 
-  const canSend = fromAccount && amount && parseFloat(amount) > 0 && email.trim() && paymentType;
+  const canSend = fromAccount && amount && parseFloat(amount) > 0 && email.trim() && recipient.trim() && paymentType;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
