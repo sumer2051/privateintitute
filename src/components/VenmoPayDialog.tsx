@@ -130,9 +130,21 @@ export const VenmoPayDialog = ({
           </div>
 
           {/* Amount card */}
-          <div className="mx-4 rounded-2xl border border-gray-200 p-4">
+          <div
+            className="relative mx-4 rounded-2xl border border-gray-200 p-4"
+            style={{
+              background: "linear-gradient(180deg, #ffffff 0%, #F7FAFD 100%)",
+              boxShadow: "0 1px 0 rgba(255,255,255,0.9) inset, 0 6px 20px -12px rgba(61,149,206,0.25)",
+            }}
+          >
             <div className="flex items-start gap-3">
-              <div className="h-11 w-11 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+              <div
+                className="h-11 w-11 rounded-full flex items-center justify-center shrink-0"
+                style={{
+                  background: "linear-gradient(180deg, #F1F5F9 0%, #E5EDF4 100%)",
+                  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.06)",
+                }}
+              >
                 <div className="h-6 w-6 rounded-full border-2 border-black relative overflow-hidden">
                   <div className="absolute inset-y-0 left-1/2 w-px bg-black" />
                   <div className="absolute inset-x-0 top-1/2 h-px bg-black" />
@@ -142,7 +154,10 @@ export const VenmoPayDialog = ({
                 <div className="text-[15px] text-black mb-1">Amount</div>
                 <div className="flex items-center gap-2 min-h-[48px]">
                   <span className="text-2xl font-medium text-black shrink-0">{currencySymbol}</span>
-                  <div className="flex-1 border border-black rounded-md px-2 py-1.5">
+                  <div
+                    className="flex-1 border border-black rounded-md px-2 py-1.5"
+                    style={{ background: "#ffffff", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.04)" }}
+                  >
                     <input
                       type="text"
                       inputMode="decimal"
@@ -169,6 +184,7 @@ export const VenmoPayDialog = ({
                 onChange={(e) => setRecipient(e.target.value)}
                 placeholder=""
                 className="w-full h-9 px-2 rounded-md border border-gray-200 bg-white outline-none text-sm text-black focus:border-[#3D95CE]"
+                style={{ boxShadow: "inset 0 1px 2px rgba(0,0,0,0.04)" }}
               />
             </div>
           </div>
