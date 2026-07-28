@@ -237,7 +237,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
             >
               {navItems.map((item) => {
                 const Icon = (item as any).Icon;
-                const active = currentPage === item.id;
+                const active = (currentPage === "support" ? "overview" : currentPage === "settings" ? "billpay" : currentPage) === item.id;
                 return (
                   <button
                     key={item.id}
