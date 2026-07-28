@@ -88,14 +88,14 @@ export const CashAppPayDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="p-0 gap-0 overflow-hidden border-0 max-w-md sm:rounded-2xl [&>button]:hidden"
+        className="p-0 gap-0 overflow-hidden border-0 max-w-[380px] sm:rounded-3xl [&>button]:hidden"
       >
         {step === "amount" ? (
           <div
             className="flex flex-col text-white"
-            style={{ background: "#00D64F", minHeight: "640px" }}
+            style={{ background: "#00D64F", minHeight: "560px" }}
           >
-            <div className="flex items-center justify-between px-5 pt-5">
+            <div className="flex items-center justify-between px-5 pt-4">
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
@@ -108,17 +108,17 @@ export const CashAppPayDialog = ({
               <div className="w-6" />
             </div>
 
-            <div className="flex-1 flex items-start justify-start px-6 pt-6">
+            <div className="flex-1 flex items-start justify-start px-6 pt-4">
               <div
                 className="font-black leading-none tracking-tight"
-                style={{ fontSize: "clamp(72px, 22vw, 128px)" }}
+                style={{ fontSize: "clamp(64px, 20vw, 112px)" }}
               >
-                <span className="align-top" style={{ fontSize: "0.72em" }}>{currencySymbol}</span>
+                <span className="align-top" style={{ fontSize: "0.7em" }}>{currencySymbol}</span>
                 {displayAmount}
               </div>
             </div>
 
-            <div className="px-4 pb-2">
+            <div className="px-3 pb-1">
               {keys.map((row, i) => (
                 <div key={i} className="grid grid-cols-3">
                   {row.map((k) => (
@@ -126,7 +126,7 @@ export const CashAppPayDialog = ({
                       key={k.value}
                       type="button"
                       onClick={() => pressKey(k.value)}
-                      className="py-4 text-3xl font-medium text-white/95 active:opacity-60 transition-opacity"
+                      className="py-3 text-2xl font-medium text-white/95 active:opacity-60 transition-opacity"
                     >
                       {k.label}
                     </button>
@@ -135,7 +135,7 @@ export const CashAppPayDialog = ({
               ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 px-5 pb-6 pt-2">
+            <div className="grid grid-cols-2 gap-3 px-5 pb-5 pt-1">
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
@@ -154,27 +154,33 @@ export const CashAppPayDialog = ({
             </div>
           </div>
         ) : (
-          <div className="bg-white text-black flex flex-col" style={{ minHeight: "640px" }}>
-            <div className="pt-6 pb-4 px-5 text-center">
-              <div className="flex items-center justify-center gap-2">
-                <span
-                  className="font-black tracking-wide text-2xl"
-                  style={{ color: "#00C244", letterSpacing: "0.02em" }}
-                >
-                  BUSINESS CASH APP
-                </span>
-                <Check className="h-6 w-6" style={{ color: "#2196F3" }} strokeWidth={3} />
-              </div>
+          <div className="bg-white text-black flex flex-col">
+            {/* Top brand header */}
+            <div className="pt-5 pb-3 px-5 flex items-center justify-center gap-2">
+              <span
+                className="font-black tracking-wide text-xl"
+                style={{ color: "#00C244", letterSpacing: "0.02em" }}
+              >
+                BUSINESS CASH APP
+              </span>
+              {/* Green starburst verified badge */}
+              <span className="relative inline-flex items-center justify-center h-6 w-6">
+                <svg viewBox="0 0 24 24" className="absolute inset-0 h-6 w-6" fill="#00C244" aria-hidden>
+                  <polygon points="12,1 14,3.2 17,2.2 18,5.1 21,5.6 20.6,8.6 22.9,10.5 21.4,13.1 22.5,16 19.8,17.3 19.5,20.3 16.5,20.2 14.7,22.7 12,21.4 9.3,22.7 7.5,20.2 4.5,20.3 4.2,17.3 1.5,16 2.6,13.1 1.1,10.5 3.4,8.6 3,5.6 6,5.1 7,2.2 10,3.2" />
+                </svg>
+                <Check className="relative h-3.5 w-3.5 text-white" strokeWidth={4} />
+              </span>
             </div>
 
-            <div className="flex items-center justify-between px-5 py-4 border-b border-black/10">
+            {/* Amount row */}
+            <div className="flex items-center justify-between px-5 py-3 border-t border-black/10">
               <button
                 type="button"
                 onClick={() => setStep("amount")}
                 aria-label="Back"
                 className="p-1"
               >
-                <X className="h-7 w-7 text-black" strokeWidth={2.5} />
+                <X className="h-6 w-6 text-black" strokeWidth={2.5} />
               </button>
               <div className="text-2xl font-bold text-black">
                 {currencySymbol}{displayAmount}
@@ -183,32 +189,32 @@ export const CashAppPayDialog = ({
                 type="button"
                 disabled={!canPay || loading}
                 onClick={onSubmit}
-                className="px-6 py-2 rounded-full font-semibold text-white text-base disabled:opacity-40"
+                className="px-5 py-1.5 rounded-full font-semibold text-white text-sm disabled:opacity-40"
                 style={{ background: canPay ? "#00C244" : "#B0B0B0" }}
               >
                 {loading ? "…" : "Pay"}
               </button>
             </div>
 
-            <div className="px-5 py-4 border-b border-black/10 flex items-center gap-6">
-              <span className="text-base font-bold text-black w-12">To</span>
+            <div className="px-5 py-3 border-t border-black/10 flex items-center gap-6">
+              <span className="text-sm font-bold text-black w-10">To</span>
               <input
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
                 placeholder="$Cashtag,"
-                className="flex-1 bg-transparent outline-none text-base placeholder:text-gray-400"
+                className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
               />
             </div>
 
-            <div className="px-5 py-4 border-b border-black/10 flex items-center gap-6">
-              <span className="text-base font-bold text-black w-12">For</span>
+            <div className="px-5 py-3 border-t border-black/10 flex items-center gap-6">
+              <span className="text-sm font-bold text-black w-10">For</span>
               <input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Note (required)"
-                className="flex-1 bg-transparent outline-none text-base placeholder:text-gray-400"
+                className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
               />
-              <div className="h-9 w-9 rounded-full flex items-center justify-center shrink-0" style={{ background: "#E6F8EC" }}>
+              <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "#E6F8EC" }}>
                 <Sparkles className="h-4 w-4" style={{ color: "#00C244" }} />
               </div>
             </div>
@@ -216,36 +222,36 @@ export const CashAppPayDialog = ({
             <button
               type="button"
               onClick={() => setBalanceIdx((i) => (i + 1) % balanceOptions.length)}
-              className="px-5 py-4 border-b border-black/10 flex items-center gap-3 text-left active:bg-black/5"
+              className="px-5 py-3 border-t border-black/10 flex items-center gap-3 text-left active:bg-black/5"
             >
-              <span className="text-base font-bold text-black">Use</span>
-              <div className="h-7 w-7 rounded-md flex items-center justify-center text-white text-sm font-bold" style={{ background: "#00C244" }}>$</div>
-              <span className="flex-1 text-base font-semibold text-black">
+              <span className="text-sm font-bold text-black">Use</span>
+              <div className="h-6 w-6 rounded-md flex items-center justify-center text-white text-xs font-bold" style={{ background: "#00C244" }}>$</div>
+              <span className="flex-1 text-sm font-semibold text-black">
                 {currentBalanceLabel}
               </span>
+              <ChevronDown className="h-4 w-4 text-black/70" />
             </button>
 
-            <div className="px-5 py-5 space-y-4">
-              <div className="flex items-center gap-4">
-                <span className="text-base font-bold text-black w-32">Gmail. -</span>
+            <div className="px-5 py-4 space-y-3 border-t border-black/10">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-bold text-black w-28">Gmail. -</span>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder=""
                   type="email"
-                  className="flex-1 h-11 px-3 rounded-md border border-black/40 bg-white outline-none text-sm focus:border-black"
+                  className="flex-1 h-9 px-2 rounded-md border border-black/40 bg-white outline-none text-sm focus:border-black"
                 />
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-base font-bold text-black w-32">Recipient name</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-bold text-black w-28">Recipient name</span>
                 <input
                   value={recipient}
                   onChange={(e) => setRecipient(e.target.value)}
-                  placeholder=""
-                  className="flex-1 h-11 px-3 rounded-md border border-black/40 bg-white outline-none text-sm focus:border-black"
+                  className="flex-1 h-9 px-2 rounded-md border border-black/40 bg-white outline-none text-sm focus:border-black"
                 />
               </div>
             </div>
+            <div className="pb-5" />
           </div>
         )}
       </DialogContent>
