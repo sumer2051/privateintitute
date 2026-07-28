@@ -949,7 +949,7 @@ const Transfers = () => {
         note={smNote}
         setNote={setSmNote}
         email={smEmail}
-        setEmail={setSmEmail}
+        setEmail={(v) => { setSmEmail(v); setSmFields((prev) => ({ ...prev, email: v })); }}
         recipient={smRecipient}
         setRecipient={setSmRecipient}
         fromAccount={smFrom}

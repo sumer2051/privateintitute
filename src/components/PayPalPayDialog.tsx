@@ -120,10 +120,10 @@ export const PayPalPayDialog = ({
           "p-0 gap-0 overflow-hidden border-0 bg-white [&>button]:hidden",
           "fixed inset-0 m-0 h-[100dvh] w-full max-w-none rounded-none",
           "sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2",
-          "sm:w-full sm:h-auto sm:max-w-[450px] sm:rounded-[2rem] sm:shadow-2xl"
+          "sm:w-full sm:h-auto sm:max-h-[92vh] sm:max-w-[420px] sm:rounded-[2rem] sm:shadow-2xl"
         )}
       >
-        <div className="flex flex-col h-full sm:h-auto overflow-y-auto bg-white">
+        <div className="flex flex-col h-full sm:h-auto sm:max-h-[92vh] overflow-y-auto bg-white">
           {/* Header */}
           <div className="pt-5 pb-3 px-4 flex items-center justify-center gap-2">
             <span className="text-xl font-bold tracking-tight" style={{ color: PAYPAL_BLUE }}>
@@ -172,7 +172,12 @@ export const PayPalPayDialog = ({
                   type="text"
                   inputMode="decimal"
                   value={displayAmount}
-                  readOnly
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/[^0-9.]/g, "");
+                    const parts = v.split(".");
+                    const clean = parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : v;
+                    setAmount(clean);
+                  }}
                   placeholder="0"
                   className="flex-1 bg-transparent outline-none text-4xl font-semibold text-black placeholder:text-gray-300 min-w-0"
                   style={{ fontSize: "2.5rem" }}
@@ -251,8 +256,8 @@ export const PayPalPayDialog = ({
             </button>
           </div>
 
-          {/* Keypad */}
-          <div className="mt-auto bg-gray-200 px-2 pb-2 pt-2">
+          {/* Keypad (mobile only) */}
+          <div className="mt-auto bg-gray-200 px-2 pb-2 pt-2 sm:hidden">
             {keys.map((row, i) => (
               <div key={i} className="grid grid-cols-3 gap-1.5 mb-1.5">
                 {row.map((k) => (
