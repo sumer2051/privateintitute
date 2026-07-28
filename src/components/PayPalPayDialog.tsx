@@ -120,10 +120,10 @@ export const PayPalPayDialog = ({
           "p-0 gap-0 overflow-hidden border-0 bg-white [&>button]:hidden",
           "fixed inset-0 m-0 h-[100dvh] w-full max-w-none rounded-none",
           "sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2",
-          "sm:w-full sm:h-auto sm:max-w-[450px] sm:rounded-[2rem] sm:shadow-2xl"
+          "sm:w-full sm:h-auto sm:max-h-[92vh] sm:max-w-[420px] sm:rounded-[2rem] sm:shadow-2xl"
         )}
       >
-        <div className="flex flex-col h-full sm:h-auto overflow-y-auto bg-white">
+        <div className="flex flex-col h-full sm:h-auto sm:max-h-[92vh] overflow-y-auto bg-white">
           {/* Header */}
           <div className="pt-5 pb-3 px-4 flex items-center justify-center gap-2">
             <span className="text-xl font-bold tracking-tight" style={{ color: PAYPAL_BLUE }}>
