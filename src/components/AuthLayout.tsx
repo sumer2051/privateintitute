@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.png";
 import { AiChatWidget } from "@/components/AiChatWidget";
 import { NotificationsBell } from "@/components/NotificationsBell";
-import { CurrencySelector } from "@/components/CurrencySelector";
 import { Shield, ShieldCheck } from "lucide-react";
 import { StaffPinDialog } from "@/components/StaffPinDialog";
 import { AchOneTimeDialog } from "@/components/AchOneTimeDialog";
@@ -175,8 +174,6 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input type="search" placeholder="Search accounts, services..." className="w-64 pl-10" />
             </div>
-
-            <CurrencySelector variant="compact" />
 
             <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setDarkMode(!darkMode)}>
               {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}

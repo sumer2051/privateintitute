@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { CountUp } from "@/components/CountUp";
 import { TransferModal } from "@/components/TransferModal";
+import { CurrencySelector } from "@/components/CurrencySelector";
 
 interface Account {
   id: string;
@@ -205,11 +206,14 @@ const Accounts = () => {
             />
           </div>
           <div className="flex w-3/4 flex-col justify-between p-3 md:p-4">
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Sparkles className="h-3 w-3 md:h-4 md:w-4" />
-              <span className="text-[10px] md:text-xs uppercase tracking-[0.2em]">
-                {greeting}
-              </span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Sparkles className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="text-[10px] md:text-xs uppercase tracking-[0.2em]">
+                  {greeting}
+                </span>
+              </div>
+              <CurrencySelector variant="compact" />
             </div>
             <div className="flex flex-wrap items-end gap-0 leading-none">
               {bouncingName}
