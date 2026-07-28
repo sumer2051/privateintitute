@@ -984,7 +984,7 @@ const Transfers = () => {
         currencySymbol={currency.symbol}
         currencyCode={currency.code}
         onSubmit={async () => {
-          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent, { skipFieldValidation: true });
           setPayPalOpen(false);
         }}
       />
