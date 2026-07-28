@@ -148,12 +148,19 @@ export const PayPalPayDialog = ({
               From Account: <span className="font-medium text-gray-500">select account</span>
             </label>
             <Select value={fromAccount} onValueChange={handleAccountChange}>
-              <SelectTrigger className="h-14 rounded-xl border border-gray-300 bg-white px-3 py-2 text-left shadow-sm focus:ring-2 focus:ring-[#0070BA]/20 focus:border-[#0070BA]">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ background: PAYPAL_BLUE }}>
+              <SelectTrigger className="h-14 rounded-xl border border-gray-300 bg-white px-3 py-2 text-left shadow-sm focus:ring-2 focus:ring-[#0070BA]/20 focus:border-[#0070BA] transition-all hover:border-[#0070BA]/60">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm ring-2 ring-white" style={{ background: `linear-gradient(135deg, ${PAYPAL_BLUE} 0%, #003087 100%)` }}>
                     {selectedInitials}
                   </div>
-                  <span className="text-base font-semibold text-black">{selectedAccountName}</span>
+                  <div className="flex-1 min-w-0 flex flex-col items-start">
+                    <span className="text-base font-semibold text-black leading-tight">{selectedAccountName}</span>
+                    {selectedAccount && (
+                      <span className="text-[11px] text-gray-500 leading-tight">
+                        Checking account balance
+                      </span>
+                    )}
+                  </div>
                 </div>
               </SelectTrigger>
               <SelectContent>
@@ -169,6 +176,24 @@ export const PayPalPayDialog = ({
                 ))}
               </SelectContent>
             </Select>
+            {selectedAccount && (
+              <div
+                key={selectedAccount.id + selectedAccount.balance}
+                className={cn(
+                  "mt-2 flex items-center justify-between rounded-lg px-3 py-2 border transition-all",
+                  pulse ? "scale-[1.02]" : "scale-100"
+                )}
+                style={{ background: "linear-gradient(90deg, #EAF3FB 0%, #F5F9FD 100%)", borderColor: "#CBE0F3" }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#00C244" }} />
+                  <span className="text-[12px] font-medium text-gray-700">Available balance</span>
+                </div>
+                <span className="text-sm font-bold" style={{ color: PAYPAL_BLUE }}>
+                  {formatCurrency(selectedAccount.balance)}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Amount input */}
