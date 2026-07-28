@@ -479,7 +479,6 @@ const Transfers = () => {
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
           <h2 className="text-3xl font-bold text-secondary mb-2">Transfers</h2>
-          <p className="text-muted-foreground">Move money between your accounts, to external banks, or via Zelle</p>
         </div>
 
         <Tabs defaultValue="send" className="w-full">
