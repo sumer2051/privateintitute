@@ -232,34 +232,6 @@ const Accounts = () => {
         </div>
       </div>
 
-      {/* Net worth quick strip — always visible on mobile */}
-      {(() => {
-        const deposits = accounts.filter((a) => a.account_type !== "credit").reduce((s, a) => s + a.balance, 0);
-        const credit = accounts.filter((a) => a.account_type === "credit").reduce((s, a) => s + a.balance, 0);
-        const net = deposits - credit;
-        return (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
-            <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
-              <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Deposits</p>
-              <p className="mt-1 font-display text-base md:text-2xl font-bold text-success truncate">
-                <CountUp value={deposits} format={formatCurrency} />
-              </p>
-            </div>
-            <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
-              <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Credit Used</p>
-              <p className="mt-1 font-display text-base md:text-2xl font-bold text-destructive truncate">
-                <CountUp value={credit} format={formatCurrency} />
-              </p>
-            </div>
-            <div className="col-span-2 md:col-span-1 rounded-xl border bg-gradient-to-br from-primary/10 to-accent/10 p-3 md:p-4 shadow-sm">
-              <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Net Worth</p>
-              <p className="mt-1 font-display text-lg md:text-2xl font-bold text-secondary truncate">
-                <CountUp value={net} format={formatCurrency} />
-              </p>
-            </div>
-          </div>
-        );
-      })()}
 
       <div className="grid gap-4 md:gap-6">
         {accounts
@@ -351,10 +323,10 @@ const Accounts = () => {
           ))}
       </div>
 
-      <Card>
-        <CardHeader className="p-4 md:p-6">
+      <Card className="rounded-2xl border shadow-sm overflow-hidden">
+        <CardHeader className="p-4 md:p-6 bg-gradient-to-r from-primary/5 to-transparent">
           <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-            <TrendingUp className="h-5 w-5" />
+            <TrendingUp className="h-5 w-5 text-primary" />
             Account Summary
           </CardTitle>
         </CardHeader>
@@ -364,30 +336,30 @@ const Accounts = () => {
             const credit = accounts.filter((a) => a.account_type === "credit").reduce((s, a) => s + a.balance, 0);
             const net = deposits - credit;
             return (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Total Deposits</span>
-                  <span className="font-semibold text-success">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
+                  <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Total Deposits</p>
+                  <p className="mt-1 font-display text-base md:text-2xl font-bold text-success truncate">
                     <CountUp value={deposits} format={formatCurrency} />
-                  </span>
+                  </p>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Credit Balance</span>
-                  <span className="font-semibold text-destructive">
+                <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
+                  <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Credit Used</p>
+                  <p className="mt-1 font-display text-base md:text-2xl font-bold text-destructive truncate">
                     <CountUp value={credit} format={formatCurrency} />
-                  </span>
+                  </p>
                 </div>
-                <div className="flex justify-between items-center pt-3 border-t">
-                  <span className="font-semibold text-secondary">Net Worth</span>
-                  <span className="text-lg md:text-xl font-bold text-secondary">
+                <div className="col-span-2 md:col-span-1 rounded-xl border bg-gradient-to-br from-primary/10 to-accent/10 p-3 md:p-4 shadow-sm">
+                  <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Net Worth</p>
+                  <p className="mt-1 font-display text-lg md:text-2xl font-bold text-secondary truncate">
                     <CountUp value={net} format={formatCurrency} />
-                  </span>
+                  </p>
                 </div>
               </div>
             );
           })()}
         </CardContent>
-        </Card>
+      </Card>
       </div>
         </>
       )}
