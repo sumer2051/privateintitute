@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info, Wallet, CreditCard, ArrowLeftRight, LifeBuoy, Settings as SettingsIcon, ShieldAlert, Users, Mail, Megaphone as MegaphoneIcon, ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
