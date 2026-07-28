@@ -914,6 +914,27 @@ const Transfers = () => {
       </Dialog>
 
       <TransferReceipt open={!!receipt} onClose={() => setReceipt(null)} receipt={receipt} />
+      <CashAppPayDialog
+        open={cashAppOpen}
+        onOpenChange={setCashAppOpen}
+        amount={smAmount}
+        setAmount={setSmAmount}
+        handle={smFields.handle ?? ""}
+        setHandle={(v) => setSmFields((p) => ({ ...p, handle: v }))}
+        note={smNote}
+        setNote={setSmNote}
+        email={smEmail}
+        setEmail={setSmEmail}
+        recipient={smRecipient}
+        setRecipient={setSmRecipient}
+        balanceLabel={`Cash balance: ${formatCurrency(accounts.find((a) => a.id === smFrom)?.balance ?? 0)}`}
+        loading={smLoading}
+        currencySymbol={currency.symbol}
+        onSubmit={async () => {
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          setCashAppOpen(false);
+        }}
+      />
       <TransferPinGate ref={pinRef} />
     </AuthLayout>
   );
