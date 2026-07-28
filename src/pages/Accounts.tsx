@@ -3,32 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowUpDown, Download, TrendingUp, Sparkles, Camera, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { CountUp } from "@/components/CountUp";
 import { TransferModal } from "@/components/TransferModal";
-
-function useRollingName<T extends HTMLElement>(name: string) {
-  const ref = useRef<T>(null);
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    setReady(!!name);
-    if (!ref.current || !name) return;
-    const el = ref.current;
-    const parent = el.parentElement;
-    if (!parent) return;
-    const overflow = el.scrollWidth - parent.clientWidth;
-    const offset = overflow > 4 ? `${overflow + 16}px` : "8px";
-    const duration = overflow > 4
-      ? Math.max(6, Math.min(14, overflow / 18))
-      : 4;
-    el.style.setProperty("--roll-offset", `-${offset}`);
-    el.style.setProperty("--roll-duration", `${duration}s`);
-  }, [name]);
-  return { ref, shouldRoll: ready };
-}
 
 interface Account {
   id: string;
@@ -48,7 +27,6 @@ const Accounts = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { ref: nameRef, shouldRoll } = useRollingName<HTMLSpanElement>(displayName);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -122,9 +100,9 @@ const Accounts = () => {
 
   const greeting = (() => {
     const h = new Date().getHours();
-    if (h < 12) return "Good morning";
-    if (h < 18) return "Good afternoon";
-    return "Good evening";
+    if (h < 12) return "Good Morning";
+    if (h < 18) return "Good Afternoon";
+    return "Good Evening";
   })();
 
   const fetchAccounts = async () => {
@@ -176,58 +154,61 @@ const Accounts = () => {
         <>
 
       <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent p-4 md:p-6 shadow-sm">
-        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-accent/20 blur-3xl" />
-        <div className="relative flex items-center gap-3 md:gap-4">
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploadingAvatar}
-            className="group relative shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary transition-transform hover:scale-105 active:scale-95"
-            aria-label="Change profile photo"
-          >
-            <Avatar className="h-12 w-12 md:h-16 md:w-16 ring-2 ring-primary/40 shadow-md">
-              <AvatarImage src={avatarUrl} alt={displayName} />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-display text-base md:text-xl font-bold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <span className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="flex h-44 md:h-56">
+          <div className="relative w-1/2 overflow-hidden">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-accent">
+                <span className="font-display text-4xl md:text-6xl font-bold text-primary-foreground">
+                  {initials}
+                </span>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              className="group absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none"
+              aria-label="Change profile photo"
+            >
               {uploadingAvatar ? (
-                <Loader2 className="h-5 w-5 text-white animate-spin" />
+                <Loader2 className="h-8 w-8 text-white animate-spin" />
               ) : (
-                <Camera className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                <Camera className="h-8 w-8 text-white" />
               )}
-            </span>
-            <span className="absolute -bottom-1 -right-1 flex h-5 w-5 md:h-6 md:w-6 items-center justify-center rounded-full bg-primary text-white shadow-md ring-2 ring-background">
-              <Camera className="h-2.5 w-2.5 md:h-3 md:w-3" />
-            </span>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleAvatarUpload}
-          />
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1">
-              <Sparkles className="h-3 w-3" /> {greeting}
-            </p>
-            <h2 className="font-display text-lg md:text-4xl font-bold text-secondary leading-tight">
-              Welcome back{displayName ? (
-                <>, <span className="overflow-hidden align-bottom inline-block max-w-full">
-                  <span
-                    ref={nameRef}
-                    className={`inline-block whitespace-nowrap bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent ${shouldRoll ? "animate-roll" : ""}`}
-                  >
-                    {displayName}
-                  </span>
-                </span></>
-              ) : ""}
-            </h2>
-            <p className="hidden md:block text-sm text-muted-foreground italic">"Your wealth, curated with precision."</p>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
+          </div>
+          <div className="flex w-1/2 flex-col justify-between p-4 md:p-6">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Sparkles className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="text-[10px] md:text-xs uppercase tracking-[0.2em]">
+                {greeting}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-end gap-0 leading-none">
+              {displayName.split("").map((char, i) => (
+                <span
+                  key={i}
+                  className="bounce-letter font-display text-xl md:text-4xl font-bold text-secondary"
+                  style={{ animationDelay: `${i * 0.07}s` }}
+                >
+                  {char === " " ? "\u00A0" : char}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
