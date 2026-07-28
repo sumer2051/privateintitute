@@ -104,7 +104,7 @@ export const CashAppPayDialog = ({
               >
                 <X className="h-6 w-6 text-white" strokeWidth={2.5} />
               </button>
-              <span className="text-sm font-semibold tracking-wide opacity-95">Cash App</span>
+              <span className="text-sm font-semibold tracking-wide opacity-95">BUSINESS CASH APP</span>
               <div className="w-6" />
             </div>
 
@@ -161,7 +161,7 @@ export const CashAppPayDialog = ({
                 className="font-black tracking-wide text-xl"
                 style={{ color: "#00C244", letterSpacing: "0.02em" }}
               >
-                CASH APP
+                BUSINESS CASH APP
               </span>
               {/* Green starburst verified badge */}
               <span className="relative inline-flex items-center justify-center h-6 w-6">

@@ -62,7 +62,7 @@ export const VenmoPayDialog = ({
           {/* Header title */}
           <div className="pt-5 pb-3 px-4 flex items-center justify-center gap-2">
             <span className="text-2xl font-extrabold tracking-tight italic" style={{ color: VENMO_BLUE, fontFamily: "system-ui" }}>
-              VENMO
+              BUSINESS VENMO
             </span>
             <span className="relative inline-flex items-center justify-center h-6 w-6 rounded-full" style={{ background: VENMO_BLUE }}>
               <Check className="h-3.5 w-3.5 text-white" strokeWidth={4} />

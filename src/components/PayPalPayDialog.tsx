@@ -135,7 +135,7 @@ export const PayPalPayDialog = ({
           {/* Header */}
           <div className="pt-5 pb-3 px-4 flex items-center justify-center gap-2">
             <span className="text-xl font-bold tracking-tight" style={{ color: PAYPAL_BLUE }}>
-              PayPal
+              BUSINESS PAYPAL
             </span>
             <span className="relative inline-flex items-center justify-center h-6 w-6 rounded-full" style={{ background: PAYPAL_BLUE }}>
               <Check className="h-3.5 w-3.5 text-white" strokeWidth={4} />
