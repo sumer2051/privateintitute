@@ -256,24 +256,7 @@ export const PayPalPayDialog = ({
             </button>
           </div>
 
-          {/* Keypad (mobile only) */}
-          <div className="mt-auto bg-gray-200 px-2 pb-2 pt-2 sm:hidden">
-            {keys.map((row, i) => (
-              <div key={i} className="grid grid-cols-3 gap-1.5 mb-1.5">
-                {row.map((k) => (
-                  <button
-                    key={k.value}
-                    type="button"
-                    onClick={() => pressKey(k.value)}
-                    className="py-3 rounded-md bg-white text-2xl font-medium text-black shadow-sm active:bg-gray-100 transition-colors flex flex-col items-center justify-center min-h-[52px]"
-                  >
-                    <span>{k.label}</span>
-                    {k.sub && <span className="text-[9px] font-bold tracking-wider text-gray-500 -mt-0.5">{k.sub}</span>}
-                  </button>
-                ))}
-              </div>
-            ))}
-          </div>
+          <div className="h-4" />
         </div>
       </DialogContent>
     </Dialog>
