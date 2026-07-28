@@ -85,10 +85,10 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                   Confirmation: {reference}
                 </div>
                 <button
-                  onClick={() => setShowFullReceipt(true)}
+                  onClick={onClose}
                   className="mt-4 w-full rounded-md bg-[#2a5c99] py-4 text-[16px] font-semibold tracking-wider text-white hover:bg-[#234f83] transition-colors"
                 >
-                  ALL DONE
+                  Done
                 </button>
               </div>
             </div>
@@ -98,7 +98,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     );
   }
 
-  if (isPayPal && !showFullReceipt) {
+  if (isPayPal) {
     const firstName = (recipientName || displayTo).split(" ")[0];
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -152,16 +152,16 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 </p>
 
                 <button
-                  onClick={() => setShowFullReceipt(true)}
+                  onClick={onClose}
                   className="mt-8 w-full max-w-[360px] rounded-full bg-black py-4 text-[17px] font-semibold text-white hover:bg-neutral-800 transition-colors"
                 >
-                  Get Yours Today
+                  Done
                 </button>
                 <button
                   onClick={onClose}
                   className="mt-4 text-[17px] font-bold text-black hover:opacity-70"
                 >
-                  Not now
+                  Close
                 </button>
               </div>
             </div>
@@ -172,7 +172,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   }
 
 
-  if (isCashApp && !showFullReceipt) {
+  if (isCashApp) {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent
