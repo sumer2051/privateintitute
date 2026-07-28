@@ -295,12 +295,23 @@ const Transfers = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currency.code]);
 
-  const handleSendMoney = async (e: React.FormEvent) => {
+  const handleSendMoney = async (
+    e: React.FormEvent,
+    overrides?: { fields?: Record<string, string>; recipient?: string; email?: string; note?: string; from?: string; amount?: string; skipFieldValidation?: boolean },
+  ) => {
     e.preventDefault();
-    const missing = smMethod.fields
-      .filter((f) => f.required !== false && !(smFields[f.key] ?? "").trim())
-      .map((f) => f.label);
-    if (!smFrom || !smAmount || missing.length) {
+    const mergedFields = { ...smFields, ...(overrides?.fields ?? {}) };
+    const effRecipient = overrides?.recipient ?? smRecipient;
+    const effEmail = overrides?.email ?? smEmail;
+    const effNote = overrides?.note ?? smNote;
+    const effFrom = overrides?.from ?? smFrom;
+    const effAmount = overrides?.amount ?? smAmount;
+    const missing = overrides?.skipFieldValidation
+      ? []
+      : smMethod.fields
+          .filter((f) => f.required !== false && !(mergedFields[f.key] ?? "").trim())
+          .map((f) => f.label);
+    if (!effFrom || !effAmount || missing.length) {
       toast({
         title: "Missing details",
         description: missing.length ? `Please complete: ${missing.join(", ")}` : "Please complete all required fields.",
@@ -308,13 +319,13 @@ const Transfers = () => {
       });
       return;
     }
-    const amtDisplay = parseFloat(smAmount);
+    const amtDisplay = parseFloat(effAmount);
     if (!(amtDisplay > 0)) {
       toast({ title: "Invalid amount", variant: "destructive" });
       return;
     }
     const amt = toUsd(amtDisplay);
-    const fromAcc = accounts.find((a) => a.id === smFrom);
+    const fromAcc = accounts.find((a) => a.id === effFrom);
     if (!fromAcc) return;
     if (fromAcc.balance < amt) {
       toast({ title: "Insufficient funds", variant: "destructive" });
@@ -328,28 +339,28 @@ const Transfers = () => {
       if (!user) throw new Error("Not signed in");
 
       const detailPairs = smMethod.fields
-        .map((f) => [f.label, (smFields[f.key] ?? "").trim()] as const)
+        .map((f) => [f.label, (mergedFields[f.key] ?? "").trim()] as const)
         .filter(([, v]) => v.length > 0);
       const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
       const details = Object.fromEntries(detailPairs);
-      const displayName = smRecipient || smFields.handle || smFields.upi_id || smFields.pix_key || smEmail || "recipient";
+      const displayName = effRecipient || mergedFields.handle || mergedFields.upi_id || mergedFields.pix_key || effEmail || "recipient";
 
       const newBal = fromAcc.balance - amt;
-      await supabase.rpc("adjust_account_balance", { p_account: smFrom, p_delta: -amt });
+      await supabase.rpc("adjust_account_balance", { p_account: effFrom, p_delta: -amt });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
           user_id: user.id,
-          account_id: smFrom,
+          account_id: effFrom,
           transaction_type: "debit",
           category: smMethod.name,
-          description: `[${smMethod.name}] To ${displayName} — ${detailString}${smNote ? ` — ${smNote}` : ""}${smVariant ? ` (${smVariant === "gs" ? "Goods & Services" : "Friends & Family"})` : ""}`,
+          description: `[${smMethod.name}] To ${displayName} — ${detailString}${effNote ? ` — ${effNote}` : ""}${smVariant ? ` (${smVariant === "gs" ? "Goods & Services" : "Friends & Family"})` : ""}`,
           amount: amt,
           balance_after: newBal,
           status: "pending",
           reference_number: ref,
-          recipient_email: smEmail || null,
-          recipient_name: smRecipient || null,
+          recipient_email: effEmail || null,
+          recipient_name: effRecipient || null,
         })
         .select()
         .single();
@@ -362,12 +373,12 @@ const Transfers = () => {
           amount: amtDisplay,
           currency: currency.code,
           recipient: displayName,
-          recipientEmail: smEmail,
+          recipientEmail: effEmail,
           scheme: smMethod.name,
           region: currency.name,
           settlement: smMethod.settlement,
           details,
-          memo: smNote || undefined,
+          memo: effNote || undefined,
           reference: ref,
           status: "pending",
         },
@@ -383,9 +394,9 @@ const Transfers = () => {
         currencySymbol: currency.symbol,
         senderName,
         recipientName: displayName,
-        recipientEmail: smEmail,
+        recipientEmail: effEmail,
         fields: details,
-        note: smNote || undefined,
+        note: effNote || undefined,
         variant: smVariant || undefined,
         reference: ref,
         timestamp: new Date().toISOString(),
@@ -393,7 +404,7 @@ const Transfers = () => {
 
       toast({
         title: `${smMethod.name} sent — Pending approval`,
-        description: smEmail ? `Ref ${ref}. Receipts emailed to you and ${smEmail}.` : `Ref ${ref}. Receipt emailed to you.`,
+        description: effEmail ? `Ref ${ref}. Receipts emailed to you and ${effEmail}.` : `Ref ${ref}. Receipt emailed to you.`,
       });
       setSmAmount(""); setSmRecipient(""); setSmEmail(""); setSmFields({}); setSmNote(""); setSmVariant("");
       fetchAccounts();
@@ -948,7 +959,7 @@ const Transfers = () => {
         loading={smLoading}
         currencySymbol={currency.symbol}
         onSubmit={async () => {
-          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent, { skipFieldValidation: true });
           setCashAppOpen(false);
         }}
       />
@@ -973,7 +984,7 @@ const Transfers = () => {
         currencySymbol={currency.symbol}
         currencyCode={currency.code}
         onSubmit={async () => {
-          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent, { skipFieldValidation: true });
           setPayPalOpen(false);
         }}
       />
@@ -997,7 +1008,7 @@ const Transfers = () => {
         loading={smLoading}
         currencySymbol={currency.symbol}
         onSubmit={async () => {
-          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent, { skipFieldValidation: true });
           setVenmoOpen(false);
         }}
       />
@@ -1019,7 +1030,7 @@ const Transfers = () => {
         loading={smLoading}
         currencySymbol={currency.symbol}
         onSubmit={async () => {
-          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent, { skipFieldValidation: true });
           setZelleOpen(false);
         }}
       />
