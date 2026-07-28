@@ -83,6 +83,7 @@ const Transfers = () => {
   const [smVariant, setSmVariant] = useState<string>("");
   const [smLoading, setSmLoading] = useState(false);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+  const [cashAppOpen, setCashAppOpen] = useState(false);
 
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
