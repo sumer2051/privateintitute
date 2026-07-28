@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Sparkles, ChevronDown, Check } from "lucide-react";
+import { X, Sparkles, Check } from "lucide-react";
 
 interface CashAppPayDialogProps {
   open: boolean;
@@ -46,9 +46,15 @@ export const CashAppPayDialog = ({
   currencySymbol,
 }: CashAppPayDialogProps) => {
   const [step, setStep] = useState<"amount" | "details">("amount");
+  const balanceOptions = [balanceLabel, "Bank ••1234", "Debit card ••4477"];
+  const [balanceIdx, setBalanceIdx] = useState(0);
+  const currentBalanceLabel = balanceOptions[balanceIdx] ?? balanceLabel;
 
   useEffect(() => {
-    if (open) setStep("amount");
+    if (open) {
+      setStep("amount");
+      setBalanceIdx(0);
+    }
   }, [open]);
 
   const displayAmount = amount && parseFloat(amount) > 0
@@ -149,26 +155,26 @@ export const CashAppPayDialog = ({
           </div>
         ) : (
           <div className="bg-white text-black flex flex-col" style={{ minHeight: "640px" }}>
-            <div className="pt-5 pb-3 px-5 text-center">
+            <div className="pt-6 pb-4 px-5 text-center">
               <div className="flex items-center justify-center gap-2">
                 <span
-                  className="font-black tracking-wide text-xl"
+                  className="font-black tracking-wide text-2xl"
                   style={{ color: "#00C244", letterSpacing: "0.02em" }}
                 >
                   BUSINESS CASH APP
                 </span>
-                <Check className="h-5 w-5" style={{ color: "#2196F3" }} strokeWidth={3} />
+                <Check className="h-6 w-6" style={{ color: "#2196F3" }} strokeWidth={3} />
               </div>
             </div>
 
-            <div className="flex items-center justify-between px-5 py-3 border-b border-black/5">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-black/10">
               <button
                 type="button"
                 onClick={() => setStep("amount")}
                 aria-label="Back"
                 className="p-1"
               >
-                <X className="h-6 w-6 text-black" strokeWidth={2.5} />
+                <X className="h-7 w-7 text-black" strokeWidth={2.5} />
               </button>
               <div className="text-2xl font-bold text-black">
                 {currencySymbol}{displayAmount}
@@ -177,15 +183,15 @@ export const CashAppPayDialog = ({
                 type="button"
                 disabled={!canPay || loading}
                 onClick={onSubmit}
-                className="px-5 py-2 rounded-full font-semibold text-white text-sm disabled:opacity-40"
+                className="px-6 py-2 rounded-full font-semibold text-white text-base disabled:opacity-40"
                 style={{ background: canPay ? "#00C244" : "#B0B0B0" }}
               >
-                {loading ? "Sending…" : "Pay"}
+                {loading ? "…" : "Pay"}
               </button>
             </div>
 
-            <div className="px-5 py-4 border-b border-black/5 flex items-center gap-4">
-              <span className="text-base font-semibold text-black w-10">To</span>
+            <div className="px-5 py-4 border-b border-black/10 flex items-center gap-6">
+              <span className="text-base font-bold text-black w-12">To</span>
               <input
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
@@ -194,63 +200,51 @@ export const CashAppPayDialog = ({
               />
             </div>
 
-            <div className="px-5 py-4 border-b border-black/5 flex items-center gap-4">
-              <span className="text-base font-semibold text-black w-10">For</span>
+            <div className="px-5 py-4 border-b border-black/10 flex items-center gap-6">
+              <span className="text-base font-bold text-black w-12">For</span>
               <input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Note (required)"
                 className="flex-1 bg-transparent outline-none text-base placeholder:text-gray-400"
               />
-              <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                <Sparkles className="h-4 w-4 text-gray-500" />
+              <div className="h-9 w-9 rounded-full flex items-center justify-center shrink-0" style={{ background: "#E6F8EC" }}>
+                <Sparkles className="h-4 w-4" style={{ color: "#00C244" }} />
               </div>
             </div>
 
-            <div className="px-5 py-4 border-b border-black/5 flex items-center gap-4">
-              <span className="text-base font-semibold text-black">Use</span>
-              <div className="h-6 w-6 rounded-md flex items-center justify-center text-white text-xs font-bold" style={{ background: "#00C244" }}>$</div>
+            <button
+              type="button"
+              onClick={() => setBalanceIdx((i) => (i + 1) % balanceOptions.length)}
+              className="px-5 py-4 border-b border-black/10 flex items-center gap-3 text-left active:bg-black/5"
+            >
+              <span className="text-base font-bold text-black">Use</span>
+              <div className="h-7 w-7 rounded-md flex items-center justify-center text-white text-sm font-bold" style={{ background: "#00C244" }}>$</div>
               <span className="flex-1 text-base font-semibold text-black">
-                {balanceLabel}
+                {currentBalanceLabel}
               </span>
-              <ChevronDown className="h-5 w-5 text-black" />
-            </div>
+            </button>
 
-            <div className="px-5 py-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-base font-bold text-black">Gmail. :-</span>
+            <div className="px-5 py-5 space-y-4">
+              <div className="flex items-center gap-4">
+                <span className="text-base font-bold text-black w-32">Gmail. -</span>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@email.com"
+                  placeholder=""
                   type="email"
-                  className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
+                  className="flex-1 h-11 px-3 rounded-md border border-black/40 bg-white outline-none text-sm focus:border-black"
                 />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-base font-bold text-black whitespace-nowrap">Recipient name :-</span>
+              <div className="flex items-center gap-4">
+                <span className="text-base font-bold text-black w-32">Recipient name</span>
                 <input
                   value={recipient}
                   onChange={(e) => setRecipient(e.target.value)}
-                  placeholder="Jane Doe"
-                  className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
+                  placeholder=""
+                  className="flex-1 h-11 px-3 rounded-md border border-black/40 bg-white outline-none text-sm focus:border-black"
                 />
               </div>
-            </div>
-
-            <div className="mt-auto px-5 pb-5">
-              <Button
-                type="button"
-                onClick={onSubmit}
-                disabled={!canPay || loading}
-                className="w-full h-12 rounded-full text-white font-semibold text-base"
-                style={{ background: canPay ? "#00C244" : "#B0B0B0" }}
-              >
-                {loading ? "Sending…" : `Pay ${currencySymbol}${displayAmount}`}
-              </Button>
-              <p className="mt-2 text-center text-[11px] text-gray-500">
-                Payments are held pending until reviewed by support.
-              </p>
             </div>
           </div>
         )}
