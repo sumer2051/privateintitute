@@ -53,6 +53,14 @@ export const PayPalPayDialog = ({
 }: PayPalPayDialogProps) => {
   const [selectedAccountName, setSelectedAccountName] = useState("James Robinson");
   const [selectedInitials, setSelectedInitials] = useState("JR");
+  const selectedAccount = accounts.find((a) => a.id === fromAccount);
+  const [pulse, setPulse] = useState(false);
+  useEffect(() => {
+    if (!fromAccount) return;
+    setPulse(true);
+    const t = setTimeout(() => setPulse(false), 500);
+    return () => clearTimeout(t);
+  }, [fromAccount]);
 
   useEffect(() => {
     if (open) {
