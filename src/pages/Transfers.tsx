@@ -17,6 +17,7 @@ import { getBankingProfile, getBankingSchemes } from "@/lib/bank-profiles";
 import { getCountryMethods, type CountryMethod } from "@/lib/country-methods";
 import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
 import { CashAppPayDialog } from "@/components/CashAppPayDialog";
+import { PayPalPayDialog } from "@/components/PayPalPayDialog";
 
 interface Account {
   id: string;
@@ -85,6 +86,7 @@ const Transfers = () => {
   const [smLoading, setSmLoading] = useState(false);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [cashAppOpen, setCashAppOpen] = useState(false);
+  const [payPalOpen, setPayPalOpen] = useState(false);
 
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
@@ -532,6 +534,9 @@ const Transfers = () => {
                             if (m.id === "cashapp") {
                               if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setCashAppOpen(true);
+                            } else if (m.id === "paypal" || m.id === "paypal_uk" || m.id === "paypal_eu") {
+                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
+                              setPayPalOpen(true);
                             }
                           }}
                           className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
@@ -934,6 +939,31 @@ const Transfers = () => {
         onSubmit={async () => {
           await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
           setCashAppOpen(false);
+        }}
+      />
+      <PayPalPayDialog
+        open={payPalOpen}
+        onOpenChange={setPayPalOpen}
+        amount={smAmount}
+        setAmount={setSmAmount}
+        note={smNote}
+        setNote={setSmNote}
+        email={smEmail}
+        setEmail={setSmEmail}
+        recipient={smRecipient}
+        setRecipient={setSmRecipient}
+        fromAccount={smFrom}
+        setFromAccount={setSmFrom}
+        accounts={accounts}
+        formatCurrency={formatCurrency}
+        paymentType={smVariant}
+        setPaymentType={setSmVariant}
+        loading={smLoading}
+        currencySymbol={currency.symbol}
+        currencyCode={currency.code}
+        onSubmit={async () => {
+          await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
+          setPayPalOpen(false);
         }}
       />
       <TransferPinGate ref={pinRef} />
