@@ -53,6 +53,10 @@ export const AchOneTimeDialog = () => {
       const tx = data as PendingDeposit | null;
       if (!tx) return;
 
+      // Only show the popup for Incoming ACH deposits.
+      const { type } = parseDepositMeta(tx.description || "");
+      if (!/ach/i.test(type)) return;
+
       const seenKey = `ach_seen_${tx.id}`;
       if (localStorage.getItem(seenKey)) return;
 
