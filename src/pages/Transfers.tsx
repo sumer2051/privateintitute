@@ -524,7 +524,15 @@ const Transfers = () => {
                         <button
                           key={m.id}
                           type="button"
-                          onClick={() => { setSmMethodId(m.id); setSmFields({}); setSmVariant(""); }}
+                          onClick={() => {
+                            setSmMethodId(m.id);
+                            setSmFields({});
+                            setSmVariant("");
+                            if (m.id === "cashapp") {
+                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
+                              setCashAppOpen(true);
+                            }
+                          }}
                           className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
                             active
                               ? "border-primary ring-2 ring-primary/40 bg-primary/5 shadow-sm"
