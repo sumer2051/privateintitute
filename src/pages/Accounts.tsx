@@ -309,8 +309,8 @@ const Accounts = () => {
           ))}
       </div>
 
-      <Card className="rounded-2xl border shadow-sm overflow-hidden">
-        <CardHeader className="p-4 md:p-6 bg-gradient-to-r from-primary/5 to-transparent">
+      <Card className="rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-md shadow-sm overflow-hidden">
+        <CardHeader className="p-4 md:p-6 bg-primary/10 backdrop-blur-md border-b border-primary/15">
           <CardTitle className="flex items-center gap-2 text-base md:text-lg">
             <TrendingUp className="h-5 w-5 text-primary" />
             Account Summary
@@ -323,19 +323,19 @@ const Accounts = () => {
             const net = deposits - credit;
             return (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-                <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
+                <div className="rounded-xl border border-primary/10 bg-card/70 backdrop-blur-sm p-3 md:p-4 shadow-sm">
                   <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Total Deposits</p>
                   <p className="mt-1 font-display text-base md:text-2xl font-bold text-success truncate">
                     <CountUp value={deposits} format={formatCurrency} />
                   </p>
                 </div>
-                <div className="rounded-xl border bg-card p-3 md:p-4 shadow-sm">
+                <div className="rounded-xl border border-primary/10 bg-card/70 backdrop-blur-sm p-3 md:p-4 shadow-sm">
                   <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Credit Used</p>
                   <p className="mt-1 font-display text-base md:text-2xl font-bold text-destructive truncate">
                     <CountUp value={credit} format={formatCurrency} />
                   </p>
                 </div>
-                <div className="col-span-2 md:col-span-1 rounded-xl border bg-gradient-to-br from-primary/10 to-accent/10 p-3 md:p-4 shadow-sm">
+                <div className="col-span-2 md:col-span-1 rounded-xl border border-primary/10 bg-gradient-to-br from-primary/10 to-accent/10 backdrop-blur-sm p-3 md:p-4 shadow-sm">
                   <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Net Worth</p>
                   <p className="mt-1 font-display text-lg md:text-2xl font-bold text-secondary truncate">
                     <CountUp value={net} format={formatCurrency} />
