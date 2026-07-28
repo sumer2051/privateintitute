@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info, Wallet, CreditCard, ArrowLeftRight, LifeBuoy, Settings as SettingsIcon, ShieldAlert, Users, Mail, Megaphone as MegaphoneIcon, ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
@@ -46,6 +46,18 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     if (typeof window === "undefined") return null;
     return window.localStorage.getItem("dismissedAnnouncementId");
   });
+  const navRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+
+  const checkNavOverflow = () => {
+    const el = navRef.current;
+    if (!el) return;
+    const hasOverflow = el.scrollWidth > el.clientWidth + 1;
+    setShowLeftArrow(hasOverflow && el.scrollLeft > 1);
+    setShowRightArrow(hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  };
+
 
 
   useEffect(() => {
@@ -136,6 +148,13 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
   const navItems = showStaff ? [...filteredUserNav, ...staffNav] : filteredUserNav;
 
+  useEffect(() => {
+    checkNavOverflow();
+    const handleResize = () => checkNavOverflow();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [navItems.length]);
+
   return (
     <div
       className={`min-h-screen bg-background transition-colors duration-300 ${
@@ -224,16 +243,17 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               type="button"
               aria-label="Show previous navigation items"
               onClick={() => {
-                const el = document.getElementById("primary-nav-scroller");
-                if (el) el.scrollBy({ left: -(el.clientWidth - 16), behavior: "smooth" });
+                if (navRef.current) navRef.current.scrollBy({ left: -(navRef.current.clientWidth - 16), behavior: "smooth" });
               }}
-              className="absolute left-1 md:left-2 top-1/2 z-10 -translate-y-1/2 flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary transition-colors"
+              className={`absolute left-1 md:left-2 top-1/2 z-10 -translate-y-1/2 flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary transition-all ${showLeftArrow ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <div
+              ref={navRef}
               id="primary-nav-scroller"
-              className="flex gap-2 overflow-x-hidden scroll-smooth pl-9 pr-8 md:pl-10 md:pr-8 scrollbar-none snap-x snap-mandatory"
+              onScroll={checkNavOverflow}
+              className={`flex gap-2 overflow-x-hidden scroll-smooth scrollbar-none snap-x snap-mandatory ${showLeftArrow || showRightArrow ? "pl-9 pr-9 md:pl-10 md:pr-10" : "px-0"}`}
             >
               {navItems.map((item) => {
                 const Icon = (item as any).Icon;
@@ -245,7 +265,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                       if (item.path) navigate(item.path);
                       if (onPageChange) onPageChange(item.id);
                     }}
-                    className={`group flex shrink-0 snap-start flex-col items-center justify-center gap-1 w-[calc(25%-0.375rem)] md:w-[calc(25%-0.375rem)] min-h-[3.25rem] md:min-h-[3.75rem] rounded-xl border px-2 py-2 text-[10px] md:text-xs font-semibold transition-all ${
+                    className={`group flex shrink-0 snap-start flex-col items-center justify-center gap-1 w-[calc(25%-0.375rem)] md:w-[calc(20%-0.5rem)] min-h-[3.25rem] md:min-h-[3.75rem] rounded-xl border px-2 py-2 text-[10px] md:text-xs font-semibold transition-all ${
                       active
                         ? "bg-primary/15 border-primary/60 text-primary shadow"
                         : "bg-card/50 dark:bg-card/30 backdrop-blur-md border-border/60 text-secondary hover:border-primary/60 hover:text-primary hover:-translate-y-0.5 hover:shadow-md"
@@ -262,10 +282,9 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               type="button"
               aria-label="Show more navigation items"
               onClick={() => {
-                const el = document.getElementById("primary-nav-scroller");
-                if (el) el.scrollBy({ left: el.clientWidth - 16, behavior: "smooth" });
+                if (navRef.current) navRef.current.scrollBy({ left: navRef.current.clientWidth - 16, behavior: "smooth" });
               }}
-              className="absolute right-1 md:right-2 top-1/2 z-10 -translate-y-1/2 flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary transition-colors"
+              className={`absolute right-1 md:right-2 top-1/2 z-10 -translate-y-1/2 flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-card/95 border shadow-sm text-secondary hover:text-primary transition-all ${showRightArrow ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
             >
               <ChevronRight className="h-4 w-4" />
             </button>
