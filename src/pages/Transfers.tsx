@@ -16,6 +16,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { getBankingProfile, getBankingSchemes } from "@/lib/bank-profiles";
 import { getCountryMethods, type CountryMethod } from "@/lib/country-methods";
 import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
+import { CashAppPayDialog } from "@/components/CashAppPayDialog";
 
 interface Account {
   id: string;
