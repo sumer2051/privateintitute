@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bell, ArrowDownLeft, ArrowUpRight, Clock, CheckCircle2, Receipt } from "lucide-react";
+import { Bell, ArrowDownLeft, ArrowUpRight, Clock, CheckCircle2, Receipt, XCircle, AlertTriangle, Loader2, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -65,6 +65,31 @@ const parseDetails = (desc?: string | null): Record<string, string> => {
     }
   });
   return out;
+};
+
+const statusMeta = (status: string, isDebit: boolean) => {
+  switch (status) {
+    case "pending":
+      return { Icon: Clock, label: "Pending approval", pillClass: "bg-warning/15 text-warning", iconBg: "bg-warning/15 text-warning", showTypeIcon: false, failed: false };
+    case "processing":
+      return { Icon: Loader2, label: "Processing", pillClass: "bg-primary/10 text-primary", iconBg: "bg-primary/10 text-primary", showTypeIcon: false, failed: false };
+    case "under_review":
+      return { Icon: AlertTriangle, label: "Under review", pillClass: "bg-amber-500/15 text-amber-600", iconBg: "bg-amber-500/15 text-amber-600", showTypeIcon: false, failed: false };
+    case "failed":
+      return { Icon: XCircle, label: "Failed", pillClass: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/15 text-destructive", showTypeIcon: false, failed: true };
+    case "cancelled":
+      return { Icon: Ban, label: "Cancelled", pillClass: "bg-muted text-muted-foreground", iconBg: "bg-muted text-muted-foreground", showTypeIcon: false, failed: true };
+    case "completed":
+    default:
+      return {
+        Icon: CheckCircle2,
+        label: status === "completed" ? "Completed" : status,
+        pillClass: "bg-success/10 text-success",
+        iconBg: isDebit ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success",
+        showTypeIcon: true,
+        failed: false,
+      };
+  }
 };
 
 export const NotificationsBell = () => {
@@ -171,34 +196,29 @@ export const NotificationsBell = () => {
               <div className="p-6 text-center text-sm text-muted-foreground">No notifications yet.</div>
             ) : items.map((n) => {
               const isDebit = n.transaction_type === "debit";
-              const pending = n.status === "pending";
+              const status = (n.status || "completed").toLowerCase();
+              const meta = statusMeta(status, isDebit);
               return (
                 <button
                   key={n.id}
                   onClick={() => { setOpen(false); setSelected(n); }}
                   className="flex w-full items-start gap-3 border-b p-3 text-left hover:bg-muted/40 transition"
                 >
-                  <div className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full ${pending ? "bg-warning/15 text-warning" : isDebit ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"}`}>
-                    {pending ? <Clock className="h-4 w-4" /> : isDebit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
+                  <div className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full ${meta.iconBg}`}>
+                    {meta.showTypeIcon ? (isDebit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />) : <meta.Icon className="h-4 w-4" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <p className="truncate text-sm font-semibold text-secondary">{n.category || "Transaction"}</p>
-                      <span className={`text-sm font-bold ${isDebit ? "text-destructive" : "text-success"}`}>
+                      <span className={`text-sm font-bold ${meta.failed ? "text-muted-foreground line-through" : isDebit ? "text-destructive" : "text-success"}`}>
                         {isDebit ? "-" : "+"}{fmt(n.amount)}
                       </span>
                     </div>
                     <p className="truncate text-xs text-muted-foreground">{n.description}</p>
                     <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-                      {pending ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 font-semibold text-warning">
-                          <Clock className="h-3 w-3" /> Pending approval
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 font-semibold text-success">
-                          <CheckCircle2 className="h-3 w-3" /> Completed
-                        </span>
-                      )}
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold ${meta.pillClass}`}>
+                        <meta.Icon className="h-3 w-3" /> {meta.label}
+                      </span>
                       <span>· {timeAgo(n.created_at)}</span>
                     </div>
                   </div>
@@ -240,11 +260,14 @@ export const NotificationsBell = () => {
                   {selected.transaction_type === "debit" ? "-" : "+"}{fmt(selected.amount)}
                 </div>
                 <div className="mt-1 flex items-center gap-2">
-                  {selected.status === "pending" ? (
-                    <Badge variant="outline" className="border-warning/40 bg-warning/10 text-warning gap-1"><Clock className="h-3 w-3" /> Pending approval</Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-success/40 bg-success/10 text-success gap-1"><CheckCircle2 className="h-3 w-3" /> {selected.status || "Completed"}</Badge>
-                  )}
+                  {(() => {
+                    const m = statusMeta((selected.status || "completed").toLowerCase(), selected.transaction_type === "debit");
+                    return (
+                      <Badge variant="outline" className={`gap-1 border-transparent ${m.pillClass}`}>
+                        <m.Icon className="h-3 w-3" /> {m.label}
+                      </Badge>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -261,6 +284,26 @@ export const NotificationsBell = () => {
                 {selected.status === "pending" && (
                   <p className="text-xs text-muted-foreground">
                     A specialist will contact you to verify and approve this transfer.
+                  </p>
+                )}
+                {selected.status === "processing" && (
+                  <p className="text-xs text-muted-foreground">
+                    Your transfer is being processed and should complete shortly.
+                  </p>
+                )}
+                {selected.status === "under_review" && (
+                  <p className="text-xs text-muted-foreground">
+                    This transfer is under review by our compliance team. We'll update you soon.
+                  </p>
+                )}
+                {selected.status === "failed" && (
+                  <p className="text-xs text-destructive">
+                    This transfer failed. No funds were moved. Please contact support if you need help.
+                  </p>
+                )}
+                {selected.status === "cancelled" && (
+                  <p className="text-xs text-muted-foreground">
+                    This transfer was cancelled.
                   </p>
                 )}
               </div>
