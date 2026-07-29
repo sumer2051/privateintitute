@@ -288,6 +288,7 @@ export default function AdminSupport() {
           if (t) revealTicket(t);
         }}
       />
+      <AdminCreateTicketDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={load} />
     </AuthLayout>
   );
 }
