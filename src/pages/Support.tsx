@@ -58,6 +58,9 @@ export default function Support() {
   const [newOpen, setNewOpen] = useState(false);
   const [callOpen, setCallOpen] = useState(false);
   const [viewed, setViewed] = useState<Record<string, string>>(() => readViewed());
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<"all" | "new" | "open" | "resolved">("all");
+  const [previews, setPreviews] = useState<Record<string, MsgRow>>({});
 
   const isNew = (t: TicketRow) => {
     const seenAt = viewed[t.id];
@@ -71,12 +74,30 @@ export default function Support() {
       supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
       supabase.from("scheduled_calls").select("*").order("scheduled_at", { ascending: true }),
     ]);
-    setTickets((t as TicketRow[]) || []);
+    const rows = (t as TicketRow[]) || [];
+    setTickets(rows);
     setCalls((c as CallRow[]) || []);
     setLoading(false);
+
+    // Latest message per ticket (for inline previews)
+    if (rows.length) {
+      const { data: msgs } = await supabase
+        .from("ticket_messages")
+        .select("id, ticket_id, sender_type, message, created_at, sender_id, attachment_name")
+        .in("ticket_id", rows.map((r) => r.id))
+        .order("created_at", { ascending: false });
+      const map: Record<string, MsgRow> = {};
+      for (const m of (msgs as any[]) || []) {
+        if (!map[m.ticket_id]) map[m.ticket_id] = m as MsgRow;
+      }
+      setPreviews(map);
+    } else {
+      setPreviews({});
+    }
   };
 
   useEffect(() => { load(); }, []);
+
 
   useEffect(() => {
     const ch = supabase
