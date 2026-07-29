@@ -543,7 +543,7 @@ export default function AdminUsers() {
         </Dialog>
 
         <Dialog open={!!adjustAccount} onOpenChange={(o) => !o && setAdjustAccount(null)}>
-          <DialogContent>
+          <DialogContent className="w-[calc(100vw-1rem)] max-w-md p-4 md:p-6">
             <DialogHeader>
               <DialogTitle>Adjust balance</DialogTitle>
               <DialogDescription>
