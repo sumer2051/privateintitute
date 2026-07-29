@@ -184,8 +184,8 @@ export default function AdminSupport() {
                 ))}
               </div>
               <div className="mt-4 flex gap-2">
-                <Textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Reply as agent…" rows={2} />
-                <Button onClick={sendAgentReply} disabled={!reply.trim()}><Send className="h-4 w-4" /></Button>
+                <Textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Reply as agent…" rows={2} className="flex-1" />
+                <Button onClick={sendAgentReply} disabled={!reply.trim()} className="shrink-0"><Send className="h-4 w-4" /></Button>
               </div>
             </CardContent>
           </Card>
@@ -196,10 +196,10 @@ export default function AdminSupport() {
               <TabsTrigger value="calls">Calls</TabsTrigger>
             </TabsList>
             <TabsContent value="tickets" className="mt-4 space-y-3">
-              <div className="flex flex-wrap gap-2">
-                <Input placeholder="Search ticket #, subject, customer…" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+                <Input placeholder="Search ticket #, subject, customer…" value={q} onChange={(e) => setQ(e.target.value)} className="w-full sm:max-w-xs" />
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-full sm:w-40"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All statuses</SelectItem>
                     {["open","pending","in_progress","resolved","closed"].map(s => <SelectItem key={s} value={s}>{s.replace("_"," ")}</SelectItem>)}

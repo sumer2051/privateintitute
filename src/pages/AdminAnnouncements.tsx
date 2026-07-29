@@ -79,16 +79,16 @@ export default function AdminAnnouncements() {
           <CardContent className="space-y-3">
             <Input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} maxLength={120} />
             <Textarea placeholder="Message body" value={body} onChange={e => setBody(e.target.value)} maxLength={800} rows={4} />
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <Select value={severity} onValueChange={setSeverity}>
-                <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-40"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="info">Info</SelectItem>
                   <SelectItem value="warning">Warning</SelectItem>
                   <SelectItem value="critical">Critical</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={publish} disabled={busy}>{busy ? "Publishing..." : "Publish now"}</Button>
+              <Button onClick={publish} disabled={busy} className="w-full sm:w-auto">{busy ? "Publishing..." : "Publish now"}</Button>
             </div>
           </CardContent>
         </Card>
