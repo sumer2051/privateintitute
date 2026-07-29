@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bell, ArrowDownLeft, ArrowUpRight, Clock, CheckCircle2, Receipt } from "lucide-react";
+import { Bell, ArrowDownLeft, ArrowUpRight, Clock, CheckCircle2, Receipt, XCircle, AlertTriangle, Loader2, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
