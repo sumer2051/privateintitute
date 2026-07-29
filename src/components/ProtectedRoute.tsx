@@ -1,8 +1,10 @@
 import { Navigate } from "react-router-dom";
 import { useAuthReady } from "@/hooks/useAuthReady";
+import { useDeviceGuard } from "@/hooks/useDeviceGuard";
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isReady } = useAuthReady();
+  useDeviceGuard(user?.id);
 
   if (!isReady) {
     return (

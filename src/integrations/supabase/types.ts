@@ -500,6 +500,60 @@ export type Database = {
           },
         ]
       }
+      user_devices: {
+        Row: {
+          blocked_at: string | null
+          created_at: string
+          device_id: string
+          first_seen: string
+          id: string
+          ip: string | null
+          is_blocked: boolean
+          is_revoked: boolean
+          label: string | null
+          last_seen: string
+          platform: string | null
+          revoked_at: string | null
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          blocked_at?: string | null
+          created_at?: string
+          device_id: string
+          first_seen?: string
+          id?: string
+          ip?: string | null
+          is_blocked?: boolean
+          is_revoked?: boolean
+          label?: string | null
+          last_seen?: string
+          platform?: string | null
+          revoked_at?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          blocked_at?: string | null
+          created_at?: string
+          device_id?: string
+          first_seen?: string
+          id?: string
+          ip?: string | null
+          is_blocked?: boolean
+          is_revoked?: boolean
+          label?: string | null
+          last_seen?: string
+          platform?: string | null
+          revoked_at?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -576,6 +630,7 @@ export type Database = {
         Args: { p_account: string; p_amount: number; p_reason: string }
         Returns: string
       }
+      admin_revoke_device: { Args: { p_device: string }; Returns: boolean }
       admin_revoke_role: {
         Args: {
           p_role: Database["public"]["Enums"]["app_role"]
@@ -585,6 +640,10 @@ export type Database = {
       }
       admin_set_account_frozen: {
         Args: { p_account: string; p_frozen: boolean; p_reason?: string }
+        Returns: boolean
+      }
+      admin_set_device_blocked: {
+        Args: { p_blocked: boolean; p_device: string }
         Returns: boolean
       }
       admin_update_transaction_status: {

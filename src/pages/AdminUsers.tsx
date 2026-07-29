@@ -8,13 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet, CreditCard, PiggyBank } from "lucide-react";
+import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet, CreditCard, PiggyBank, Monitor, Smartphone, Lock, Unlock, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
 type Role = { user_id: string; role: "admin" | "support" | "tx_support" | "user" };
 type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
+type Device = { id: string; user_id: string; device_id: string; label: string | null; user_agent: string | null; platform: string | null; last_seen: string; first_seen: string; is_blocked: boolean; is_revoked: boolean };
 
 const TX_STATUSES = ["pending", "processing", "under_review", "completed", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string,string> = {
@@ -47,6 +48,8 @@ export default function AdminUsers() {
   const [adjustNote, setAdjustNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [userTx, setUserTx] = useState<Tx[]>([]);
+  const [userDevices, setUserDevices] = useState<Device[]>([]);
+  const [deviceBusy, setDeviceBusy] = useState<string | null>(null);
   const [txBusy, setTxBusy] = useState<string | null>(null);
   const [depositAccount, setDepositAccount] = useState<Account | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
@@ -80,17 +83,56 @@ export default function AdminUsers() {
   useEffect(() => { if (allowed) load(); }, [allowed]);
 
   useEffect(() => {
-    if (!selected) { setUserTx([]); return; }
+    if (!selected) { setUserTx([]); setUserDevices([]); return; }
     (async () => {
-      const { data } = await supabase
-        .from("transactions")
-        .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
-        .eq("user_id", selected.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      setUserTx((data as Tx[]) || []);
+      const [{ data: tx }, { data: dv }] = await Promise.all([
+        supabase
+          .from("transactions")
+          .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+          .eq("user_id", selected.id)
+          .order("created_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("user_devices")
+          .select("id,user_id,device_id,label,user_agent,platform,last_seen,first_seen,is_blocked,is_revoked")
+          .eq("user_id", selected.id)
+          .order("last_seen", { ascending: false }),
+      ]);
+      setUserTx((tx as Tx[]) || []);
+      setUserDevices((dv as Device[]) || []);
     })();
   }, [selected]);
+
+  const reloadDevices = async (uid: string) => {
+    const { data } = await supabase
+      .from("user_devices")
+      .select("id,user_id,device_id,label,user_agent,platform,last_seen,first_seen,is_blocked,is_revoked")
+      .eq("user_id", uid)
+      .order("last_seen", { ascending: false });
+    setUserDevices((data as Device[]) || []);
+  };
+
+  const kickDevice = async (d: Device) => {
+    if (!confirm(`Sign this device out of ${selected?.email}'s account? They will need to sign in again on that device.`)) return;
+    setDeviceBusy(d.id);
+    const { error } = await supabase.rpc("admin_revoke_device", { p_device: d.id });
+    setDeviceBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Device kicked out");
+    if (selected) reloadDevices(selected.id);
+  };
+
+  const toggleDeviceLock = async (d: Device) => {
+    const lock = !d.is_blocked;
+    if (lock && !confirm(`Lock this device from ever signing back into ${selected?.email}'s account?`)) return;
+    setDeviceBusy(d.id);
+    const { error } = await supabase.rpc("admin_set_device_blocked", { p_device: d.id, p_blocked: lock });
+    setDeviceBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(lock ? "Device locked" : "Device unlocked");
+    if (selected) reloadDevices(selected.id);
+  };
+
 
   const updateTxStatus = async (tx: Tx, status: string) => {
     const isPendingDeposit = tx.category === "Pending Deposit";
@@ -428,6 +470,63 @@ export default function AdminUsers() {
                       )}
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-secondary flex items-center gap-2">
+                  <Monitor className="h-4 w-4 text-primary" /> Signed-in devices
+                </h3>
+                <span className="text-xs text-muted-foreground">{userDevices.length} known</span>
+              </div>
+              {userDevices.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4 border rounded-lg">No devices have signed in yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {userDevices.map(d => {
+                    const Icon = /iOS|Android/i.test(d.platform || "") ? Smartphone : Monitor;
+                    const lastSeen = new Date(d.last_seen);
+                    const mins = Math.round((Date.now() - lastSeen.getTime()) / 60000);
+                    const active = mins < 3 && !d.is_revoked && !d.is_blocked;
+                    return (
+                      <div key={d.id} className="border rounded-lg p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+                        <Icon className="h-5 w-5 text-primary shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium text-secondary text-sm truncate">{d.label || d.platform || "Unknown device"}</span>
+                            {active && <Badge className="bg-emerald-500 text-white text-[10px]">Active now</Badge>}
+                            {d.is_blocked && <Badge variant="destructive" className="text-[10px]">Locked</Badge>}
+                            {d.is_revoked && !d.is_blocked && <Badge variant="outline" className="text-[10px]">Kicked</Badge>}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground truncate">{d.user_agent || "—"}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            Last seen {lastSeen.toLocaleString()} · First seen {new Date(d.first_seen).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={deviceBusy === d.id || d.is_revoked}
+                            onClick={() => kickDevice(d)}
+                          >
+                            <LogOut className="h-3.5 w-3.5 mr-1" /> Kick out
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={d.is_blocked ? "default" : "outline"}
+                            className={d.is_blocked ? "" : "border-red-400 text-red-700 hover:bg-red-50"}
+                            disabled={deviceBusy === d.id}
+                            onClick={() => toggleDeviceLock(d)}
+                          >
+                            {d.is_blocked ? <><Unlock className="h-3.5 w-3.5 mr-1" /> Unlock</> : <><Lock className="h-3.5 w-3.5 mr-1" /> Lock</>}
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
