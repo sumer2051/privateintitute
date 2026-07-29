@@ -35,6 +35,14 @@ const statusColor: Record<string, string> = {
   closed: "bg-gray-200 text-gray-700",
 };
 
+const VIEWED_KEY = "support_ticket_viewed_v1";
+const readViewed = (): Record<string, string> => {
+  try { return JSON.parse(localStorage.getItem(VIEWED_KEY) || "{}"); } catch { return {}; }
+};
+const writeViewed = (v: Record<string, string>) => {
+  try { localStorage.setItem(VIEWED_KEY, JSON.stringify(v)); } catch {}
+};
+
 export default function Support() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [calls, setCalls] = useState<CallRow[]>([]);
@@ -44,6 +52,13 @@ export default function Support() {
   const [reply, setReply] = useState("");
   const [newOpen, setNewOpen] = useState(false);
   const [callOpen, setCallOpen] = useState(false);
+  const [viewed, setViewed] = useState<Record<string, string>>(() => readViewed());
+
+  const isNew = (t: TicketRow) => {
+    const seenAt = viewed[t.id];
+    if (!seenAt) return true;
+    return new Date(t.updated_at).getTime() > new Date(seenAt).getTime();
+  };
 
   const load = async () => {
     setLoading(true);
@@ -72,6 +87,12 @@ export default function Support() {
     const { data } = await supabase.from("ticket_messages")
       .select("*").eq("ticket_id", t.id).order("created_at", { ascending: true });
     setMessages((data as MsgRow[]) || []);
+    // Mark viewed
+    setViewed((prev) => {
+      const next = { ...prev, [t.id]: new Date().toISOString() };
+      writeViewed(next);
+      return next;
+    });
   };
 
   useEffect(() => {
