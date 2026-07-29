@@ -181,17 +181,22 @@ export const NotificationsBell = () => {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-96 p-0">
-          <div className="flex items-center justify-between border-b p-3">
-            <div>
+        <PopoverContent
+          align="end"
+          sideOffset={8}
+          collisionPadding={8}
+          className="w-[calc(100vw-1rem)] sm:w-96 max-w-[26rem] p-0 overflow-hidden"
+        >
+          <div className="flex items-center justify-between gap-2 border-b p-3">
+            <div className="min-w-0">
               <div className="font-semibold text-secondary">Notifications</div>
-              <div className="text-xs text-muted-foreground">Tap a transfer to view its receipt</div>
+              <div className="text-xs text-muted-foreground truncate">Tap a transfer to view its receipt</div>
             </div>
-            <Button size="sm" variant="ghost" onClick={() => { setOpen(false); navigate("/transfers"); }}>
+            <Button size="sm" variant="ghost" className="shrink-0" onClick={() => { setOpen(false); navigate("/transfers"); }}>
               View transfers
             </Button>
           </div>
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[min(70vh,26rem)] overflow-y-auto overscroll-contain">
             {items.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">No notifications yet.</div>
             ) : items.map((n) => {
@@ -231,7 +236,7 @@ export const NotificationsBell = () => {
 
       {/* Notification detail dialog */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[calc(100vw-1rem)] max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain p-4 sm:p-6">
           {selected && (
             <>
               <DialogHeader>
