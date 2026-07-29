@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ShieldAlert, Ticket, PhoneCall, Send, ArrowLeft, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { StaffPinDialog } from "@/components/StaffPinDialog";
 
 type T = {
   id: string; ticket_number: string; subject: string; description: string;
@@ -41,6 +42,7 @@ export default function AdminSupport() {
   const [active, setActive] = useState<T | null>(null);
   const [msgs, setMsgs] = useState<M[]>([]);
   const [reply, setReply] = useState("");
+  const [pinPending, setPinPending] = useState<T | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -71,7 +73,12 @@ export default function AdminSupport() {
     return () => { supabase.removeChannel(ch); };
   }, [allowed]);
 
-  const openT = async (t: T) => {
+  const openT = (t: T) => {
+    // Always require staff PIN before opening a ticket
+    setPinPending(t);
+  };
+
+  const revealTicket = async (t: T) => {
     setActive(t);
     const { data } = await supabase.from("ticket_messages").select("*").eq("ticket_id", t.id).order("created_at");
     setMsgs((data as M[]) || []);
@@ -259,6 +266,15 @@ export default function AdminSupport() {
           </Tabs>
         )}
       </div>
+      <StaffPinDialog
+        open={!!pinPending}
+        onOpenChange={(v) => { if (!v) setPinPending(null); }}
+        onVerified={() => {
+          const t = pinPending;
+          setPinPending(null);
+          if (t) revealTicket(t);
+        }}
+      />
     </AuthLayout>
   );
 }
