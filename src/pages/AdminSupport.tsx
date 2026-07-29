@@ -21,7 +21,11 @@ type T = {
   customer_name: string; customer_email: string; user_id: string; category: string | null;
   ai_summary: string | null;
 };
-type M = { id: string; sender_type: string; message: string; created_at: string };
+type M = {
+  id: string; sender_type: string; message: string; created_at: string;
+  attachment_path?: string | null; attachment_name?: string | null;
+  attachment_type?: string | null; attachment_size?: number | null;
+};
 type C = { id: string; scheduled_at: string; timezone: string; reason: string; status: string; phone: string; customer_name: string; email: string; agent_notes: string | null };
 
 const priColor: Record<string, string> = {
