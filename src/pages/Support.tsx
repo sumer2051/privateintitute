@@ -164,22 +164,32 @@ export default function Support() {
                 </CardContent></Card>
               ) : (
                 <div className="space-y-2">
-                  {tickets.map((t) => (
-                    <button key={t.id} onClick={() => openTicket(t)}
-                      className="w-full rounded-lg border bg-card p-4 text-left transition hover:shadow-md">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs text-muted-foreground">{t.ticket_number}</span>
-                          <Badge className={priorityColor[t.priority]}>{t.priority}</Badge>
-                          <Badge variant="outline" className={statusColor[t.status]}>{t.status.replace("_"," ")}</Badge>
+                  {tickets.map((t) => {
+                    const fresh = isNew(t);
+                    return (
+                      <button key={t.id} onClick={() => openTicket(t)}
+                        className={`relative w-full rounded-lg border p-4 text-left transition hover:shadow-md ${fresh ? "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-900" : "bg-card"}`}>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            {fresh && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm animate-pulse">
+                                <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                                New
+                              </span>
+                            )}
+                            <span className="font-mono text-xs text-muted-foreground">{t.ticket_number}</span>
+                            <Badge className={priorityColor[t.priority]}>{t.priority}</Badge>
+                            <Badge variant="outline" className={statusColor[t.status]}>{t.status.replace("_"," ")}</Badge>
+                          </div>
+                          <span className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}</span>
                         </div>
-                        <span className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}</span>
-                      </div>
-                      <p className="mt-2 font-medium">{t.subject}</p>
-                      <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{t.description}</p>
-                    </button>
-                  ))}
+                        <p className={`mt-2 font-medium ${fresh ? "text-red-900 dark:text-red-100" : ""}`}>{t.subject}</p>
+                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{t.description}</p>
+                      </button>
+                    );
+                  })}
                 </div>
+
               )}
             </TabsContent>
             <TabsContent value="calls" className="mt-4">
