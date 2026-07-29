@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,12 +90,28 @@ export default function AdminSupport() {
   const sendAgentReply = async () => {
     if (!active || !reply.trim()) return;
     const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    // Claim ticket + auto-generate 8-digit handoff PIN (emailed to admin) on first reply
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/notify-ticket-pin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ ticket_id: active.id }),
+      });
+    } catch (e) { console.error("pin claim failed", e); }
+
     await supabase.from("ticket_messages").insert({
-      ticket_id: active.id, sender_type: "agent", sender_id: session?.user.id, message: reply.trim(),
+      ticket_id: active.id, sender_type: "agent", sender_id: session.user.id, message: reply.trim(),
     });
     await supabase.from("support_tickets").update({ status: "in_progress" }).eq("id", active.id);
     setMsgs((m) => [...m, { id: crypto.randomUUID(), sender_type: "agent", message: reply.trim(), created_at: new Date().toISOString() }]);
     setReply("");
+    toast.success("Reply sent — handoff PIN emailed to admin");
   };
 
   const updateCall = async (id: string, patch: Partial<C>) => {

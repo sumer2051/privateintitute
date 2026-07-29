@@ -35,6 +35,14 @@ const statusColor: Record<string, string> = {
   closed: "bg-gray-200 text-gray-700",
 };
 
+const VIEWED_KEY = "support_ticket_viewed_v1";
+const readViewed = (): Record<string, string> => {
+  try { return JSON.parse(localStorage.getItem(VIEWED_KEY) || "{}"); } catch { return {}; }
+};
+const writeViewed = (v: Record<string, string>) => {
+  try { localStorage.setItem(VIEWED_KEY, JSON.stringify(v)); } catch {}
+};
+
 export default function Support() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [calls, setCalls] = useState<CallRow[]>([]);
@@ -44,6 +52,13 @@ export default function Support() {
   const [reply, setReply] = useState("");
   const [newOpen, setNewOpen] = useState(false);
   const [callOpen, setCallOpen] = useState(false);
+  const [viewed, setViewed] = useState<Record<string, string>>(() => readViewed());
+
+  const isNew = (t: TicketRow) => {
+    const seenAt = viewed[t.id];
+    if (!seenAt) return true;
+    return new Date(t.updated_at).getTime() > new Date(seenAt).getTime();
+  };
 
   const load = async () => {
     setLoading(true);
@@ -72,6 +87,12 @@ export default function Support() {
     const { data } = await supabase.from("ticket_messages")
       .select("*").eq("ticket_id", t.id).order("created_at", { ascending: true });
     setMessages((data as MsgRow[]) || []);
+    // Mark viewed
+    setViewed((prev) => {
+      const next = { ...prev, [t.id]: new Date().toISOString() };
+      writeViewed(next);
+      return next;
+    });
   };
 
   useEffect(() => {
@@ -143,22 +164,32 @@ export default function Support() {
                 </CardContent></Card>
               ) : (
                 <div className="space-y-2">
-                  {tickets.map((t) => (
-                    <button key={t.id} onClick={() => openTicket(t)}
-                      className="w-full rounded-lg border bg-card p-4 text-left transition hover:shadow-md">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs text-muted-foreground">{t.ticket_number}</span>
-                          <Badge className={priorityColor[t.priority]}>{t.priority}</Badge>
-                          <Badge variant="outline" className={statusColor[t.status]}>{t.status.replace("_"," ")}</Badge>
+                  {tickets.map((t) => {
+                    const fresh = isNew(t);
+                    return (
+                      <button key={t.id} onClick={() => openTicket(t)}
+                        className={`relative w-full rounded-lg border p-4 text-left transition hover:shadow-md ${fresh ? "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-900" : "bg-card"}`}>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            {fresh && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm animate-pulse">
+                                <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                                New
+                              </span>
+                            )}
+                            <span className="font-mono text-xs text-muted-foreground">{t.ticket_number}</span>
+                            <Badge className={priorityColor[t.priority]}>{t.priority}</Badge>
+                            <Badge variant="outline" className={statusColor[t.status]}>{t.status.replace("_"," ")}</Badge>
+                          </div>
+                          <span className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}</span>
                         </div>
-                        <span className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}</span>
-                      </div>
-                      <p className="mt-2 font-medium">{t.subject}</p>
-                      <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{t.description}</p>
-                    </button>
-                  ))}
+                        <p className={`mt-2 font-medium ${fresh ? "text-red-900 dark:text-red-100" : ""}`}>{t.subject}</p>
+                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{t.description}</p>
+                      </button>
+                    );
+                  })}
                 </div>
+
               )}
             </TabsContent>
             <TabsContent value="calls" className="mt-4">

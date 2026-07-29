@@ -367,6 +367,7 @@ export type Database = {
           id: string
           priority: string
           source: string
+          staff_reply_pin: string | null
           status: string
           subject: string
           ticket_number: string
@@ -384,6 +385,7 @@ export type Database = {
           id?: string
           priority?: string
           source?: string
+          staff_reply_pin?: string | null
           status?: string
           subject: string
           ticket_number?: string
@@ -401,6 +403,7 @@ export type Database = {
           id?: string
           priority?: string
           source?: string
+          staff_reply_pin?: string | null
           status?: string
           subject?: string
           ticket_number?: string
@@ -672,6 +675,14 @@ export type Database = {
       }
       set_staff_pin: { Args: { _pin: string }; Returns: boolean }
       set_transfer_pin: { Args: { _pin: string }; Returns: boolean }
+      staff_claim_ticket: {
+        Args: { p_ticket: string }
+        Returns: {
+          assigned_to: string
+          newly_generated: boolean
+          pin: string
+        }[]
+      }
       verify_staff_pin: { Args: { _pin: string }; Returns: boolean }
       verify_transfer_pin: { Args: { _pin: string }; Returns: boolean }
     }
