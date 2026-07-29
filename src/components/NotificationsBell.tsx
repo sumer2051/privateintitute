@@ -67,6 +67,31 @@ const parseDetails = (desc?: string | null): Record<string, string> => {
   return out;
 };
 
+const statusMeta = (status: string, isDebit: boolean) => {
+  switch (status) {
+    case "pending":
+      return { Icon: Clock, label: "Pending approval", pillClass: "bg-warning/15 text-warning", iconBg: "bg-warning/15 text-warning", showTypeIcon: false, failed: false };
+    case "processing":
+      return { Icon: Loader2, label: "Processing", pillClass: "bg-primary/10 text-primary", iconBg: "bg-primary/10 text-primary", showTypeIcon: false, failed: false };
+    case "under_review":
+      return { Icon: AlertTriangle, label: "Under review", pillClass: "bg-amber-500/15 text-amber-600", iconBg: "bg-amber-500/15 text-amber-600", showTypeIcon: false, failed: false };
+    case "failed":
+      return { Icon: XCircle, label: "Failed", pillClass: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/15 text-destructive", showTypeIcon: false, failed: true };
+    case "cancelled":
+      return { Icon: Ban, label: "Cancelled", pillClass: "bg-muted text-muted-foreground", iconBg: "bg-muted text-muted-foreground", showTypeIcon: false, failed: true };
+    case "completed":
+    default:
+      return {
+        Icon: CheckCircle2,
+        label: status === "completed" ? "Completed" : status,
+        pillClass: "bg-success/10 text-success",
+        iconBg: isDebit ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success",
+        showTypeIcon: true,
+        failed: false,
+      };
+  }
+};
+
 export const NotificationsBell = () => {
   const [items, setItems] = useState<Notif[]>([]);
   const [unread, setUnread] = useState(0);
