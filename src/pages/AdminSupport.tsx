@@ -44,6 +44,8 @@ export default function AdminSupport() {
   const [msgs, setMsgs] = useState<M[]>([]);
   const [reply, setReply] = useState("");
   const [pinPending, setPinPending] = useState<T | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -51,6 +53,7 @@ export default function AdminSupport() {
       if (!user) { navigate("/auth"); return; }
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
       const roles = (data || []).map((r: any) => r.role);
+      setIsAdmin(roles.includes("admin"));
       setAllowed(roles.includes("admin") || roles.includes("support"));
     })();
   }, [navigate]);
