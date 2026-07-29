@@ -260,11 +260,14 @@ export const NotificationsBell = () => {
                   {selected.transaction_type === "debit" ? "-" : "+"}{fmt(selected.amount)}
                 </div>
                 <div className="mt-1 flex items-center gap-2">
-                  {selected.status === "pending" ? (
-                    <Badge variant="outline" className="border-warning/40 bg-warning/10 text-warning gap-1"><Clock className="h-3 w-3" /> Pending approval</Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-success/40 bg-success/10 text-success gap-1"><CheckCircle2 className="h-3 w-3" /> {selected.status || "Completed"}</Badge>
-                  )}
+                  {(() => {
+                    const m = statusMeta((selected.status || "completed").toLowerCase(), selected.transaction_type === "debit");
+                    return (
+                      <Badge variant="outline" className={`gap-1 border-transparent ${m.pillClass}`}>
+                        <m.Icon className="h-3 w-3" /> {m.label}
+                      </Badge>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -281,6 +284,26 @@ export const NotificationsBell = () => {
                 {selected.status === "pending" && (
                   <p className="text-xs text-muted-foreground">
                     A specialist will contact you to verify and approve this transfer.
+                  </p>
+                )}
+                {selected.status === "processing" && (
+                  <p className="text-xs text-muted-foreground">
+                    Your transfer is being processed and should complete shortly.
+                  </p>
+                )}
+                {selected.status === "under_review" && (
+                  <p className="text-xs text-muted-foreground">
+                    This transfer is under review by our compliance team. We'll update you soon.
+                  </p>
+                )}
+                {selected.status === "failed" && (
+                  <p className="text-xs text-destructive">
+                    This transfer failed. No funds were moved. Please contact support if you need help.
+                  </p>
+                )}
+                {selected.status === "cancelled" && (
+                  <p className="text-xs text-muted-foreground">
+                    This transfer was cancelled.
                   </p>
                 )}
               </div>
