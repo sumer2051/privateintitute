@@ -237,13 +237,43 @@ export default function AdminSupport() {
                     }`}>
                       <p className="text-[10px] opacity-80 mb-0.5 uppercase">{m.sender_type} · {new Date(m.created_at).toLocaleString()}</p>
                       {m.message}
+                      {m.attachment_path && (
+                        <AttachmentPreview
+                          path={m.attachment_path}
+                          name={m.attachment_name}
+                          type={m.attachment_type}
+                          size={m.attachment_size}
+                        />
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
+              {replyFile && (
+                <div className="mt-3 flex items-center gap-2 rounded-md border bg-muted/40 px-2 py-1.5 text-xs">
+                  <Paperclip className="h-3.5 w-3.5" />
+                  <span className="flex-1 truncate">{replyFile.name}</span>
+                  <span className="opacity-60">{formatBytes(replyFile.size)}</span>
+                  <button onClick={() => setReplyFile(null)} className="opacity-70 hover:opacity-100">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
               <div className="mt-4 flex gap-2">
+                <input
+                  ref={fileRef} type="file" className="hidden"
+                  accept="image/*,application/pdf,.doc,.docx,.txt,.csv,.xlsx"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] || null;
+                    if (f && f.size > MAX_ATTACHMENT_BYTES) { toast.error("File too large (max 10 MB)"); return; }
+                    setReplyFile(f);
+                  }}
+                />
+                <Button type="button" variant="outline" size="icon" onClick={() => fileRef.current?.click()} className="shrink-0" title="Attach file">
+                  <Paperclip className="h-4 w-4" />
+                </Button>
                 <Textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Reply as agent…" rows={2} className="flex-1" />
-                <Button onClick={sendAgentReply} disabled={!reply.trim()} className="shrink-0"><Send className="h-4 w-4" /></Button>
+                <Button onClick={sendAgentReply} disabled={sending || (!reply.trim() && !replyFile)} className="shrink-0"><Send className="h-4 w-4" /></Button>
               </div>
             </CardContent>
           </Card>
