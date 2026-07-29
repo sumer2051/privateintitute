@@ -110,12 +110,20 @@ export default function Support() {
     return () => { supabase.removeChannel(ch); };
   }, [active?.id]);
 
-  const sendReply = async () => {
-    if (!active || !reply.trim()) return;
+  const sendReply = async (file: File | null) => {
+    if (!active) return;
+    if (!reply.trim() && !file) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
+    let att: Awaited<ReturnType<typeof uploadTicketAttachment>> | null = null;
+    if (file) {
+      try { att = await uploadTicketAttachment(active.id, file); }
+      catch (e) { toast.error((e as Error).message); return; }
+    }
     const { error } = await supabase.from("ticket_messages").insert({
-      ticket_id: active.id, sender_type: "customer", sender_id: session.user.id, message: reply.trim(),
+      ticket_id: active.id, sender_type: "customer", sender_id: session.user.id,
+      message: reply.trim() || (att ? `📎 ${att.attachment_name}` : ""),
+      ...(att || {}),
     });
     if (error) { toast.error(error.message); return; }
     if (active.status === "resolved" || active.status === "closed") {
