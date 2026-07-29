@@ -45,14 +45,17 @@ Deno.serve(async (req) => {
       .eq("id", ticket_id)
       .single();
 
-    if (newly_generated && ticket) {
+    let emailed = false;
+    let emailError: string | null = null;
+    if (ticket) {
       try {
+        console.log("[notify-ticket-pin] sending to", ADMIN_EMAIL, "ticket", ticket.ticket_number, "newly_generated=", newly_generated);
         await sendEmail(
           ADMIN_EMAIL,
-          `[Handoff PIN] Ticket ${ticket.ticket_number} claimed by staff`,
+          `[Handoff PIN] Ticket ${ticket.ticket_number} — ${newly_generated ? "new claim" : "re-sent"}`,
           brandedEmail(
-            `Staff handoff PIN generated`,
-            `<p>A support staff member has claimed a ticket. Use the PIN below to hand it over to the customer for verification.</p>
+            `Staff handoff PIN`,
+            `<p>${newly_generated ? "A support staff member has claimed a ticket." : "PIN re-sent for an already-claimed ticket."} Share the PIN below with the customer through a verified channel.</p>
              <div style="background:#0b1e3f;color:#fff;text-align:center;padding:18px;border-radius:10px;margin:16px 0">
                <div style="font-size:12px;opacity:.75;letter-spacing:1px">HANDOFF PIN</div>
                <div style="font-size:34px;font-weight:800;letter-spacing:8px;margin-top:4px">${pin}</div>
@@ -67,12 +70,14 @@ Deno.serve(async (req) => {
             `Share this PIN with the customer only through a verified channel.`,
           ),
         );
+        emailed = true;
       } catch (e) {
-        console.error("admin pin email failed", e);
+        emailError = (e as Error).message;
+        console.error("[notify-ticket-pin] email failed:", emailError);
       }
     }
 
-    return json({ ok: true, pin, newly_generated });
+    return json({ ok: true, pin, newly_generated, emailed, emailError });
   } catch (e) {
     return json({ error: (e as Error).message }, 500);
   }

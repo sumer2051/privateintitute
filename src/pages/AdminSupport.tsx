@@ -120,17 +120,20 @@ export default function AdminSupport() {
     }
 
     // Claim ticket + auto-generate 8-digit handoff PIN (emailed to admin) on first reply
+    let pinEmailed = false;
+    let pinError: string | null = null;
     try {
-      await fetch(`${SUPABASE_URL}/functions/v1/notify-ticket-pin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-          apikey: SUPABASE_PUBLISHABLE_KEY,
-        },
-        body: JSON.stringify({ ticket_id: active.id }),
+      const { data, error } = await supabase.functions.invoke("notify-ticket-pin", {
+        body: { ticket_id: active.id },
       });
-    } catch (e) { console.error("pin claim failed", e); }
+      if (error) throw error;
+      pinEmailed = !!data?.emailed;
+      pinError = data?.emailError || null;
+      if (pinError) console.error("[handoff-pin] send failed:", pinError);
+    } catch (e) {
+      pinError = (e as Error).message;
+      console.error("pin claim failed", e);
+    }
 
     const msgText = reply.trim() || (att ? `📎 ${att.attachment_name}` : "");
     await supabase.from("ticket_messages").insert({
@@ -145,7 +148,9 @@ export default function AdminSupport() {
     setReply(""); setReplyFile(null);
     if (fileRef.current) fileRef.current.value = "";
     setSending(false);
-    toast.success("Reply sent — handoff PIN emailed to admin");
+    if (pinEmailed) toast.success("Reply sent — handoff PIN emailed to admin");
+    else if (pinError) toast.error(`Reply sent, but PIN email failed: ${pinError}`);
+    else toast.success("Reply sent");
   };
 
 
