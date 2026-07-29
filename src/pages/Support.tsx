@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { MessageSquare, PhoneCall, Ticket, Send, Sparkles, ArrowLeft, Clock, Paperclip, X } from "lucide-react";
+import { MessageSquare, PhoneCall, Ticket, Send, Sparkles, ArrowLeft, Clock, Paperclip, X, Search, ChevronRight, CornerUpLeft } from "lucide-react";
 import { AttachmentPreview, uploadTicketAttachment, MAX_ATTACHMENT_BYTES, formatBytes } from "@/components/TicketAttachment";
 
 type TicketRow = {
@@ -58,6 +58,9 @@ export default function Support() {
   const [newOpen, setNewOpen] = useState(false);
   const [callOpen, setCallOpen] = useState(false);
   const [viewed, setViewed] = useState<Record<string, string>>(() => readViewed());
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<"all" | "new" | "open" | "resolved">("all");
+  const [previews, setPreviews] = useState<Record<string, MsgRow>>({});
 
   const isNew = (t: TicketRow) => {
     const seenAt = viewed[t.id];
@@ -71,12 +74,30 @@ export default function Support() {
       supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
       supabase.from("scheduled_calls").select("*").order("scheduled_at", { ascending: true }),
     ]);
-    setTickets((t as TicketRow[]) || []);
+    const rows = (t as TicketRow[]) || [];
+    setTickets(rows);
     setCalls((c as CallRow[]) || []);
     setLoading(false);
+
+    // Latest message per ticket (for inline previews)
+    if (rows.length) {
+      const { data: msgs } = await supabase
+        .from("ticket_messages")
+        .select("id, ticket_id, sender_type, message, created_at, sender_id, attachment_name")
+        .in("ticket_id", rows.map((r) => r.id))
+        .order("created_at", { ascending: false });
+      const map: Record<string, MsgRow> = {};
+      for (const m of (msgs as any[]) || []) {
+        if (!map[m.ticket_id]) map[m.ticket_id] = m as MsgRow;
+      }
+      setPreviews(map);
+    } else {
+      setPreviews({});
+    }
   };
 
   useEffect(() => { load(); }, []);
+
 
   useEffect(() => {
     const ch = supabase
@@ -132,15 +153,42 @@ export default function Support() {
     setReply("");
   };
 
+  const freshCount = tickets.filter(isNew).length;
+  const openCount = tickets.filter((t) => !["resolved", "closed"].includes(t.status)).length;
+
+  const visibleTickets = tickets
+    .filter((t) => {
+      if (filter === "new" && !isNew(t)) return false;
+      if (filter === "open" && ["resolved", "closed"].includes(t.status)) return false;
+      if (filter === "resolved" && !["resolved", "closed"].includes(t.status)) return false;
+      const q = query.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        t.subject.toLowerCase().includes(q) ||
+        t.ticket_number.toLowerCase().includes(q) ||
+        (t.description || "").toLowerCase().includes(q) ||
+        (t.category || "").toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      const an = isNew(a) ? 1 : 0, bn = isNew(b) ? 1 : 0;
+      if (an !== bn) return bn - an;
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    });
+
+  const latestFresh = tickets.filter(isNew).sort(
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  )[0];
+
   return (
     <AuthLayout currentPage="support">
-      <div className="mx-auto max-w-6xl p-4 md:p-6 space-y-6">
+      <div className="mx-auto max-w-6xl p-4 md:p-6 space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Support Center</h1>
             <p className="text-sm text-muted-foreground">Ask Ava, open a ticket, or schedule a call with a specialist.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => window.dispatchEvent(new Event("open-ai-chat"))}>
               <Sparkles className="mr-2 h-4 w-4" /> Ask Ava
             </Button>
@@ -163,49 +211,149 @@ export default function Support() {
             onBack={() => { setActive(null); load(); }}
           />
         ) : (
-          <Tabs defaultValue="tickets">
-            <TabsList>
-              <TabsTrigger value="tickets"><Ticket className="mr-1 h-4 w-4" />My Tickets ({tickets.length})</TabsTrigger>
-              <TabsTrigger value="calls"><PhoneCall className="mr-1 h-4 w-4" />Scheduled Calls ({calls.length})</TabsTrigger>
-            </TabsList>
-            <TabsContent value="tickets" className="mt-4">
-              {loading ? (
-                <p className="text-sm text-muted-foreground">Loading…</p>
-              ) : tickets.length === 0 ? (
-                <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">
-                  <MessageSquare className="mx-auto mb-2 h-8 w-8 opacity-40" />
-                  No tickets yet. Open one or ask Ava for instant help.
-                </CardContent></Card>
-              ) : (
-                <div className="space-y-2">
-                  {tickets.map((t) => {
-                    const fresh = isNew(t);
-                    return (
-                      <button key={t.id} onClick={() => openTicket(t)}
-                        className={`relative w-full rounded-lg border p-4 text-left transition hover:shadow-md ${fresh ? "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-900" : "bg-card"}`}>
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            {fresh && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm animate-pulse">
-                                <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                                New
-                              </span>
-                            )}
-                            <span className="font-mono text-xs text-muted-foreground">{t.ticket_number}</span>
-                            <Badge className={priorityColor[t.priority]}>{t.priority}</Badge>
-                            <Badge variant="outline" className={statusColor[t.status]}>{t.status.replace("_"," ")}</Badge>
-                          </div>
-                          <span className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}</span>
-                        </div>
-                        <p className={`mt-2 font-medium ${fresh ? "text-red-900 dark:text-red-100" : ""}`}>{t.subject}</p>
-                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{t.description}</p>
-                      </button>
-                    );
-                  })}
+          <>
+            {/* Floating green chat bubble — new message alert / first-time welcome */}
+            {!loading && (freshCount > 0 || tickets.length === 0) && (
+              <button
+                onClick={() => (latestFresh ? openTicket(latestFresh) : setNewOpen(true))}
+                className="group relative block w-full text-left"
+              >
+                <div className="relative animate-[float_3s_ease-in-out_infinite] rounded-2xl rounded-bl-sm border border-emerald-300/70 bg-gradient-to-br from-emerald-500 to-emerald-600 p-4 text-white shadow-lg shadow-emerald-600/25 transition group-hover:shadow-xl dark:border-emerald-700">
+                  <span className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-emerald-300" />
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20">
+                      <MessageSquare className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      {latestFresh ? (
+                        <>
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-50/90">
+                            {freshCount > 1 ? `${freshCount} new messages` : "New message"}
+                          </p>
+                          <p className="truncate text-sm font-semibold">{latestFresh.subject}</p>
+                          <p className="mt-0.5 truncate text-xs text-emerald-50/85">
+                            {previews[latestFresh.id]?.message || latestFresh.description}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-50/90">Welcome</p>
+                          <p className="text-sm font-semibold">No tickets yet — we're here 24/7</p>
+                          <p className="mt-0.5 text-xs text-emerald-50/85">Tap to start a conversation with support.</p>
+                        </>
+                      )}
+                    </div>
+                    <ChevronRight className="mt-2 h-4 w-4 shrink-0 opacity-80 transition group-hover:translate-x-0.5" />
+                  </div>
                 </div>
+              </button>
+            )}
 
-              )}
-            </TabsContent>
+            <Tabs defaultValue="tickets">
+              <TabsList>
+                <TabsTrigger value="tickets">
+                  <Ticket className="mr-1 h-4 w-4" />My Tickets ({tickets.length})
+                  {freshCount > 0 && (
+                    <span className="ml-1.5 rounded-full bg-emerald-600 px-1.5 text-[10px] font-bold text-white">{freshCount}</span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="calls"><PhoneCall className="mr-1 h-4 w-4" />Scheduled Calls ({calls.length})</TabsTrigger>
+              </TabsList>
+              <TabsContent value="tickets" className="mt-4 space-y-3">
+                {tickets.length > 0 && (
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="relative flex-1">
+                      <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search tickets by subject, number or category"
+                        className="pl-8"
+                      />
+                    </div>
+                    <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+                      {([
+                        ["all", `All ${tickets.length}`],
+                        ["new", `Unread ${freshCount}`],
+                        ["open", `Open ${openCount}`],
+                        ["resolved", "Resolved"],
+                      ] as const).map(([key, label]) => (
+                        <button
+                          key={key}
+                          onClick={() => setFilter(key)}
+                          className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                            filter === key
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "bg-card text-muted-foreground hover:bg-muted"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {loading ? (
+                  <div className="space-y-2">
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="h-24 animate-pulse rounded-lg border bg-muted/40" />
+                    ))}
+                  </div>
+                ) : tickets.length === 0 ? (
+                  <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">
+                    <MessageSquare className="mx-auto mb-2 h-8 w-8 opacity-40" />
+                    No tickets yet. Open one or ask Ava for instant help.
+                  </CardContent></Card>
+                ) : visibleTickets.length === 0 ? (
+                  <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">
+                    No tickets match this view.
+                  </CardContent></Card>
+                ) : (
+                  <div className="space-y-2">
+                    {visibleTickets.map((t) => {
+                      const fresh = isNew(t);
+                      const p = previews[t.id];
+                      const staffReply = p && p.sender_type !== "customer";
+                      return (
+                        <button key={t.id} onClick={() => openTicket(t)}
+                          className={`relative w-full overflow-hidden rounded-xl border p-4 text-left transition hover:shadow-md ${fresh ? "border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30" : "bg-card"}`}>
+                          {fresh && <span className="absolute inset-y-0 left-0 w-1 bg-emerald-500" />}
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {fresh && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm animate-pulse">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                                  New
+                                </span>
+                              )}
+                              <span className="font-mono text-xs text-muted-foreground">{t.ticket_number}</span>
+                              <Badge className={priorityColor[t.priority]}>{t.priority}</Badge>
+                              <Badge variant="outline" className={statusColor[t.status]}>{t.status.replace("_"," ")}</Badge>
+                            </div>
+                            <span className="text-xs text-muted-foreground">{new Date(t.updated_at || t.created_at).toLocaleString()}</span>
+                          </div>
+                          <p className={`mt-2 font-medium ${fresh ? "text-emerald-900 dark:text-emerald-100" : ""}`}>{t.subject}</p>
+                          {p ? (
+                            <p className="mt-1 flex items-start gap-1.5 text-sm text-muted-foreground line-clamp-2">
+                              {staffReply
+                                ? <MessageSquare className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                                : <CornerUpLeft className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-60" />}
+                              <span className="line-clamp-2">
+                                <span className="font-medium capitalize">{staffReply ? p.sender_type : "You"}:</span>{" "}
+                                {p.message || (p.attachment_name ? `📎 ${p.attachment_name}` : "")}
+                              </span>
+                            </p>
+                          ) : (
+                            <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{t.description}</p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </TabsContent>
+
             <TabsContent value="calls" className="mt-4">
               {calls.length === 0 ? (
                 <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">
@@ -227,8 +375,10 @@ export default function Support() {
                 </div>
               )}
             </TabsContent>
-          </Tabs>
+            </Tabs>
+          </>
         )}
+
       </div>
 
       <NewTicketDialog open={newOpen} onOpenChange={setNewOpen} onCreated={load} />
