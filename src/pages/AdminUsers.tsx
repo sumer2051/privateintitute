@@ -315,11 +315,11 @@ export default function AdminUsers() {
           <p className="text-sm text-muted-foreground">View every customer, adjust balances, and manage roles.</p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Total users</p><p className="text-2xl font-bold text-secondary">{profiles.length}</p></CardContent></Card>
-          <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Accounts</p><p className="text-2xl font-bold text-secondary">{accounts.length}</p></CardContent></Card>
-          <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Deposits held</p><p className="text-2xl font-bold text-emerald-600">${totalDeposits.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</p></CardContent></Card>
-          <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Staff</p><p className="text-2xl font-bold text-secondary">{roles.filter(r=>r.role!=="user").length}</p></CardContent></Card>
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+          <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Total users</p><p className="text-lg md:text-2xl font-bold text-secondary">{profiles.length}</p></CardContent></Card>
+          <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Accounts</p><p className="text-lg md:text-2xl font-bold text-secondary">{accounts.length}</p></CardContent></Card>
+          <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Deposits held</p><p className="text-lg md:text-2xl font-bold text-emerald-600 truncate">${totalDeposits.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</p></CardContent></Card>
+          <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Staff</p><p className="text-lg md:text-2xl font-bold text-secondary">{roles.filter(r=>r.role!=="user").length}</p></CardContent></Card>
         </div>
 
         <Card>
