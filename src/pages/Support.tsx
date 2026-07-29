@@ -239,8 +239,26 @@ export default function Support() {
 
 function TicketDetail({ ticket, messages, reply, setReply, onSend, onBack }: {
   ticket: TicketRow; messages: MsgRow[]; reply: string;
-  setReply: (v: string) => void; onSend: () => void; onBack: () => void;
+  setReply: (v: string) => void; onSend: (file: File | null) => void | Promise<void>; onBack: () => void;
 }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [sending, setSending] = useState(false);
+
+  const pickFile = (f: File | null) => {
+    if (f && f.size > MAX_ATTACHMENT_BYTES) {
+      toast.error("File too large (max 10 MB)");
+      return;
+    }
+    setFile(f);
+  };
+
+  const handleSend = async () => {
+    setSending(true);
+    try { await onSend(file); setFile(null); if (fileRef.current) fileRef.current.value = ""; }
+    finally { setSending(false); }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -266,14 +284,42 @@ function TicketDetail({ ticket, messages, reply, setReply, onSend, onBack }: {
               }`}>
                 <p className="text-[10px] opacity-70 mb-0.5 uppercase">{m.sender_type} · {new Date(m.created_at).toLocaleString()}</p>
                 {m.message}
+                {m.attachment_path && (
+                  <AttachmentPreview
+                    path={m.attachment_path}
+                    name={m.attachment_name}
+                    type={m.attachment_type}
+                    size={m.attachment_size}
+                  />
+                )}
               </div>
             </div>
           ))}
           {messages.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No messages yet.</p>}
         </div>
+        {file && (
+          <div className="mt-3 flex items-center gap-2 rounded-md border bg-muted/40 px-2 py-1.5 text-xs">
+            <Paperclip className="h-3.5 w-3.5" />
+            <span className="flex-1 truncate">{file.name}</span>
+            <span className="opacity-60">{formatBytes(file.size)}</span>
+            <button onClick={() => pickFile(null)} className="opacity-70 hover:opacity-100">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
         <div className="mt-4 flex gap-2">
-          <Textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Reply to support…" rows={2} />
-          <Button onClick={onSend} disabled={!reply.trim()}><Send className="h-4 w-4" /></Button>
+          <input
+            ref={fileRef} type="file" className="hidden"
+            accept="image/*,application/pdf,.doc,.docx,.txt,.csv,.xlsx"
+            onChange={(e) => pickFile(e.target.files?.[0] || null)}
+          />
+          <Button type="button" variant="outline" size="icon" onClick={() => fileRef.current?.click()} title="Attach file">
+            <Paperclip className="h-4 w-4" />
+          </Button>
+          <Textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Reply to support…" rows={2} className="flex-1" />
+          <Button onClick={handleSend} disabled={sending || (!reply.trim() && !file)}>
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
       </CardContent>
     </Card>
