@@ -266,6 +266,15 @@ export default function AdminSupport() {
           </Tabs>
         )}
       </div>
+      <StaffPinDialog
+        open={!!pinPending}
+        onOpenChange={(v) => { if (!v) setPinPending(null); }}
+        onVerified={() => {
+          const t = pinPending;
+          setPinPending(null);
+          if (t) revealTicket(t);
+        }}
+      />
     </AuthLayout>
   );
 }
