@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ShieldAlert, Ticket, PhoneCall, Send, ArrowLeft, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { StaffPinDialog } from "@/components/StaffPinDialog";
 
 type T = {
   id: string; ticket_number: string; subject: string; description: string;
