@@ -568,7 +568,7 @@ export default function AdminUsers() {
         </Dialog>
 
         <Dialog open={quickDepositOpen} onOpenChange={(o) => !o && setQuickDepositOpen(false)}>
-          <DialogContent>
+          <DialogContent className="w-[calc(100vw-1rem)] max-w-lg max-h-[92vh] overflow-y-auto p-4 md:p-6">
             <DialogHeader>
               <DialogTitle>Post deposit to any user</DialogTitle>
               <DialogDescription>
