@@ -315,11 +315,11 @@ export default function AdminUsers() {
           <p className="text-sm text-muted-foreground">View every customer, adjust balances, and manage roles.</p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Total users</p><p className="text-2xl font-bold text-secondary">{profiles.length}</p></CardContent></Card>
-          <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Accounts</p><p className="text-2xl font-bold text-secondary">{accounts.length}</p></CardContent></Card>
-          <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Deposits held</p><p className="text-2xl font-bold text-emerald-600">${totalDeposits.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</p></CardContent></Card>
-          <Card><CardContent className="p-4"><p className="text-xs uppercase text-muted-foreground">Staff</p><p className="text-2xl font-bold text-secondary">{roles.filter(r=>r.role!=="user").length}</p></CardContent></Card>
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+          <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Total users</p><p className="text-lg md:text-2xl font-bold text-secondary">{profiles.length}</p></CardContent></Card>
+          <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Accounts</p><p className="text-lg md:text-2xl font-bold text-secondary">{accounts.length}</p></CardContent></Card>
+          <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Deposits held</p><p className="text-lg md:text-2xl font-bold text-emerald-600 truncate">${totalDeposits.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</p></CardContent></Card>
+          <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Staff</p><p className="text-lg md:text-2xl font-bold text-secondary">{roles.filter(r=>r.role!=="user").length}</p></CardContent></Card>
         </div>
 
         <Card>
@@ -363,15 +363,15 @@ export default function AdminUsers() {
                             Joined {new Date(p.created_at).toLocaleDateString()} · {accs.length} account{accs.length===1?"":"s"}
                           </p>
                         </div>
-                        <div className="flex gap-2 flex-wrap">
-                          <Button size="sm" variant="outline" onClick={() => setSelected(p)}>Manage</Button>
-                          <Button size="sm" variant={ur.includes("tx_support") ? "ghost" : "outline"} onClick={() => toggleRole(p.id, "tx_support", !ur.includes("tx_support"))}>
-                            {ur.includes("tx_support") ? "Remove tx support" : "Make tx support"}
+                        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2">
+                          <Button size="sm" variant="outline" className="w-full md:w-auto" onClick={() => setSelected(p)}>Manage</Button>
+                          <Button size="sm" variant={ur.includes("tx_support") ? "ghost" : "outline"} className="w-full md:w-auto" onClick={() => toggleRole(p.id, "tx_support", !ur.includes("tx_support"))}>
+                            {ur.includes("tx_support") ? "Remove tx" : "Make tx"}
                           </Button>
-                          <Button size="sm" variant={ur.includes("support") ? "ghost" : "outline"} onClick={() => toggleRole(p.id, "support", !ur.includes("support"))}>
+                          <Button size="sm" variant={ur.includes("support") ? "ghost" : "outline"} className="w-full md:w-auto" onClick={() => toggleRole(p.id, "support", !ur.includes("support"))}>
                             {ur.includes("support") ? <><ShieldOff className="h-3.5 w-3.5 mr-1"/>Remove support</> : <><ShieldCheck className="h-3.5 w-3.5 mr-1"/>Make support</>}
                           </Button>
-                          <Button size="sm" variant={ur.includes("admin") ? "ghost" : "outline"} className={ur.includes("admin") ? "text-destructive" : ""} onClick={() => toggleRole(p.id, "admin", !ur.includes("admin"))}>
+                          <Button size="sm" variant={ur.includes("admin") ? "ghost" : "outline"} className={`w-full md:w-auto ${ur.includes("admin") ? "text-destructive" : ""}`} onClick={() => toggleRole(p.id, "admin", !ur.includes("admin"))}>
                             {ur.includes("admin") ? "Revoke admin" : "Make admin"}
                           </Button>
                         </div>
@@ -385,40 +385,44 @@ export default function AdminUsers() {
         </Card>
 
         <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl w-[calc(100vw-1rem)] max-h-[92vh] overflow-y-auto p-4 md:p-6">
 
             <DialogHeader>
-              <DialogTitle>{selected?.full_name || selected?.email}</DialogTitle>
-              <DialogDescription>{selected?.email}{selected?.phone ? ` · ${selected.phone}` : ""}</DialogDescription>
+              <DialogTitle className="text-base md:text-lg break-words">{selected?.full_name || selected?.email}</DialogTitle>
+              <DialogDescription className="text-xs md:text-sm break-words">{selected?.email}{selected?.phone ? ` · ${selected.phone}` : ""}</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
               {selected && accountsFor(selected.id).map(acc => {
                 const Icon = iconFor(acc.account_type);
                 return (
-                  <div key={acc.id} className="flex items-center gap-3 border rounded-lg p-3">
-                    <Icon className="h-5 w-5 text-primary" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-secondary capitalize flex items-center gap-2">
-                        {acc.account_name} <span className="text-xs text-muted-foreground">••••{acc.account_number.slice(-4)}</span>
-                        {acc.is_frozen && <Badge variant="destructive" className="text-[10px]">Frozen</Badge>}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {acc.account_type === "credit"
-                          ? `Used $${Number(acc.balance).toLocaleString()} · Available $${Number(acc.available_balance).toLocaleString()} · Limit $${Number(acc.credit_limit||0).toLocaleString()}`
-                          : `Balance $${Number(acc.balance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`}
-                      </p>
+                  <div key={acc.id} className="border rounded-lg p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <Icon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-secondary capitalize flex items-center gap-2 flex-wrap">
+                          <span className="truncate">{acc.account_name}</span> <span className="text-xs text-muted-foreground">••••{acc.account_number.slice(-4)}</span>
+                          {acc.is_frozen && <Badge variant="destructive" className="text-[10px]">Frozen</Badge>}
+                        </p>
+                        <p className="text-xs text-muted-foreground break-words">
+                          {acc.account_type === "credit"
+                            ? `Used $${Number(acc.balance).toLocaleString()} · Available $${Number(acc.available_balance).toLocaleString()} · Limit $${Number(acc.credit_limit||0).toLocaleString()}`
+                            : `Balance $${Number(acc.balance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`}
+                        </p>
+                      </div>
                     </div>
-                    <Button size="sm" variant="outline" onClick={() => openAdjust(acc)}>
-                      <DollarSign className="h-3.5 w-3.5 mr-1" /> Adjust
-                    </Button>
-                    {acc.account_type !== "credit" && (
-                      <Button size="sm" variant="outline" className="border-emerald-400 text-emerald-700 hover:bg-emerald-50" onClick={() => { setDepositAccount(acc); setDepositAmount(""); setDepositReason(""); }}>
-                        Post deposit
+                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                      <Button size="sm" variant="outline" onClick={() => openAdjust(acc)}>
+                        <DollarSign className="h-3.5 w-3.5 mr-1" /> Adjust
                       </Button>
-                    )}
-                    <Button size="sm" variant={acc.is_frozen ? "default" : "outline"} onClick={() => toggleFreeze(acc, !acc.is_frozen)}>
-                      {acc.is_frozen ? "Unfreeze" : "Freeze"}
-                    </Button>
+                      {acc.account_type !== "credit" && (
+                        <Button size="sm" variant="outline" className="border-emerald-400 text-emerald-700 hover:bg-emerald-50" onClick={() => { setDepositAccount(acc); setDepositAmount(""); setDepositReason(""); }}>
+                          Post deposit
+                        </Button>
+                      )}
+                      <Button size="sm" variant={acc.is_frozen ? "default" : "outline"} onClick={() => toggleFreeze(acc, !acc.is_frozen)}>
+                        {acc.is_frozen ? "Unfreeze" : "Freeze"}
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
@@ -539,7 +543,7 @@ export default function AdminUsers() {
         </Dialog>
 
         <Dialog open={!!adjustAccount} onOpenChange={(o) => !o && setAdjustAccount(null)}>
-          <DialogContent>
+          <DialogContent className="w-[calc(100vw-1rem)] max-w-md p-4 md:p-6">
             <DialogHeader>
               <DialogTitle>Adjust balance</DialogTitle>
               <DialogDescription>
@@ -564,7 +568,7 @@ export default function AdminUsers() {
         </Dialog>
 
         <Dialog open={quickDepositOpen} onOpenChange={(o) => !o && setQuickDepositOpen(false)}>
-          <DialogContent>
+          <DialogContent className="w-[calc(100vw-1rem)] max-w-lg max-h-[92vh] overflow-y-auto p-4 md:p-6">
             <DialogHeader>
               <DialogTitle>Post deposit to any user</DialogTitle>
               <DialogDescription>
@@ -659,7 +663,7 @@ export default function AdminUsers() {
         </Dialog>
 
         <Dialog open={!!depositAccount} onOpenChange={(o) => !o && setDepositAccount(null)}>
-          <DialogContent>
+          <DialogContent className="w-[calc(100vw-1rem)] max-w-lg max-h-[92vh] overflow-y-auto p-4 md:p-6">
             <DialogHeader>
               <DialogTitle>Post pending deposit</DialogTitle>
               <DialogDescription>

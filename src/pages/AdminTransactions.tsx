@@ -145,13 +145,13 @@ export default function AdminTransactions() {
           <CardHeader>
             <div className="flex flex-col md:flex-row md:items-center gap-3 md:justify-between">
               <CardTitle>All transactions</CardTitle>
-              <div className="flex gap-2 w-full md:w-auto">
+              <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                 <div className="relative flex-1 md:w-72">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input className="pl-9" placeholder="Search customer, description, ref" value={q} onChange={e => setQ(e.target.value)} />
                 </div>
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-full sm:w-40"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All statuses</SelectItem>
                     {TX_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}

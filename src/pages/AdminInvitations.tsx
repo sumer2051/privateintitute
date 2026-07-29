@@ -200,12 +200,12 @@ export default function AdminInvitations() {
                           {inv.used_at ? ` · Accepted ${new Date(inv.used_at).toLocaleDateString()}` : ""}
                         </p>
                       </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => copyLink(inv)}>
+                      <div className="flex gap-2 w-full md:w-auto">
+                        <Button size="sm" variant="outline" className="flex-1 md:flex-none" onClick={() => copyLink(inv)}>
                           <Copy className="h-3.5 w-3.5 mr-1" /> Copy link
                         </Button>
                         {inv.status === "pending" && (
-                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => revoke(inv)}>
+                          <Button size="sm" variant="ghost" className="flex-1 md:flex-none text-destructive" onClick={() => revoke(inv)}>
                             <XCircle className="h-3.5 w-3.5 mr-1" /> Revoke
                           </Button>
                         )}
