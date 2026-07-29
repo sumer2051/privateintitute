@@ -375,8 +375,10 @@ export default function Support() {
                 </div>
               )}
             </TabsContent>
-          </Tabs>
+            </Tabs>
+          </>
         )}
+
       </div>
 
       <NewTicketDialog open={newOpen} onOpenChange={setNewOpen} onCreated={load} />
