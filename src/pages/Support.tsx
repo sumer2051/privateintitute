@@ -331,7 +331,19 @@ function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boolean; onO
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
   const [category, setCategory] = useState("account");
+  const [files, setFiles] = useState<File[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+
+  const addFiles = (list: FileList | null) => {
+    if (!list) return;
+    const picked = Array.from(list).filter((f) => {
+      if (f.size > MAX_ATTACHMENT_BYTES) { toast.error(`${f.name}: too large (max 10 MB)`); return false; }
+      return true;
+    });
+    setFiles((prev) => [...prev, ...picked].slice(0, 5));
+    if (fileRef.current) fileRef.current.value = "";
+  };
 
   const submit = async () => {
     if (!subject.trim() || !description.trim()) { toast.error("Subject and description required"); return; }
@@ -346,8 +358,24 @@ function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boolean; onO
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
+
+      // Upload any attachments and post them as follow-up customer messages
+      if (files.length) {
+        for (const f of files) {
+          try {
+            const att = await uploadTicketAttachment(data.ticket.id, f);
+            await supabase.from("ticket_messages").insert({
+              ticket_id: data.ticket.id, sender_type: "customer", sender_id: session.user.id,
+              message: `📎 ${att.attachment_name}`, ...att,
+            });
+          } catch (e) {
+            toast.error(`${f.name}: ${(e as Error).message}`);
+          }
+        }
+      }
+
       toast.success(`Ticket ${data.ticket.ticket_number} created — email sent.`);
-      setSubject(""); setDescription(""); setPriority("medium");
+      setSubject(""); setDescription(""); setPriority("medium"); setFiles([]);
       onOpenChange(false); onCreated();
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   };
@@ -391,6 +419,34 @@ function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boolean; onO
             </div>
           </div>
           <div><Label>Describe the issue</Label><Textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          <div>
+            <Label>Attachments (optional)</Label>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <input
+                ref={fileRef} type="file" multiple className="hidden"
+                accept="image/*,application/pdf,.doc,.docx,.txt,.csv,.xlsx"
+                onChange={(e) => addFiles(e.target.files)}
+              />
+              <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
+                <Paperclip className="mr-1.5 h-3.5 w-3.5" /> Attach files
+              </Button>
+              <span className="text-[11px] text-muted-foreground">Screenshots or documents, up to 10 MB each</span>
+            </div>
+            {files.length > 0 && (
+              <div className="mt-2 space-y-1">
+                {files.map((f, i) => (
+                  <div key={i} className="flex items-center gap-2 rounded-md border bg-muted/40 px-2 py-1 text-xs">
+                    <Paperclip className="h-3.5 w-3.5" />
+                    <span className="flex-1 truncate">{f.name}</span>
+                    <span className="opacity-60">{formatBytes(f.size)}</span>
+                    <button type="button" onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))} className="opacity-70 hover:opacity-100">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
