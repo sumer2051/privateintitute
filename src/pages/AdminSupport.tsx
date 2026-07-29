@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ShieldAlert, Ticket, PhoneCall, Send, ArrowLeft, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { TicketPinDialog } from "@/components/TicketPinDialog";
+import { AdminCreateTicketDialog } from "@/components/AdminCreateTicketDialog";
 
 type T = {
   id: string; ticket_number: string; subject: string; description: string;
