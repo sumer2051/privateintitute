@@ -201,7 +201,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
             <NotificationsBell />
 
-            {hasStaffAccess && (
+            {hasStaffAccess && !staffOnlyAccount && (
               <Button
                 variant={staffMode ? "default" : "outline"}
                 size="sm"
@@ -216,7 +216,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 {staffMode ? "Staff on" : "Staff mode"}
               </Button>
             )}
-            {hasStaffAccess && (
+            {hasStaffAccess && !staffOnlyAccount && (
               <Button
                 variant={staffMode ? "default" : "outline"}
                 size="icon"
@@ -230,6 +230,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 {staffMode ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
               </Button>
             )}
+
 
 
 
