@@ -17,6 +17,7 @@ interface Props {
 export function TicketPinDialog({ open, ticketId, ticketNumber, onOpenChange, onVerified }: Props) {
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => { if (!open) setPin(""); }, [open]);
 
@@ -30,6 +31,15 @@ export function TicketPinDialog({ open, ticketId, ticketNumber, onOpenChange, on
     if (!data) return toast.error("Incorrect PIN for this ticket");
     onOpenChange(false);
     onVerified();
+  };
+
+  const resend = async () => {
+    if (!ticketId) return;
+    setResending(true);
+    const { data, error } = await supabase.functions.invoke("resend-ticket-pin", { body: { ticket_id: ticketId } });
+    setResending(false);
+    if (error || (data as any)?.error) return toast.error(error?.message || (data as any).error);
+    toast.success("PIN resent to admin email");
   };
 
   return (
@@ -53,7 +63,10 @@ export function TicketPinDialog({ open, ticketId, ticketNumber, onOpenChange, on
           placeholder="••••••••"
           className="text-center tracking-[0.5em] text-lg"
         />
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button variant="ghost" onClick={resend} disabled={busy || resending} className="mr-auto">
+            {resending ? "Resending…" : "Resend PIN"}
+          </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>Cancel</Button>
           <Button onClick={submit} disabled={busy || pin.length !== 8}>Verify</Button>
         </DialogFooter>
