@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ShieldAlert, Ticket, PhoneCall, Send, ArrowLeft, TrendingUp } from "lucide-react";
+import { ShieldAlert, Ticket, PhoneCall, Send, ArrowLeft, TrendingUp, Paperclip, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { TicketPinDialog } from "@/components/TicketPinDialog";
 import { AdminCreateTicketDialog } from "@/components/AdminCreateTicketDialog";
+import { AttachmentPreview, uploadTicketAttachment, MAX_ATTACHMENT_BYTES, formatBytes } from "@/components/TicketAttachment";
 
 type T = {
   id: string; ticket_number: string; subject: string; description: string;
