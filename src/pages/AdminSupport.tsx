@@ -162,9 +162,16 @@ export default function AdminSupport() {
       <div className="mx-auto max-w-6xl p-4 md:p-6 space-y-6">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <h1 className="text-2xl md:text-3xl font-bold">Admin · Support</h1>
-          <Button variant="outline" size="sm" onClick={() => navigate("/admin/invitations")}>
-            Manage invitations
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            {isAdmin && (
+              <Button size="sm" onClick={() => setCreateOpen(true)}>
+                <Ticket className="mr-1.5 h-4 w-4" /> New ticket
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => navigate("/admin/invitations")}>
+              Manage invitations
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
