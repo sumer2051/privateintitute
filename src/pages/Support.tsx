@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,14 +11,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { MessageSquare, PhoneCall, Ticket, Send, Sparkles, ArrowLeft, Clock } from "lucide-react";
+import { MessageSquare, PhoneCall, Ticket, Send, Sparkles, ArrowLeft, Clock, Paperclip, X } from "lucide-react";
+import { AttachmentPreview, uploadTicketAttachment, MAX_ATTACHMENT_BYTES, formatBytes } from "@/components/TicketAttachment";
 
 type TicketRow = {
   id: string; ticket_number: string; subject: string; description: string;
   status: string; priority: string; created_at: string; updated_at: string;
   customer_name: string; customer_email: string; category: string | null;
 };
-type MsgRow = { id: string; sender_type: string; message: string; created_at: string; sender_id: string | null };
+type MsgRow = {
+  id: string; sender_type: string; message: string; created_at: string; sender_id: string | null;
+  attachment_path?: string | null; attachment_name?: string | null;
+  attachment_type?: string | null; attachment_size?: number | null;
+};
 type CallRow = { id: string; scheduled_at: string; timezone: string; reason: string; status: string; phone: string };
 
 const priorityColor: Record<string, string> = {
