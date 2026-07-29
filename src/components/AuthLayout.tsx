@@ -106,6 +106,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
       if (sub) supabase.removeChannel(sub);
     };
   }, []);
+
+  const checkNavOverflow = () => {
     const el = navRef.current;
     if (!el) return;
     const hasOverflow = el.scrollWidth > el.clientWidth + 1;
