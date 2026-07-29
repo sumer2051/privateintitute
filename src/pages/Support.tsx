@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,14 +11,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { MessageSquare, PhoneCall, Ticket, Send, Sparkles, ArrowLeft, Clock } from "lucide-react";
+import { MessageSquare, PhoneCall, Ticket, Send, Sparkles, ArrowLeft, Clock, Paperclip, X } from "lucide-react";
+import { AttachmentPreview, uploadTicketAttachment, MAX_ATTACHMENT_BYTES, formatBytes } from "@/components/TicketAttachment";
 
 type TicketRow = {
   id: string; ticket_number: string; subject: string; description: string;
   status: string; priority: string; created_at: string; updated_at: string;
   customer_name: string; customer_email: string; category: string | null;
 };
-type MsgRow = { id: string; sender_type: string; message: string; created_at: string; sender_id: string | null };
+type MsgRow = {
+  id: string; sender_type: string; message: string; created_at: string; sender_id: string | null;
+  attachment_path?: string | null; attachment_name?: string | null;
+  attachment_type?: string | null; attachment_size?: number | null;
+};
 type CallRow = { id: string; scheduled_at: string; timezone: string; reason: string; status: string; phone: string };
 
 const priorityColor: Record<string, string> = {
@@ -105,12 +110,20 @@ export default function Support() {
     return () => { supabase.removeChannel(ch); };
   }, [active?.id]);
 
-  const sendReply = async () => {
-    if (!active || !reply.trim()) return;
+  const sendReply = async (file: File | null) => {
+    if (!active) return;
+    if (!reply.trim() && !file) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
+    let att: Awaited<ReturnType<typeof uploadTicketAttachment>> | null = null;
+    if (file) {
+      try { att = await uploadTicketAttachment(active.id, file); }
+      catch (e) { toast.error((e as Error).message); return; }
+    }
     const { error } = await supabase.from("ticket_messages").insert({
-      ticket_id: active.id, sender_type: "customer", sender_id: session.user.id, message: reply.trim(),
+      ticket_id: active.id, sender_type: "customer", sender_id: session.user.id,
+      message: reply.trim() || (att ? `📎 ${att.attachment_name}` : ""),
+      ...(att || {}),
     });
     if (error) { toast.error(error.message); return; }
     if (active.status === "resolved" || active.status === "closed") {
@@ -226,8 +239,26 @@ export default function Support() {
 
 function TicketDetail({ ticket, messages, reply, setReply, onSend, onBack }: {
   ticket: TicketRow; messages: MsgRow[]; reply: string;
-  setReply: (v: string) => void; onSend: () => void; onBack: () => void;
+  setReply: (v: string) => void; onSend: (file: File | null) => void | Promise<void>; onBack: () => void;
 }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [sending, setSending] = useState(false);
+
+  const pickFile = (f: File | null) => {
+    if (f && f.size > MAX_ATTACHMENT_BYTES) {
+      toast.error("File too large (max 10 MB)");
+      return;
+    }
+    setFile(f);
+  };
+
+  const handleSend = async () => {
+    setSending(true);
+    try { await onSend(file); setFile(null); if (fileRef.current) fileRef.current.value = ""; }
+    finally { setSending(false); }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -253,14 +284,42 @@ function TicketDetail({ ticket, messages, reply, setReply, onSend, onBack }: {
               }`}>
                 <p className="text-[10px] opacity-70 mb-0.5 uppercase">{m.sender_type} · {new Date(m.created_at).toLocaleString()}</p>
                 {m.message}
+                {m.attachment_path && (
+                  <AttachmentPreview
+                    path={m.attachment_path}
+                    name={m.attachment_name}
+                    type={m.attachment_type}
+                    size={m.attachment_size}
+                  />
+                )}
               </div>
             </div>
           ))}
           {messages.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No messages yet.</p>}
         </div>
+        {file && (
+          <div className="mt-3 flex items-center gap-2 rounded-md border bg-muted/40 px-2 py-1.5 text-xs">
+            <Paperclip className="h-3.5 w-3.5" />
+            <span className="flex-1 truncate">{file.name}</span>
+            <span className="opacity-60">{formatBytes(file.size)}</span>
+            <button onClick={() => pickFile(null)} className="opacity-70 hover:opacity-100">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
         <div className="mt-4 flex gap-2">
-          <Textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Reply to support…" rows={2} />
-          <Button onClick={onSend} disabled={!reply.trim()}><Send className="h-4 w-4" /></Button>
+          <input
+            ref={fileRef} type="file" className="hidden"
+            accept="image/*,application/pdf,.doc,.docx,.txt,.csv,.xlsx"
+            onChange={(e) => pickFile(e.target.files?.[0] || null)}
+          />
+          <Button type="button" variant="outline" size="icon" onClick={() => fileRef.current?.click()} title="Attach file">
+            <Paperclip className="h-4 w-4" />
+          </Button>
+          <Textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Reply to support…" rows={2} className="flex-1" />
+          <Button onClick={handleSend} disabled={sending || (!reply.trim() && !file)}>
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -272,7 +331,19 @@ function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boolean; onO
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
   const [category, setCategory] = useState("account");
+  const [files, setFiles] = useState<File[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+
+  const addFiles = (list: FileList | null) => {
+    if (!list) return;
+    const picked = Array.from(list).filter((f) => {
+      if (f.size > MAX_ATTACHMENT_BYTES) { toast.error(`${f.name}: too large (max 10 MB)`); return false; }
+      return true;
+    });
+    setFiles((prev) => [...prev, ...picked].slice(0, 5));
+    if (fileRef.current) fileRef.current.value = "";
+  };
 
   const submit = async () => {
     if (!subject.trim() || !description.trim()) { toast.error("Subject and description required"); return; }
@@ -287,8 +358,24 @@ function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boolean; onO
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
+
+      // Upload any attachments and post them as follow-up customer messages
+      if (files.length) {
+        for (const f of files) {
+          try {
+            const att = await uploadTicketAttachment(data.ticket.id, f);
+            await supabase.from("ticket_messages").insert({
+              ticket_id: data.ticket.id, sender_type: "customer", sender_id: session.user.id,
+              message: `📎 ${att.attachment_name}`, ...att,
+            });
+          } catch (e) {
+            toast.error(`${f.name}: ${(e as Error).message}`);
+          }
+        }
+      }
+
       toast.success(`Ticket ${data.ticket.ticket_number} created — email sent.`);
-      setSubject(""); setDescription(""); setPriority("medium");
+      setSubject(""); setDescription(""); setPriority("medium"); setFiles([]);
       onOpenChange(false); onCreated();
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   };
@@ -332,6 +419,34 @@ function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boolean; onO
             </div>
           </div>
           <div><Label>Describe the issue</Label><Textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          <div>
+            <Label>Attachments (optional)</Label>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <input
+                ref={fileRef} type="file" multiple className="hidden"
+                accept="image/*,application/pdf,.doc,.docx,.txt,.csv,.xlsx"
+                onChange={(e) => addFiles(e.target.files)}
+              />
+              <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
+                <Paperclip className="mr-1.5 h-3.5 w-3.5" /> Attach files
+              </Button>
+              <span className="text-[11px] text-muted-foreground">Screenshots or documents, up to 10 MB each</span>
+            </div>
+            {files.length > 0 && (
+              <div className="mt-2 space-y-1">
+                {files.map((f, i) => (
+                  <div key={i} className="flex items-center gap-2 rounded-md border bg-muted/40 px-2 py-1 text-xs">
+                    <Paperclip className="h-3.5 w-3.5" />
+                    <span className="flex-1 truncate">{f.name}</span>
+                    <span className="opacity-60">{formatBytes(f.size)}</span>
+                    <button type="button" onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))} className="opacity-70 hover:opacity-100">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>

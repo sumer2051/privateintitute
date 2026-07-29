@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ShieldAlert, Ticket, PhoneCall, Send, ArrowLeft, TrendingUp } from "lucide-react";
+import { ShieldAlert, Ticket, PhoneCall, Send, ArrowLeft, TrendingUp, Paperclip, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { TicketPinDialog } from "@/components/TicketPinDialog";
 import { AdminCreateTicketDialog } from "@/components/AdminCreateTicketDialog";
+import { AttachmentPreview, uploadTicketAttachment, MAX_ATTACHMENT_BYTES, formatBytes } from "@/components/TicketAttachment";
 
 type T = {
   id: string; ticket_number: string; subject: string; description: string;
@@ -20,7 +21,11 @@ type T = {
   customer_name: string; customer_email: string; user_id: string; category: string | null;
   ai_summary: string | null;
 };
-type M = { id: string; sender_type: string; message: string; created_at: string };
+type M = {
+  id: string; sender_type: string; message: string; created_at: string;
+  attachment_path?: string | null; attachment_name?: string | null;
+  attachment_type?: string | null; attachment_size?: number | null;
+};
 type C = { id: string; scheduled_at: string; timezone: string; reason: string; status: string; phone: string; customer_name: string; email: string; agent_notes: string | null };
 
 const priColor: Record<string, string> = {
@@ -43,6 +48,9 @@ export default function AdminSupport() {
   const [active, setActive] = useState<T | null>(null);
   const [msgs, setMsgs] = useState<M[]>([]);
   const [reply, setReply] = useState("");
+  const [replyFile, setReplyFile] = useState<File | null>(null);
+  const [sending, setSending] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [pinPending, setPinPending] = useState<T | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -99,9 +107,17 @@ export default function AdminSupport() {
   };
 
   const sendAgentReply = async () => {
-    if (!active || !reply.trim()) return;
+    if (!active) return;
+    if (!reply.trim() && !replyFile) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
+
+    setSending(true);
+    let att: Awaited<ReturnType<typeof uploadTicketAttachment>> | null = null;
+    if (replyFile) {
+      try { att = await uploadTicketAttachment(active.id, replyFile); }
+      catch (e) { toast.error((e as Error).message); setSending(false); return; }
+    }
 
     // Claim ticket + auto-generate 8-digit handoff PIN (emailed to admin) on first reply
     try {
@@ -116,14 +132,22 @@ export default function AdminSupport() {
       });
     } catch (e) { console.error("pin claim failed", e); }
 
+    const msgText = reply.trim() || (att ? `📎 ${att.attachment_name}` : "");
     await supabase.from("ticket_messages").insert({
-      ticket_id: active.id, sender_type: "agent", sender_id: session.user.id, message: reply.trim(),
+      ticket_id: active.id, sender_type: "agent", sender_id: session.user.id,
+      message: msgText, ...(att || {}),
     });
     await supabase.from("support_tickets").update({ status: "in_progress" }).eq("id", active.id);
-    setMsgs((m) => [...m, { id: crypto.randomUUID(), sender_type: "agent", message: reply.trim(), created_at: new Date().toISOString() }]);
-    setReply("");
+    setMsgs((m) => [...m, {
+      id: crypto.randomUUID(), sender_type: "agent", message: msgText, created_at: new Date().toISOString(),
+      ...(att || {}),
+    }]);
+    setReply(""); setReplyFile(null);
+    if (fileRef.current) fileRef.current.value = "";
+    setSending(false);
     toast.success("Reply sent — handoff PIN emailed to admin");
   };
+
 
   const updateCall = async (id: string, patch: Partial<C>) => {
     const { error } = await supabase.from("scheduled_calls").update(patch).eq("id", id);
@@ -213,13 +237,43 @@ export default function AdminSupport() {
                     }`}>
                       <p className="text-[10px] opacity-80 mb-0.5 uppercase">{m.sender_type} · {new Date(m.created_at).toLocaleString()}</p>
                       {m.message}
+                      {m.attachment_path && (
+                        <AttachmentPreview
+                          path={m.attachment_path}
+                          name={m.attachment_name}
+                          type={m.attachment_type}
+                          size={m.attachment_size}
+                        />
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
+              {replyFile && (
+                <div className="mt-3 flex items-center gap-2 rounded-md border bg-muted/40 px-2 py-1.5 text-xs">
+                  <Paperclip className="h-3.5 w-3.5" />
+                  <span className="flex-1 truncate">{replyFile.name}</span>
+                  <span className="opacity-60">{formatBytes(replyFile.size)}</span>
+                  <button onClick={() => setReplyFile(null)} className="opacity-70 hover:opacity-100">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
               <div className="mt-4 flex gap-2">
+                <input
+                  ref={fileRef} type="file" className="hidden"
+                  accept="image/*,application/pdf,.doc,.docx,.txt,.csv,.xlsx"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] || null;
+                    if (f && f.size > MAX_ATTACHMENT_BYTES) { toast.error("File too large (max 10 MB)"); return; }
+                    setReplyFile(f);
+                  }}
+                />
+                <Button type="button" variant="outline" size="icon" onClick={() => fileRef.current?.click()} className="shrink-0" title="Attach file">
+                  <Paperclip className="h-4 w-4" />
+                </Button>
                 <Textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Reply as agent…" rows={2} className="flex-1" />
-                <Button onClick={sendAgentReply} disabled={!reply.trim()} className="shrink-0"><Send className="h-4 w-4" /></Button>
+                <Button onClick={sendAgentReply} disabled={sending || (!reply.trim() && !replyFile)} className="shrink-0"><Send className="h-4 w-4" /></Button>
               </div>
             </CardContent>
           </Card>
