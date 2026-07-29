@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ShieldAlert, Ticket, PhoneCall, Send, ArrowLeft, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { TicketPinDialog } from "@/components/TicketPinDialog";
+import { AdminCreateTicketDialog } from "@/components/AdminCreateTicketDialog";
 
 type T = {
   id: string; ticket_number: string; subject: string; description: string;
@@ -43,6 +44,8 @@ export default function AdminSupport() {
   const [msgs, setMsgs] = useState<M[]>([]);
   const [reply, setReply] = useState("");
   const [pinPending, setPinPending] = useState<T | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -50,6 +53,7 @@ export default function AdminSupport() {
       if (!user) { navigate("/auth"); return; }
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
       const roles = (data || []).map((r: any) => r.role);
+      setIsAdmin(roles.includes("admin"));
       setAllowed(roles.includes("admin") || roles.includes("support"));
     })();
   }, [navigate]);
@@ -158,9 +162,16 @@ export default function AdminSupport() {
       <div className="mx-auto max-w-6xl p-4 md:p-6 space-y-6">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <h1 className="text-2xl md:text-3xl font-bold">Admin · Support</h1>
-          <Button variant="outline" size="sm" onClick={() => navigate("/admin/invitations")}>
-            Manage invitations
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            {isAdmin && (
+              <Button size="sm" onClick={() => setCreateOpen(true)}>
+                <Ticket className="mr-1.5 h-4 w-4" /> New ticket
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => navigate("/admin/invitations")}>
+              Manage invitations
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -277,6 +288,7 @@ export default function AdminSupport() {
           if (t) revealTicket(t);
         }}
       />
+      <AdminCreateTicketDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={load} />
     </AuthLayout>
   );
 }

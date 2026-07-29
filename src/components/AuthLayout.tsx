@@ -50,6 +50,62 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const navRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
+  const [hasSupportUnread, setHasSupportUnread] = useState(false);
+
+  // Watch for unread support tickets/messages for the signed-in user.
+  useEffect(() => {
+    let cancelled = false;
+    const readViewed = (): Record<string, string> => {
+      try { return JSON.parse(localStorage.getItem("support_ticket_viewed_v1") || "{}"); } catch { return {}; }
+    };
+    const computeUnread = async (uid: string) => {
+      const { data } = await supabase
+        .from("support_tickets")
+        .select("id, updated_at, source")
+        .eq("user_id", uid);
+      const viewed = readViewed();
+      const rows = (data as any[]) || [];
+      const unread = rows.some((t) => {
+        const seen = viewed[t.id];
+        if (!seen) return true;
+        return new Date(t.updated_at).getTime() > new Date(seen).getTime();
+      });
+      if (!cancelled) setHasSupportUnread(unread);
+    };
+
+    let sub: any;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const uid = session?.user?.id;
+      if (!uid) { setHasSupportUnread(false); return; }
+      computeUnread(uid);
+      sub = supabase
+        .channel("support-unread-nav")
+        .on("postgres_changes", { event: "*", schema: "public", table: "support_tickets", filter: `user_id=eq.${uid}` }, () => computeUnread(uid))
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_messages" }, () => computeUnread(uid))
+        .subscribe();
+    });
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "support_ticket_viewed_v1") {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session?.user?.id) computeUnread(session.user.id);
+        });
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    const onLocal = () => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user?.id) computeUnread(session.user.id);
+      });
+    };
+    window.addEventListener("support-tickets-viewed", onLocal);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("support-tickets-viewed", onLocal);
+      if (sub) supabase.removeChannel(sub);
+    };
+  }, []);
 
   const checkNavOverflow = () => {
     const el = navRef.current;
@@ -261,6 +317,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               {navItems.map((item) => {
                 const Icon = (item as any).Icon;
                 const active = currentPage === item.id;
+                const highlightUnread = item.id === "support" && hasSupportUnread && !active;
                 return (
                   <button
                     key={item.id}
@@ -268,15 +325,20 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                       if (item.path) navigate(item.path);
                       if (onPageChange) onPageChange(item.id);
                     }}
-                    className={`group flex shrink-0 snap-start flex-col items-center justify-center gap-1 w-[calc(25%-0.375rem)] md:w-[calc(20%-0.5rem)] min-h-[3.25rem] md:min-h-[3.75rem] rounded-xl border px-2 py-2 text-[10px] md:text-xs font-semibold transition-all ${
+                    className={`relative group flex shrink-0 snap-start flex-col items-center justify-center gap-1 w-[calc(25%-0.375rem)] md:w-[calc(20%-0.5rem)] min-h-[3.25rem] md:min-h-[3.75rem] rounded-xl border px-2 py-2 text-[10px] md:text-xs font-semibold transition-all ${
                       active
                         ? "bg-primary/15 border-primary/60 text-primary shadow"
+                        : highlightUnread
+                        ? "bg-emerald-500/20 border-emerald-500/60 text-emerald-700 dark:text-emerald-300 shadow-[0_0_0_1px_rgba(16,185,129,0.35)] animate-pulse hover:-translate-y-0.5"
                         : "bg-card/50 dark:bg-card/30 backdrop-blur-md border-border/60 text-secondary hover:border-primary/60 hover:text-primary hover:-translate-y-0.5 hover:shadow-md"
                     }`}
                     title={item.label}
                   >
-                    {Icon ? <Icon className={`h-5 w-5 ${active ? "text-primary" : "text-secondary group-hover:text-primary"}`} /> : null}
+                    {Icon ? <Icon className={`h-5 w-5 ${active ? "text-primary" : highlightUnread ? "text-emerald-600 dark:text-emerald-300" : "text-secondary group-hover:text-primary"}`} /> : null}
                     <span className="leading-none truncate w-full text-center">{item.label}</span>
+                    {highlightUnread && (
+                      <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-background" />
+                    )}
                   </button>
                 );
               })}
