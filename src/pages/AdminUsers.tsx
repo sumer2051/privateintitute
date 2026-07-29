@@ -363,15 +363,15 @@ export default function AdminUsers() {
                             Joined {new Date(p.created_at).toLocaleDateString()} · {accs.length} account{accs.length===1?"":"s"}
                           </p>
                         </div>
-                        <div className="flex gap-2 flex-wrap">
-                          <Button size="sm" variant="outline" onClick={() => setSelected(p)}>Manage</Button>
-                          <Button size="sm" variant={ur.includes("tx_support") ? "ghost" : "outline"} onClick={() => toggleRole(p.id, "tx_support", !ur.includes("tx_support"))}>
-                            {ur.includes("tx_support") ? "Remove tx support" : "Make tx support"}
+                        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2">
+                          <Button size="sm" variant="outline" className="w-full md:w-auto" onClick={() => setSelected(p)}>Manage</Button>
+                          <Button size="sm" variant={ur.includes("tx_support") ? "ghost" : "outline"} className="w-full md:w-auto" onClick={() => toggleRole(p.id, "tx_support", !ur.includes("tx_support"))}>
+                            {ur.includes("tx_support") ? "Remove tx" : "Make tx"}
                           </Button>
-                          <Button size="sm" variant={ur.includes("support") ? "ghost" : "outline"} onClick={() => toggleRole(p.id, "support", !ur.includes("support"))}>
+                          <Button size="sm" variant={ur.includes("support") ? "ghost" : "outline"} className="w-full md:w-auto" onClick={() => toggleRole(p.id, "support", !ur.includes("support"))}>
                             {ur.includes("support") ? <><ShieldOff className="h-3.5 w-3.5 mr-1"/>Remove support</> : <><ShieldCheck className="h-3.5 w-3.5 mr-1"/>Make support</>}
                           </Button>
-                          <Button size="sm" variant={ur.includes("admin") ? "ghost" : "outline"} className={ur.includes("admin") ? "text-destructive" : ""} onClick={() => toggleRole(p.id, "admin", !ur.includes("admin"))}>
+                          <Button size="sm" variant={ur.includes("admin") ? "ghost" : "outline"} className={`w-full md:w-auto ${ur.includes("admin") ? "text-destructive" : ""}`} onClick={() => toggleRole(p.id, "admin", !ur.includes("admin"))}>
                             {ur.includes("admin") ? "Revoke admin" : "Make admin"}
                           </Button>
                         </div>
