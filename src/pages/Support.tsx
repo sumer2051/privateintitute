@@ -91,6 +91,7 @@ export default function Support() {
     setViewed((prev) => {
       const next = { ...prev, [t.id]: new Date().toISOString() };
       writeViewed(next);
+      try { window.dispatchEvent(new Event("support-tickets-viewed")); } catch {}
       return next;
     });
   };
