@@ -42,6 +42,7 @@ export default function AdminSupport() {
   const [active, setActive] = useState<T | null>(null);
   const [msgs, setMsgs] = useState<M[]>([]);
   const [reply, setReply] = useState("");
+  const [pinPending, setPinPending] = useState<T | null>(null);
 
   useEffect(() => {
     (async () => {
