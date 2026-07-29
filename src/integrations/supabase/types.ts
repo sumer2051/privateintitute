@@ -684,6 +684,10 @@ export type Database = {
         }[]
       }
       verify_staff_pin: { Args: { _pin: string }; Returns: boolean }
+      verify_ticket_pin: {
+        Args: { p_pin: string; p_ticket: string }
+        Returns: boolean
+      }
       verify_transfer_pin: { Args: { _pin: string }; Returns: boolean }
     }
     Enums: {

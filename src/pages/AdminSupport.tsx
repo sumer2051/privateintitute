@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ShieldAlert, Ticket, PhoneCall, Send, ArrowLeft, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { StaffPinDialog } from "@/components/StaffPinDialog";
+import { TicketPinDialog } from "@/components/TicketPinDialog";
 
 type T = {
   id: string; ticket_number: string; subject: string; description: string;
@@ -266,8 +266,10 @@ export default function AdminSupport() {
           </Tabs>
         )}
       </div>
-      <StaffPinDialog
+      <TicketPinDialog
         open={!!pinPending}
+        ticketId={pinPending?.id || null}
+        ticketNumber={pinPending?.ticket_number}
         onOpenChange={(v) => { if (!v) setPinPending(null); }}
         onVerified={() => {
           const t = pinPending;

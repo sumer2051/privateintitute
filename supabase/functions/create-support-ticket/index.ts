@@ -78,6 +78,7 @@ Deno.serve(async (req) => {
     } catch (e) { console.error("user email failed", e); }
 
     try {
+      const pin = (ticket as any).staff_reply_pin || "";
       await sendEmail(
         ADMIN_EMAIL,
         `[${priority.toUpperCase()}] New ticket ${ticket.ticket_number} — ${subject}`,
@@ -87,8 +88,13 @@ Deno.serve(async (req) => {
            <p><b>From:</b> ${escapeHtml(customerName)} &lt;${escapeHtml(customerEmail)}&gt;</p>
            <p><b>Subject:</b> ${escapeHtml(subject)}</p>
            <p style="background:#f9fafb;padding:12px;border-radius:8px">${escapeHtml(description).replace(/\n/g,"<br>")}</p>
-           ${aiSummary ? `<p><b>AI summary:</b> ${escapeHtml(aiSummary)}</p>` : ""}`,
-          `Open the admin dashboard to reply.`
+           ${aiSummary ? `<p><b>AI summary:</b> ${escapeHtml(aiSummary)}</p>` : ""}
+           ${pin ? `<div style="background:#0b1e3f;color:#fff;text-align:center;padding:18px;border-radius:10px;margin:16px 0">
+              <div style="font-size:12px;opacity:.75;letter-spacing:1px">STAFF HANDOFF PIN</div>
+              <div style="font-size:34px;font-weight:800;letter-spacing:8px;margin-top:4px">${pin}</div>
+              <div style="font-size:11px;opacity:.7;margin-top:6px">Support / Tx-support must enter this PIN to open the ticket.</div>
+            </div>` : ""}`,
+          `Share this PIN with the assigned staff only through a verified channel.`
         )
       );
     } catch (e) { console.error("admin email failed", e); }
