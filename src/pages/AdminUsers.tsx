@@ -48,6 +48,8 @@ export default function AdminUsers() {
   const [adjustNote, setAdjustNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [userTx, setUserTx] = useState<Tx[]>([]);
+  const [userDevices, setUserDevices] = useState<Device[]>([]);
+  const [deviceBusy, setDeviceBusy] = useState<string | null>(null);
   const [txBusy, setTxBusy] = useState<string | null>(null);
   const [depositAccount, setDepositAccount] = useState<Account | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
