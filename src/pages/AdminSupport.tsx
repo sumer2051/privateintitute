@@ -73,7 +73,12 @@ export default function AdminSupport() {
     return () => { supabase.removeChannel(ch); };
   }, [allowed]);
 
-  const openT = async (t: T) => {
+  const openT = (t: T) => {
+    // Always require staff PIN before opening a ticket
+    setPinPending(t);
+  };
+
+  const revealTicket = async (t: T) => {
     setActive(t);
     const { data } = await supabase.from("ticket_messages").select("*").eq("ticket_id", t.id).order("created_at");
     setMsgs((data as M[]) || []);
