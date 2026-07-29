@@ -355,6 +355,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
       <AiChatWidget open={chatOpen} onOpenChange={setChatOpen} />
       <StaffPinDialog open={pinOpen} onOpenChange={setPinOpen} onVerified={() => setStaffMode(true)} />
       <AchOneTimeDialog />
+      <TicketReplyToaster />
     </div>
   );
 };
