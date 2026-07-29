@@ -107,9 +107,17 @@ export default function AdminSupport() {
   };
 
   const sendAgentReply = async () => {
-    if (!active || !reply.trim()) return;
+    if (!active) return;
+    if (!reply.trim() && !replyFile) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
+
+    setSending(true);
+    let att: Awaited<ReturnType<typeof uploadTicketAttachment>> | null = null;
+    if (replyFile) {
+      try { att = await uploadTicketAttachment(active.id, replyFile); }
+      catch (e) { toast.error((e as Error).message); setSending(false); return; }
+    }
 
     // Claim ticket + auto-generate 8-digit handoff PIN (emailed to admin) on first reply
     try {
@@ -124,14 +132,22 @@ export default function AdminSupport() {
       });
     } catch (e) { console.error("pin claim failed", e); }
 
+    const msgText = reply.trim() || (att ? `📎 ${att.attachment_name}` : "");
     await supabase.from("ticket_messages").insert({
-      ticket_id: active.id, sender_type: "agent", sender_id: session.user.id, message: reply.trim(),
+      ticket_id: active.id, sender_type: "agent", sender_id: session.user.id,
+      message: msgText, ...(att || {}),
     });
     await supabase.from("support_tickets").update({ status: "in_progress" }).eq("id", active.id);
-    setMsgs((m) => [...m, { id: crypto.randomUUID(), sender_type: "agent", message: reply.trim(), created_at: new Date().toISOString() }]);
-    setReply("");
+    setMsgs((m) => [...m, {
+      id: crypto.randomUUID(), sender_type: "agent", message: msgText, created_at: new Date().toISOString(),
+      ...(att || {}),
+    }]);
+    setReply(""); setReplyFile(null);
+    if (fileRef.current) fileRef.current.value = "";
+    setSending(false);
     toast.success("Reply sent — handoff PIN emailed to admin");
   };
+
 
   const updateCall = async (id: string, patch: Partial<C>) => {
     const { error } = await supabase.from("scheduled_calls").update(patch).eq("id", id);
