@@ -622,6 +622,17 @@ export type Database = {
         Args: { p_tx: string }
         Returns: number
       }
+      admin_create_ticket: {
+        Args: {
+          p_assigned_to?: string
+          p_category?: string
+          p_description: string
+          p_priority?: string
+          p_subject: string
+          p_user: string
+        }
+        Returns: string
+      }
       admin_grant_role: {
         Args: {
           p_role: Database["public"]["Enums"]["app_role"]
