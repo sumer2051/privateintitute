@@ -120,7 +120,10 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const isSupport = roles.includes("support");
   const isTxSupport = roles.includes("tx_support");
   const hasStaffAccess = isAdmin || isSupport || isTxSupport;
-  const showStaff = hasStaffAccess && staffMode;
+  // Support / tx_support (without admin) are staff-only accounts: no user banking pages,
+  // no PIN toggle — their staff nav is always on when they sign in.
+  const staffOnlyAccount = !isAdmin && (isSupport || isTxSupport);
+  const showStaff = staffOnlyAccount ? true : (hasStaffAccess && staffMode);
 
   const userNav = [
     { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet },
@@ -140,13 +143,13 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   ];
 
 
-  // tx_support is restricted: no balances, no transfers, no bill pay, no cards
-  const restrictedForTxOnly = isTxSupport && !isAdmin && !isSupport;
-  const filteredUserNav = restrictedForTxOnly
-    ? userNav.filter((i) => ["support", "settings"].includes(i.id))
+  // Staff-only accounts see ONLY their staff nav + Settings — never the banking pages.
+  const filteredUserNav = staffOnlyAccount
+    ? userNav.filter((i) => i.id === "settings")
     : userNav;
 
   const navItems = showStaff ? [...filteredUserNav, ...staffNav] : filteredUserNav;
+
 
   useEffect(() => {
     checkNavOverflow();
