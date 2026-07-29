@@ -83,17 +83,56 @@ export default function AdminUsers() {
   useEffect(() => { if (allowed) load(); }, [allowed]);
 
   useEffect(() => {
-    if (!selected) { setUserTx([]); return; }
+    if (!selected) { setUserTx([]); setUserDevices([]); return; }
     (async () => {
-      const { data } = await supabase
-        .from("transactions")
-        .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
-        .eq("user_id", selected.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      setUserTx((data as Tx[]) || []);
+      const [{ data: tx }, { data: dv }] = await Promise.all([
+        supabase
+          .from("transactions")
+          .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+          .eq("user_id", selected.id)
+          .order("created_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("user_devices")
+          .select("id,user_id,device_id,label,user_agent,platform,last_seen,first_seen,is_blocked,is_revoked")
+          .eq("user_id", selected.id)
+          .order("last_seen", { ascending: false }),
+      ]);
+      setUserTx((tx as Tx[]) || []);
+      setUserDevices((dv as Device[]) || []);
     })();
   }, [selected]);
+
+  const reloadDevices = async (uid: string) => {
+    const { data } = await supabase
+      .from("user_devices")
+      .select("id,user_id,device_id,label,user_agent,platform,last_seen,first_seen,is_blocked,is_revoked")
+      .eq("user_id", uid)
+      .order("last_seen", { ascending: false });
+    setUserDevices((data as Device[]) || []);
+  };
+
+  const kickDevice = async (d: Device) => {
+    if (!confirm(`Sign this device out of ${selected?.email}'s account? They will need to sign in again on that device.`)) return;
+    setDeviceBusy(d.id);
+    const { error } = await supabase.rpc("admin_revoke_device", { p_device: d.id });
+    setDeviceBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Device kicked out");
+    if (selected) reloadDevices(selected.id);
+  };
+
+  const toggleDeviceLock = async (d: Device) => {
+    const lock = !d.is_blocked;
+    if (lock && !confirm(`Lock this device from ever signing back into ${selected?.email}'s account?`)) return;
+    setDeviceBusy(d.id);
+    const { error } = await supabase.rpc("admin_set_device_blocked", { p_device: d.id, p_blocked: lock });
+    setDeviceBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(lock ? "Device locked" : "Device unlocked");
+    if (selected) reloadDevices(selected.id);
+  };
+
 
   const updateTxStatus = async (tx: Tx, status: string) => {
     const isPendingDeposit = tx.category === "Pending Deposit";
