@@ -143,10 +143,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   ];
 
 
-  // Staff-only accounts see ONLY their staff nav + Settings — never the banking pages.
-  const filteredUserNav = staffOnlyAccount
-    ? userNav.filter((i) => i.id === "settings")
-    : userNav;
+  // Staff-only accounts see ONLY their staff nav — never the banking pages or settings.
+  const filteredUserNav = staffOnlyAccount ? [] : userNav;
 
   const navItems = showStaff ? [...filteredUserNav, ...staffNav] : filteredUserNav;
 
