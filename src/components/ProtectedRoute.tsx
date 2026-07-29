@@ -5,7 +5,7 @@ import { useDeviceGuard } from "@/hooks/useDeviceGuard";
 import { supabase } from "@/integrations/supabase/client";
 
 // Routes that regular users can access (non-staff pages).
-const USER_ROUTES = ["/accounts", "/cards", "/transfers", "/billpay", "/support", "/overview"];
+const USER_ROUTES = ["/accounts", "/cards", "/transfers", "/billpay", "/support", "/overview", "/settings"];
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isReady } = useAuthReady();
