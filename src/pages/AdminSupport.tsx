@@ -48,6 +48,9 @@ export default function AdminSupport() {
   const [active, setActive] = useState<T | null>(null);
   const [msgs, setMsgs] = useState<M[]>([]);
   const [reply, setReply] = useState("");
+  const [replyFile, setReplyFile] = useState<File | null>(null);
+  const [sending, setSending] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [pinPending, setPinPending] = useState<T | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
