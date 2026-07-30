@@ -19,6 +19,7 @@ import AdminTransactions from "./pages/AdminTransactions";
 import AdminAnnouncements from "./pages/AdminAnnouncements";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminResendPin from "./pages/AdminResendPin";
+import Locations from "./pages/Locations";
 
 import NotFound from "./pages/NotFound";
 
