@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User, Lock, Bell, CreditCard, Camera, Shield, Loader2, CheckCircle2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
@@ -349,10 +350,10 @@ const Settings = () => {
                 </div>
                 <div className="md:col-span-2">
                   <Label htmlFor="address">Mailing Address</Label>
-                  <Input
+                  <AddressAutocomplete
                     id="address"
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    onChange={setAddress}
                     placeholder="123 Main St, City, State ZIP"
                   />
                 </div>

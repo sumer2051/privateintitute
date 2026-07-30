@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info, Wallet, CreditCard, ArrowLeftRight, LifeBuoy, Settings as SettingsIcon, ShieldAlert, Users, Mail, Megaphone as MegaphoneIcon, ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
+import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Info, Wallet, CreditCard, ArrowLeftRight, LifeBuoy, Settings as SettingsIcon, ShieldAlert, Users, Mail, Megaphone as MegaphoneIcon, ScrollText, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -186,6 +186,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet },
     { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard },
     { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight },
+    { id: "locations", label: "Locations", path: "/locations", Icon: MapPin },
     { id: "support", label: "Support", path: "/support", Icon: LifeBuoy },
     { id: "settings", label: "Settings", path: "/settings", Icon: SettingsIcon },
   ];

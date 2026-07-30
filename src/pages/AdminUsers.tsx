@@ -8,14 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet, CreditCard, PiggyBank, Monitor, Smartphone, Lock, Unlock, LogOut } from "lucide-react";
+import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet, CreditCard, PiggyBank, Monitor, Smartphone, Lock, Unlock, LogOut, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
 type Role = { user_id: string; role: "admin" | "support" | "tx_support" | "user" };
 type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
-type Device = { id: string; user_id: string; device_id: string; label: string | null; user_agent: string | null; platform: string | null; last_seen: string; first_seen: string; is_blocked: boolean; is_revoked: boolean };
+type Device = { id: string; user_id: string; device_id: string; label: string | null; user_agent: string | null; platform: string | null; last_seen: string; first_seen: string; is_blocked: boolean; is_revoked: boolean; lat?: number | null; lng?: number | null; location_label?: string | null };
 
 const TX_STATUSES = ["pending", "processing", "under_review", "completed", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string,string> = {
@@ -508,6 +508,17 @@ export default function AdminUsers() {
                           <p className="text-[11px] text-muted-foreground">
                             Last seen {lastSeen.toLocaleString()} · First seen {new Date(d.first_seen).toLocaleDateString()}
                           </p>
+                          {(d.location_label || (d.lat != null && d.lng != null)) && (
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                            >
+                              <MapPin className="h-3 w-3" />
+                              {d.location_label || `${Number(d.lat).toFixed(2)}, ${Number(d.lng).toFixed(2)}`}
+                            </a>
+                          )}
                         </div>
                         <div className="flex gap-2 flex-wrap">
                           <Button

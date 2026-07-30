@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { TransactionMapCard } from "@/components/TransactionMapCard";
 import { COUNTRY_METHODS, SWIFT_FALLBACK, type CountryMethod } from "@/lib/country-methods";
 import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
 
@@ -286,6 +287,9 @@ export const NotificationsBell = () => {
                 <div className="rounded-md border bg-background p-3 text-xs text-muted-foreground">
                   {selected.description}
                 </div>
+                {["purchase", "payment", "card", "merchant"].includes((selected.category || "").toLowerCase()) && selected.description && (
+                  <TransactionMapCard query={selected.description} />
+                )}
                 {selected.status === "pending" && (
                   <p className="text-xs text-muted-foreground">
                     A specialist will contact you to verify and approve this transfer.
