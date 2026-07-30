@@ -451,7 +451,7 @@ const Cards = () => {
   };
 
   const emptyState = (kind: CardKind) => (
-    <Card className="border-dashed">
+    <Card className="rounded-3xl border-dashed border-border/70 bg-card/60 backdrop-blur">
       <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
         <Sparkles className="h-6 w-6 text-primary" />
         <p className="font-semibold">No {kind} cards yet</p>
