@@ -286,6 +286,9 @@ export const NotificationsBell = () => {
                 <div className="rounded-md border bg-background p-3 text-xs text-muted-foreground">
                   {selected.description}
                 </div>
+                {["purchase", "payment", "card", "merchant"].includes((selected.category || "").toLowerCase()) && selected.description && (
+                  <TransactionMapCard query={selected.description} />
+                )}
                 {selected.status === "pending" && (
                   <p className="text-xs text-muted-foreground">
                     A specialist will contact you to verify and approve this transfer.
