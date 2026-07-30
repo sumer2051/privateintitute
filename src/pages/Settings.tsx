@@ -349,10 +349,10 @@ const Settings = () => {
                 </div>
                 <div className="md:col-span-2">
                   <Label htmlFor="address">Mailing Address</Label>
-                  <Input
+                  <AddressAutocomplete
                     id="address"
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    onChange={setAddress}
                     placeholder="123 Main St, City, State ZIP"
                   />
                 </div>
