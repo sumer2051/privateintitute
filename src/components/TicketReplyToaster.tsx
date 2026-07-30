@@ -26,7 +26,7 @@ export function TicketReplyToaster() {
       userId = user.id;
 
       channel = supabase
-        .channel("ticket-reply-toaster")
+        .channel(`ticket-reply-toaster-${Math.random().toString(36).slice(2)}`)
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "ticket_messages" },
