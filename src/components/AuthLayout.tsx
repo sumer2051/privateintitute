@@ -184,9 +184,9 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
   const userNav = [
     { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet },
+    { id: "locations", label: "Locations", path: "/locations", Icon: MapPin },
     { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard },
     { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight },
-    { id: "locations", label: "Locations", path: "/locations", Icon: MapPin },
     { id: "support", label: "Support", path: "/support", Icon: LifeBuoy },
     { id: "settings", label: "Settings", path: "/settings", Icon: SettingsIcon },
   ];
