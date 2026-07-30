@@ -551,28 +551,35 @@ const Cards = () => {
           </Tabs>
         )}
 
-        <Card>
+        <Card className="rounded-3xl border-border/60 bg-card/70 backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-lg">Card benefits & security</CardTitle>
+            <CardTitle className="font-display text-lg text-secondary">Card benefits & security</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-3 text-sm">
-            <div className="rounded-lg border bg-muted/30 p-4">
-              <ShieldCheck className="h-5 w-5 text-primary" />
+            <div className="rounded-2xl border border-border/60 bg-muted/25 p-4 transition-all hover:-translate-y-0.5 hover:border-accent/50">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </div>
               <p className="mt-2 font-semibold">Zero liability</p>
               <p className="text-muted-foreground">You're never liable for unauthorized charges.</p>
             </div>
-            <div className="rounded-lg border bg-muted/30 p-4">
-              <Globe className="h-5 w-5 text-primary" />
+            <div className="rounded-2xl border border-border/60 bg-muted/25 p-4 transition-all hover:-translate-y-0.5 hover:border-accent/50">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                <Globe className="h-5 w-5 text-primary" />
+              </div>
               <p className="mt-2 font-semibold">Global acceptance</p>
               <p className="text-muted-foreground">Use your card in 200+ countries and currencies.</p>
             </div>
-            <div className="rounded-lg border bg-muted/30 p-4">
-              <Bell className="h-5 w-5 text-primary" />
+            <div className="rounded-2xl border border-border/60 bg-muted/25 p-4 transition-all hover:-translate-y-0.5 hover:border-accent/50">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                <Bell className="h-5 w-5 text-primary" />
+              </div>
               <p className="mt-2 font-semibold">Real-time alerts</p>
               <p className="text-muted-foreground">Get instant notifications on every transaction.</p>
             </div>
           </CardContent>
         </Card>
+
       </div>
 
       {/* PIN dialog */}
