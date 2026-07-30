@@ -1,8 +1,39 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { mapsApi } from "@/lib/maps";
 
 const DEVICE_KEY = "boa.device.id";
+const GEO_KEY = "boa.device.geo";
+
+/** Best-effort approximate sign-in location; resolves to null when unavailable or denied. */
+async function getApproxLocation(): Promise<{ lat: number; lng: number; location_label: string | null } | null> {
+  try {
+    const cached = sessionStorage.getItem(GEO_KEY);
+    if (cached) return JSON.parse(cached);
+  } catch (_) { /* ignore */ }
+  if (!("geolocation" in navigator)) return null;
+  const perm = await (navigator.permissions?.query?.({ name: "geolocation" as PermissionName }).catch(() => null) ?? null);
+  if (perm && perm.state === "denied") return null;
+  const pos = await new Promise<GeolocationPosition | null>((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve(p),
+      () => resolve(null),
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 },
+    );
+  });
+  if (!pos) return null;
+  const lat = Number(pos.coords.latitude.toFixed(3));
+  const lng = Number(pos.coords.longitude.toFixed(3));
+  let location_label: string | null = null;
+  try {
+    const { formatted_address } = await mapsApi.reverse(lat, lng);
+    location_label = formatted_address ?? null;
+  } catch (_) { /* non-fatal */ }
+  const result = { lat, lng, location_label };
+  try { sessionStorage.setItem(GEO_KEY, JSON.stringify(result)); } catch (_) { /* ignore */ }
+  return result;
+}
 
 function getOrCreateDeviceId(): string {
   let id = localStorage.getItem(DEVICE_KEY);
@@ -84,10 +115,13 @@ export function useDeviceGuard(userId: string | undefined) {
         .eq("device_id", deviceId)
         .maybeSingle();
 
+      const geo = await getApproxLocation();
+      if (cancelled) return;
+
       if (existing?.id) {
         await supabase
           .from("user_devices")
-          .update({ last_seen: new Date().toISOString(), user_agent: ua, platform, label })
+          .update({ last_seen: new Date().toISOString(), user_agent: ua, platform, label, ...(geo ?? {}) })
           .eq("id", existing.id);
       } else {
         await supabase.from("user_devices").insert({
@@ -96,6 +130,7 @@ export function useDeviceGuard(userId: string | undefined) {
           user_agent: ua,
           platform,
           label,
+          ...(geo ?? {}),
         });
       }
       registered.current = true;
