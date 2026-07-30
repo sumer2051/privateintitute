@@ -527,6 +527,9 @@ export type Database = {
           is_revoked: boolean
           label: string | null
           last_seen: string
+          lat: number | null
+          lng: number | null
+          location_label: string | null
           platform: string | null
           revoked_at: string | null
           updated_at: string
@@ -544,6 +547,9 @@ export type Database = {
           is_revoked?: boolean
           label?: string | null
           last_seen?: string
+          lat?: number | null
+          lng?: number | null
+          location_label?: string | null
           platform?: string | null
           revoked_at?: string | null
           updated_at?: string
@@ -561,6 +567,9 @@ export type Database = {
           is_revoked?: boolean
           label?: string | null
           last_seen?: string
+          lat?: number | null
+          lng?: number | null
+          location_label?: string | null
           platform?: string | null
           revoked_at?: string | null
           updated_at?: string
