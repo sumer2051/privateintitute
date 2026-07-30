@@ -482,54 +482,61 @@ const Cards = () => {
   return (
     <AuthLayout currentPage="cards">
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h2 className="mb-1 text-3xl font-bold text-secondary">Cards</h2>
-            <p className="text-muted-foreground">
-              Manage your debit and credit cards — freeze, reveal, set limits, and more.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Badge variant="outline" className="gap-1">
-              <MapPin className="h-3 w-3" /> Balances in {useCurrency().currency.code}
-            </Badge>
-            <Button
-              variant="outline"
-              onClick={() =>
-                guard(
-                  "requesting a new card",
-                  "Verify to request a new card",
-                  "For your security, enter the 6-digit code we emailed you before we submit a new card request.",
-                  () =>
-                    toast({
-                      title: "New card requested",
-                      description: "A specialist will contact you to complete issuance.",
-                    }),
-                )
-              }
-            >
-              + Request new card
-            </Button>
+        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-secondary via-secondary/95 to-primary p-6 text-primary-foreground shadow-[0_24px_60px_-32px_hsl(var(--secondary)/0.7)]">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/25 blur-3xl" />
+          <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-accent/70 to-transparent" />
+          <div className="relative flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.32em] opacity-70">Wallet</p>
+              <h2 className="font-display text-3xl font-bold">Cards</h2>
+              <p className="mt-1 max-w-md text-sm opacity-80">
+                Manage your debit and credit cards — freeze, reveal, set limits, and more.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="gap-1 border-primary-foreground/30 bg-primary-foreground/10 text-primary-foreground">
+                <MapPin className="h-3 w-3" /> Balances in {useCurrency().currency.code}
+              </Badge>
+              <Button
+                variant="outline"
+                className="border-primary-foreground/30 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"
+                onClick={() =>
+                  guard(
+                    "requesting a new card",
+                    "Verify to request a new card",
+                    "For your security, enter the 6-digit code we emailed you before we submit a new card request.",
+                    () =>
+                      toast({
+                        title: "New card requested",
+                        description: "A specialist will contact you to complete issuance.",
+                      }),
+                  )
+                }
+              >
+                + Request new card
+              </Button>
+            </div>
           </div>
         </div>
 
         {loading ? (
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="h-96 rounded-lg bg-muted animate-pulse" />
-            <div className="h-96 rounded-lg bg-muted animate-pulse" />
+            <div className="h-96 rounded-3xl bg-muted animate-pulse" />
+            <div className="h-96 rounded-3xl bg-muted animate-pulse" />
           </div>
         ) : (
           <Tabs defaultValue="debit" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:w-[420px]">
-              <TabsTrigger value="debit">
+            <TabsList className="grid w-full grid-cols-2 rounded-full bg-muted/60 p-1 backdrop-blur md:w-[420px]">
+              <TabsTrigger value="debit" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 <Wallet className="mr-2 h-4 w-4" />
                 Debit ({debitCards.length})
               </TabsTrigger>
-              <TabsTrigger value="credit">
+              <TabsTrigger value="credit" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">
                 <CreditCard className="mr-2 h-4 w-4" />
                 Credit ({creditCards.length})
               </TabsTrigger>
             </TabsList>
+
 
             <TabsContent value="debit" className="mt-4">
               <div className="grid gap-6 md:grid-cols-2">
