@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Money } from "@/components/Money";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -244,25 +245,23 @@ const Cards = () => {
               <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 backdrop-blur">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Current balance</span>
-                  <span className="font-display text-lg font-bold text-secondary">{format(used)}</span>
+                  <Money value={used} size="lg" className="text-secondary" />
                 </div>
                 <div className="mt-1.5 flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Available credit</span>
-                  <span className="font-semibold">{format(c.account.available_balance)}</span>
+                  <Money value={c.account.available_balance} size="sm" className="text-foreground" />
                 </div>
                 <div className="mt-3">
                   <div className="mb-1 flex justify-between text-[11px] uppercase tracking-wider text-muted-foreground">
                     <span>Utilization</span>
-                    <span>{utilization.toFixed(0)}% of {format(creditLimit)}</span>
+                    <span className="tabular-nums">{utilization.toFixed(0)}% of {format(creditLimit)}</span>
                   </div>
                   <Progress value={utilization} className="h-1.5" />
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
                   <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
                     <p className="text-muted-foreground">Min. payment</p>
-                    <p className="font-semibold text-secondary">
-                      {format(Math.max(25, used * 0.02))}
-                    </p>
+                    <Money value={Math.max(25, used * 0.02)} size="sm" className="text-secondary" />
                   </div>
                   <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
                     <p className="text-muted-foreground">Due date</p>
@@ -276,20 +275,20 @@ const Cards = () => {
               <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 backdrop-blur">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Linked balance</span>
-                  <span className="font-display text-lg font-bold text-secondary">{format(c.account.balance)}</span>
+                  <Money value={c.account.balance} size="lg" className="text-secondary" />
                 </div>
                 <div className="mt-1.5 flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Available to spend</span>
-                  <span className="font-semibold">{format(c.account.available_balance)}</span>
+                  <Money value={c.account.available_balance} size="sm" className="text-foreground" />
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
                   <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
                     <p className="text-muted-foreground">Daily ATM limit</p>
-                    <p className="font-semibold text-secondary">{format(1000)}</p>
+                    <Money value={1000} size="sm" className="text-secondary" />
                   </div>
                   <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
                     <p className="text-muted-foreground">Daily purchase limit</p>
-                    <p className="font-semibold text-secondary">{format(5000)}</p>
+                    <Money value={5000} size="sm" className="text-secondary" />
                   </div>
                 </div>
               </div>
