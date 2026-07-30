@@ -335,7 +335,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                     }`}
                     title={item.label}
                   >
-                    {Icon ? <Icon className={`h-5 w-5 ${active ? "text-primary" : highlightUnread ? "text-emerald-600 dark:text-emerald-300" : "text-secondary group-hover:text-primary"}`} /> : null}
+                    {Icon ? <Icon className={`h-4 w-4 md:h-[1.15rem] md:w-[1.15rem] ${active ? "text-primary" : highlightUnread ? "text-emerald-600 dark:text-emerald-300" : "text-secondary group-hover:text-primary"}`} /> : null}
                     <span className="leading-none truncate w-full text-center">{item.label}</span>
                     {highlightUnread && (
                       <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-background" />
