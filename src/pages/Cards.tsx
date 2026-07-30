@@ -167,8 +167,8 @@ const Cards = () => {
     const isFrozen = !!frozen[c.id];
     const gradient =
       c.kind === "credit"
-        ? "from-secondary via-primary to-accent"
-        : "from-primary via-primary/80 to-accent/70";
+        ? "from-secondary via-secondary/90 to-primary"
+        : "from-primary via-primary/85 to-secondary";
 
     // Credit-specific numbers
     const creditLimit = 10000;
@@ -176,82 +176,95 @@ const Cards = () => {
     const utilization = c.kind === "credit" ? Math.min(100, (used / creditLimit) * 100) : 0;
 
     return (
-      <Card key={c.id} className="overflow-hidden border-primary/10">
+      <Card
+        key={c.id}
+        className="group relative overflow-hidden rounded-3xl border-border/60 bg-card/70 shadow-[0_18px_50px_-28px_hsl(var(--secondary)/0.55)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_28px_70px_-30px_hsl(var(--secondary)/0.6)]"
+      >
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
         <CardContent className="p-0">
           {/* Physical card */}
-          <div
-            className={`relative m-4 aspect-[1.586/1] rounded-2xl bg-gradient-to-br ${gradient} p-5 text-white shadow-xl overflow-hidden`}
-          >
-            <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-            <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-            {isFrozen && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-2xl bg-slate-900/70 backdrop-blur-sm">
-                <Snowflake className="h-6 w-6 text-sky-300" />
-                <span className="font-semibold tracking-wide">Card Frozen</span>
-              </div>
-            )}
-            <div className="relative flex h-full flex-col justify-between">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.25em] opacity-80">
-                    BoA private institute
-                  </p>
-                  <p className="text-sm font-semibold">
-                    {c.kind === "credit" ? "Platinum Credit" : "Everyday Debit"}
-                  </p>
+          <div className="p-4 pb-2">
+            <div
+              className={`relative aspect-[1.586/1] rounded-2xl bg-gradient-to-br ${gradient} p-5 text-primary-foreground shadow-2xl overflow-hidden ring-1 ring-inset ring-white/15 transition-transform duration-500 group-hover:scale-[1.015]`}
+            >
+              {/* metal sheen */}
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_20%,hsl(0_0%_100%/0.18)_38%,transparent_52%)]" />
+              <div className="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-accent/25 blur-3xl" />
+              <div className="absolute -bottom-14 -left-10 h-36 w-36 rounded-full bg-white/10 blur-3xl" />
+              {isFrozen && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 rounded-2xl bg-secondary/80 backdrop-blur-md">
+                  <Snowflake className="h-7 w-7 text-sky-300" />
+                  <span className="text-sm font-semibold tracking-[0.2em] uppercase">Frozen</span>
                 </div>
-                <div className="h-8 w-10 rounded-md bg-gradient-to-br from-yellow-200 to-yellow-500 shadow-inner" />
-              </div>
-              <div>
-                <p className="font-mono text-lg tracking-[0.2em] drop-shadow-sm">
-                  {isRevealed ? groupCard(c.fullNumber) : `•••• •••• •••• ${c.last4}`}
-                </p>
-                <div className="mt-3 flex items-end justify-between text-xs">
+              )}
+              <div className="relative flex h-full flex-col justify-between">
+                <div className="flex items-start justify-between">
                   <div>
-                    <p className="opacity-70 text-[9px] uppercase tracking-wider">Card Holder</p>
-                    <p className="font-semibold tracking-wide">{c.holder}</p>
+                    <p className="text-[10px] uppercase tracking-[0.32em] opacity-75">
+                      BoA private institute
+                    </p>
+                    <p className="font-display text-base font-semibold tracking-wide">
+                      {c.kind === "credit" ? "Platinum Credit" : "Everyday Debit"}
+                    </p>
                   </div>
-                  <div>
-                    <p className="opacity-70 text-[9px] uppercase tracking-wider">Expires</p>
-                    <p className="font-mono">{c.exp}</p>
+                  <div className="flex items-center gap-2">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5 opacity-80" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M5 8a10 10 0 0 1 0 8M9.5 6a14 14 0 0 1 0 12M14 4.5A18 18 0 0 1 14 19.5" />
+                    </svg>
+                    <div className="h-8 w-11 rounded-md bg-gradient-to-br from-yellow-100 via-yellow-300 to-yellow-600 shadow-inner ring-1 ring-yellow-700/30" />
                   </div>
-                  <div>
-                    <p className="opacity-70 text-[9px] uppercase tracking-wider">CVV</p>
-                    <p className="font-mono">{isRevealed ? c.cvv : "•••"}</p>
+                </div>
+                <div>
+                  <p className="font-mono text-lg tracking-[0.22em] drop-shadow">
+                    {isRevealed ? groupCard(c.fullNumber) : `•••• •••• •••• ${c.last4}`}
+                  </p>
+                  <div className="mt-3 flex items-end justify-between gap-2 text-xs">
+                    <div className="min-w-0">
+                      <p className="opacity-60 text-[9px] uppercase tracking-[0.18em]">Card Holder</p>
+                      <p className="truncate font-semibold tracking-wide">{c.holder}</p>
+                    </div>
+                    <div>
+                      <p className="opacity-60 text-[9px] uppercase tracking-[0.18em]">Expires</p>
+                      <p className="font-mono">{c.exp}</p>
+                    </div>
+                    <div>
+                      <p className="opacity-60 text-[9px] uppercase tracking-[0.18em]">CVV</p>
+                      <p className="font-mono">{isRevealed ? c.cvv : "•••"}</p>
+                    </div>
+                    <p className="font-display text-lg italic tracking-wider">{c.brand}</p>
                   </div>
-                  <p className="font-display text-lg italic tracking-wider">{c.brand}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Balance / limit strip */}
-          <div className="px-5">
+          <div className="px-4">
             {c.kind === "credit" ? (
-              <div className="rounded-lg border bg-muted/40 p-4">
+              <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 backdrop-blur">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Current balance</span>
-                  <span className="font-semibold text-secondary">{format(used)}</span>
+                  <span className="font-display text-lg font-bold text-secondary">{format(used)}</span>
                 </div>
-                <div className="mt-2 flex items-center justify-between text-sm">
+                <div className="mt-1.5 flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Available credit</span>
                   <span className="font-semibold">{format(c.account.available_balance)}</span>
                 </div>
                 <div className="mt-3">
-                  <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+                  <div className="mb-1 flex justify-between text-[11px] uppercase tracking-wider text-muted-foreground">
                     <span>Utilization</span>
                     <span>{utilization.toFixed(0)}% of {format(creditLimit)}</span>
                   </div>
-                  <Progress value={utilization} />
+                  <Progress value={utilization} className="h-1.5" />
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                  <div className="rounded-md bg-background p-2">
+                  <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
                     <p className="text-muted-foreground">Min. payment</p>
                     <p className="font-semibold text-secondary">
                       {format(Math.max(25, used * 0.02))}
                     </p>
                   </div>
-                  <div className="rounded-md bg-background p-2">
+                  <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
                     <p className="text-muted-foreground">Due date</p>
                     <p className="font-semibold text-secondary">
                       {new Date(Date.now() + 14 * 864e5).toLocaleDateString()}
@@ -260,21 +273,21 @@ const Cards = () => {
                 </div>
               </div>
             ) : (
-              <div className="rounded-lg border bg-muted/40 p-4">
+              <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 backdrop-blur">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Linked balance</span>
-                  <span className="font-semibold text-secondary">{format(c.account.balance)}</span>
+                  <span className="font-display text-lg font-bold text-secondary">{format(c.account.balance)}</span>
                 </div>
-                <div className="mt-2 flex items-center justify-between text-sm">
+                <div className="mt-1.5 flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Available to spend</span>
                   <span className="font-semibold">{format(c.account.available_balance)}</span>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                  <div className="rounded-md bg-background p-2">
+                  <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
                     <p className="text-muted-foreground">Daily ATM limit</p>
                     <p className="font-semibold text-secondary">{format(1000)}</p>
                   </div>
-                  <div className="rounded-md bg-background p-2">
+                  <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
                     <p className="text-muted-foreground">Daily purchase limit</p>
                     <p className="font-semibold text-secondary">{format(5000)}</p>
                   </div>
@@ -282,6 +295,7 @@ const Cards = () => {
               </div>
             )}
           </div>
+
 
           {/* Quick actions */}
           <div className="grid grid-cols-4 gap-2 p-4">
