@@ -298,11 +298,11 @@ const Cards = () => {
 
 
           {/* Quick actions */}
-          <div className="grid grid-cols-4 gap-2 p-4">
+          <div className="grid grid-cols-4 gap-2 px-4 py-4">
             <Button
               variant="outline"
               size="sm"
-              className="flex-col h-auto py-2"
+              className="h-auto flex-col gap-1 rounded-xl border-border/60 bg-background/60 py-2.5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10"
               onClick={() => {
                 if (isRevealed) {
                   setRevealed((p) => ({ ...p, [c.id]: false }));
@@ -322,7 +322,7 @@ const Cards = () => {
             <Button
               variant="outline"
               size="sm"
-              className="flex-col h-auto py-2"
+              className="h-auto flex-col gap-1 rounded-xl border-border/60 bg-background/60 py-2.5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10"
               onClick={() => {
                 setFrozen((p) => ({ ...p, [c.id]: !p[c.id] }));
                 toast({
@@ -339,7 +339,7 @@ const Cards = () => {
             <Button
               variant="outline"
               size="sm"
-              className="flex-col h-auto py-2"
+              className="h-auto flex-col gap-1 rounded-xl border-border/60 bg-background/60 py-2.5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10"
               onClick={() =>
                 guard(
                   `viewing PIN for card •••• ${c.last4}`,
@@ -355,7 +355,7 @@ const Cards = () => {
             <Button
               variant="outline"
               size="sm"
-              className="flex-col h-auto py-2"
+              className="h-auto flex-col gap-1 rounded-xl border-border/60 bg-background/60 py-2.5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10"
               onClick={() =>
                 guard(
                   `replacing card •••• ${c.last4}`,
@@ -371,7 +371,7 @@ const Cards = () => {
           </div>
 
           {/* Controls */}
-          <div className="space-y-3 border-t p-4">
+          <div className="space-y-3 border-t border-border/60 bg-muted/10 p-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Card Controls
             </p>
