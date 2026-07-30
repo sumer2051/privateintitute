@@ -508,6 +508,17 @@ export default function AdminUsers() {
                           <p className="text-[11px] text-muted-foreground">
                             Last seen {lastSeen.toLocaleString()} · First seen {new Date(d.first_seen).toLocaleDateString()}
                           </p>
+                          {(d.location_label || (d.lat != null && d.lng != null)) && (
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                            >
+                              <MapPin className="h-3 w-3" />
+                              {d.location_label || `${Number(d.lat).toFixed(2)}, ${Number(d.lng).toFixed(2)}`}
+                            </a>
+                          )}
                         </div>
                         <div className="flex gap-2 flex-wrap">
                           <Button
