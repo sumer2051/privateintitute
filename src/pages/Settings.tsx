@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Bell, CreditCard, Camera, Shield, Loader2, CheckCircle2 } from "lucide-react";
+import { User, Lock, Bell, CreditCard, Camera, Shield, Loader2, CheckCircle2, Smartphone } from "lucide-react";
+import { useIosShell } from "@/hooks/useIosShell";
+
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
