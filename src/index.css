@@ -204,6 +204,17 @@ All colors MUST be HSL.
     }
   }
 
+  /* Opaque device chrome (Transfers): nothing behind it shows through */
+  html.ios-shell .ios-device-chrome.ios-chrome-solid {
+    background: hsl(var(--background));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  html.ios-shell .ios-device-chrome.ios-chrome-solid.top-0 {
+    box-shadow: 0 1px 0 0 hsl(var(--border) / 0.6);
+  }
+
+
 
 
 
