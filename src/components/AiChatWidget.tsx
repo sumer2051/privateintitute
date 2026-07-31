@@ -91,7 +91,7 @@ export const AiChatWidget = ({ open, onOpenChange }: Props) => {
       {/* Chat window */}
       <div
         className={cn(
-          "fixed bottom-6 right-6 z-50 flex h-[560px] w-[90vw] max-w-sm flex-col overflow-hidden rounded-2xl border bg-card shadow-2xl transition-all duration-300",
+          "fixed bottom-[calc(var(--ios-home-h,20px)+16px)] right-4 z-50 flex h-[min(560px,calc(100dvh-var(--ios-status-h,54px)-var(--ios-home-h,20px)-32px))] w-[90vw] max-w-sm flex-col overflow-hidden rounded-2xl border bg-card shadow-2xl transition-all duration-300",
           open ? "opacity-100 translate-y-0" : "pointer-events-none opacity-0 translate-y-4",
         )}
       >
