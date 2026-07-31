@@ -349,6 +349,7 @@ const Accounts = () => {
                   </p>
                 </div>
               </div>
+              </>
             );
           })()}
         </CardContent>

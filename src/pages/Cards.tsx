@@ -708,6 +708,7 @@ const Cards = () => {
         }}
       />
     </AuthLayout>
+    </>
   );
 };
 

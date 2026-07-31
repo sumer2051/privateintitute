@@ -619,6 +619,7 @@ const Settings = () => {
         </DialogContent>
       </Dialog>
     </AuthLayout>
+    </>
   );
 };
 

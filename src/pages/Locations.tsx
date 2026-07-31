@@ -221,6 +221,7 @@ const Locations = () => {
         </div>
       </div>
     </AuthLayout>
+    </>
   );
 };
 

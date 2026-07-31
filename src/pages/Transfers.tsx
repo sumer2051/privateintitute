@@ -733,6 +733,7 @@ const Transfers = () => {
                             <p className="text-[11px] text-muted-foreground mt-0.5">{s.tagline}</p>
                           )}
                         </button>
+                        </>
                       );
                     })}
                   </div>

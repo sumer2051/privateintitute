@@ -661,5 +661,6 @@ function ScheduleCallDialog({ open, onOpenChange, onCreated }: { open: boolean; 
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
