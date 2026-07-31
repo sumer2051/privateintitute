@@ -27,10 +27,12 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { AppLock } from "./components/AppLock";
 import { DeviceFrame } from "./components/DeviceFrame";
+import { HelmetProvider } from "react-helmet-async";
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <HelmetProvider>
   <QueryClientProvider client={queryClient}>
     <CurrencyProvider>
       <TooltipProvider>
@@ -67,6 +69,7 @@ const App = () => (
       </TooltipProvider>
     </CurrencyProvider>
   </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
