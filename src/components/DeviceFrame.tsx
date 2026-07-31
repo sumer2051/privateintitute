@@ -157,7 +157,7 @@ export const DeviceFrame = () => {
   return (
     <>
       {/* Status bar */}
-      <div className="fixed inset-x-0 top-0 z-[300] h-[var(--ios-status-h,44px)] select-none bg-background text-foreground">
+      <div className="fixed inset-x-0 top-0 z-[300] h-[var(--ios-status-h,44px)] select-none bg-transparent text-foreground">
         <div className="relative mx-auto flex h-full max-w-[520px] items-center justify-between px-6 text-[13px] font-semibold tracking-tight">
           <button
             type="button"
