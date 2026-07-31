@@ -112,8 +112,8 @@ export const DeviceFrame = () => {
   // Reserve space for the bars across every page.
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty("--ios-status-h", "44px");
-    root.style.setProperty("--ios-home-h", "0px");
+    root.style.setProperty("--ios-status-h", "54px");
+    root.style.setProperty("--ios-home-h", "20px");
     root.classList.add("ios-shell");
     return () => {
       root.classList.remove("ios-shell");
@@ -157,25 +157,30 @@ export const DeviceFrame = () => {
 
   return (
     <>
-      {/* Status bar — transparent overlay so content shows behind it */}
-      <div className="ios-device-chrome fixed inset-x-0 top-0 z-[10050] h-[var(--ios-status-h,44px)] select-none text-foreground">
-        <div className="relative mx-auto flex h-full max-w-[520px] items-center justify-between px-5 text-[17px] font-semibold tracking-tight">
+      {/* iPhone 17 Pro Max status bar — space is reserved, so it never covers page content */}
+      <div className="ios-device-chrome fixed inset-x-0 top-0 z-[10050] h-[var(--ios-status-h,54px)] select-none text-foreground">
+        <div className="relative mx-auto flex h-full max-w-[520px] items-end justify-between px-8 pb-[9px] text-[17px] font-semibold tracking-tight">
 
           <button
             type="button"
             onClick={openTime}
             aria-label="Status bar clock (triple-tap to edit)"
-            className="z-10 flex items-center gap-2 text-left tabular-nums"
+            className="z-10 flex w-[92px] items-center gap-1.5 text-left tabular-nums"
           >
-            <span>{displayTime}</span>
-            <span className="text-[12px] font-semibold opacity-80">{carrier}</span>
+            <span className="text-[17px] leading-none">{displayTime}</span>
+            <span className="text-[11px] font-semibold leading-none opacity-70">{carrier}</span>
           </button>
+
+          {/* Dynamic Island */}
+          <div className="pointer-events-none absolute left-1/2 top-[11px] h-[36px] w-[125px] -translate-x-1/2 rounded-full bg-black shadow-[0_1px_4px_rgba(0,0,0,0.35)]">
+            <span className="absolute right-[13px] top-1/2 h-[9px] w-[9px] -translate-y-1/2 rounded-full bg-[#101820] ring-1 ring-white/10" />
+          </div>
 
           <button
             type="button"
             onClick={openBatt}
             aria-label="Battery status (triple-tap to edit)"
-            className="z-10 flex items-center justify-end gap-2"
+            className="z-10 flex items-center justify-end gap-[5px]"
           >
             <SignalBars />
             <WifiIcon />
@@ -183,6 +188,12 @@ export const DeviceFrame = () => {
           </button>
         </div>
       </div>
+
+      {/* Home indicator */}
+      <div className="ios-device-chrome fixed inset-x-0 bottom-0 z-[10050] flex h-[var(--ios-home-h,20px)] items-center justify-center">
+        <span className="h-[5px] w-[140px] rounded-full bg-foreground/70" />
+      </div>
+
 
       <Dialog open={timeOpen} onOpenChange={setTimeOpen}>
         <DialogContent className="max-w-sm">
