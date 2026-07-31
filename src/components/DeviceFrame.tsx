@@ -201,7 +201,11 @@ export const DeviceFrame = () => {
       </div>
 
       {/* Home indicator */}
-      <div className="ios-device-chrome fixed inset-x-0 bottom-0 z-[10050] flex h-[var(--ios-home-h,20px)] items-center justify-center">
+      <div
+        className={`ios-device-chrome fixed inset-x-0 bottom-0 z-[10050] flex h-[var(--ios-home-h,20px)] items-center justify-center ${
+          solid ? "ios-chrome-solid" : ""
+        }`}
+      >
         <span className="h-[5px] w-[140px] rounded-full bg-foreground/70" />
       </div>
 
