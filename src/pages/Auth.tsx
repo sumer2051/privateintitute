@@ -271,8 +271,11 @@ const Auth = () => {
                 <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-accent animate-pulse" />
               </div>
             </div>
-            <CardTitle className="text-center font-display text-3xl font-bold text-secondary tracking-tight">
-              BoA <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">private</span> institute
+            <CardTitle asChild>
+              <h1 className="text-center font-display text-3xl font-bold text-secondary tracking-tight">
+                BoA <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">private</span> institute
+                <span className="sr-only"> — sign in to the wealth management portal</span>
+              </h1>
             </CardTitle>
             <p className="text-center text-[10px] uppercase tracking-[0.3em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer">
               Wealth · Trust · Legacy
