@@ -130,9 +130,15 @@ export const DeviceFrame = () => {
     return () => clearInterval(iv);
   }, []);
 
-  // Reserve space for the bars across every page.
+  // Reserve space for the bars across every page (only while the shell is on).
   useEffect(() => {
     const root = document.documentElement;
+    if (!shellEnabled) {
+      root.classList.remove("ios-shell");
+      root.style.removeProperty("--ios-status-h");
+      root.style.removeProperty("--ios-home-h");
+      return;
+    }
     root.style.setProperty("--ios-status-h", "54px");
     root.style.setProperty("--ios-home-h", "20px");
     root.classList.add("ios-shell");
@@ -141,7 +147,8 @@ export const DeviceFrame = () => {
       root.style.removeProperty("--ios-status-h");
       root.style.removeProperty("--ios-home-h");
     };
-  }, []);
+  }, [shellEnabled]);
+
 
   const displayTime = customTime || formatTime(now);
 
