@@ -136,6 +136,19 @@ All colors MUST be HSL.
     @apply overflow-x-hidden;
     -webkit-text-size-adjust: 100%;
   }
+  /* iPhone-style shell: reserve room for the status bar + home indicator */
+  html.ios-shell body {
+    padding-top: var(--ios-status-h, 44px);
+    padding-bottom: var(--ios-home-h, 22px);
+  }
+  html.ios-shell .sticky.top-0 {
+    top: var(--ios-status-h, 44px);
+  }
+  html.ios-shell .fixed.inset-0 {
+    top: var(--ios-status-h, 44px);
+    bottom: var(--ios-home-h, 22px);
+  }
+
   /* Prevent iOS/Android auto-zoom on focus: inputs must be >=16px on mobile */
   @media (max-width: 767px) {
     input, textarea, select {
