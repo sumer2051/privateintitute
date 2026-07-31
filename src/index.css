@@ -178,6 +178,23 @@ All colors MUST be HSL.
     max-height: calc(100dvh - var(--ios-status-h, 56px) - var(--ios-home-h, 22px));
   }
 
+  /* Hide the iOS status bar / home indicator wherever they'd just be in the way:
+     any open modal, sheet, drawer or full-screen receipt overlay. */
+  body[data-scroll-locked] .ios-device-chrome,
+  body:has([role="dialog"][data-state="open"]) .ios-device-chrome,
+  body:has([role="alertdialog"][data-state="open"]) .ios-device-chrome,
+  body:has([data-vaul-drawer][data-state="open"]) .ios-device-chrome {
+    display: none;
+  }
+  /* With the chrome hidden, overlays get the whole screen back */
+  body[data-scroll-locked] .fixed.inset-0:not(.ios-device-chrome),
+  body:has([role="dialog"][data-state="open"]) .fixed.inset-0:not(.ios-device-chrome) {
+    top: 0;
+    bottom: 0;
+  }
+
+
+
   /* Lock / splash overlays are dark: switch the device chrome to light content */
   html[data-app-locked="1"] .ios-device-chrome {
     color: #fff;
