@@ -32,7 +32,9 @@ import { Seo } from "@/components/Seo";
 
 
 const Settings = () => {
+  const { enabled: iosShell, setIosShell } = useIosShell();
   const [userId, setUserId] = useState<string>("");
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
