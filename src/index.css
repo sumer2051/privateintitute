@@ -205,6 +205,19 @@ All colors MUST be HSL.
   html[data-app-locked="1"] .ios-device-chrome span[class*="bg-foreground"] {
     background-color: rgba(255, 255, 255, 0.85);
   }
+  /* App dialogs portal to <body>, so they can float above the passcode screen
+     and swallow keypad taps. Suppress them until the app is unlocked. */
+  html[data-app-locked="1"] [role="dialog"][data-state="open"]:not(.ios-lock-dialog),
+  html[data-app-locked="1"] [role="alertdialog"][data-state="open"]:not(.ios-lock-dialog),
+  html[data-app-locked="1"] [data-radix-popper-content-wrapper],
+  html[data-app-locked="1"] [data-vaul-drawer],
+  html[data-app-locked="1"] [data-radix-dialog-overlay] {
+    display: none !important;
+  }
+  html[data-app-locked="1"] .ios-lock-dialog {
+    display: grid !important;
+  }
+
 
 
 
