@@ -195,7 +195,7 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
 
   if (phase === "splash") {
     return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-gradient-to-br from-secondary via-secondary to-[hsl(222,60%,4%)]">
+      <div className="ios-fullbleed fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-gradient-to-br from-secondary via-secondary to-[hsl(222,60%,4%)]">
         <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-primary/25 blur-3xl animate-pulse" />
         <div className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-accent/25 blur-3xl animate-pulse" />
         <div className="relative flex flex-col items-center gap-6 text-center">
@@ -237,8 +237,11 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">{children}</div>
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-secondary via-secondary to-[hsl(222,60%,4%)] px-6 py-8 text-white">
+    {/* children are intentionally NOT mounted while locked: their portalled
+        dialogs (ACH notice, toasts) would float above the passcode keypad and
+        swallow taps. */}
+
+    <div className="ios-fullbleed fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-secondary via-secondary to-[hsl(222,60%,4%)] px-6 pb-8 pt-[calc(var(--ios-status-h,54px)+8px)] text-white">
 
       <div className="flex flex-col items-center gap-3">
         <img src={logo} alt="BoA private institute" className="h-14 w-14 rounded-full ring-2 ring-primary/40 shadow-lg" />
@@ -309,7 +312,7 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
       )}
 
       <Dialog open={signOutDialogOpen} onOpenChange={setSignOutDialogOpen}>
-        <DialogContent>
+        <DialogContent className="ios-lock-dialog">
           <DialogHeader>
             <DialogTitle>Sign out and clear passcode?</DialogTitle>
             <DialogDescription>
