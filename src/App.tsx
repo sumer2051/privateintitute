@@ -23,6 +23,7 @@ import Locations from "./pages/Locations";
 
 import NotFound from "./pages/NotFound";
 
+import WillVsTrust from "./pages/WillVsTrust";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { AppLock } from "./components/AppLock";
@@ -44,6 +45,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+            <Route path="/insights/will-vs-trust" element={<WillVsTrust />} />
             <Route path="/" element={<Navigate to="/accounts" replace />} />
             <Route path="/overview" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/accounts" element={<ProtectedRoute><Accounts /></ProtectedRoute>} />

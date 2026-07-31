@@ -8,6 +8,7 @@ BoA private institute is a secure client portal. Account, transfer, card, and su
 
 - [Home](/): Entry point to the private banking portal.
 - [Sign in](/auth): Secure client sign-in and invitation activation.
+- [Will vs Trust guide](/insights/will-vs-trust): Comparison of wills and living trusts for estate and legacy planning.
 
 ## Optional
 
