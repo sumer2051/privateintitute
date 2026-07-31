@@ -165,9 +165,10 @@ export const DeviceFrame = () => {
             type="button"
             onClick={openTime}
             aria-label="Status bar clock (triple-tap to edit)"
-            className="flex min-w-[104px] items-center gap-1.5 text-left tabular-nums"
+            className="z-10 flex items-center gap-2 text-left tabular-nums"
           >
             <span>{displayTime}</span>
+            <span className="text-[12px] font-semibold opacity-80">{carrier}</span>
           </button>
 
           {/* Dynamic Island */}
@@ -177,9 +178,8 @@ export const DeviceFrame = () => {
             type="button"
             onClick={openBatt}
             aria-label="Battery status (triple-tap to edit)"
-            className="flex min-w-[104px] items-center justify-end gap-2"
+            className="z-10 flex items-center justify-end gap-2"
           >
-            <span className="text-[12px] font-semibold opacity-90">{carrier}</span>
             <SignalBars />
             <WifiIcon />
             <Battery level={battery} charging={charging} />
