@@ -40,7 +40,8 @@ function useTripleTap(onTriple: () => void) {
 }
 
 const SignalBars = () => (
-  <svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden="true">
+  <svg width="22" height="15" viewBox="0 0 18 12" fill="none" aria-hidden="true">
+
     {[0, 1, 2, 3].map((i) => (
       <rect
         key={i}
@@ -56,7 +57,7 @@ const SignalBars = () => (
 );
 
 const WifiIcon = () => (
-  <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor" aria-hidden="true">
+  <svg width="20" height="15" viewBox="0 0 16 12" fill="currentColor" aria-hidden="true">
     <path d="M8 10.6 6.1 8.5a2.8 2.8 0 0 1 3.8 0L8 10.6Z" />
     <path d="M8 5.6c-1.4 0-2.7.5-3.7 1.5l-1.2-1.3A7 7 0 0 1 8 3.8a7 7 0 0 1 4.9 2l-1.2 1.3A5.2 5.2 0 0 0 8 5.6Z" />
     <path d="M8 1.6c-2.4 0-4.7.9-6.4 2.6L.4 2.9A11 11 0 0 1 8 0c2.9 0 5.6 1.1 7.6 2.9l-1.2 1.3A9.2 9.2 0 0 0 8 1.6Z" />
@@ -68,7 +69,7 @@ const Battery = ({ level, charging }: { level: number; charging: boolean }) => {
   const low = pct <= 20 && !charging;
   return (
     <span className="flex items-center gap-1">
-      <span className="relative inline-block h-[12px] w-[25px] rounded-[4px] border border-current/60 p-[1.5px]">
+      <span className="relative inline-block h-[15px] w-[30px] rounded-[5px] border border-current/60 p-[2px]">
         <span
           className={`block h-full rounded-[2px] ${
             charging ? "bg-[#34C759]" : low ? "bg-[#FF3B30]" : "bg-current"
@@ -111,7 +112,7 @@ export const DeviceFrame = () => {
   // Reserve space for the bars across every page.
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty("--ios-status-h", "44px");
+    root.style.setProperty("--ios-status-h", "56px");
     root.style.setProperty("--ios-home-h", "22px");
     root.classList.add("ios-shell");
     return () => {
@@ -156,29 +157,29 @@ export const DeviceFrame = () => {
 
   return (
     <>
-      {/* Status bar */}
-      <div className="fixed inset-x-0 top-0 z-[300] h-[var(--ios-status-h,44px)] select-none bg-background/60 backdrop-blur-xl text-foreground">
-        <div className="relative mx-auto flex h-full max-w-[520px] items-center justify-between px-6 text-[13px] font-semibold tracking-tight">
+      {/* Status bar — fully opaque so it masks the real device status bar behind it */}
+      <div className="fixed inset-x-0 top-0 z-[300] h-[var(--ios-status-h,56px)] select-none bg-background text-foreground shadow-[0_1px_0_hsl(var(--border))]">
+        <div className="relative mx-auto flex h-full max-w-[520px] items-center justify-between px-5 text-[17px] font-semibold tracking-tight">
 
           <button
             type="button"
             onClick={openTime}
             aria-label="Status bar clock (triple-tap to edit)"
-            className="flex min-w-[86px] items-center gap-1.5 text-left tabular-nums"
+            className="flex min-w-[104px] items-center gap-1.5 text-left tabular-nums"
           >
             <span>{displayTime}</span>
           </button>
 
           {/* Dynamic Island */}
-          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[30px] w-[104px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black shadow-[inset_0_0_2px_rgba(255,255,255,0.15)]" />
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[34px] w-[118px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black shadow-[inset_0_0_2px_rgba(255,255,255,0.15)]" />
 
           <button
             type="button"
             onClick={openBatt}
             aria-label="Battery status (triple-tap to edit)"
-            className="flex min-w-[86px] items-center justify-end gap-1.5"
+            className="flex min-w-[104px] items-center justify-end gap-2"
           >
-            <span className="text-[10px] font-semibold opacity-80">{carrier}</span>
+            <span className="text-[12px] font-semibold opacity-90">{carrier}</span>
             <SignalBars />
             <WifiIcon />
             <Battery level={battery} charging={charging} />

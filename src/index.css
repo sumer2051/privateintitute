@@ -145,15 +145,15 @@ All colors MUST be HSL.
   }
   /* iPhone-style shell: reserve room for the status bar + home indicator */
   html.ios-shell body {
-    padding-top: var(--ios-status-h, 44px);
+    padding-top: var(--ios-status-h, 56px);
     padding-bottom: var(--ios-home-h, 22px);
   }
   /* Pinned headers/toolbars park right under the Dynamic Island line */
   html.ios-shell .sticky.top-0 {
-    top: var(--ios-status-h, 44px);
+    top: var(--ios-status-h, 56px);
   }
   html.ios-shell .fixed.inset-0 {
-    top: var(--ios-status-h, 44px);
+    top: var(--ios-status-h, 56px);
     bottom: var(--ios-home-h, 22px);
   }
 
