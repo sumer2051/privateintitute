@@ -112,8 +112,8 @@ export const DeviceFrame = () => {
   // Reserve space for the bars across every page.
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty("--ios-status-h", "44px");
-    root.style.setProperty("--ios-home-h", "0px");
+    root.style.setProperty("--ios-status-h", "54px");
+    root.style.setProperty("--ios-home-h", "20px");
     root.classList.add("ios-shell");
     return () => {
       root.classList.remove("ios-shell");

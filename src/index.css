@@ -145,47 +145,47 @@ All colors MUST be HSL.
   }
   /* iPhone-style shell: reserve room for the status bar + home indicator */
   html.ios-shell body {
-    padding-top: var(--ios-status-h, 44px);
-    padding-bottom: var(--ios-home-h, 0px);
+    padding-top: var(--ios-status-h, 54px);
+    padding-bottom: var(--ios-home-h, 20px);
   }
   /* Pinned headers/toolbars park right under the Dynamic Island line */
   html.ios-shell .sticky.top-0 {
-    top: var(--ios-status-h, 44px);
+    top: var(--ios-status-h, 54px);
   }
   html.ios-shell .fixed.inset-0:not(.ios-device-chrome) {
-    top: var(--ios-status-h, 44px);
-    bottom: var(--ios-home-h, 0px);
+    top: var(--ios-status-h, 54px);
+    bottom: var(--ios-home-h, 20px);
   }
   /* Anything pinned to the bottom sits above the home indicator */
   html.ios-shell .fixed.bottom-0:not(.ios-device-chrome) {
-    bottom: var(--ios-home-h, 0px);
+    bottom: var(--ios-home-h, 20px);
   }
   /* Toasts / notifications drop below the status bar */
   html.ios-shell [data-radix-toast-viewport],
   html.ios-shell .fixed.top-0:not(.ios-device-chrome) {
-    top: var(--ios-status-h, 44px);
+    top: var(--ios-status-h, 54px);
   }
   /* Centered modals sit inside the safe area, never under the Island/indicator */
   html.ios-shell [role="dialog"][data-state],
   html.ios-shell [role="alertdialog"][data-state] {
-    max-height: calc(100dvh - var(--ios-status-h, 44px) - var(--ios-home-h, 0px) - 24px);
+    max-height: calc(100dvh - var(--ios-status-h, 54px) - var(--ios-home-h, 20px) - 24px);
     overflow-y: auto;
     overscroll-behavior: contain;
   }
   /* Bottom sheets / drawers stop above the home indicator */
   html.ios-shell [data-vaul-drawer],
   html.ios-shell [role="dialog"][data-state].fixed.bottom-0 {
-    bottom: var(--ios-home-h, 0px);
+    bottom: var(--ios-home-h, 20px);
   }
   /* Full-bleed sheets/receipts respect both bars */
   html.ios-shell .h-screen,
   html.ios-shell .min-h-screen.fixed {
-    max-height: calc(100dvh - var(--ios-status-h, 44px) - var(--ios-home-h, 0px));
+    max-height: calc(100dvh - var(--ios-status-h, 54px) - var(--ios-home-h, 20px));
   }
   /* Full-screen overlay content gets padding so headers clear the status bar */
   html.ios-shell [role="dialog"][data-state].inset-0 {
-    padding-top: var(--ios-status-h, 44px);
-    padding-bottom: var(--ios-home-h, 0px);
+    padding-top: var(--ios-status-h, 54px);
+    padding-bottom: var(--ios-home-h, 20px);
   }
 
 
