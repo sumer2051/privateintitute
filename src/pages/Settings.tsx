@@ -516,6 +516,34 @@ const Settings = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Device appearance */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Smartphone className="h-5 w-5" />
+                Device Appearance
+              </CardTitle>
+              <CardDescription>Simulated iPhone 17 Pro Max shell</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-semibold">iPhone 17 Pro Max features</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Dynamic Island status bar, carrier, clock, battery and home indicator. Turn off for a
+                    plain mobile app view.
+                  </p>
+                </div>
+                <Switch
+                  checked={iosShell}
+                  onCheckedChange={setIosShell}
+                  aria-label="Toggle iPhone 17 Pro Max shell"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
         </div>
       </div>
 
