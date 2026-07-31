@@ -724,7 +724,22 @@ export default function AdminUsers() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <Dialog open={!!txPending} onOpenChange={(v) => { if (!v) { setTxPending(null); setTxNote(""); } }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Move to “{txPending ? (STATUS_LABEL[txPending.status] || txPending.status) : ""}”</DialogTitle>
+              <DialogDescription>Optional note for the customer — included in the email notification.</DialogDescription>
+            </DialogHeader>
+            <Input placeholder="Optional note to the customer" value={txNote} onChange={e => setTxNote(e.target.value)} />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setTxPending(null); setTxNote(""); }} disabled={!!txBusy}>Cancel</Button>
+              <Button onClick={confirmTxStatus} disabled={!!txBusy}>{txBusy ? "Updating..." : "Confirm"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
+
     </AuthLayout>
   );
 }
