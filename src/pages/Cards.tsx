@@ -36,6 +36,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { VerifyCodeDialog } from "@/components/VerifyCodeDialog";
+import { Seo } from "@/components/Seo";
 
 interface Account {
   id: string;
@@ -479,7 +480,9 @@ const Cards = () => {
   );
 
   return (
-    <AuthLayout currentPage="cards">
+    <>
+      <Seo title="Cards | BoA private institute" description="Manage your debit and credit cards, view details, freeze cards and track spending limits." path="/cards" noindex />
+      <AuthLayout currentPage="cards">
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-secondary via-secondary/95 to-primary p-6 text-primary-foreground shadow-[0_24px_60px_-32px_hsl(var(--secondary)/0.7)]">
           <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/25 blur-3xl" />

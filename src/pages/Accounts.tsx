@@ -9,6 +9,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { CountUp } from "@/components/CountUp";
 import { TransferModal } from "@/components/TransferModal";
 import { CurrencySelector } from "@/components/CurrencySelector";
+import { Seo } from "@/components/Seo";
 
 interface Account {
   id: string;
@@ -326,7 +327,9 @@ const Accounts = () => {
             const credit = accounts.filter((a) => a.account_type === "credit").reduce((s, a) => s + a.balance, 0);
             const net = deposits - credit;
             return (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+              <>
+                <Seo title="Accounts | BoA private institute" description="View balances, recent activity and account details across your checking, savings and credit accounts." path="/accounts" noindex />
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 <div className="rounded-xl border border-primary/10 bg-card/70 backdrop-blur-sm p-3 md:p-4 shadow-sm">
                   <p className="text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground">Total Deposits</p>
                   <p className="mt-1 font-display text-base md:text-2xl font-bold text-success truncate">

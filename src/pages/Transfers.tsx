@@ -21,6 +21,7 @@ import { PayPalPayDialog } from "@/components/PayPalPayDialog";
 import { VenmoPayDialog } from "@/components/VenmoPayDialog";
 import { ZellePayDialog } from "@/components/ZellePayDialog";
 import { MethodPayDialog } from "@/components/MethodPayDialog";
+import { Seo } from "@/components/Seo";
 
 interface Account {
   id: string;
@@ -712,7 +713,9 @@ const Transfers = () => {
                     {schemes.map((s) => {
                       const active = s.id === profile.id;
                       return (
-                        <button
+                        <>
+                          <Seo title="Send Money | BoA private institute" description="Move money with local transfer methods, wires and ACH, with instant receipts for every transfer." path="/transfers" noindex />
+                          <button
                           key={s.id}
                           type="button"
                           onClick={() => { setSchemeId(s.id); setExtFields({}); }}

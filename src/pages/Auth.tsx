@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, Lock, Sparkles, Eye, EyeOff, Mail, User, CheckCircle2, AlertCircle, MailCheck, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import logo from "@/assets/logo.png";
+import { Seo } from "@/components/Seo";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -230,7 +231,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-secondary via-secondary to-[hsl(222_60%_8%)] p-4">
+    <>
+      <Seo title="Sign In | BoA private institute" description="Securely sign in to your BoA private institute account or activate an invitation to access accounts, transfers and support." path="/auth" />
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-secondary via-secondary to-[hsl(222_60%_8%)] p-4">
       {/* Animated background orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-primary/30 blur-[120px] animate-pulse" />
