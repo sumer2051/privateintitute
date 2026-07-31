@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useIosShell } from "@/hooks/useIosShell";
+
 
 import {
   Dialog,
