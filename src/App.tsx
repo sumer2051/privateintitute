@@ -26,6 +26,7 @@ import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { AppLock } from "./components/AppLock";
+import { DeviceFrame } from "./components/DeviceFrame";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <DeviceFrame />
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <AppLock>
           <Routes>
