@@ -165,7 +165,11 @@ export const DeviceFrame = () => {
   return (
     <>
       {/* iPhone 17 Pro Max status bar — space is reserved, so it never covers page content */}
-      <div className="ios-device-chrome fixed inset-x-0 top-0 z-[10050] h-[var(--ios-status-h,54px)] select-none text-foreground">
+      <div
+        className={`ios-device-chrome fixed inset-x-0 top-0 z-[10050] h-[var(--ios-status-h,54px)] select-none text-foreground ${
+          solid ? "ios-chrome-solid" : ""
+        }`}
+      >
         <div className="relative mx-auto flex h-full max-w-[520px] items-end justify-between px-8 pb-[9px] text-[17px] font-semibold tracking-tight">
 
           <button
