@@ -134,13 +134,21 @@ export default function AdminUsers() {
   };
 
 
-  const updateTxStatus = async (tx: Tx, status: string) => {
+  const [txPending, setTxPending] = useState<{ tx: Tx; status: string } | null>(null);
+  const [txNote, setTxNote] = useState("");
+
+  const confirmTxStatus = async () => {
+    if (!txPending) return;
+    const { tx, status } = txPending;
+    await updateTxStatus(tx, status, txNote);
+    setTxPending(null);
+    setTxNote("");
+  };
+
+  const updateTxStatus = async (tx: Tx, status: string, note: string) => {
     const isPendingDeposit = tx.category === "Pending Deposit";
-    const note = window.prompt(
-      `Add a note for the customer about moving this transfer to "${STATUS_LABEL[status] || status}" (optional):`,
-      "",
-    );
-    if (note === null) return;
+
+
     setTxBusy(tx.id);
 
     // For pending deposits moving to "completed", use the RPC that credits balance.
@@ -454,7 +462,7 @@ export default function AdminUsers() {
                       <div className={`text-sm font-semibold ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
                         {Number(tx.amount) < 0 ? "-" : "+"}${Math.abs(Number(tx.amount)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
                       </div>
-                      <Select value={tx.status} onValueChange={(v) => updateTxStatus(tx, v)} disabled={txBusy === tx.id}>
+                      <Select value={tx.status} onValueChange={(v) => { if (v !== tx.status) { setTxNote(""); setTxPending({ tx, status: v }); } }} disabled={txBusy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-40 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {TX_STATUSES.map(s => (
@@ -716,7 +724,22 @@ export default function AdminUsers() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <Dialog open={!!txPending} onOpenChange={(v) => { if (!v) { setTxPending(null); setTxNote(""); } }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Move to “{txPending ? (STATUS_LABEL[txPending.status] || txPending.status) : ""}”</DialogTitle>
+              <DialogDescription>Optional note for the customer — included in the email notification.</DialogDescription>
+            </DialogHeader>
+            <Input placeholder="Optional note to the customer" value={txNote} onChange={e => setTxNote(e.target.value)} />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setTxPending(null); setTxNote(""); }} disabled={!!txBusy}>Cancel</Button>
+              <Button onClick={confirmTxStatus} disabled={!!txBusy}>{txBusy ? "Updating..." : "Confirm"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
+
     </AuthLayout>
   );
 }
