@@ -312,7 +312,7 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
       )}
 
       <Dialog open={signOutDialogOpen} onOpenChange={setSignOutDialogOpen}>
-        <DialogContent>
+        <DialogContent className="ios-lock-dialog">
           <DialogHeader>
             <DialogTitle>Sign out and clear passcode?</DialogTitle>
             <DialogDescription>
