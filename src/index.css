@@ -165,33 +165,30 @@ All colors MUST be HSL.
   html.ios-shell .fixed.top-0:not(.ios-device-chrome) {
     top: var(--ios-status-h, 56px);
   }
-  /* Centered modals never grow past the safe area */
+  /* Centered modals sit inside the safe area, never under the Island/indicator */
   html.ios-shell [role="dialog"][data-state],
   html.ios-shell [role="alertdialog"][data-state] {
-    max-height: calc(100dvh - var(--ios-status-h, 56px) - var(--ios-home-h, 22px) - 16px);
+    max-height: calc(100dvh - var(--ios-status-h, 56px) - var(--ios-home-h, 22px) - 24px);
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+  /* Bottom sheets / drawers stop above the home indicator */
+  html.ios-shell [data-vaul-drawer],
+  html.ios-shell [role="dialog"][data-state].fixed.bottom-0 {
+    bottom: var(--ios-home-h, 22px);
   }
   /* Full-bleed sheets/receipts respect both bars */
   html.ios-shell .h-screen,
   html.ios-shell .min-h-screen.fixed {
     max-height: calc(100dvh - var(--ios-status-h, 56px) - var(--ios-home-h, 22px));
   }
+  /* Full-screen overlay content gets padding so headers clear the status bar */
+  html.ios-shell [role="dialog"][data-state].inset-0 {
+    padding-top: var(--ios-status-h, 56px);
+    padding-bottom: var(--ios-home-h, 22px);
+  }
 
-  /* Hide the iOS status bar / home indicator wherever they'd just be in the way:
-     any open modal, sheet, drawer or full-screen receipt overlay. */
-  body[data-scroll-locked] .ios-device-chrome,
-  body:has([role="dialog"][data-state="open"]) .ios-device-chrome,
-  body:has([role="alertdialog"][data-state="open"]) .ios-device-chrome,
-  body:has([data-vaul-drawer][data-state="open"]) .ios-device-chrome {
-    display: none;
-  }
-  /* With the chrome hidden, overlays get the whole screen back */
-  body[data-scroll-locked] .fixed.inset-0:not(.ios-device-chrome),
-  body:has([role="dialog"][data-state="open"]) .fixed.inset-0:not(.ios-device-chrome) {
-    top: 0;
-    bottom: 0;
-  }
+
 
 
 
