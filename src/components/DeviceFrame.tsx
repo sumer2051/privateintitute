@@ -183,7 +183,10 @@ export const DeviceFrame = () => {
     setBattOpen(false);
   };
 
+  if (!shellEnabled) return null;
+
   return (
+
     <>
       {/* iPhone 17 Pro Max status bar — space is reserved, so it never covers page content */}
       <div
