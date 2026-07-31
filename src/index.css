@@ -152,10 +152,32 @@ All colors MUST be HSL.
   html.ios-shell .sticky.top-0 {
     top: var(--ios-status-h, 56px);
   }
-  html.ios-shell .fixed.inset-0 {
+  html.ios-shell .fixed.inset-0:not(.ios-device-chrome) {
     top: var(--ios-status-h, 56px);
     bottom: var(--ios-home-h, 22px);
   }
+  /* Anything pinned to the bottom sits above the home indicator */
+  html.ios-shell .fixed.bottom-0:not(.ios-device-chrome) {
+    bottom: var(--ios-home-h, 22px);
+  }
+  /* Toasts / notifications drop below the status bar */
+  html.ios-shell [data-radix-toast-viewport],
+  html.ios-shell .fixed.top-0:not(.ios-device-chrome) {
+    top: var(--ios-status-h, 56px);
+  }
+  /* Centered modals never grow past the safe area */
+  html.ios-shell [role="dialog"][data-state],
+  html.ios-shell [role="alertdialog"][data-state] {
+    max-height: calc(100dvh - var(--ios-status-h, 56px) - var(--ios-home-h, 22px) - 16px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* Full-bleed sheets/receipts respect both bars */
+  html.ios-shell .h-screen,
+  html.ios-shell .min-h-screen.fixed {
+    max-height: calc(100dvh - var(--ios-status-h, 56px) - var(--ios-home-h, 22px));
+  }
+
   /* Lock / splash overlays are dark: switch the device chrome to light content */
   html[data-app-locked="1"] .ios-device-chrome {
     color: #fff;
