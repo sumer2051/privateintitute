@@ -5,7 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+
 import { ShieldAlert, ListChecks, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -78,12 +81,12 @@ export default function AdminTransactions() {
 
   useEffect(() => { if (allowed) load(); }, [allowed]);
 
-  const update = async (tx: Tx, status: string) => {
-    const note = window.prompt(
-      `Add a note for the customer about moving this transfer to "${STATUS_LABEL[status] || status}" (optional):`,
-      "",
-    );
-    if (note === null) return; // cancelled
+  const [pending, setPending] = useState<{ tx: Tx; status: string } | null>(null);
+  const [note, setNote] = useState("");
+
+  const confirmUpdate = async () => {
+    if (!pending) return;
+    const { tx, status } = pending;
     setBusy(tx.id);
     const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: tx.id, p_status: status });
     if (error) { setBusy(null); return toast.error(error.message); }
@@ -91,9 +94,12 @@ export default function AdminTransactions() {
       body: { transactionId: tx.id, status, note: note.trim() || undefined },
     }).catch((e) => console.error("status email failed", e));
     setBusy(null);
+    setPending(null);
+    setNote("");
     toast.success(`Marked ${STATUS_LABEL[status]} · notifications sent`);
     setTxs(prev => prev.map(t => t.id === tx.id ? { ...t, status } : t));
   };
+
 
 
   const filtered = useMemo(() => {
@@ -181,7 +187,7 @@ export default function AdminTransactions() {
                           {tx.reference_number ? ` · ${tx.reference_number}` : ""}
                         </p>
                       </div>
-                      <Select value={tx.status} onValueChange={(v) => update(tx, v)} disabled={busy === tx.id}>
+                      <Select value={tx.status} onValueChange={(v) => { if (v !== tx.status) { setNote(""); setPending({ tx, status: v }); } }} disabled={busy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-44 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {TX_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}
@@ -194,7 +200,22 @@ export default function AdminTransactions() {
             )}
           </CardContent>
         </Card>
+
+        <Dialog open={!!pending} onOpenChange={(v) => { if (!v) { setPending(null); setNote(""); } }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Move to “{pending ? (STATUS_LABEL[pending.status] || pending.status) : ""}”</DialogTitle>
+              <DialogDescription>Add an optional note for the customer. This is included in the email notification.</DialogDescription>
+            </DialogHeader>
+            <Textarea rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional note to the customer" />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setPending(null); setNote(""); }} disabled={!!busy}>Cancel</Button>
+              <Button onClick={confirmUpdate} disabled={!!busy}>Confirm</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
+
     </AuthLayout>
   );
 }
