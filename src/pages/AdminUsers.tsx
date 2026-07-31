@@ -134,13 +134,9 @@ export default function AdminUsers() {
   };
 
 
-  const updateTxStatus = async (tx: Tx, status: string) => {
+  const updateTxStatus = async (tx: Tx, status: string, note: string) => {
     const isPendingDeposit = tx.category === "Pending Deposit";
-    const note = window.prompt(
-      `Add a note for the customer about moving this transfer to "${STATUS_LABEL[status] || status}" (optional):`,
-      "",
-    );
-    if (note === null) return;
+
     setTxBusy(tx.id);
 
     // For pending deposits moving to "completed", use the RPC that credits balance.
