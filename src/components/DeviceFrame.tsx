@@ -96,8 +96,10 @@ const Battery = ({ level, charging }: { level: number; charging: boolean }) => {
  */
 export const DeviceFrame = () => {
   // Rendered outside the Router, so read the path from the browser directly.
+  const { enabled: shellEnabled } = useIosShell();
   const [pathname, setPathname] = useState(() => window.location.pathname);
   useEffect(() => {
+
     const sync = () => setPathname(window.location.pathname);
     window.addEventListener("popstate", sync);
     const iv = setInterval(sync, 500);
