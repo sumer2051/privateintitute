@@ -5,11 +5,13 @@ const EVENT = "ios-shell-toggle";
 
 export function isIosShellEnabled() {
   try {
-    return (localStorage.getItem(KEY) ?? "1") === "1";
+    // Default OFF: the device shell only appears once the user turns it on.
+    return localStorage.getItem(KEY) === "1";
   } catch {
-    return true;
+    return false;
   }
 }
+
 
 /** Shared toggle for the iPhone 17 Pro Max device shell (status bar + home indicator). */
 export function useIosShell() {
