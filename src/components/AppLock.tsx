@@ -237,7 +237,10 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">{children}</div>
+    {/* children are intentionally NOT mounted while locked: their portalled
+        dialogs (ACH notice, toasts) would float above the passcode keypad and
+        swallow taps. */}
+
     <div className="ios-fullbleed fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-secondary via-secondary to-[hsl(222,60%,4%)] px-6 pb-8 pt-[calc(var(--ios-status-h,54px)+8px)] text-white">
 
       <div className="flex flex-col items-center gap-3">
