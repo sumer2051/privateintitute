@@ -197,7 +197,22 @@ export default function AdminTransactions() {
             )}
           </CardContent>
         </Card>
+
+        <Dialog open={!!pending} onOpenChange={(v) => { if (!v) { setPending(null); setNote(""); } }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Move to “{pending ? (STATUS_LABEL[pending.status] || pending.status) : ""}”</DialogTitle>
+              <DialogDescription>Add an optional note for the customer. This is included in the email notification.</DialogDescription>
+            </DialogHeader>
+            <Textarea rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional note to the customer" />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setPending(null); setNote(""); }} disabled={!!busy}>Cancel</Button>
+              <Button onClick={confirmUpdate} disabled={!!busy}>Confirm</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
+
     </AuthLayout>
   );
 }
