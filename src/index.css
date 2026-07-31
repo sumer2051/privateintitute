@@ -194,6 +194,17 @@ All colors MUST be HSL.
     padding-bottom: var(--ios-home-h, 20px);
   }
 
+  /* Mobile full-screen pay sheets / receipts: sit inside the device bars */
+  @media (max-width: 639px) {
+    html.ios-shell .ios-safe-sheet {
+      top: var(--ios-status-h, 54px) !important;
+      bottom: var(--ios-home-h, 20px) !important;
+      height: auto !important;
+      max-height: none !important;
+    }
+  }
+
+
 
 
 
