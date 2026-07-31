@@ -152,10 +152,16 @@ All colors MUST be HSL.
   html.ios-shell .sticky.top-0 {
     top: var(--ios-status-h, 54px);
   }
-  html.ios-shell .fixed.inset-0:not(.ios-device-chrome) {
+  html.ios-shell .fixed.inset-0:not(.ios-device-chrome):not(.ios-fullbleed) {
     top: var(--ios-status-h, 54px);
     bottom: var(--ios-home-h, 20px);
   }
+  /* Splash / lock screens are full-bleed like a real device boot screen */
+  html.ios-shell .ios-fullbleed {
+    top: 0 !important;
+    bottom: 0 !important;
+  }
+
   /* Anything pinned to the bottom sits above the home indicator */
   html.ios-shell .fixed.bottom-0:not(.ios-device-chrome) {
     bottom: var(--ios-home-h, 20px);
