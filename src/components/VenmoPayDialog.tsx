@@ -53,7 +53,7 @@ export const VenmoPayDialog = ({
       <DialogContent
         className={cn(
           "p-0 gap-0 overflow-hidden border-0 bg-white [&>button]:hidden",
-          "!left-0 !top-0 !translate-x-0 !translate-y-0 !m-0 !max-w-none !w-screen !h-[100dvh] !rounded-none",
+          "ios-safe-sheet !left-0 !top-0 !translate-x-0 !translate-y-0 !m-0 !max-w-none !w-screen !h-[100dvh] !rounded-none",
           "sm:!left-1/2 sm:!top-1/2 sm:!-translate-x-1/2 sm:!-translate-y-1/2",
           "sm:!w-full sm:!h-auto sm:!max-h-[92vh] sm:!max-w-[420px] sm:!rounded-[2rem] sm:shadow-2xl"
         )}
