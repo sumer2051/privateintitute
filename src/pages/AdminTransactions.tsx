@@ -184,7 +184,7 @@ export default function AdminTransactions() {
                           {tx.reference_number ? ` · ${tx.reference_number}` : ""}
                         </p>
                       </div>
-                      <Select value={tx.status} onValueChange={(v) => update(tx, v)} disabled={busy === tx.id}>
+                      <Select value={tx.status} onValueChange={(v) => { if (v !== tx.status) { setNote(""); setPending({ tx, status: v }); } }} disabled={busy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-44 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {TX_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}
