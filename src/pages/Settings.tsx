@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { User, Lock, Bell, CreditCard, Camera, Shield, Loader2, CheckCircle2 } from "lucide-react";
+import { User, Lock, Bell, CreditCard, Camera, Shield, Loader2, CheckCircle2, Smartphone } from "lucide-react";
+import { useIosShell } from "@/hooks/useIosShell";
+
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
@@ -30,7 +32,9 @@ import { Seo } from "@/components/Seo";
 
 
 const Settings = () => {
+  const { enabled: iosShell, setIosShell } = useIosShell();
   const [userId, setUserId] = useState<string>("");
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -516,6 +520,34 @@ const Settings = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Device appearance */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Smartphone className="h-5 w-5" />
+                Device Appearance
+              </CardTitle>
+              <CardDescription>Simulated iPhone 17 Pro Max shell</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-semibold">iPhone 17 Pro Max features</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Dynamic Island status bar, carrier, clock, battery and home indicator. Turn off for a
+                    plain mobile app view.
+                  </p>
+                </div>
+                <Switch
+                  checked={iosShell}
+                  onCheckedChange={setIosShell}
+                  aria-label="Toggle iPhone 17 Pro Max shell"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
         </div>
       </div>
 

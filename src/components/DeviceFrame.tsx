@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useIosShell } from "@/hooks/useIosShell";
+
 
 import {
   Dialog,
@@ -94,8 +96,10 @@ const Battery = ({ level, charging }: { level: number; charging: boolean }) => {
  */
 export const DeviceFrame = () => {
   // Rendered outside the Router, so read the path from the browser directly.
+  const { enabled: shellEnabled } = useIosShell();
   const [pathname, setPathname] = useState(() => window.location.pathname);
   useEffect(() => {
+
     const sync = () => setPathname(window.location.pathname);
     window.addEventListener("popstate", sync);
     const iv = setInterval(sync, 500);
@@ -126,9 +130,15 @@ export const DeviceFrame = () => {
     return () => clearInterval(iv);
   }, []);
 
-  // Reserve space for the bars across every page.
+  // Reserve space for the bars across every page (only while the shell is on).
   useEffect(() => {
     const root = document.documentElement;
+    if (!shellEnabled) {
+      root.classList.remove("ios-shell");
+      root.style.removeProperty("--ios-status-h");
+      root.style.removeProperty("--ios-home-h");
+      return;
+    }
     root.style.setProperty("--ios-status-h", "54px");
     root.style.setProperty("--ios-home-h", "20px");
     root.classList.add("ios-shell");
@@ -137,7 +147,8 @@ export const DeviceFrame = () => {
       root.style.removeProperty("--ios-status-h");
       root.style.removeProperty("--ios-home-h");
     };
-  }, []);
+  }, [shellEnabled]);
+
 
   const displayTime = customTime || formatTime(now);
 
@@ -172,7 +183,10 @@ export const DeviceFrame = () => {
     setBattOpen(false);
   };
 
+  if (!shellEnabled) return null;
+
   return (
+
     <>
       {/* iPhone 17 Pro Max status bar — space is reserved, so it never covers page content */}
       <div
