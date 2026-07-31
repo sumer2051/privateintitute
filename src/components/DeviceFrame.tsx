@@ -112,8 +112,8 @@ export const DeviceFrame = () => {
   // Reserve space for the bars across every page.
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty("--ios-status-h", "56px");
-    root.style.setProperty("--ios-home-h", "22px");
+    root.style.setProperty("--ios-status-h", "44px");
+    root.style.setProperty("--ios-home-h", "0px");
     root.classList.add("ios-shell");
     return () => {
       root.classList.remove("ios-shell");
@@ -158,7 +158,7 @@ export const DeviceFrame = () => {
   return (
     <>
       {/* Status bar — transparent overlay so content shows behind it */}
-      <div className="ios-device-chrome fixed inset-x-0 top-0 z-[10050] h-[var(--ios-status-h,56px)] select-none text-foreground">
+      <div className="ios-device-chrome fixed inset-x-0 top-0 z-[10050] h-[var(--ios-status-h,44px)] select-none text-foreground">
         <div className="relative mx-auto flex h-full max-w-[520px] items-center justify-between px-5 text-[17px] font-semibold tracking-tight">
 
           <button
@@ -171,9 +171,6 @@ export const DeviceFrame = () => {
             <span className="text-[12px] font-semibold opacity-80">{carrier}</span>
           </button>
 
-          {/* Dynamic Island */}
-          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[34px] w-[118px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black shadow-[inset_0_0_2px_rgba(255,255,255,0.15)]" />
-
           <button
             type="button"
             onClick={openBatt}
@@ -185,11 +182,6 @@ export const DeviceFrame = () => {
             <Battery level={battery} charging={charging} />
           </button>
         </div>
-      </div>
-
-      {/* Home indicator — transparent overlay */}
-      <div className="ios-device-chrome fixed inset-x-0 bottom-0 z-[10050] flex h-[var(--ios-home-h,22px)] items-center justify-center">
-        <span className="h-[5px] w-[140px] rounded-full bg-foreground/80" />
       </div>
 
       <Dialog open={timeOpen} onOpenChange={setTimeOpen}>
