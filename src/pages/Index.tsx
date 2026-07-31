@@ -169,7 +169,7 @@ const Index = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 shadow-lg">
               <span className="text-xl font-bold text-primary-foreground">B</span>
             </div>
-            <h1 className="text-xl font-bold text-secondary">BoA private institute</h1>
+            <h1 className="text-xl font-bold text-secondary">BoA private institute <span className="hidden sm:inline font-normal text-muted-foreground">— Wealth Management Portal</span></h1>
           </div>
 
           <div className="flex items-center gap-4">
@@ -199,6 +199,7 @@ const Index = () => {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Toggle dark mode"
               onClick={() => {
                 setDarkMode(!darkMode);
                 showNotification("Theme", `${!darkMode ? "Dark" : "Light"} mode activated`, "info");
@@ -210,6 +211,7 @@ const Index = () => {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="View notifications"
               className="relative"
               onClick={() => showNotification("Notifications", "You have 2 unread notifications", "info")}
             >
@@ -219,7 +221,7 @@ const Index = () => {
               </Badge>
             </Button>
 
-            <Button variant="ghost" size="icon" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
+            <Button variant="ghost" size="icon" aria-label="Sign out" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
               {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
             </Button>
           </div>

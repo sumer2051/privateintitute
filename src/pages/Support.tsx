@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 import { MessageSquare, PhoneCall, Ticket, Send, Sparkles, ArrowLeft, Clock, Paperclip, X, Search, ChevronRight, CornerUpLeft } from "lucide-react";
 import { AttachmentPreview, uploadTicketAttachment, MAX_ATTACHMENT_BYTES, formatBytes } from "@/components/TicketAttachment";
+import { Seo } from "@/components/Seo";
 
 type TicketRow = {
   id: string; ticket_number: string; subject: string; description: string;
@@ -637,7 +638,9 @@ function ScheduleCallDialog({ open, onOpenChange, onCreated }: { open: boolean; 
 
   const today = new Date().toISOString().split("T")[0];
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Seo title="Support | BoA private institute" description="Open a support ticket, chat with our assistant and track replies from your dedicated support team." path="/support" noindex />
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Schedule a call</DialogTitle>
@@ -658,5 +661,6 @@ function ScheduleCallDialog({ open, onOpenChange, onCreated }: { open: boolean; 
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   );
 }

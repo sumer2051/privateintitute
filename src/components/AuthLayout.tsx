@@ -251,7 +251,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               <Input type="search" placeholder="Search accounts, services..." className="w-64 pl-10" />
             </div>
 
-            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setDarkMode(!darkMode)}>
+            <Button variant="ghost" size="icon" aria-label="Toggle dark mode" title="Toggle dark mode" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setDarkMode(!darkMode)}>
               {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
@@ -277,6 +277,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 variant={staffMode ? "default" : "outline"}
                 size="icon"
                 className="md:hidden h-9 w-9"
+                aria-label={staffMode ? "Exit staff mode" : "Enter staff mode"}
                 onClick={() => {
                   if (staffMode) { setStaffMode(false); navigate("/accounts"); }
                   else setPinOpen(true);
@@ -291,7 +292,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
 
 
-            <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
+            <Button variant="ghost" size="icon" aria-label="Sign out" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
               {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
             </Button>
           </div>

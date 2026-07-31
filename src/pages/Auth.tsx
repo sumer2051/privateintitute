@@ -4,11 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, Lock, Sparkles, Eye, EyeOff, Mail, User, CheckCircle2, AlertCircle, MailCheck, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import logo from "@/assets/logo.png";
+import { Seo } from "@/components/Seo";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -230,7 +231,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-secondary via-secondary to-[hsl(222_60%_8%)] p-4">
+    <>
+      <Seo title="Sign In | BoA private institute" description="Securely sign in to your BoA private institute account or activate an invitation to access accounts, transfers and support." path="/auth" />
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-secondary via-secondary to-[hsl(222_60%_8%)] p-4">
       {/* Animated background orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-primary/30 blur-[120px] animate-pulse" />
@@ -249,6 +252,7 @@ const Auth = () => {
         }}
       />
 
+      <main className="relative w-full max-w-md">
       <Card className="relative w-full max-w-md border-white/10 bg-card/95 backdrop-blur-xl shadow-2xl animate-in fade-in zoom-in-95 duration-500">
         {/* Glowing border */}
         <div className="pointer-events-none absolute -inset-px rounded-lg bg-gradient-to-r from-primary via-accent to-primary opacity-40 blur-sm" />
@@ -268,9 +272,10 @@ const Auth = () => {
                 <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-accent animate-pulse" />
               </div>
             </div>
-            <CardTitle className="text-center font-display text-3xl font-bold text-secondary tracking-tight">
+            <h1 className="text-center font-display text-3xl font-bold text-secondary tracking-tight">
               BoA <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">private</span> institute
-            </CardTitle>
+              <span className="sr-only"> — sign in to the wealth management portal</span>
+            </h1>
             <p className="text-center text-[10px] uppercase tracking-[0.3em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer">
               Wealth · Trust · Legacy
             </p>
@@ -516,6 +521,7 @@ const Auth = () => {
           </CardContent>
         </div>
       </Card>
+      </main>
 
       <Dialog open={tfaOpen} onOpenChange={setTfaOpen}>
         <DialogContent>
@@ -543,6 +549,7 @@ const Auth = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 };
 

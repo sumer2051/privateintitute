@@ -8,6 +8,7 @@ import { Building2, Landmark, LocateFixed, MapPin, Navigation, Phone, Search, St
 import { GoogleMapView, type MapMarker } from "@/components/GoogleMapView";
 import { mapsApi, type MapsPlace } from "@/lib/maps";
 import { toast } from "sonner";
+import { Seo } from "@/components/Seo";
 
 const DEFAULT_CENTER = { lat: 40.7128, lng: -74.006 };
 
@@ -98,7 +99,9 @@ const Locations = () => {
   );
 
   return (
-    <AuthLayout>
+    <>
+      <Seo title="Locations | BoA private institute" description="Find nearby branches and ATMs, get directions and check services available at each location." path="/locations" noindex />
+      <AuthLayout>
       <div className="space-y-5">
         <div className="rounded-3xl border border-border/60 bg-gradient-to-br from-secondary via-secondary/95 to-primary p-5 text-primary-foreground shadow-[0_18px_50px_-30px_hsl(var(--secondary)/0.7)] md:p-7">
           <p className="text-[10px] uppercase tracking-[0.32em] opacity-75">BoA private institute</p>
@@ -218,6 +221,7 @@ const Locations = () => {
         </div>
       </div>
     </AuthLayout>
+    </>
   );
 };
 
