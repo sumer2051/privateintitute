@@ -133,14 +133,22 @@ All colors MUST be HSL.
 
 @layer base {
   html, body {
-    @apply overflow-x-hidden;
+    /* `clip` instead of `hidden`: `overflow-x: hidden` makes html/body a scroll
+       container and silently breaks every `position: sticky` header in the app. */
+    overflow-x: clip;
     -webkit-text-size-adjust: 100%;
+  }
+  @supports not (overflow-x: clip) {
+    html, body {
+      overflow-x: hidden;
+    }
   }
   /* iPhone-style shell: reserve room for the status bar + home indicator */
   html.ios-shell body {
     padding-top: var(--ios-status-h, 44px);
     padding-bottom: var(--ios-home-h, 22px);
   }
+  /* Pinned headers/toolbars park right under the Dynamic Island line */
   html.ios-shell .sticky.top-0 {
     top: var(--ios-status-h, 44px);
   }
@@ -148,6 +156,7 @@ All colors MUST be HSL.
     top: var(--ios-status-h, 44px);
     bottom: var(--ios-home-h, 22px);
   }
+
 
   /* Prevent iOS/Android auto-zoom on focus: inputs must be >=16px on mobile */
   @media (max-width: 767px) {
