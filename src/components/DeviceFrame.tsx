@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+
 import {
   Dialog,
   DialogContent,
@@ -92,7 +94,12 @@ const Battery = ({ level, charging }: { level: number; charging: boolean }) => {
  * home indicator on the bottom. Triple-tap the clock or the battery to edit them.
  */
 export const DeviceFrame = () => {
+  const { pathname } = useLocation();
+  // Transfers gets its own opaque chrome so busy sheet/page backgrounds
+  // never bleed through the Dynamic Island or status bar.
+  const solid = pathname.startsWith("/transfers");
   const [carrier, setCarrier] = useState(() => read(CARRIER_KEY, "AT&T"));
+
   const [customTime, setCustomTime] = useState(() => read(TIME_KEY, ""));
   const [battery, setBattery] = useState(() => Number(read(BATT_KEY, "100")) || 100);
   const [charging, setCharging] = useState(() => read(CHARGE_KEY, "0") === "1");
@@ -158,7 +165,11 @@ export const DeviceFrame = () => {
   return (
     <>
       {/* iPhone 17 Pro Max status bar — space is reserved, so it never covers page content */}
-      <div className="ios-device-chrome fixed inset-x-0 top-0 z-[10050] h-[var(--ios-status-h,54px)] select-none text-foreground">
+      <div
+        className={`ios-device-chrome fixed inset-x-0 top-0 z-[10050] h-[var(--ios-status-h,54px)] select-none text-foreground ${
+          solid ? "ios-chrome-solid" : ""
+        }`}
+      >
         <div className="relative mx-auto flex h-full max-w-[520px] items-end justify-between px-8 pb-[9px] text-[17px] font-semibold tracking-tight">
 
           <button
@@ -190,7 +201,11 @@ export const DeviceFrame = () => {
       </div>
 
       {/* Home indicator */}
-      <div className="ios-device-chrome fixed inset-x-0 bottom-0 z-[10050] flex h-[var(--ios-home-h,20px)] items-center justify-center">
+      <div
+        className={`ios-device-chrome fixed inset-x-0 bottom-0 z-[10050] flex h-[var(--ios-home-h,20px)] items-center justify-center ${
+          solid ? "ios-chrome-solid" : ""
+        }`}
+      >
         <span className="h-[5px] w-[140px] rounded-full bg-foreground/70" />
       </div>
 
