@@ -199,6 +199,7 @@ const Index = () => {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Toggle dark mode"
               onClick={() => {
                 setDarkMode(!darkMode);
                 showNotification("Theme", `${!darkMode ? "Dark" : "Light"} mode activated`, "info");
@@ -210,6 +211,7 @@ const Index = () => {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="View notifications"
               className="relative"
               onClick={() => showNotification("Notifications", "You have 2 unread notifications", "info")}
             >
@@ -219,7 +221,7 @@ const Index = () => {
               </Badge>
             </Button>
 
-            <Button variant="ghost" size="icon" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
+            <Button variant="ghost" size="icon" aria-label="Sign out" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
               {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
             </Button>
           </div>
