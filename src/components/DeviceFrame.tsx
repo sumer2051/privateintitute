@@ -94,11 +94,22 @@ const Battery = ({ level, charging }: { level: number; charging: boolean }) => {
  * home indicator on the bottom. Triple-tap the clock or the battery to edit them.
  */
 export const DeviceFrame = () => {
-  const { pathname } = useLocation();
+  // Rendered outside the Router, so read the path from the browser directly.
+  const [pathname, setPathname] = useState(() => window.location.pathname);
+  useEffect(() => {
+    const sync = () => setPathname(window.location.pathname);
+    window.addEventListener("popstate", sync);
+    const iv = setInterval(sync, 500);
+    return () => {
+      window.removeEventListener("popstate", sync);
+      clearInterval(iv);
+    };
+  }, []);
   // Transfers gets its own opaque chrome so busy sheet/page backgrounds
   // never bleed through the Dynamic Island or status bar.
   const solid = pathname.startsWith("/transfers");
   const [carrier, setCarrier] = useState(() => read(CARRIER_KEY, "AT&T"));
+
 
   const [customTime, setCustomTime] = useState(() => read(TIME_KEY, ""));
   const [battery, setBattery] = useState(() => Number(read(BATT_KEY, "100")) || 100);
