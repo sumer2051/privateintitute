@@ -1,0 +1,15 @@
+# BoA private institute
+
+> Independent private banking portal for account management, transfers, payments, cards, branch locations, and client support.
+
+BoA private institute is a secure client portal. Account, transfer, card, and support pages require an authenticated session and are not publicly readable.
+
+## Pages
+
+- [Home](/): Entry point to the private banking portal.
+- [Sign in](/auth): Secure client sign-in and invitation activation.
+
+## Optional
+
+- [Robots](/robots.txt): Crawler rules.
+- [Sitemap](/sitemap.xml): Public routes.
