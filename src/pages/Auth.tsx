@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, Lock, Sparkles, Eye, EyeOff, Mail, User, CheckCircle2, AlertCircle, MailCheck, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -252,6 +252,7 @@ const Auth = () => {
         }}
       />
 
+      <main className="relative w-full max-w-md">
       <Card className="relative w-full max-w-md border-white/10 bg-card/95 backdrop-blur-xl shadow-2xl animate-in fade-in zoom-in-95 duration-500">
         {/* Glowing border */}
         <div className="pointer-events-none absolute -inset-px rounded-lg bg-gradient-to-r from-primary via-accent to-primary opacity-40 blur-sm" />
@@ -520,6 +521,7 @@ const Auth = () => {
           </CardContent>
         </div>
       </Card>
+      </main>
 
       <Dialog open={tfaOpen} onOpenChange={setTfaOpen}>
         <DialogContent>
