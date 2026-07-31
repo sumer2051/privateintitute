@@ -134,8 +134,20 @@ export default function AdminUsers() {
   };
 
 
+  const [txPending, setTxPending] = useState<{ tx: Tx; status: string } | null>(null);
+  const [txNote, setTxNote] = useState("");
+
+  const confirmTxStatus = async () => {
+    if (!txPending) return;
+    const { tx, status } = txPending;
+    await updateTxStatus(tx, status, txNote);
+    setTxPending(null);
+    setTxNote("");
+  };
+
   const updateTxStatus = async (tx: Tx, status: string, note: string) => {
     const isPendingDeposit = tx.category === "Pending Deposit";
+
 
     setTxBusy(tx.id);
 
