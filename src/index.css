@@ -156,6 +156,15 @@ All colors MUST be HSL.
     top: var(--ios-status-h, 56px);
     bottom: var(--ios-home-h, 22px);
   }
+  /* Lock / splash overlays are dark: switch the device chrome to light content */
+  html[data-app-locked="1"] .ios-device-chrome {
+    color: #fff;
+  }
+  html[data-app-locked="1"] .ios-device-chrome span[class*="bg-foreground"] {
+    background-color: rgba(255, 255, 255, 0.85);
+  }
+
+
 
 
   /* Prevent iOS/Android auto-zoom on focus: inputs must be >=16px on mobile */

@@ -182,6 +182,15 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
   };
   const backspace = () => setCode((c) => c.slice(0, -1));
 
+  // Let the iOS status bar / home indicator switch to light content while the
+  // lock or splash overlay is visible (they render above the overlay).
+  useEffect(() => {
+    const locked = phase !== "ready";
+    if (locked) document.documentElement.setAttribute("data-app-locked", "1");
+    else document.documentElement.removeAttribute("data-app-locked");
+    return () => document.documentElement.removeAttribute("data-app-locked");
+  }, [phase]);
+
   if (phase === "ready") return <>{children}</>;
 
   if (phase === "splash") {
