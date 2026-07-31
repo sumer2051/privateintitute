@@ -158,7 +158,7 @@ export const DeviceFrame = () => {
   return (
     <>
       {/* Status bar — transparent overlay so content shows behind it */}
-      <div className="fixed inset-x-0 top-0 z-[300] h-[var(--ios-status-h,56px)] select-none text-foreground">
+      <div className="ios-device-chrome fixed inset-x-0 top-0 z-[10050] h-[var(--ios-status-h,56px)] select-none text-foreground">
         <div className="relative mx-auto flex h-full max-w-[520px] items-center justify-between px-5 text-[17px] font-semibold tracking-tight">
 
           <button
@@ -188,7 +188,7 @@ export const DeviceFrame = () => {
       </div>
 
       {/* Home indicator — transparent overlay */}
-      <div className="fixed inset-x-0 bottom-0 z-[300] flex h-[var(--ios-home-h,22px)] items-center justify-center">
+      <div className="ios-device-chrome fixed inset-x-0 bottom-0 z-[10050] flex h-[var(--ios-home-h,22px)] items-center justify-center">
         <span className="h-[5px] w-[140px] rounded-full bg-foreground/80" />
       </div>
 
