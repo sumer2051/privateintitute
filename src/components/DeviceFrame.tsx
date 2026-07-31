@@ -94,7 +94,12 @@ const Battery = ({ level, charging }: { level: number; charging: boolean }) => {
  * home indicator on the bottom. Triple-tap the clock or the battery to edit them.
  */
 export const DeviceFrame = () => {
+  const { pathname } = useLocation();
+  // Transfers gets its own opaque chrome so busy sheet/page backgrounds
+  // never bleed through the Dynamic Island or status bar.
+  const solid = pathname.startsWith("/transfers");
   const [carrier, setCarrier] = useState(() => read(CARRIER_KEY, "AT&T"));
+
   const [customTime, setCustomTime] = useState(() => read(TIME_KEY, ""));
   const [battery, setBattery] = useState(() => Number(read(BATT_KEY, "100")) || 100);
   const [charging, setCharging] = useState(() => read(CHARGE_KEY, "0") === "1");
