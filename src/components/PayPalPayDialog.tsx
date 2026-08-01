@@ -57,6 +57,10 @@ export const PayPalPayDialog = ({
   const [selectedAccountName, setSelectedAccountName] = useState("James Robinson");
   const [selectedInitials, setSelectedInitials] = useState("JR");
   const selectedAccount = accounts.find((a) => a.id === fromAccount);
+  const lookup = useHandleLookup("paypal", email, (n) => {
+    if (!recipient.trim()) setRecipient(n);
+  });
+
   const [pulse, setPulse] = useState(false);
   useEffect(() => {
     if (!fromAccount) return;
