@@ -3,8 +3,6 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useHandleLookup } from "@/hooks/useHandleLookup";
-import { HandleVerifyRow } from "@/components/HandleVerifyRow";
 
 
 interface ZellePayDialogProps {
@@ -42,9 +40,6 @@ export const ZellePayDialog = ({
   }, [open, accounts, fromAccount, setFromAccount]);
 
   const selected = accounts.find((a) => a.id === fromAccount);
-  const lookup = useHandleLookup("zelle", email, (n) => {
-    if (!recipient.trim()) setRecipient(n);
-  });
 
   const displayAmount = amount && parseFloat(amount) > 0
     ? Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -169,13 +164,6 @@ export const ZellePayDialog = ({
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@email.com"
               className="w-full h-12 px-3 rounded-xl border border-gray-300 bg-white outline-none text-sm text-black placeholder:text-gray-400 focus:border-[#6D1ED4] focus:ring-2 focus:ring-[#6D1ED4]/20 transition-all"
-            />
-            <HandleVerifyRow
-              status={lookup.status}
-              name={lookup.name}
-              hint={lookup.hint}
-              accent="#6D1ED4"
-              onUseName={setRecipient}
             />
           </div>
 

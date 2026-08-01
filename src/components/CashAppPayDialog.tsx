@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Sparkles, Check, ChevronDown } from "lucide-react";
-import { useHandleLookup } from "@/hooks/useHandleLookup";
-import { HandleVerifyRow } from "@/components/HandleVerifyRow";
 
 
 interface CashAppPayDialogProps {
@@ -52,9 +50,6 @@ export const CashAppPayDialog = ({
   const balanceOptions = [balanceLabel, "Bank ••1234", "Debit card ••4477"];
   const [balanceIdx, setBalanceIdx] = useState(0);
   const currentBalanceLabel = balanceOptions[balanceIdx] ?? balanceLabel;
-  const lookup = useHandleLookup("cashapp", handle, (n) => {
-    if (!recipient.trim()) setRecipient(n);
-  });
 
 
   useEffect(() => {
@@ -203,24 +198,16 @@ export const CashAppPayDialog = ({
               </button>
             </div>
 
-            <div className="px-5 py-3 border-t border-black/10">
-              <div className="flex items-center gap-6">
-                <span className="text-sm font-bold text-black w-10">To</span>
-                <input
-                  value={handle}
-                  onChange={(e) => setHandle(e.target.value)}
-                  placeholder="$Cashtag,"
-                  className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
-                />
-              </div>
-              <HandleVerifyRow
-                status={lookup.status}
-                name={lookup.name}
-                hint={lookup.hint}
-                accent="#00C244"
-                onUseName={setRecipient}
+            <div className="px-5 py-3 border-t border-black/10 flex items-center gap-6">
+              <span className="text-sm font-bold text-black w-10">To</span>
+              <input
+                value={handle}
+                onChange={(e) => setHandle(e.target.value)}
+                placeholder="$Cashtag,"
+                className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
               />
             </div>
+
 
 
             <div className="px-5 py-3 border-t border-black/10 flex items-center gap-6">
