@@ -170,13 +170,6 @@ export const ZellePayDialog = ({
               placeholder="name@email.com"
               className="w-full h-12 px-3 rounded-xl border border-gray-300 bg-white outline-none text-sm text-black placeholder:text-gray-400 focus:border-[#6D1ED4] focus:ring-2 focus:ring-[#6D1ED4]/20 transition-all"
             />
-            <HandleVerifyRow
-              status={lookup.status}
-              name={lookup.name}
-              hint={lookup.hint}
-              accent="#6D1ED4"
-              onUseName={setRecipient}
-            />
           </div>
 
 
