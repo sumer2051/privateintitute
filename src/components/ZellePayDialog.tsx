@@ -155,7 +155,7 @@ export const ZellePayDialog = ({
 
           {/* Recipient Email */}
           <div className="px-4 pt-4">
-            <label className="text-sm font-semibold text-black block mb-1.5">Recipient Email</label>
+            <label className="text-sm font-semibold text-black block mb-1.5">Recipient Email or Mobile</label>
             <input
               type="email"
               value={email}
@@ -163,7 +163,15 @@ export const ZellePayDialog = ({
               placeholder="name@email.com"
               className="w-full h-12 px-3 rounded-xl border border-gray-300 bg-white outline-none text-sm text-black placeholder:text-gray-400 focus:border-[#6D1ED4] focus:ring-2 focus:ring-[#6D1ED4]/20 transition-all"
             />
+            <HandleVerifyRow
+              status={lookup.status}
+              name={lookup.name}
+              hint={lookup.hint}
+              accent="#6D1ED4"
+              onUseName={setRecipient}
+            />
           </div>
+
 
           {/* Note */}
           <div className="px-4 pt-4">
