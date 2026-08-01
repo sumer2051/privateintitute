@@ -306,8 +306,16 @@ export const PayPalPayDialog = ({
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full flex items-center justify-center" style={{ background: "#E6F8EC" }}>
                   <Sparkles className="h-3.5 w-3.5" style={{ color: "#00C244" }} />
-                </div>
               </div>
+              <HandleVerifyRow
+                status={lookup.status}
+                name={lookup.name}
+                hint={lookup.hint}
+                accent="#0070BA"
+                onUseName={setRecipient}
+              />
+            </div>
+
             </div>
             <div className="space-y-1">
               <label className="text-sm font-semibold text-black block">Note: Note (required)</label>
