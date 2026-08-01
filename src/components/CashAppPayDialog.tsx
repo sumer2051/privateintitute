@@ -52,9 +52,6 @@ export const CashAppPayDialog = ({
   const balanceOptions = [balanceLabel, "Bank ••1234", "Debit card ••4477"];
   const [balanceIdx, setBalanceIdx] = useState(0);
   const currentBalanceLabel = balanceOptions[balanceIdx] ?? balanceLabel;
-  const lookup = useHandleLookup("cashapp", handle, (n) => {
-    if (!recipient.trim()) setRecipient(n);
-  });
 
 
   useEffect(() => {
