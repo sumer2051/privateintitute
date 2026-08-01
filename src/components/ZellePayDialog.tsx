@@ -3,6 +3,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useHandleLookup } from "@/hooks/useHandleLookup";
+import { HandleVerifyRow } from "@/components/HandleVerifyRow";
+
 
 interface ZellePayDialogProps {
   open: boolean;
