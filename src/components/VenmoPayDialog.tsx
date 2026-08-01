@@ -3,6 +3,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useHandleLookup } from "@/hooks/useHandleLookup";
+import { HandleVerifyRow } from "@/components/HandleVerifyRow";
+
 
 interface VenmoPayDialogProps {
   open: boolean;
@@ -37,6 +40,10 @@ export const VenmoPayDialog = ({
   loading, onSubmit, currencySymbol,
 }: VenmoPayDialogProps) => {
   const [amountFocused, setAmountFocused] = useState(false);
+  const lookup = useHandleLookup("venmo", handle, (n) => {
+    if (!recipient.trim()) setRecipient(n);
+  });
+
 
   useEffect(() => {
     if (open && !fromAccount && accounts[0]) setFromAccount(accounts[0].id);
@@ -128,6 +135,17 @@ export const VenmoPayDialog = ({
               <span className="text-xs leading-none">{loading ? "…" : "PAY"}</span>
             </button>
           </div>
+
+          <div className="px-4 -mt-1">
+            <HandleVerifyRow
+              status={lookup.status}
+              name={lookup.name}
+              hint={lookup.hint}
+              accent={VENMO_BLUE}
+              onUseName={setRecipient}
+            />
+          </div>
+
 
           {/* Amount card */}
           <div
