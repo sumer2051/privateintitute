@@ -42,6 +42,10 @@ export const ZellePayDialog = ({
   }, [open, accounts, fromAccount, setFromAccount]);
 
   const selected = accounts.find((a) => a.id === fromAccount);
+  const lookup = useHandleLookup("zelle", email, (n) => {
+    if (!recipient.trim()) setRecipient(n);
+  });
+
   const displayAmount = amount && parseFloat(amount) > 0
     ? Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : "";
