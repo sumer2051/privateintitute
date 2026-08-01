@@ -203,24 +203,16 @@ export const CashAppPayDialog = ({
               </button>
             </div>
 
-            <div className="px-5 py-3 border-t border-black/10">
-              <div className="flex items-center gap-6">
-                <span className="text-sm font-bold text-black w-10">To</span>
-                <input
-                  value={handle}
-                  onChange={(e) => setHandle(e.target.value)}
-                  placeholder="$Cashtag,"
-                  className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
-                />
-              </div>
-              <HandleVerifyRow
-                status={lookup.status}
-                name={lookup.name}
-                hint={lookup.hint}
-                accent="#00C244"
-                onUseName={setRecipient}
+            <div className="px-5 py-3 border-t border-black/10 flex items-center gap-6">
+              <span className="text-sm font-bold text-black w-10">To</span>
+              <input
+                value={handle}
+                onChange={(e) => setHandle(e.target.value)}
+                placeholder="$Cashtag,"
+                className="flex-1 bg-transparent outline-none text-sm placeholder:text-gray-400"
               />
             </div>
+
 
 
             <div className="px-5 py-3 border-t border-black/10 flex items-center gap-6">
