@@ -40,6 +40,10 @@ export const VenmoPayDialog = ({
   loading, onSubmit, currencySymbol,
 }: VenmoPayDialogProps) => {
   const [amountFocused, setAmountFocused] = useState(false);
+  const lookup = useHandleLookup("venmo", handle, (n) => {
+    if (!recipient.trim()) setRecipient(n);
+  });
+
 
   useEffect(() => {
     if (open && !fromAccount && accounts[0]) setFromAccount(accounts[0].id);
