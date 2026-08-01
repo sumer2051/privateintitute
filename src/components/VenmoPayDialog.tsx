@@ -136,6 +136,17 @@ export const VenmoPayDialog = ({
             </button>
           </div>
 
+          <div className="px-4 -mt-1">
+            <HandleVerifyRow
+              status={lookup.status}
+              name={lookup.name}
+              hint={lookup.hint}
+              accent={VENMO_BLUE}
+              onUseName={setRecipient}
+            />
+          </div>
+
+
           {/* Amount card */}
           <div
             className="relative mx-4 rounded-2xl border border-gray-200 p-4"
