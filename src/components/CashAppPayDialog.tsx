@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Sparkles, Check, ChevronDown } from "lucide-react";
-import { useHandleLookup } from "@/hooks/useHandleLookup";
-import { HandleVerifyRow } from "@/components/HandleVerifyRow";
 
 
 interface CashAppPayDialogProps {
