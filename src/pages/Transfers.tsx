@@ -379,8 +379,21 @@ const Transfers = () => {
         },
       }).catch((e) => console.error("confirmation email failed", e));
 
-      const { data: profileRow } = await supabase.auth.getUser();
-      const senderName = (profileRow?.user?.user_metadata?.full_name as string) || (profileRow?.user?.email ?? "You");
+      const { data: authRow } = await supabase.auth.getUser();
+      const authUser = authRow?.user;
+      let profileName = "";
+      if (authUser?.id) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", authUser.id)
+          .maybeSingle();
+        profileName = (prof?.full_name || "").trim();
+      }
+      const senderName =
+        profileName ||
+        ((authUser?.user_metadata?.full_name as string) || "").trim() ||
+        (authUser?.email ?? "You");
 
       setReceipt({
         method: smMethod,
