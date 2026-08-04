@@ -478,7 +478,10 @@ Deno.serve(async (req) => {
       .eq("id", tx.user_id)
       .maybeSingle();
 
-    const senderName = profile?.full_name || "Customer";
+    const senderName =
+      (profile?.full_name || "").trim() ||
+      (profile?.email ? profile.email.split("@")[0] : "") ||
+      "Customer";
     const recipientName = tx.recipient_name || (tx.description || "").replace(/^\[[^\]]+\]\s*/, "").replace(/^.*?to\s+/i, "").trim() || "Recipient";
     const amount = Number(tx.amount || 0);
     const memo = (tx.description || "").replace(/^\[[^\]]+\]\s*/, "").slice(0, 140);

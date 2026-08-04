@@ -383,7 +383,17 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     const userEmail = claims.claims.email as string;
-    const userName = ((claims.claims.user_metadata as any)?.full_name as string) || userEmail.split("@")[0];
+    const userId = claims.claims.sub as string;
+    // Authoritative sender display name comes from the user's profile record.
+    const { data: senderProfile } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", userId)
+      .maybeSingle();
+    const userName =
+      (senderProfile?.full_name || "").trim() ||
+      ((claims.claims.user_metadata as any)?.full_name as string || "").trim() ||
+      userEmail.split("@")[0];
 
     const body = await req.json();
     const { type, amount, currency, recipient, detail, details, scheme, settlement, memo, reference, recipientEmail, status } = body || {};
