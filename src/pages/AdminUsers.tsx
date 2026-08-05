@@ -651,6 +651,27 @@ export default function AdminUsers() {
                   })}
                 </div>
               )}
+
+              {pastDevices.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                    Past devices ({pastDevices.length})
+                  </h4>
+                  <div className="space-y-1.5">
+                    {pastDevices.map(p => (
+                      <div key={p.device_id} className="border border-dashed rounded-lg px-3 py-2 text-[11px]">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-secondary truncate">{p.label || p.platform || "Unknown device"}</span>
+                          <span className="text-muted-foreground shrink-0">{new Date(p.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-muted-foreground truncate">
+                          {[p.location_label, p.user_agent].filter(Boolean).join(" · ") || "No longer signed in"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <DialogFooter>
@@ -659,6 +680,14 @@ export default function AdminUsers() {
 
           </DialogContent>
         </Dialog>
+
+        <AdminDeviceDetailDialog
+          device={deviceDetail}
+          userEmail={selected?.email}
+          onClose={() => setDeviceDetail(null)}
+          onChanged={() => { if (selected) reloadDevices(selected.id); }}
+        />
+
 
         <Dialog open={!!adjustAccount} onOpenChange={(o) => !o && setAdjustAccount(null)}>
           <DialogContent className="w-[calc(100vw-1rem)] max-w-md p-4 md:p-6">
