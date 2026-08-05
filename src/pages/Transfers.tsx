@@ -22,6 +22,7 @@ import { VenmoPayDialog } from "@/components/VenmoPayDialog";
 import { ZellePayDialog } from "@/components/ZellePayDialog";
 import { MethodPayDialog } from "@/components/MethodPayDialog";
 import { Seo } from "@/components/Seo";
+import { deviceCanTransfer } from "@/lib/device-caps";
 
 interface Account {
   id: string;
@@ -331,6 +332,14 @@ const Transfers = () => {
     try {
       const ref = genRef(smMethod.id.toUpperCase().slice(0, 4));
       const { data: { user } } = await supabase.auth.getUser();
+      if (user && !(await deviceCanTransfer(user.id))) {
+        toast({
+          title: "Transfers disabled on this device",
+          description: "Money movement has been restricted on this device. Please contact support.",
+          variant: "destructive",
+        });
+        return;
+      }
       if (!user) throw new Error("Not signed in");
 
       const detailPairs = smMethod.fields
