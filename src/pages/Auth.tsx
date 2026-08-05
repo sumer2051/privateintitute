@@ -10,6 +10,7 @@ import { ShieldCheck, Lock, Sparkles, Eye, EyeOff, Mail, User, CheckCircle2, Ale
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import logo from "@/assets/logo.png";
 import { Seo } from "@/components/Seo";
+import { DEVICE_BLOCKED_EVENT, DEVICE_BLOCKED_KEY } from "@/components/DeviceBlockedNotice";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -36,6 +37,20 @@ const Auth = () => {
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const passwordValid = password.length >= 6;
+
+  // Recover browsers restricted by the legacy flow, which signed the user out
+  // and left a local notice that could no longer check the server after unlock.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) return;
+      try {
+        if (localStorage.getItem(DEVICE_BLOCKED_KEY)) {
+          localStorage.removeItem(DEVICE_BLOCKED_KEY);
+          window.dispatchEvent(new Event(DEVICE_BLOCKED_EVENT));
+        }
+      } catch (_) { /* ignore */ }
+    });
+  }, []);
 
 
   // 2FA prompt state (post-login, optional)

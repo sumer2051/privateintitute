@@ -665,6 +665,7 @@ export type Database = {
         Args: { p_account: string; p_amount: number; p_reason: string }
         Returns: string
       }
+      admin_restore_device: { Args: { p_device: string }; Returns: boolean }
       admin_revoke_device: { Args: { p_device: string }; Returns: boolean }
       admin_revoke_role: {
         Args: {

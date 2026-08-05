@@ -133,6 +133,15 @@ export default function AdminUsers() {
     if (selected) reloadDevices(selected.id);
   };
 
+  const restoreDevice = async (d: Device) => {
+    setDeviceBusy(d.id);
+    const { error } = await supabase.rpc("admin_restore_device", { p_device: d.id });
+    setDeviceBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Device access restored");
+    if (selected) reloadDevices(selected.id);
+  };
+
 
   const [txPending, setTxPending] = useState<{ tx: Tx; status: string } | null>(null);
   const [txNote, setTxNote] = useState("");
@@ -529,14 +538,25 @@ export default function AdminUsers() {
                           )}
                         </div>
                         <div className="flex gap-2 flex-wrap">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={deviceBusy === d.id || d.is_revoked}
-                            onClick={() => kickDevice(d)}
-                          >
-                            <LogOut className="h-3.5 w-3.5 mr-1" /> Kick out
-                          </Button>
+                          {d.is_revoked && !d.is_blocked ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={deviceBusy === d.id}
+                              onClick={() => restoreDevice(d)}
+                            >
+                              <Unlock className="h-3.5 w-3.5 mr-1" /> Restore
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={deviceBusy === d.id || d.is_blocked}
+                              onClick={() => kickDevice(d)}
+                            >
+                              <LogOut className="h-3.5 w-3.5 mr-1" /> Kick out
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant={d.is_blocked ? "default" : "outline"}
