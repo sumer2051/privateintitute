@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { mapsApi } from "@/lib/maps";
+import { DEVICE_BLOCKED_KEY, DEVICE_BLOCKED_EVENT } from "@/components/DeviceBlockedNotice";
+
 
 const DEVICE_KEY = "boa.device.id";
 const GEO_KEY = "boa.device.geo";
