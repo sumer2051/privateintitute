@@ -94,8 +94,9 @@ export function useDeviceGuard(userId: string | undefined) {
           localStorage.setItem(DEVICE_BLOCKED_KEY, "1");
           window.dispatchEvent(new Event(DEVICE_BLOCKED_EVENT));
         } catch (_) { /* ignore */ }
-        await supabase.auth.signOut();
-        window.location.href = "/auth";
+        // Keep the authenticated session alive behind the full-screen notice.
+        // This lets the guard observe an administrator unlocking the device and
+        // remove the restriction without trapping the browser in signed-out state.
         return true;
       }
       try {
