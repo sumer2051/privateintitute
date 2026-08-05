@@ -90,16 +90,18 @@ export function useDeviceGuard(userId: string | undefined) {
       if (data?.is_blocked) {
         toast.error("This device has been locked by an administrator.");
         await supabase.auth.signOut();
-        localStorage.removeItem(DEVICE_KEY);
         window.location.href = "/auth";
         return true;
       }
       if (data?.is_revoked) {
-        toast.error("Your session on this device was ended by an administrator.");
+        // A "kick" is a one-time session end: sign out silently and rotate the
+        // local device id so the next sign-in registers as a fresh device.
+        localStorage.removeItem(DEVICE_KEY);
         await supabase.auth.signOut();
         window.location.href = "/auth";
         return true;
       }
+
       return false;
     };
 
