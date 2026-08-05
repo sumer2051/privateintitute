@@ -532,12 +532,37 @@ export default function AdminUsers() {
             </div>
 
             <div className="mt-6">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
                 <h3 className="text-sm font-semibold text-secondary flex items-center gap-2">
                   <Monitor className="h-4 w-4 text-primary" /> Signed-in devices
                 </h3>
-                <span className="text-xs text-muted-foreground">{userDevices.length} known</span>
+                <span className="text-xs text-muted-foreground">
+                  {userDevices.length} of {selected.device_limit ?? 5} allowed
+                </span>
               </div>
+
+              <div className="mb-3 border rounded-lg p-3 flex flex-col sm:flex-row sm:items-end gap-2">
+                <div className="flex-1">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Device limit on this account
+                  </label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={limitValue}
+                    onChange={e => setLimitValue(e.target.value)}
+                    className="mt-1"
+                  />
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Maximum number of devices allowed to stay signed in. Currently using {userDevices.length}.
+                  </p>
+                </div>
+                <Button size="sm" onClick={saveDeviceLimit} disabled={limitBusy}>
+                  {limitBusy ? "Saving…" : "Save limit"}
+                </Button>
+              </div>
+
               {userDevices.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-4 border rounded-lg">No devices have signed in yet.</p>
               ) : (
@@ -548,7 +573,14 @@ export default function AdminUsers() {
                     const mins = Math.round((Date.now() - lastSeen.getTime()) / 60000);
                     const active = mins < 3 && !d.is_revoked && !d.is_blocked;
                     return (
-                      <div key={d.id} className="border rounded-lg p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+                      <div
+                        key={d.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setDeviceDetail(d)}
+                        onKeyDown={(e) => { if (e.key === "Enter") setDeviceDetail(d); }}
+                        className="border rounded-lg p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-3 cursor-pointer transition hover:border-primary/60 hover:bg-muted/40"
+                      >
                         <Icon className="h-5 w-5 text-primary shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -556,6 +588,14 @@ export default function AdminUsers() {
                             {active && <Badge className="bg-emerald-500 text-white text-[10px]">Active now</Badge>}
                             {d.is_blocked && <Badge variant="destructive" className="text-[10px]">Locked</Badge>}
                             {d.is_revoked && !d.is_blocked && <Badge variant="outline" className="text-[10px]">Kicked</Badge>}
+                            {d.view_only
+                              ? <Badge className="bg-amber-500 text-white text-[10px]">View only</Badge>
+                              : (
+                                <>
+                                  {d.can_transfer === false && <Badge variant="outline" className="text-[10px]">No transfers</Badge>}
+                                  {d.can_deposit === false && <Badge variant="outline" className="text-[10px]">No deposits</Badge>}
+                                </>
+                              )}
                           </div>
                           <p className="text-[11px] text-muted-foreground truncate">{d.user_agent || "—"}</p>
                           <p className="text-[11px] text-muted-foreground">
@@ -566,14 +606,17 @@ export default function AdminUsers() {
                               href={`https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}`}
                               target="_blank"
                               rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
                             >
                               <MapPin className="h-3 w-3" />
                               {d.location_label || `${Number(d.lat).toFixed(2)}, ${Number(d.lng).toFixed(2)}`}
                             </a>
                           )}
+                          <p className="text-[11px] text-primary mt-0.5">Tap for full details & capabilities</p>
                         </div>
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+
                           {d.is_revoked && !d.is_blocked ? (
                             <Button
                               size="sm"
