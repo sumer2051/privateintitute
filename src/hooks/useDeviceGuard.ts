@@ -133,23 +133,46 @@ export function useDeviceGuard(userId: string | undefined) {
       const geo = await getApproxLocation();
       if (cancelled) return;
 
-      if (existing?.id) {
+      let rowId = existing?.id as string | undefined;
+      if (rowId) {
         await supabase
           .from("user_devices")
           .update({ last_seen: new Date().toISOString(), user_agent: ua, platform, label, ...(geo ?? {}) })
-          .eq("id", existing.id);
+          .eq("id", rowId);
       } else {
-        await supabase.from("user_devices").insert({
+        const { data: inserted } = await supabase.from("user_devices").insert({
           user_id: userId,
           device_id: deviceId,
           user_agent: ua,
           platform,
           label,
           ...(geo ?? {}),
-        });
+        }).select("id").maybeSingle();
+        rowId = (inserted as any)?.id;
       }
+
+      // Log one sign-in history entry per browser session so admins keep a
+      // permanent record of past devices, even after a device row is removed.
+      try {
+        const flag = `boa.device.logged.${deviceId}`;
+        if (!sessionStorage.getItem(flag)) {
+          sessionStorage.setItem(flag, "1");
+          await supabase.from("device_login_events").insert({
+            user_id: userId,
+            device_row: rowId ?? null,
+            device_id: deviceId,
+            event_type: existing?.id ? "sign_in" : "first_seen",
+            label,
+            user_agent: ua,
+            platform,
+            ...(geo ?? {}),
+          });
+        }
+      } catch (_) { /* non-fatal */ }
+
       registered.current = true;
     };
+
 
     register();
 
