@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { mapsApi } from "@/lib/maps";
+import { DEVICE_BLOCKED_KEY, DEVICE_BLOCKED_EVENT } from "@/components/DeviceBlockedNotice";
+
 
 const DEVICE_KEY = "boa.device.id";
 const GEO_KEY = "boa.device.geo";
@@ -88,11 +90,20 @@ export function useDeviceGuard(userId: string | undefined) {
         .maybeSingle();
       if (cancelled) return;
       if (data?.is_blocked) {
-        toast.error("This device has been locked by an administrator.");
+        try {
+          localStorage.setItem(DEVICE_BLOCKED_KEY, "1");
+          window.dispatchEvent(new Event(DEVICE_BLOCKED_EVENT));
+        } catch (_) { /* ignore */ }
         await supabase.auth.signOut();
         window.location.href = "/auth";
         return true;
       }
+      try {
+        if (localStorage.getItem(DEVICE_BLOCKED_KEY)) {
+          localStorage.removeItem(DEVICE_BLOCKED_KEY);
+          window.dispatchEvent(new Event(DEVICE_BLOCKED_EVENT));
+        }
+      } catch (_) { /* ignore */ }
       if (data?.is_revoked) {
         // A "kick" is a one-time session end: sign out silently and rotate the
         // local device id so the next sign-in registers as a fresh device.
@@ -104,6 +115,7 @@ export function useDeviceGuard(userId: string | undefined) {
 
       return false;
     };
+
 
     const register = async () => {
       const kicked = await enforce();
