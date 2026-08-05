@@ -42,6 +42,8 @@ const App = () => (
         <Toaster />
         <Sonner />
         <DeviceFrame />
+        <DeviceBlockedNotice />
+
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <AppLock>
           <Routes>
