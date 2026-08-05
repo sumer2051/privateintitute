@@ -28,6 +28,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { AppLock } from "./components/AppLock";
 import { DeviceFrame } from "./components/DeviceFrame";
+import { DeviceBlockedNotice } from "./components/DeviceBlockedNotice";
+
 import { HelmetProvider } from "react-helmet-async";
 
 const queryClient = new QueryClient();
