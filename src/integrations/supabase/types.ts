@@ -92,6 +92,57 @@ export type Database = {
         }
         Relationships: []
       }
+      device_login_events: {
+        Row: {
+          created_at: string
+          device_id: string
+          device_row: string | null
+          event_type: string
+          id: string
+          ip: string | null
+          label: string | null
+          lat: number | null
+          lng: number | null
+          location_label: string | null
+          meta: Json
+          platform: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          device_row?: string | null
+          event_type?: string
+          id?: string
+          ip?: string | null
+          label?: string | null
+          lat?: number | null
+          lng?: number | null
+          location_label?: string | null
+          meta?: Json
+          platform?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          device_row?: string | null
+          event_type?: string
+          id?: string
+          ip?: string | null
+          label?: string | null
+          lat?: number | null
+          lng?: number | null
+          location_label?: string | null
+          meta?: Json
+          platform?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       invitations: {
         Row: {
           created_at: string
@@ -173,6 +224,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           date_of_birth: string | null
+          device_limit: number
           email: string | null
           full_name: string | null
           id: string
@@ -188,6 +240,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          device_limit?: number
           email?: string | null
           full_name?: string | null
           id: string
@@ -203,6 +256,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          device_limit?: number
           email?: string | null
           full_name?: string | null
           id?: string
@@ -517,7 +571,10 @@ export type Database = {
       }
       user_devices: {
         Row: {
+          admin_notes: string | null
           blocked_at: string | null
+          can_deposit: boolean
+          can_transfer: boolean
           created_at: string
           device_id: string
           first_seen: string
@@ -535,9 +592,13 @@ export type Database = {
           updated_at: string
           user_agent: string | null
           user_id: string
+          view_only: boolean
         }
         Insert: {
+          admin_notes?: string | null
           blocked_at?: string | null
+          can_deposit?: boolean
+          can_transfer?: boolean
           created_at?: string
           device_id: string
           first_seen?: string
@@ -555,9 +616,13 @@ export type Database = {
           updated_at?: string
           user_agent?: string | null
           user_id: string
+          view_only?: boolean
         }
         Update: {
+          admin_notes?: string | null
           blocked_at?: string | null
+          can_deposit?: boolean
+          can_transfer?: boolean
           created_at?: string
           device_id?: string
           first_seen?: string
@@ -575,6 +640,7 @@ export type Database = {
           updated_at?: string
           user_agent?: string | null
           user_id?: string
+          view_only?: boolean
         }
         Relationships: []
       }
@@ -680,6 +746,20 @@ export type Database = {
       }
       admin_set_device_blocked: {
         Args: { p_blocked: boolean; p_device: string }
+        Returns: boolean
+      }
+      admin_set_device_limit: {
+        Args: { p_limit: number; p_user: string }
+        Returns: number
+      }
+      admin_set_device_permissions: {
+        Args: {
+          p_can_deposit: boolean
+          p_can_transfer: boolean
+          p_device: string
+          p_notes?: string
+          p_view_only: boolean
+        }
         Returns: boolean
       }
       admin_update_transaction_status: {

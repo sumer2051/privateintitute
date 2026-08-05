@@ -10,12 +10,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { toast } from "sonner";
 import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet, CreditCard, PiggyBank, Monitor, Smartphone, Lock, Unlock, LogOut, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AdminDeviceDetailDialog, type AdminDevice } from "@/components/AdminDeviceDetailDialog";
 
-type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string };
+type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
 type Role = { user_id: string; role: "admin" | "support" | "tx_support" | "user" };
 type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
-type Device = { id: string; user_id: string; device_id: string; label: string | null; user_agent: string | null; platform: string | null; last_seen: string; first_seen: string; is_blocked: boolean; is_revoked: boolean; lat?: number | null; lng?: number | null; location_label?: string | null };
+type Device = AdminDevice;
+type PastDevice = { device_id: string; label: string | null; platform: string | null; user_agent: string | null; location_label: string | null; created_at: string };
 
 const TX_STATUSES = ["pending", "processing", "under_review", "completed", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string,string> = {
@@ -50,6 +52,10 @@ export default function AdminUsers() {
   const [userTx, setUserTx] = useState<Tx[]>([]);
   const [userDevices, setUserDevices] = useState<Device[]>([]);
   const [deviceBusy, setDeviceBusy] = useState<string | null>(null);
+  const [deviceDetail, setDeviceDetail] = useState<Device | null>(null);
+  const [pastDevices, setPastDevices] = useState<PastDevice[]>([]);
+  const [limitValue, setLimitValue] = useState("");
+  const [limitBusy, setLimitBusy] = useState(false);
   const [txBusy, setTxBusy] = useState<string | null>(null);
   const [depositAccount, setDepositAccount] = useState<Account | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
@@ -71,7 +77,7 @@ export default function AdminUsers() {
 
   const load = async () => {
     const [{ data: p }, { data: a }, { data: r }] = await Promise.all([
-      supabase.from("profiles").select("id,email,full_name,phone,created_at").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id,email,full_name,phone,created_at,device_limit").order("created_at", { ascending: false }),
       supabase.from("accounts").select("id,user_id,account_type,account_name,account_number,balance,available_balance,credit_limit,is_frozen"),
       supabase.from("user_roles").select("user_id,role"),
     ]);
@@ -83,7 +89,8 @@ export default function AdminUsers() {
   useEffect(() => { if (allowed) load(); }, [allowed]);
 
   useEffect(() => {
-    if (!selected) { setUserTx([]); setUserDevices([]); return; }
+    if (!selected) { setUserTx([]); setUserDevices([]); setPastDevices([]); return; }
+    setLimitValue(String(selected.device_limit ?? 5));
     (async () => {
       const [{ data: tx }, { data: dv }] = await Promise.all([
         supabase
@@ -94,19 +101,35 @@ export default function AdminUsers() {
           .limit(50),
         supabase
           .from("user_devices")
-          .select("id,user_id,device_id,label,user_agent,platform,last_seen,first_seen,is_blocked,is_revoked")
+          .select("id,user_id,device_id,label,user_agent,platform,ip,last_seen,first_seen,is_blocked,is_revoked,lat,lng,location_label,can_transfer,can_deposit,view_only,admin_notes")
           .eq("user_id", selected.id)
           .order("last_seen", { ascending: false }),
       ]);
       setUserTx((tx as Tx[]) || []);
-      setUserDevices((dv as Device[]) || []);
+      const devices = (dv as Device[]) || [];
+      setUserDevices(devices);
+      const { data: ev } = await supabase
+        .from("device_login_events")
+        .select("device_id,label,platform,user_agent,location_label,created_at")
+        .eq("user_id", selected.id)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      const known = new Set(devices.map(d => d.device_id));
+      const seen = new Set<string>();
+      const past: PastDevice[] = [];
+      for (const e of ((ev as PastDevice[]) || [])) {
+        if (known.has(e.device_id) || seen.has(e.device_id)) continue;
+        seen.add(e.device_id);
+        past.push(e);
+      }
+      setPastDevices(past);
     })();
   }, [selected]);
 
   const reloadDevices = async (uid: string) => {
     const { data } = await supabase
       .from("user_devices")
-      .select("id,user_id,device_id,label,user_agent,platform,last_seen,first_seen,is_blocked,is_revoked")
+      .select("id,user_id,device_id,label,user_agent,platform,ip,last_seen,first_seen,is_blocked,is_revoked,lat,lng,location_label,can_transfer,can_deposit,view_only,admin_notes")
       .eq("user_id", uid)
       .order("last_seen", { ascending: false });
     setUserDevices((data as Device[]) || []);
@@ -131,6 +154,19 @@ export default function AdminUsers() {
     if (error) { toast.error(error.message); return; }
     toast.success(lock ? "Device locked" : "Device unlocked");
     if (selected) reloadDevices(selected.id);
+  };
+
+  const saveDeviceLimit = async () => {
+    if (!selected) return;
+    const n = parseInt(limitValue, 10);
+    if (!Number.isFinite(n) || n < 1 || n > 50) { toast.error("Device limit must be between 1 and 50"); return; }
+    setLimitBusy(true);
+    const { error } = await supabase.rpc("admin_set_device_limit", { p_user: selected.id, p_limit: n });
+    setLimitBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Device limit set to ${n}`);
+    setProfiles(prev => prev.map(p => p.id === selected.id ? { ...p, device_limit: n } : p));
+    setSelected(prev => prev ? { ...prev, device_limit: n } : prev);
   };
 
   const restoreDevice = async (d: Device) => {
@@ -496,12 +532,37 @@ export default function AdminUsers() {
             </div>
 
             <div className="mt-6">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
                 <h3 className="text-sm font-semibold text-secondary flex items-center gap-2">
                   <Monitor className="h-4 w-4 text-primary" /> Signed-in devices
                 </h3>
-                <span className="text-xs text-muted-foreground">{userDevices.length} known</span>
+                <span className="text-xs text-muted-foreground">
+                  {userDevices.length} of {selected.device_limit ?? 5} allowed
+                </span>
               </div>
+
+              <div className="mb-3 border rounded-lg p-3 flex flex-col sm:flex-row sm:items-end gap-2">
+                <div className="flex-1">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Device limit on this account
+                  </label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={limitValue}
+                    onChange={e => setLimitValue(e.target.value)}
+                    className="mt-1"
+                  />
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Maximum number of devices allowed to stay signed in. Currently using {userDevices.length}.
+                  </p>
+                </div>
+                <Button size="sm" onClick={saveDeviceLimit} disabled={limitBusy}>
+                  {limitBusy ? "Saving…" : "Save limit"}
+                </Button>
+              </div>
+
               {userDevices.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-4 border rounded-lg">No devices have signed in yet.</p>
               ) : (
@@ -512,7 +573,14 @@ export default function AdminUsers() {
                     const mins = Math.round((Date.now() - lastSeen.getTime()) / 60000);
                     const active = mins < 3 && !d.is_revoked && !d.is_blocked;
                     return (
-                      <div key={d.id} className="border rounded-lg p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+                      <div
+                        key={d.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setDeviceDetail(d)}
+                        onKeyDown={(e) => { if (e.key === "Enter") setDeviceDetail(d); }}
+                        className="border rounded-lg p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-3 cursor-pointer transition hover:border-primary/60 hover:bg-muted/40"
+                      >
                         <Icon className="h-5 w-5 text-primary shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -520,6 +588,14 @@ export default function AdminUsers() {
                             {active && <Badge className="bg-emerald-500 text-white text-[10px]">Active now</Badge>}
                             {d.is_blocked && <Badge variant="destructive" className="text-[10px]">Locked</Badge>}
                             {d.is_revoked && !d.is_blocked && <Badge variant="outline" className="text-[10px]">Kicked</Badge>}
+                            {d.view_only
+                              ? <Badge className="bg-amber-500 text-white text-[10px]">View only</Badge>
+                              : (
+                                <>
+                                  {d.can_transfer === false && <Badge variant="outline" className="text-[10px]">No transfers</Badge>}
+                                  {d.can_deposit === false && <Badge variant="outline" className="text-[10px]">No deposits</Badge>}
+                                </>
+                              )}
                           </div>
                           <p className="text-[11px] text-muted-foreground truncate">{d.user_agent || "—"}</p>
                           <p className="text-[11px] text-muted-foreground">
@@ -530,14 +606,17 @@ export default function AdminUsers() {
                               href={`https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}`}
                               target="_blank"
                               rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
                             >
                               <MapPin className="h-3 w-3" />
                               {d.location_label || `${Number(d.lat).toFixed(2)}, ${Number(d.lng).toFixed(2)}`}
                             </a>
                           )}
+                          <p className="text-[11px] text-primary mt-0.5">Tap for full details & capabilities</p>
                         </div>
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+
                           {d.is_revoked && !d.is_blocked ? (
                             <Button
                               size="sm"
@@ -572,6 +651,27 @@ export default function AdminUsers() {
                   })}
                 </div>
               )}
+
+              {pastDevices.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                    Past devices ({pastDevices.length})
+                  </h4>
+                  <div className="space-y-1.5">
+                    {pastDevices.map(p => (
+                      <div key={p.device_id} className="border border-dashed rounded-lg px-3 py-2 text-[11px]">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-secondary truncate">{p.label || p.platform || "Unknown device"}</span>
+                          <span className="text-muted-foreground shrink-0">{new Date(p.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-muted-foreground truncate">
+                          {[p.location_label, p.user_agent].filter(Boolean).join(" · ") || "No longer signed in"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <DialogFooter>
@@ -580,6 +680,14 @@ export default function AdminUsers() {
 
           </DialogContent>
         </Dialog>
+
+        <AdminDeviceDetailDialog
+          device={deviceDetail}
+          userEmail={selected?.email}
+          onClose={() => setDeviceDetail(null)}
+          onChanged={() => { if (selected) reloadDevices(selected.id); }}
+        />
+
 
         <Dialog open={!!adjustAccount} onOpenChange={(o) => !o && setAdjustAccount(null)}>
           <DialogContent className="w-[calc(100vw-1rem)] max-w-md p-4 md:p-6">
