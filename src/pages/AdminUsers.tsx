@@ -537,7 +537,7 @@ export default function AdminUsers() {
                   <Monitor className="h-4 w-4 text-primary" /> Signed-in devices
                 </h3>
                 <span className="text-xs text-muted-foreground">
-                  {userDevices.length} of {selected.device_limit ?? 5} allowed
+                  {userDevices.length} of {selected?.device_limit ?? 5} allowed
                 </span>
               </div>
 
