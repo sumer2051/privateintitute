@@ -190,13 +190,22 @@ export default function AdminTransactions() {
                           {tx.reference_number ? ` · ${tx.reference_number}` : ""}
                         </p>
                       </div>
-                      <Select value={tx.status} onValueChange={(v) => { if (v !== tx.status) { setNote(""); setPending({ tx, status: v }); } }} disabled={busy === tx.id}>
+                      <Select value={tx.status} onValueChange={(v) => { setNote(""); setPending({ tx, status: v }); }} disabled={busy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-44 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {TX_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}
                         </SelectContent>
                       </Select>
-                    </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        disabled={busy === tx.id}
+                        onClick={() => { setNote(""); setPending({ tx, status: tx.status }); }}
+                      >
+                        Resend email
+                      </Button>
+
                   );
                 })}
               </div>
