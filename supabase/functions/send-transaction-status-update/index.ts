@@ -17,16 +17,18 @@ function esc(s: string) {
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
-type StatusKey = "pending" | "processing" | "under_review" | "completed" | "failed" | "cancelled";
+type StatusKey = "pending" | "processing" | "under_review" | "reviewed" | "completed" | "failed" | "cancelled";
 
 const STATUS_META: Record<StatusKey, { label: string; sub: string; icon: string; color: string; bg: string }> = {
   pending:      { label: "Pending",      sub: "Awaiting review",                       icon: "⏳", color: "#8a6d00", bg: "#fff7d6" },
   processing:   { label: "Processing",   sub: "Your payment is being processed",       icon: "⟳", color: "#0b62d6", bg: "#e6f0ff" },
   under_review: { label: "Under review", sub: "Compliance is reviewing this payment",  icon: "🔍", color: "#6b21a8", bg: "#f3e8ff" },
+  reviewed:     { label: "Reviewed — clearance ongoing", sub: "Review complete, clearance in progress", icon: "🛡", color: "#0e7490", bg: "#e0f7fb" },
   completed:    { label: "Complete",     sub: "Payment received",                      icon: "✓", color: "#00a63e", bg: "#e6f9ee" },
   failed:       { label: "Failed",       sub: "Payment could not be completed",        icon: "✕", color: "#b91c1c", bg: "#fee2e2" },
   cancelled:    { label: "Cancelled",    sub: "Payment was cancelled",                 icon: "⊘", color: "#525252", bg: "#f0f0f0" },
 };
+
 
 function fmtMoney(n: number) {
   return `$${Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -142,6 +144,8 @@ function venmoStatusEmail(c: Ctx) {
         ? "Balance transfer Cancelled"
         : c.status === "under_review"
           ? "Balance transfer Under Review"
+          : c.status === "reviewed"
+            ? "Balance transfer Reviewed — Clearance Ongoing"
           : c.status === "processing"
             ? "Balance transfer Processing"
             : "Balance transfer Pending";

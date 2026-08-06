@@ -25,11 +25,12 @@ type Tx = {
 };
 type Profile = { id: string; email: string; full_name: string | null };
 
-const TX_STATUSES = ["pending", "processing", "under_review", "completed", "failed", "cancelled"] as const;
+const TX_STATUSES = ["pending", "processing", "under_review", "reviewed", "completed", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pending",
   processing: "Processing",
   under_review: "Under review",
+  reviewed: "Reviewed · clearance ongoing",
   completed: "Successful",
   failed: "Failed",
   cancelled: "Cancelled",
@@ -38,10 +39,12 @@ const STATUS_COLOR: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
   processing: "bg-blue-100 text-blue-800",
   under_review: "bg-purple-100 text-purple-800",
+  reviewed: "bg-cyan-100 text-cyan-800",
   completed: "bg-emerald-100 text-emerald-800",
   failed: "bg-red-100 text-red-800",
   cancelled: "bg-muted text-muted-foreground",
 };
+
 
 export default function AdminTransactions() {
   const navigate = useNavigate();
@@ -187,13 +190,24 @@ export default function AdminTransactions() {
                           {tx.reference_number ? ` · ${tx.reference_number}` : ""}
                         </p>
                       </div>
-                      <Select value={tx.status} onValueChange={(v) => { if (v !== tx.status) { setNote(""); setPending({ tx, status: v }); } }} disabled={busy === tx.id}>
+                      <Select value={tx.status} onValueChange={(v) => { setNote(""); setPending({ tx, status: v }); }} disabled={busy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-44 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {TX_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}
                         </SelectContent>
                       </Select>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        disabled={busy === tx.id}
+                        onClick={() => { setNote(""); setPending({ tx, status: tx.status }); }}
+                      >
+                        Resend email
+                      </Button>
                     </div>
+
+
                   );
                 })}
               </div>

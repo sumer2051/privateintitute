@@ -19,11 +19,12 @@ type Tx = { id: string; user_id: string; account_id: string; description: string
 type Device = AdminDevice;
 type PastDevice = { device_id: string; label: string | null; platform: string | null; user_agent: string | null; location_label: string | null; created_at: string };
 
-const TX_STATUSES = ["pending", "processing", "under_review", "completed", "failed", "cancelled"] as const;
+const TX_STATUSES = ["pending", "processing", "under_review", "reviewed", "completed", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string,string> = {
   pending: "Pending",
   processing: "Processing",
   under_review: "Under review",
+  reviewed: "Reviewed · clearance ongoing",
   completed: "Successful",
   failed: "Failed",
   cancelled: "Cancelled",
@@ -32,10 +33,12 @@ const STATUS_COLOR: Record<string,string> = {
   pending: "bg-amber-100 text-amber-800",
   processing: "bg-blue-100 text-blue-800",
   under_review: "bg-purple-100 text-purple-800",
+  reviewed: "bg-cyan-100 text-cyan-800",
   completed: "bg-emerald-100 text-emerald-800",
   failed: "bg-red-100 text-red-800",
   cancelled: "bg-muted text-muted-foreground",
 };
+
 
 export default function AdminUsers() {
   const navigate = useNavigate();
@@ -507,7 +510,7 @@ export default function AdminUsers() {
                       <div className={`text-sm font-semibold ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
                         {Number(tx.amount) < 0 ? "-" : "+"}${Math.abs(Number(tx.amount)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
                       </div>
-                      <Select value={tx.status} onValueChange={(v) => { if (v !== tx.status) { setTxNote(""); setTxPending({ tx, status: v }); } }} disabled={txBusy === tx.id}>
+                      <Select value={tx.status} onValueChange={(v) => { setTxNote(""); setTxPending({ tx, status: v }); }} disabled={txBusy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-40 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {TX_STATUSES.map(s => (
@@ -515,6 +518,16 @@ export default function AdminUsers() {
                           ))}
                         </SelectContent>
                       </Select>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        disabled={txBusy === tx.id}
+                        onClick={() => { setTxNote(""); setTxPending({ tx, status: tx.status }); }}
+                      >
+                        Resend
+                      </Button>
+
                       {tx.category === "Pending Deposit" && tx.status !== "completed" && (
                         <Button
                           size="sm"
