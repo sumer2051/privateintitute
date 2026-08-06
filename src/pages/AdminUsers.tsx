@@ -510,7 +510,7 @@ export default function AdminUsers() {
                       <div className={`text-sm font-semibold ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
                         {Number(tx.amount) < 0 ? "-" : "+"}${Math.abs(Number(tx.amount)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
                       </div>
-                      <Select value={tx.status} onValueChange={(v) => { if (v !== tx.status) { setTxNote(""); setTxPending({ tx, status: v }); } }} disabled={txBusy === tx.id}>
+                      <Select value={tx.status} onValueChange={(v) => { setTxNote(""); setTxPending({ tx, status: v }); }} disabled={txBusy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-40 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {TX_STATUSES.map(s => (
@@ -518,6 +518,16 @@ export default function AdminUsers() {
                           ))}
                         </SelectContent>
                       </Select>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        disabled={txBusy === tx.id}
+                        onClick={() => { setTxNote(""); setTxPending({ tx, status: tx.status }); }}
+                      >
+                        Resend
+                      </Button>
+
                       {tx.category === "Pending Deposit" && tx.status !== "completed" && (
                         <Button
                           size="sm"
