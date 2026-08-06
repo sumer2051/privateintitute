@@ -144,6 +144,8 @@ function venmoStatusEmail(c: Ctx) {
         ? "Balance transfer Cancelled"
         : c.status === "under_review"
           ? "Balance transfer Under Review"
+          : c.status === "reviewed"
+            ? "Balance transfer Reviewed — Clearance Ongoing"
           : c.status === "processing"
             ? "Balance transfer Processing"
             : "Balance transfer Pending";
