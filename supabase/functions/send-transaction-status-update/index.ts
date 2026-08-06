@@ -486,9 +486,24 @@ Deno.serve(async (req) => {
       (profile?.full_name || "").trim() ||
       (profile?.email ? profile.email.split("@")[0] : "") ||
       "Customer";
-    const recipientName = tx.recipient_name || (tx.description || "").replace(/^\[[^\]]+\]\s*/, "").replace(/^.*?to\s+/i, "").trim() || "Recipient";
+    // Strip "[Scheme] " prefix, then the leading "To <name>" segment
+    const bare = (tx.description || "").replace(/^\[[^\]]+\]\s*/, "").trim();
+    const toMatch = /^to\s+([^—·]+)/i.exec(bare);
+    const recipientName =
+      (tx.recipient_name || "").trim() ||
+      (toMatch ? toMatch[1].trim() : "") ||
+      "Recipient";
     const amount = Number(tx.amount || 0);
-    const memo = (tx.description || "").replace(/^\[[^\]]+\]\s*/, "").slice(0, 140);
+    // Memo must never leak counterparty/routing details — keep only free-text notes
+    const memo = bare
+      .replace(/^to\s+[^—·]+/i, "")
+      .split(/\s+—\s+|\s+·\s+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0 && !/^[^:]{1,30}:\s*\S/.test(s))
+      .join(" · ")
+      .slice(0, 140);
+
+
     const reference = tx.reference_number || tx.id.slice(0, 8).toUpperCase();
     const category = tx.category || "Cash balance";
     const dateStr = new Date().toLocaleDateString(undefined, {
