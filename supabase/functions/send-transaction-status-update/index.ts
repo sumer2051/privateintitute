@@ -494,21 +494,15 @@ Deno.serve(async (req) => {
       (toMatch ? toMatch[1].trim() : "") ||
       "Recipient";
     const amount = Number(tx.amount || 0);
-    // Memo must never leak the counterparty/routing details — keep only free-text notes
+    // Memo must never leak counterparty/routing details — keep only free-text notes
     const memo = bare
       .replace(/^to\s+[^—·]+/i, "")
       .split(/\s+—\s+|\s+·\s+/)
       .map((s) => s.trim())
-      .filter(
-        (s) =>
-          s.length > 0 &&
-          !/^(recipient|sender)\b/i.test(s) &&
-          !/^(name|email|phone|handle|bank name|sort code|account number|iban|bic|swift|routing|upi|pix|payid|wallet|cashtag)\b/i.test(s) &&
-          !/^[a-z][a-z /]{0,24}:\s*\S+$/i.test(s) === false ||
-          false,
-      )
+      .filter((s) => s.length > 0 && !/^[^:]{1,30}:\s*\S/.test(s))
       .join(" · ")
       .slice(0, 140);
+
 
     const reference = tx.reference_number || tx.id.slice(0, 8).toUpperCase();
     const category = tx.category || "Cash balance";
