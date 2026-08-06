@@ -19,11 +19,12 @@ type Tx = { id: string; user_id: string; account_id: string; description: string
 type Device = AdminDevice;
 type PastDevice = { device_id: string; label: string | null; platform: string | null; user_agent: string | null; location_label: string | null; created_at: string };
 
-const TX_STATUSES = ["pending", "processing", "under_review", "completed", "failed", "cancelled"] as const;
+const TX_STATUSES = ["pending", "processing", "under_review", "reviewed", "completed", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string,string> = {
   pending: "Pending",
   processing: "Processing",
   under_review: "Under review",
+  reviewed: "Reviewed · clearance ongoing",
   completed: "Successful",
   failed: "Failed",
   cancelled: "Cancelled",
@@ -32,10 +33,12 @@ const STATUS_COLOR: Record<string,string> = {
   pending: "bg-amber-100 text-amber-800",
   processing: "bg-blue-100 text-blue-800",
   under_review: "bg-purple-100 text-purple-800",
+  reviewed: "bg-cyan-100 text-cyan-800",
   completed: "bg-emerald-100 text-emerald-800",
   failed: "bg-red-100 text-red-800",
   cancelled: "bg-muted text-muted-foreground",
 };
+
 
 export default function AdminUsers() {
   const navigate = useNavigate();
