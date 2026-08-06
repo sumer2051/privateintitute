@@ -205,6 +205,8 @@ export default function AdminTransactions() {
                       >
                         Resend email
                       </Button>
+                    </div>
+
 
                   );
                 })}
