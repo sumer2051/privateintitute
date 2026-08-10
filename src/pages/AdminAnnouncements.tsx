@@ -90,13 +90,25 @@ export default function AdminAnnouncements() {
     <AuthLayout>
       <div className="max-w-4xl mx-auto space-y-6">
         <div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-secondary flex items-center gap-2"><Megaphone className="h-6 w-6 text-primary" /> Broadcast announcements</h1>
-          <p className="text-sm text-muted-foreground">Publish an in-app banner visible to every signed-in customer.</p>
+          <h1 className="font-display text-2xl md:text-3xl font-bold text-secondary flex items-center gap-2"><Megaphone className="h-6 w-6 text-primary" /> Announcements</h1>
+          <p className="text-sm text-muted-foreground">Publish an in-app banner to every customer, or send a private notice to one customer.</p>
         </div>
 
         <Card>
           <CardHeader><CardTitle>New announcement</CardTitle></CardHeader>
           <CardContent className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Recipient</label>
+              <Select value={target} onValueChange={setTarget}>
+                <SelectTrigger><SelectValue placeholder="All customers" /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="all">All customers (broadcast)</SelectItem>
+                  {people.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.full_name || "Unnamed"} · {p.email}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} maxLength={120} />
             <Textarea placeholder="Message body" value={body} onChange={e => setBody(e.target.value)} maxLength={800} rows={4} />
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -108,8 +120,13 @@ export default function AdminAnnouncements() {
                   <SelectItem value="critical">Critical</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={publish} disabled={busy} className="w-full sm:w-auto">{busy ? "Publishing..." : "Publish now"}</Button>
+              <Button onClick={publish} disabled={busy} className="w-full sm:w-auto">
+                {busy ? "Sending..." : target === "all" ? "Publish to all" : "Send privately"}
+              </Button>
             </div>
+          </CardContent>
+        </Card>
+
           </CardContent>
         </Card>
 
