@@ -100,6 +100,9 @@ export const NotificationsBell = () => {
   const [selected, setSelected] = useState<Notif | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [senderName, setSenderName] = useState<string>("You");
+  const [limit, setLimit] = useState(40);
+  const [hasMore, setHasMore] = useState(false);
+  const limitRef = useRef(40);
   const navigate = useNavigate();
   const { format, currency } = useCurrency();
 
