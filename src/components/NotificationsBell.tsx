@@ -122,15 +122,17 @@ export const NotificationsBell = () => {
       .limit(limitRef.current);
     const rows = (data ?? []) as Notif[];
     setItems(rows);
+    setHasMore(rows.length >= limitRef.current);
     const lastRead = Number(localStorage.getItem(READ_KEY) || 0);
     setUnread(rows.filter((r) => new Date(r.created_at || 0).getTime() > lastRead).length);
   };
 
   useEffect(() => {
+    limitRef.current = limit;
     fetchItems();
     const t = setInterval(fetchItems, 20000);
     return () => clearInterval(t);
-  }, []);
+  }, [limit]);
 
   const markAllRead = () => {
     localStorage.setItem(READ_KEY, String(Date.now()));
