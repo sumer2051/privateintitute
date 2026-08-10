@@ -116,7 +116,7 @@ export const NotificationsBell = () => {
       .select("id, category, description, amount, transaction_type, status, reference_number, recipient_email, recipient_name, created_at")
       .in("account_id", ids)
       .order("created_at", { ascending: false })
-      .limit(15);
+      .limit(limitRef.current);
     const rows = (data ?? []) as Notif[];
     setItems(rows);
     const lastRead = Number(localStorage.getItem(READ_KEY) || 0);
