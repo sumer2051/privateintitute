@@ -198,20 +198,33 @@ const Settings = () => {
     setTwoFAOpen(true);
   };
 
-  const sendTwoFACode = () => {
+  const [sendingCode, setSendingCode] = useState(false);
+
+  const sendTwoFACode = async () => {
     if (twoFactorMethod === "sms" && !phone) {
       toast({ title: "Add phone first", description: "Save a phone number in Profile Information before using SMS.", variant: "destructive" });
       return;
     }
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setTwoFACode(code);
-    setTwoFAStep("verify");
-    const dest = twoFactorMethod === "sms" ? phone : email;
-    toast({
-      title: "Verification code sent",
-      description: `Code sent to ${dest}. (Demo code: ${code})`,
-    });
+    setSendingCode(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-verification-code", {
+        body: { purpose: "two-factor authentication setup" },
+      });
+      if (error) throw error;
+      if (!data?.code) throw new Error("No code returned");
+      setTwoFACode(String(data.code));
+      setTwoFAStep("verify");
+      toast({
+        title: "Verification code sent",
+        description: `We emailed a 6-digit code to ${data.sentTo || email}.`,
+      });
+    } catch (e: any) {
+      toast({ title: "Couldn't send code", description: e?.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setSendingCode(false);
+    }
   };
+
 
   const verifyTwoFA = async () => {
     if (twoFAInput.trim() !== twoFACode) {
