@@ -11,12 +11,15 @@ import { toast } from "sonner";
 import { Megaphone, ShieldAlert, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-type Ann = { id: string; title: string; body: string; severity: string; active: boolean; created_at: string };
+type Ann = { id: string; title: string; body: string; severity: string; active: boolean; created_at: string; target_user_id: string | null };
+type Prof = { id: string; full_name: string | null; email: string | null };
 
 export default function AdminAnnouncements() {
   const navigate = useNavigate();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [items, setItems] = useState<Ann[]>([]);
+  const [people, setPeople] = useState<Prof[]>([]);
+  const [target, setTarget] = useState<string>("all");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [severity, setSeverity] = useState("info");
@@ -32,22 +35,39 @@ export default function AdminAnnouncements() {
   }, [navigate]);
 
   const load = async () => {
-    const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
+    const [{ data }, { data: profs }] = await Promise.all([
+      supabase.from("announcements").select("*").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id,full_name,email").order("full_name", { ascending: true }),
+    ]);
     setItems((data as Ann[]) || []);
+    setPeople((profs as Prof[]) || []);
   };
   useEffect(() => { if (allowed) load(); }, [allowed]);
+
+  const nameFor = (id: string | null) => {
+    if (!id) return null;
+    const p = people.find(x => x.id === id);
+    return p?.full_name || p?.email || "Selected customer";
+  };
 
   const publish = async () => {
     if (!title.trim() || !body.trim()) return toast.error("Title and body required");
     setBusy(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from("announcements").insert({ title: title.trim(), body: body.trim(), severity, created_by: user?.id });
+    const { error } = await supabase.from("announcements").insert({
+      title: title.trim(),
+      body: body.trim(),
+      severity,
+      created_by: user?.id,
+      target_user_id: target === "all" ? null : target,
+    });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Announcement published to all users");
-    setTitle(""); setBody(""); setSeverity("info");
+    toast.success(target === "all" ? "Announcement published to all users" : `Sent privately to ${nameFor(target)}`);
+    setTitle(""); setBody(""); setSeverity("info"); setTarget("all");
     load();
   };
+
 
   const toggle = async (a: Ann) => {
     const { error } = await supabase.from("announcements").update({ active: !a.active }).eq("id", a.id);
@@ -70,13 +90,25 @@ export default function AdminAnnouncements() {
     <AuthLayout>
       <div className="max-w-4xl mx-auto space-y-6">
         <div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-secondary flex items-center gap-2"><Megaphone className="h-6 w-6 text-primary" /> Broadcast announcements</h1>
-          <p className="text-sm text-muted-foreground">Publish an in-app banner visible to every signed-in customer.</p>
+          <h1 className="font-display text-2xl md:text-3xl font-bold text-secondary flex items-center gap-2"><Megaphone className="h-6 w-6 text-primary" /> Announcements</h1>
+          <p className="text-sm text-muted-foreground">Publish an in-app banner to every customer, or send a private notice to one customer.</p>
         </div>
 
         <Card>
           <CardHeader><CardTitle>New announcement</CardTitle></CardHeader>
           <CardContent className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Recipient</label>
+              <Select value={target} onValueChange={setTarget}>
+                <SelectTrigger><SelectValue placeholder="All customers" /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="all">All customers (broadcast)</SelectItem>
+                  {people.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.full_name || "Unnamed"} · {p.email}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} maxLength={120} />
             <Textarea placeholder="Message body" value={body} onChange={e => setBody(e.target.value)} maxLength={800} rows={4} />
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -88,10 +120,14 @@ export default function AdminAnnouncements() {
                   <SelectItem value="critical">Critical</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={publish} disabled={busy} className="w-full sm:w-auto">{busy ? "Publishing..." : "Publish now"}</Button>
+              <Button onClick={publish} disabled={busy} className="w-full sm:w-auto">
+                {busy ? "Sending..." : target === "all" ? "Publish to all" : "Send privately"}
+              </Button>
             </div>
           </CardContent>
         </Card>
+
+
 
         <Card>
           <CardHeader><CardTitle>History</CardTitle></CardHeader>
@@ -106,6 +142,9 @@ export default function AdminAnnouncements() {
                           <span className="font-semibold text-secondary">{a.title}</span>
                           <Badge variant="outline" className="uppercase text-[10px]">{a.severity}</Badge>
                           {a.active ? <Badge className="bg-emerald-500 text-white">Live</Badge> : <Badge variant="secondary">Hidden</Badge>}
+                          {a.target_user_id
+                            ? <Badge className="bg-indigo-500 text-white">Private · {nameFor(a.target_user_id)}</Badge>
+                            : <Badge variant="outline">All customers</Badge>}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">{new Date(a.created_at).toLocaleString()}</p>
                         <p className="text-sm mt-2 whitespace-pre-line">{a.body}</p>

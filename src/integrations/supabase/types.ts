@@ -67,6 +67,7 @@ export type Database = {
           created_by: string | null
           id: string
           severity: string
+          target_user_id: string | null
           title: string
           updated_at: string
         }
@@ -77,6 +78,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           severity?: string
+          target_user_id?: string | null
           title: string
           updated_at?: string
         }
@@ -87,6 +89,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           severity?: string
+          target_user_id?: string | null
           title?: string
           updated_at?: string
         }
