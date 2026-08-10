@@ -11,12 +11,15 @@ import { toast } from "sonner";
 import { Megaphone, ShieldAlert, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-type Ann = { id: string; title: string; body: string; severity: string; active: boolean; created_at: string };
+type Ann = { id: string; title: string; body: string; severity: string; active: boolean; created_at: string; target_user_id: string | null };
+type Prof = { id: string; full_name: string | null; email: string | null };
 
 export default function AdminAnnouncements() {
   const navigate = useNavigate();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [items, setItems] = useState<Ann[]>([]);
+  const [people, setPeople] = useState<Prof[]>([]);
+  const [target, setTarget] = useState<string>("all");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [severity, setSeverity] = useState("info");
@@ -32,22 +35,39 @@ export default function AdminAnnouncements() {
   }, [navigate]);
 
   const load = async () => {
-    const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
+    const [{ data }, { data: profs }] = await Promise.all([
+      supabase.from("announcements").select("*").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id,full_name,email").order("full_name", { ascending: true }),
+    ]);
     setItems((data as Ann[]) || []);
+    setPeople((profs as Prof[]) || []);
   };
   useEffect(() => { if (allowed) load(); }, [allowed]);
+
+  const nameFor = (id: string | null) => {
+    if (!id) return null;
+    const p = people.find(x => x.id === id);
+    return p?.full_name || p?.email || "Selected customer";
+  };
 
   const publish = async () => {
     if (!title.trim() || !body.trim()) return toast.error("Title and body required");
     setBusy(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from("announcements").insert({ title: title.trim(), body: body.trim(), severity, created_by: user?.id });
+    const { error } = await supabase.from("announcements").insert({
+      title: title.trim(),
+      body: body.trim(),
+      severity,
+      created_by: user?.id,
+      target_user_id: target === "all" ? null : target,
+    });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Announcement published to all users");
-    setTitle(""); setBody(""); setSeverity("info");
+    toast.success(target === "all" ? "Announcement published to all users" : `Sent privately to ${nameFor(target)}`);
+    setTitle(""); setBody(""); setSeverity("info"); setTarget("all");
     load();
   };
+
 
   const toggle = async (a: Ann) => {
     const { error } = await supabase.from("announcements").update({ active: !a.active }).eq("id", a.id);
