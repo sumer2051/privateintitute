@@ -593,7 +593,7 @@ const Settings = () => {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setTwoFAOpen(false)}>Cancel</Button>
-                <Button onClick={sendTwoFACode}>Send Code</Button>
+                <Button onClick={sendTwoFACode} disabled={sendingCode}>{sendingCode ? "Sending…" : "Send Code"}</Button>
               </DialogFooter>
             </div>
           ) : (
