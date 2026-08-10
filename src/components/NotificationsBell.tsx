@@ -236,6 +236,18 @@ export const NotificationsBell = () => {
                 </button>
               );
             })}
+            {hasMore && (
+              <div className="p-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => setLimit((l) => l + 40)}
+                >
+                  Show older activity
+                </Button>
+              </div>
+            )}
           </div>
         </PopoverContent>
       </Popover>
