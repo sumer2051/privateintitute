@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, ArrowDownLeft, ArrowUpRight, Clock, CheckCircle2, Receipt, XCircle, AlertTriangle, Loader2, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -100,6 +100,9 @@ export const NotificationsBell = () => {
   const [selected, setSelected] = useState<Notif | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [senderName, setSenderName] = useState<string>("You");
+  const [limit, setLimit] = useState(40);
+  const [hasMore, setHasMore] = useState(false);
+  const limitRef = useRef(40);
   const navigate = useNavigate();
   const { format, currency } = useCurrency();
 
@@ -116,18 +119,20 @@ export const NotificationsBell = () => {
       .select("id, category, description, amount, transaction_type, status, reference_number, recipient_email, recipient_name, created_at")
       .in("account_id", ids)
       .order("created_at", { ascending: false })
-      .limit(15);
+      .limit(limitRef.current);
     const rows = (data ?? []) as Notif[];
     setItems(rows);
+    setHasMore(rows.length >= limitRef.current);
     const lastRead = Number(localStorage.getItem(READ_KEY) || 0);
     setUnread(rows.filter((r) => new Date(r.created_at || 0).getTime() > lastRead).length);
   };
 
   useEffect(() => {
+    limitRef.current = limit;
     fetchItems();
     const t = setInterval(fetchItems, 20000);
     return () => clearInterval(t);
-  }, []);
+  }, [limit]);
 
   const markAllRead = () => {
     localStorage.setItem(READ_KEY, String(Date.now()));
@@ -231,6 +236,18 @@ export const NotificationsBell = () => {
                 </button>
               );
             })}
+            {hasMore && (
+              <div className="p-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => setLimit((l) => l + 40)}
+                >
+                  Show older activity
+                </Button>
+              </div>
+            )}
           </div>
         </PopoverContent>
       </Popover>
