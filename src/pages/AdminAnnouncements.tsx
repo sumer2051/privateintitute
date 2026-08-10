@@ -127,8 +127,7 @@ export default function AdminAnnouncements() {
           </CardContent>
         </Card>
 
-          </CardContent>
-        </Card>
+
 
         <Card>
           <CardHeader><CardTitle>History</CardTitle></CardHeader>
