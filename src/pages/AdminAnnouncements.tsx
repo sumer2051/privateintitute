@@ -142,6 +142,9 @@ export default function AdminAnnouncements() {
                           <span className="font-semibold text-secondary">{a.title}</span>
                           <Badge variant="outline" className="uppercase text-[10px]">{a.severity}</Badge>
                           {a.active ? <Badge className="bg-emerald-500 text-white">Live</Badge> : <Badge variant="secondary">Hidden</Badge>}
+                          {a.target_user_id
+                            ? <Badge className="bg-indigo-500 text-white">Private · {nameFor(a.target_user_id)}</Badge>
+                            : <Badge variant="outline">All customers</Badge>}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">{new Date(a.created_at).toLocaleString()}</p>
                         <p className="text-sm mt-2 whitespace-pre-line">{a.body}</p>
