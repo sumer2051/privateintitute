@@ -103,6 +103,8 @@ const Auth = () => {
 
   const proceedAfterLogin = () => {
     toast({ title: "Welcome back!", description: "You have successfully logged in." });
+    triggerMickeyShow();
+
     if (nextPath) {
       window.location.href = nextPath;
     } else {
