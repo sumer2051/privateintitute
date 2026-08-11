@@ -243,9 +243,14 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               />
             </span>
             <span className="flex min-w-0 flex-col items-start leading-tight">
-              <h1 className="font-display text-sm md:text-xl font-bold text-secondary tracking-tight truncate max-w-[160px] md:max-w-none">
-                BoA <span className="text-primary">private</span> institute
+              <h1 className="min-w-0 max-w-[190px] md:max-w-none">
+                <MickeyNameShow
+                  name="BoA private institute"
+                  sizeClass="text-[13px] md:text-xl"
+                  className="tracking-tight"
+                />
               </h1>
+
               <span
                 className="hidden md:inline text-[10px] uppercase tracking-[0.25em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer"
               >
