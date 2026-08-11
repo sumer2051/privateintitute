@@ -10,6 +10,7 @@ import { CountUp } from "@/components/CountUp";
 import { TransferModal } from "@/components/TransferModal";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Seo } from "@/components/Seo";
+import { HomeActivity } from "@/components/HomeActivity";
 
 interface Account {
   id: string;
