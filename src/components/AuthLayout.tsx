@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.png";
 import { AiChatWidget } from "@/components/AiChatWidget";
 import { NotificationsBell } from "@/components/NotificationsBell";
-import { MickeyCameo } from "@/components/MickeyNameShow";
+import { MickeyBankName } from "@/components/MickeyNameShow";
 import { Shield, ShieldCheck } from "lucide-react";
 import { StaffPinDialog } from "@/components/StaffPinDialog";
 import { AchOneTimeDialog } from "@/components/AchOneTimeDialog";
@@ -244,12 +244,15 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               />
             </span>
             <span className="flex min-w-0 flex-col items-start leading-tight">
-              <span className="flex items-end gap-1">
-                <h1 className="font-display text-sm md:text-xl font-bold text-secondary tracking-tight truncate max-w-[160px] md:max-w-none">
-                  BoA <span className="text-primary">private</span> institute
-                </h1>
-                <MickeyCameo heightClass="h-7 md:h-9" />
-              </span>
+              <h1 className="flex items-end tracking-tight">
+                <MickeyBankName
+                  segments={[
+                    { text: "BoA " },
+                    { text: "private", className: "text-primary" },
+                    { text: " institute" },
+                  ]}
+                />
+              </h1>
 
 
               <span

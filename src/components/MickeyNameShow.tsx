@@ -283,3 +283,122 @@ export const MickeyNameShow = ({
 };
 
 export default MickeyNameShow;
+
+type Segment = { text: string; className?: string };
+
+/**
+ * Bank name in the header: letters dissolve tiny from the last one back to the
+ * first, the first letter becomes a bowing Mickey, he throws a little mouse that
+ * flies across re-revealing every letter, then Mickey smiles + salutes and
+ * turns back into the letter.
+ */
+export const MickeyBankName = ({
+  segments,
+  className = "",
+  sizeClass = "text-sm md:text-xl",
+}: {
+  segments: Segment[];
+  className?: string;
+  sizeClass?: string;
+}) => {
+  const chars = useMemo(
+    () =>
+      segments.flatMap((s) =>
+        s.text.split("").map((c) => ({ c, className: s.className ?? "" })),
+      ),
+    [segments],
+  );
+
+  const [hidden, setHidden] = useState(0); // hidden count from the end
+  const [phase, setPhase] = useState<"idle" | "vanish" | "bow" | "throw" | "salute">("idle");
+  const timers = useRef<number[]>([]);
+  const runRef = useRef<() => void>(() => {});
+
+  useEffect(() => {
+    const n = chars.length;
+    if (!n) return;
+    const clear = () => {
+      timers.current.forEach((t) => window.clearTimeout(t));
+      timers.current = [];
+    };
+    const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
+
+    const run = () => {
+      clear();
+      setPhase("vanish");
+      // dissolve from the last letter back towards the first (keep letter 0)
+      for (let i = 1; i <= n - 1; i++) later(() => setHidden(i), i * LETTER_MS);
+      const vanishEnd = (n - 1) * LETTER_MS;
+
+      later(() => setPhase("bow"), vanishEnd);
+      later(() => setPhase("throw"), vanishEnd + BOW_MS);
+
+      // the little mouse flies forward, revealing letters as it passes
+      const step = THROW_MS / Math.max(1, n - 1);
+      for (let i = 1; i <= n - 1; i++) {
+        later(() => setHidden(n - 1 - i), vanishEnd + BOW_MS + i * step);
+      }
+
+      later(() => setPhase("salute"), vanishEnd + BOW_MS + THROW_MS);
+      later(() => {
+        setPhase("idle");
+        setHidden(0);
+      }, vanishEnd + BOW_MS + THROW_MS + SALUTE_MS);
+    };
+    runRef.current = run;
+
+    const onDemand = () => runRef.current();
+    window.addEventListener(MICKEY_SHOW_EVENT, onDemand);
+    const interval = window.setInterval(run, CYCLE_MS);
+    return () => {
+      window.removeEventListener(MICKEY_SHOW_EVENT, onDemand);
+      window.clearInterval(interval);
+      clear();
+    };
+  }, [chars]);
+
+  const showMickey = phase === "bow" || phase === "throw" || phase === "salute";
+
+  return (
+    <span className={`relative inline-flex flex-nowrap items-end leading-none ${className}`}>
+      {chars.map((ch, i) => {
+        const isHidden = i >= chars.length - hidden;
+        if (i === 0 && showMickey) {
+          return (
+            <span key="mickey-slot" className={`inline-block ${sizeClass}`}>
+              <Mickey pose={phase === "salute" ? "salute" : phase === "bow" ? "bow" : "throw"} />
+            </span>
+          );
+        }
+        return (
+          <span
+            key={`${ch.c}-${i}`}
+            className={`font-display font-bold ${ch.className || "text-secondary"} ${sizeClass}`}
+            style={{
+              display: "inline-block",
+              opacity: isHidden ? 0 : 1,
+              transform: isHidden ? "scale(0.05)" : "scale(1)",
+              filter: isHidden ? "blur(2px)" : "none",
+              transformOrigin: "bottom center",
+              transition: "opacity 220ms ease, transform 220ms ease, filter 220ms ease",
+            }}
+          >
+            {ch.c === " " ? "\u00A0" : ch.c}
+          </span>
+        );
+      })}
+
+      {phase === "throw" && (
+        <span
+          className={`pointer-events-none absolute bottom-0 left-[1.1em] h-[1.4em] aspect-[100/130] ${sizeClass}`}
+          style={{
+            ["--fly-x" as string]: `${Math.max(4, chars.length * 0.5)}em`,
+            animation: `mouse-fly ${THROW_MS}ms linear forwards`,
+          }}
+        >
+          <LittleMouse />
+        </span>
+      )}
+    </span>
+  );
+};
