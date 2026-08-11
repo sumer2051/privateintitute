@@ -232,6 +232,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          preferred_currency: string
           staff_pin_hash: string | null
           transfer_pin_hash: string | null
           two_factor_enabled: boolean
@@ -248,6 +249,7 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          preferred_currency?: string
           staff_pin_hash?: string | null
           transfer_pin_hash?: string | null
           two_factor_enabled?: boolean
@@ -264,6 +266,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          preferred_currency?: string
           staff_pin_hash?: string | null
           transfer_pin_hash?: string | null
           two_factor_enabled?: boolean
