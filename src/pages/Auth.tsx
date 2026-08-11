@@ -1,3 +1,4 @@
+import { triggerMickeyShow } from "@/components/MickeyNameShow";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -103,6 +104,8 @@ const Auth = () => {
 
   const proceedAfterLogin = () => {
     toast({ title: "Welcome back!", description: "You have successfully logged in." });
+    triggerMickeyShow();
+
     if (nextPath) {
       window.location.href = nextPath;
     } else {

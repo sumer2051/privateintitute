@@ -166,17 +166,30 @@ export const MickeyCameo = ({ className = "", heightClass = "h-8" }: { className
 };
 
 
-const LETTER_MS = 90;
-const BOW_MS = 1300;
-const THROW_MS = 2200;
-const SALUTE_MS = 1500;
+const LETTER_MS = 260;
+const BOW_MS = 2600;
+const THROW_MS = 5200;
+const SALUTE_MS = 3000;
 const CYCLE_MS = 30000;
 
 export const MICKEY_SHOW_EVENT = "boa:mickey-show";
+/** Pending flag so a trigger fired before mount (login/passcode) still plays. */
+const PENDING_KEY = "boa:mickey-pending";
+export const consumeMickeyPending = () => {
+  if (typeof sessionStorage === "undefined") return false;
+  const p = sessionStorage.getItem(PENDING_KEY);
+  if (p) sessionStorage.removeItem(PENDING_KEY);
+  return !!p;
+};
 /** Replay the Mickey name reveal everywhere it is mounted (e.g. after a passcode unlock). */
 export const triggerMickeyShow = () => {
-  if (typeof window !== "undefined") window.dispatchEvent(new Event(MICKEY_SHOW_EVENT));
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(PENDING_KEY, "1");
+  } catch {}
+  window.dispatchEvent(new Event(MICKEY_SHOW_EVENT));
 };
+
 
 export const MickeyNameShow = ({
   name,
@@ -349,7 +362,10 @@ export const MickeyBankName = ({
 
     const onDemand = () => runRef.current();
     window.addEventListener(MICKEY_SHOW_EVENT, onDemand);
+    // login / passcode may have triggered before this mounted
+    if (consumeMickeyPending()) later(run, 300);
     const interval = window.setInterval(run, CYCLE_MS);
+
     return () => {
       window.removeEventListener(MICKEY_SHOW_EVENT, onDemand);
       window.clearInterval(interval);
@@ -380,7 +396,7 @@ export const MickeyBankName = ({
               transform: isHidden ? "scale(0.05)" : "scale(1)",
               filter: isHidden ? "blur(2px)" : "none",
               transformOrigin: "bottom center",
-              transition: "opacity 220ms ease, transform 220ms ease, filter 220ms ease",
+              transition: "opacity 420ms ease, transform 420ms ease, filter 420ms ease",
             }}
           >
             {ch.c === " " ? "\u00A0" : ch.c}
