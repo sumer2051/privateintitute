@@ -62,7 +62,13 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     const load = async (uid: string) => {
+      if (userId.current === uid && channel) return;
       userId.current = uid;
+      if (channel) {
+        supabase.removeChannel(channel);
+        channel = null;
+      }
+
       const { data } = await supabase
         .from("profiles")
         .select("preferred_currency")
