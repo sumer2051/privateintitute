@@ -396,7 +396,7 @@ export const MickeyBankName = ({
               transform: isHidden ? "scale(0.05)" : "scale(1)",
               filter: isHidden ? "blur(2px)" : "none",
               transformOrigin: "bottom center",
-              transition: "opacity 220ms ease, transform 220ms ease, filter 220ms ease",
+              transition: "opacity 420ms ease, transform 420ms ease, filter 420ms ease",
             }}
           >
             {ch.c === " " ? "\u00A0" : ch.c}
