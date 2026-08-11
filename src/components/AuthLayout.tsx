@@ -139,15 +139,24 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   }, []);
 
   useEffect(() => {
-    supabase
-      .from("announcements")
-      .select("id,title,body,severity")
-      .eq("active", true)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => setAnnouncement((data as any) || null));
+    let active = true;
+    const loadAnnouncement = async (uid?: string) => {
+      if (!uid) { if (active) setAnnouncement(null); return; }
+      const { data } = await supabase
+        .from("announcements")
+        .select("id,title,body,severity,target_user_id")
+        .eq("active", true)
+        .or(`target_user_id.is.null,target_user_id.eq.${uid}`)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (active) setAnnouncement((data as any) || null);
+    };
+    supabase.auth.getSession().then(({ data: { session } }) => loadAnnouncement(session?.user?.id));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => loadAnnouncement(session?.user?.id));
+    return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
+
 
   const dismissAnnouncement = () => {
     if (!announcement) return;
