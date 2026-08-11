@@ -10,6 +10,7 @@ import { CountUp } from "@/components/CountUp";
 import { TransferModal } from "@/components/TransferModal";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Seo } from "@/components/Seo";
+import { HomeActivity } from "@/components/HomeActivity";
 
 interface Account {
   id: string;
@@ -313,9 +314,13 @@ const Accounts = () => {
             </Card>
           ))}
       </div>
+      <HomeActivity
+        accountNames={Object.fromEntries(accounts.map((a) => [a.id, a.account_name]))}
+      />
 
       <Card className="rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-md shadow-sm overflow-hidden">
         <CardHeader className="p-4 md:p-6 bg-primary/10 backdrop-blur-md border-b border-primary/15">
+
           <CardTitle className="flex items-center gap-2 text-base md:text-lg">
             <TrendingUp className="h-5 w-5 text-primary" />
             Account Summary
