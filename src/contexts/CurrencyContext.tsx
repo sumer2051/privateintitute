@@ -62,7 +62,13 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     const load = async (uid: string) => {
+      if (userId.current === uid && channel) return;
       userId.current = uid;
+      if (channel) {
+        supabase.removeChannel(channel);
+        channel = null;
+      }
+
       const { data } = await supabase
         .from("profiles")
         .select("preferred_currency")
@@ -91,12 +97,10 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
 
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       const uid = session?.user?.id ?? null;
-      if (uid && uid !== userId.current) {
-        hydrated.current = false;
-        if (channel) supabase.removeChannel(channel);
-        channel = null;
+      if (uid) {
         load(uid);
-      } else if (!uid) {
+      } else {
+
         userId.current = null;
         hydrated.current = false;
       }
