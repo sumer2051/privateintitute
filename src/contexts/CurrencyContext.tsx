@@ -50,9 +50,75 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
     return localStorage.getItem(STORAGE_KEY) || "USD";
   });
 
+  const userId = useRef<string | null>(null);
+  const hydrated = useRef(false);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, code);
   }, [code]);
+
+  // Load the currency saved on the user's profile so it follows them on every device.
+  useEffect(() => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    const load = async (uid: string) => {
+      userId.current = uid;
+      const { data } = await supabase
+        .from("profiles")
+        .select("preferred_currency")
+        .eq("id", uid)
+        .maybeSingle();
+      const saved = (data as any)?.preferred_currency as string | undefined;
+      if (saved && CURRENCIES.some((c) => c.code === saved)) setCode(saved);
+      hydrated.current = true;
+
+      channel = supabase
+        .channel(`profile-currency-${uid}`)
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${uid}` },
+          (payload) => {
+            const next = (payload.new as any)?.preferred_currency;
+            if (next && CURRENCIES.some((c) => c.code === next)) setCode(next);
+          },
+        )
+        .subscribe();
+    };
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) load(data.session.user.id);
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      const uid = session?.user?.id ?? null;
+      if (uid && uid !== userId.current) {
+        hydrated.current = false;
+        if (channel) supabase.removeChannel(channel);
+        channel = null;
+        load(uid);
+      } else if (!uid) {
+        userId.current = null;
+        hydrated.current = false;
+      }
+    });
+
+    return () => {
+      sub.subscription.unsubscribe();
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const setCurrencyCode = (next: string) => {
+    setCode(next);
+    if (userId.current) {
+      supabase
+        .from("profiles")
+        .update({ preferred_currency: next } as any)
+        .eq("id", userId.current)
+        .then(() => {});
+    }
+  };
+
 
   const value = useMemo<CurrencyContextValue>(() => {
     const currency = CURRENCIES.find((c) => c.code === code) || CURRENCIES[0];
