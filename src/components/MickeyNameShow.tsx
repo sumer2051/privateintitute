@@ -362,7 +362,10 @@ export const MickeyBankName = ({
 
     const onDemand = () => runRef.current();
     window.addEventListener(MICKEY_SHOW_EVENT, onDemand);
+    // login / passcode may have triggered before this mounted
+    if (consumeMickeyPending()) later(run, 300);
     const interval = window.setInterval(run, CYCLE_MS);
+
     return () => {
       window.removeEventListener(MICKEY_SHOW_EVENT, onDemand);
       window.clearInterval(interval);
