@@ -11,6 +11,7 @@ import { TransferModal } from "@/components/TransferModal";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Seo } from "@/components/Seo";
 import { HomeActivity } from "@/components/HomeActivity";
+import { MickeyNameShow } from "@/components/MickeyNameShow";
 
 interface Account {
   id: string;
@@ -108,18 +109,6 @@ const Accounts = () => {
     return "Good Evening";
   })();
 
-  const bouncingName = useMemo(() => {
-    if (!displayName) return null;
-    return displayName.split("").map((char, i) => (
-      <span
-        key={`${char}-${i}`}
-        className="bounce-letter font-display text-xl md:text-4xl font-bold text-secondary"
-        style={{ animationDelay: `${i * 0.07}s` }}
-      >
-        {char === " " ? "\u00A0" : char}
-      </span>
-    ));
-  }, [displayName]);
 
   const fetchAccounts = async () => {
     const start = Date.now();
@@ -217,9 +206,7 @@ const Accounts = () => {
               </div>
               <CurrencySelector variant="compact" />
             </div>
-            <div className="flex flex-wrap items-end gap-0 leading-none">
-              {bouncingName}
-            </div>
+            {displayName ? <MickeyNameShow name={displayName} /> : null}
           </div>
         </div>
       </div>
