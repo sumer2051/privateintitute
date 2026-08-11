@@ -72,11 +72,26 @@ const THROW_MS = 2200;
 const SALUTE_MS = 1500;
 const CYCLE_MS = 30000;
 
-export const MickeyNameShow = ({ name, className = "" }: { name: string; className?: string }) => {
+export const MICKEY_SHOW_EVENT = "boa:mickey-show";
+/** Replay the Mickey name reveal everywhere it is mounted (e.g. after a passcode unlock). */
+export const triggerMickeyShow = () => {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(MICKEY_SHOW_EVENT));
+};
+
+export const MickeyNameShow = ({
+  name,
+  className = "",
+  sizeClass = "text-xl md:text-4xl",
+}: {
+  name: string;
+  className?: string;
+  sizeClass?: string;
+}) => {
   const letters = useMemo(() => name.split(""), [name]);
   const [hidden, setHidden] = useState<number>(0); // count hidden from the end
   const [phase, setPhase] = useState<"idle" | "vanish" | "bow" | "throw" | "salute">("idle");
   const timers = useRef<number[]>([]);
+  const runRef = useRef<() => void>(() => {});
 
   const clearTimers = () => {
     timers.current.forEach((t) => window.clearTimeout(t));
@@ -89,6 +104,7 @@ export const MickeyNameShow = ({ name, className = "" }: { name: string; classNa
   useEffect(() => {
     if (!letters.length) return;
     const run = () => {
+      clearTimers();
       const n = letters.length;
       setPhase("vanish");
       // vanish gradually from the last letter back to the first
@@ -110,9 +126,13 @@ export const MickeyNameShow = ({ name, className = "" }: { name: string; classNa
         setHidden(0);
       }, vanishEnd + BOW_MS + THROW_MS + SALUTE_MS);
     };
+    runRef.current = run;
 
+    const onDemand = () => runRef.current();
+    window.addEventListener(MICKEY_SHOW_EVENT, onDemand);
     const interval = window.setInterval(run, CYCLE_MS);
     return () => {
+      window.removeEventListener(MICKEY_SHOW_EVENT, onDemand);
       window.clearInterval(interval);
       clearTimers();
     };
@@ -121,13 +141,13 @@ export const MickeyNameShow = ({ name, className = "" }: { name: string; classNa
   const showMickey = phase === "bow" || phase === "throw" || phase === "salute";
 
   return (
-    <div className={`relative flex flex-wrap items-end gap-0 leading-none ${className}`}>
+    <div className={`relative flex flex-nowrap items-end gap-0 leading-none ${className}`}>
       {letters.map((char, i) => {
         const isFirst = i === 0;
         const isHidden = i >= letters.length - hidden;
         if (isFirst && showMickey) {
           return (
-            <span key="mickey-slot" className="inline-block text-xl md:text-4xl text-secondary">
+            <span key="mickey-slot" className={`inline-block text-secondary ${sizeClass}`}>
               <Mickey pose={phase === "salute" ? "salute" : phase === "bow" ? "bow" : "throw"} />
             </span>
           );
@@ -135,7 +155,7 @@ export const MickeyNameShow = ({ name, className = "" }: { name: string; classNa
         return (
           <span
             key={`${char}-${i}`}
-            className="bounce-letter font-display text-xl md:text-4xl font-bold text-secondary"
+            className={`bounce-letter font-display font-bold text-secondary ${sizeClass}`}
             style={{
               animationDelay: `${i * 0.07}s`,
               opacity: isHidden ? 0 : 1,
@@ -151,12 +171,13 @@ export const MickeyNameShow = ({ name, className = "" }: { name: string; classNa
 
       {phase === "throw" && (
         <span
-          className="pointer-events-none absolute bottom-0 left-0 h-[1em] w-[1em] text-xl md:text-4xl text-secondary"
+          className={`pointer-events-none absolute bottom-0 left-0 h-[1em] w-[1em] text-secondary ${sizeClass}`}
           style={{ animation: `mouse-dash ${THROW_MS}ms linear forwards` }}
         >
           <LittleMouse />
         </span>
       )}
+
     </div>
   );
 };
