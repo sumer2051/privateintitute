@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Delete, LockKeyhole, ShieldCheck, Loader2 } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { triggerMickeyShow } from "@/components/MickeyNameShow";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -152,6 +153,7 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem(PASSCODE_KEY, hash);
       toast({ title: "Passcode set", description: "You'll be asked for this whenever you reopen the app." });
       setPhase("ready");
+      setTimeout(triggerMickeyShow, 400);
       setFirstCode("");
       setCode("");
       return;
@@ -161,6 +163,7 @@ export const AppLock = ({ children }: { children: React.ReactNode }) => {
       const hash = await sha256(value);
       if (hash === stored) {
         setPhase("ready");
+        setTimeout(triggerMickeyShow, 400);
         setCode("");
         setError("");
       } else {
