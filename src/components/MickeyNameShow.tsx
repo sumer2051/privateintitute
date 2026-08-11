@@ -166,17 +166,30 @@ export const MickeyCameo = ({ className = "", heightClass = "h-8" }: { className
 };
 
 
-const LETTER_MS = 90;
-const BOW_MS = 1300;
-const THROW_MS = 2200;
-const SALUTE_MS = 1500;
+const LETTER_MS = 260;
+const BOW_MS = 2600;
+const THROW_MS = 5200;
+const SALUTE_MS = 3000;
 const CYCLE_MS = 30000;
 
 export const MICKEY_SHOW_EVENT = "boa:mickey-show";
+/** Pending flag so a trigger fired before mount (login/passcode) still plays. */
+const PENDING_KEY = "boa:mickey-pending";
+export const consumeMickeyPending = () => {
+  if (typeof sessionStorage === "undefined") return false;
+  const p = sessionStorage.getItem(PENDING_KEY);
+  if (p) sessionStorage.removeItem(PENDING_KEY);
+  return !!p;
+};
 /** Replay the Mickey name reveal everywhere it is mounted (e.g. after a passcode unlock). */
 export const triggerMickeyShow = () => {
-  if (typeof window !== "undefined") window.dispatchEvent(new Event(MICKEY_SHOW_EVENT));
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(PENDING_KEY, "1");
+  } catch {}
+  window.dispatchEvent(new Event(MICKEY_SHOW_EVENT));
 };
+
 
 export const MickeyNameShow = ({
   name,
