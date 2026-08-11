@@ -137,7 +137,7 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
     };
     return {
       currency,
-      setCurrencyCode: setCode,
+      setCurrencyCode,
       convert,
       toUsd,
       format: (usd: number) => formatRaw(convert(usd)),
