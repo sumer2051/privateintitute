@@ -153,10 +153,9 @@ export const MickeyNameShow = ({
           );
         }
         return (
-
           <span
             key={`${char}-${i}`}
-            className="bounce-letter font-display text-xl md:text-4xl font-bold text-secondary"
+            className={`bounce-letter font-display font-bold text-secondary ${sizeClass}`}
             style={{
               animationDelay: `${i * 0.07}s`,
               opacity: isHidden ? 0 : 1,
@@ -172,12 +171,13 @@ export const MickeyNameShow = ({
 
       {phase === "throw" && (
         <span
-          className="pointer-events-none absolute bottom-0 left-0 h-[1em] w-[1em] text-xl md:text-4xl text-secondary"
+          className={`pointer-events-none absolute bottom-0 left-0 h-[1em] w-[1em] text-secondary ${sizeClass}`}
           style={{ animation: `mouse-dash ${THROW_MS}ms linear forwards` }}
         >
           <LittleMouse />
         </span>
       )}
+
     </div>
   );
 };
