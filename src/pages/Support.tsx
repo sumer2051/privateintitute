@@ -124,7 +124,11 @@ export default function Support() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_messages", filter: `ticket_id=eq.${id}` },
         (p) => {
           const row = p.new as MsgRow;
-          setMessages((m) => (m.some((x) => x.id === row.id) ? m : [...m, row]));
+          setMessages((m) => {
+            if (m.some((x) => x.id === row.id)) return m;
+            if (row.sender_type !== "customer") playSound("message");
+            return [...m, row];
+          });
           markViewed(id);
         })
       .subscribe();
