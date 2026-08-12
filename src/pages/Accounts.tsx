@@ -115,6 +115,13 @@ const Accounts = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
+      // Collect any past-due credit card payments before displaying balances
+      try {
+        await supabase.rpc("process_my_overdue_credit_payments");
+      } catch {
+        /* non-blocking */
+      }
+
       const { data, error } = await supabase
         .from("accounts")
         .select("*")
