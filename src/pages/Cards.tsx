@@ -45,7 +45,12 @@ interface Account {
   account_number: string;
   balance: number;
   available_balance: number;
+  credit_limit?: number | null;
+  payment_due_date?: string | null;
+  minimum_payment?: number | null;
+  last_payment_at?: string | null;
 }
+
 
 type CardKind = "debit" | "credit";
 
