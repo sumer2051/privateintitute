@@ -103,15 +103,29 @@ const Cards = () => {
   const [pinDialog, setPinDialog] = useState<DerivedCard | null>(null);
   const [replaceDialog, setReplaceDialog] = useState<DerivedCard | null>(null);
   const [travelDialog, setTravelDialog] = useState<DerivedCard | null>(null);
+  const [payDialog, setPayDialog] = useState<DerivedCard | null>(null);
+  const [payAmount, setPayAmount] = useState("");
+  const [payFrom, setPayFrom] = useState("");
+  const [paying, setPaying] = useState(false);
   const [verifyState, setVerifyState] = useState<{ purpose: string; title: string; description: string; onOk: () => void } | null>(null);
 
   const guard = (purpose: string, title: string, description: string, onOk: () => void) => {
     setVerifyState({ purpose, title, description, onOk });
   };
 
+  const loadAccounts = async (uid: string) => {
+    const { data } = await supabase
+      .from("accounts")
+      .select("*")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: true });
+    setAccounts((data as any) || []);
+  };
+
   useEffect(() => {
     (async () => {
       const { data: userRes } = await supabase.auth.getUser();
+      if (!userRes.user) return;
       const meta: any = userRes.user?.user_metadata || {};
       const name =
         meta.full_name ||
@@ -119,15 +133,56 @@ const Cards = () => {
         (userRes.user?.email ? userRes.user.email.split("@")[0] : "Card Holder");
       setHolder(String(name).toUpperCase());
 
-      const { data } = await supabase
-        .from("accounts")
-        .select("*")
-        .eq("user_id", userRes.user!.id)
-        .order("created_at", { ascending: true });
-      setAccounts(data || []);
+      // Collect any past-due credit card payments before showing balances
+      try {
+        await supabase.rpc("process_my_overdue_credit_payments");
+      } catch {
+        /* non-blocking */
+      }
+      await loadAccounts(userRes.user.id);
       setLoading(false);
     })();
   }, []);
+
+  const fundingAccounts = accounts.filter((a) => a.account_type !== "credit");
+
+  const openPayDialog = (c: DerivedCard) => {
+    setPayDialog(c);
+    setPayAmount(String(Number(c.account.minimum_payment || 0) || ""));
+    setPayFrom(fundingAccounts[0]?.id || "");
+  };
+
+  const submitPayment = async () => {
+    if (!payDialog) return;
+    const amount = Number(payAmount);
+    if (!payFrom) {
+      toast({ title: "Select an account", description: "Choose the account to pay from.", variant: "destructive" });
+      return;
+    }
+    if (!amount || amount <= 0) {
+      toast({ title: "Invalid amount", description: "Enter an amount greater than zero.", variant: "destructive" });
+      return;
+    }
+    setPaying(true);
+    const { data, error } = await supabase.rpc("pay_credit_card", {
+      p_credit: payDialog.account.id,
+      p_from: payFrom,
+      p_amount: amount,
+    });
+    setPaying(false);
+    if (error) {
+      toast({ title: "Payment failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: "Payment posted",
+      description: `${format(amount)} applied. Remaining balance ${format(Number(data) || 0)}.`,
+    });
+    setPayDialog(null);
+    const { data: userRes } = await supabase.auth.getUser();
+    if (userRes.user) await loadAccounts(userRes.user.id);
+  };
+
 
   const cards: DerivedCard[] = useMemo(() => {
     return accounts
