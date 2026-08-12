@@ -518,20 +518,11 @@ const Cards = () => {
                 Statement
               </Button>
               {c.kind === "credit" && (
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    toast({
-                      title: "Payment scheduled",
-                      description: `${format(Math.max(25, used * 0.02))} scheduled for ${new Date(
-                        Date.now() + 3 * 864e5,
-                      ).toLocaleDateString()}`,
-                    })
-                  }
-                >
+                <Button size="sm" onClick={() => openPayDialog(c)} disabled={used <= 0}>
                   Pay card
                 </Button>
               )}
+
             </div>
           </div>
         </CardContent>
