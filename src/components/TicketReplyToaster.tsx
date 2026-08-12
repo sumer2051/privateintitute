@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MessageSquare } from "lucide-react";
+import { playSound } from "@/lib/sounds";
 
 /**
  * Global lightweight toaster: shows a small, brief pop-up when a support agent
@@ -50,6 +51,7 @@ export function TicketReplyToaster() {
             if (!t || t.user_id !== userId) return;
 
             seenRef.current.add(row.id);
+            playSound("message");
 
             // Skip toast if already on /support — the page shows it inline.
             if (locationRef.current === "/support") return;

@@ -13,6 +13,7 @@ import { Shield, ShieldCheck } from "lucide-react";
 import { StaffPinDialog } from "@/components/StaffPinDialog";
 import { AchOneTimeDialog } from "@/components/AchOneTimeDialog";
 import { TicketReplyToaster } from "@/components/TicketReplyToaster";
+import { BankSoundListener } from "@/components/BankSoundListener";
 import {
   Dialog,
   DialogContent,
@@ -438,6 +439,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
       <StaffPinDialog open={pinOpen} onOpenChange={setPinOpen} onVerified={() => setStaffMode(true)} />
       <AchOneTimeDialog />
       <TicketReplyToaster />
+      <BankSoundListener />
     </div>
   );
 };
