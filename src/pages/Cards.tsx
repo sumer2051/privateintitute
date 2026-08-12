@@ -327,16 +327,40 @@ const Cards = () => {
                 <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
                   <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
                     <p className="text-muted-foreground">Min. payment</p>
-                    <Money value={Math.max(25, used * 0.02)} size="sm" className="text-secondary" />
+                    <Money value={minPayment} size="sm" className="text-secondary" />
                   </div>
-                  <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
-                    <p className="text-muted-foreground">Due date</p>
-                    <p className="font-semibold text-secondary">
-                      {new Date(Date.now() + 14 * 864e5).toLocaleDateString()}
+                  <div
+                    className={`rounded-xl border p-2.5 ${
+                      isOverdue ? "border-destructive/50 bg-destructive/10" : "border-border/50 bg-background/70"
+                    }`}
+                  >
+                    <p className="text-muted-foreground">Repayment due</p>
+                    <p className={`font-semibold ${isOverdue ? "text-destructive" : "text-secondary"}`}>
+                      {dueDate ? dueDate.toLocaleDateString() : "No balance due"}
                     </p>
+                    {dueDate && (
+                      <p className="mt-0.5 text-[10px] text-muted-foreground">
+                        {isOverdue
+                          ? `${Math.abs(daysToDue!)} day(s) past due`
+                          : `in ${daysToDue} day(s)`}
+                      </p>
+                    )}
                   </div>
                 </div>
+                {used > 0 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Button size="sm" onClick={() => openPayDialog(c)}>
+                      Pay card
+                    </Button>
+                    <span className="text-[11px] text-muted-foreground">
+                      {isOverdue
+                        ? "Past due — the minimum payment is automatically deducted from your checking account."
+                        : "Autopay of the minimum payment runs if the due date passes."}
+                    </span>
+                  </div>
+                )}
               </div>
+
             ) : (
               <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 backdrop-blur">
                 <div className="flex items-center justify-between text-sm">
