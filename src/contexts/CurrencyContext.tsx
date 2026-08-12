@@ -79,7 +79,7 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
       hydrated.current = true;
 
       channel = supabase
-        .channel(`profile-currency-${uid}`)
+        .channel(`profile-currency-${uid}-${Math.random().toString(36).slice(2)}`)
         .on(
           "postgres_changes",
           { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${uid}` },
