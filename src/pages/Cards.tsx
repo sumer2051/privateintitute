@@ -45,7 +45,12 @@ interface Account {
   account_number: string;
   balance: number;
   available_balance: number;
+  credit_limit?: number | null;
+  payment_due_date?: string | null;
+  minimum_payment?: number | null;
+  last_payment_at?: string | null;
 }
+
 
 type CardKind = "debit" | "credit";
 
@@ -98,15 +103,29 @@ const Cards = () => {
   const [pinDialog, setPinDialog] = useState<DerivedCard | null>(null);
   const [replaceDialog, setReplaceDialog] = useState<DerivedCard | null>(null);
   const [travelDialog, setTravelDialog] = useState<DerivedCard | null>(null);
+  const [payDialog, setPayDialog] = useState<DerivedCard | null>(null);
+  const [payAmount, setPayAmount] = useState("");
+  const [payFrom, setPayFrom] = useState("");
+  const [paying, setPaying] = useState(false);
   const [verifyState, setVerifyState] = useState<{ purpose: string; title: string; description: string; onOk: () => void } | null>(null);
 
   const guard = (purpose: string, title: string, description: string, onOk: () => void) => {
     setVerifyState({ purpose, title, description, onOk });
   };
 
+  const loadAccounts = async (uid: string) => {
+    const { data } = await supabase
+      .from("accounts")
+      .select("*")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: true });
+    setAccounts((data as any) || []);
+  };
+
   useEffect(() => {
     (async () => {
       const { data: userRes } = await supabase.auth.getUser();
+      if (!userRes.user) return;
       const meta: any = userRes.user?.user_metadata || {};
       const name =
         meta.full_name ||
@@ -114,15 +133,56 @@ const Cards = () => {
         (userRes.user?.email ? userRes.user.email.split("@")[0] : "Card Holder");
       setHolder(String(name).toUpperCase());
 
-      const { data } = await supabase
-        .from("accounts")
-        .select("*")
-        .eq("user_id", userRes.user!.id)
-        .order("created_at", { ascending: true });
-      setAccounts(data || []);
+      // Collect any past-due credit card payments before showing balances
+      try {
+        await supabase.rpc("process_my_overdue_credit_payments");
+      } catch {
+        /* non-blocking */
+      }
+      await loadAccounts(userRes.user.id);
       setLoading(false);
     })();
   }, []);
+
+  const fundingAccounts = accounts.filter((a) => a.account_type !== "credit");
+
+  const openPayDialog = (c: DerivedCard) => {
+    setPayDialog(c);
+    setPayAmount(String(Number(c.account.minimum_payment || 0) || ""));
+    setPayFrom(fundingAccounts[0]?.id || "");
+  };
+
+  const submitPayment = async () => {
+    if (!payDialog) return;
+    const amount = Number(payAmount);
+    if (!payFrom) {
+      toast({ title: "Select an account", description: "Choose the account to pay from.", variant: "destructive" });
+      return;
+    }
+    if (!amount || amount <= 0) {
+      toast({ title: "Invalid amount", description: "Enter an amount greater than zero.", variant: "destructive" });
+      return;
+    }
+    setPaying(true);
+    const { data, error } = await supabase.rpc("pay_credit_card", {
+      p_credit: payDialog.account.id,
+      p_from: payFrom,
+      p_amount: amount,
+    });
+    setPaying(false);
+    if (error) {
+      toast({ title: "Payment failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: "Payment posted",
+      description: `${format(amount)} applied. Remaining balance ${format(Number(data) || 0)}.`,
+    });
+    setPayDialog(null);
+    const { data: userRes } = await supabase.auth.getUser();
+    if (userRes.user) await loadAccounts(userRes.user.id);
+  };
+
 
   const cards: DerivedCard[] = useMemo(() => {
     return accounts
@@ -172,10 +232,15 @@ const Cards = () => {
         ? "from-secondary via-secondary/90 to-primary"
         : "from-primary via-primary/85 to-secondary";
 
-    // Credit-specific numbers
-    const creditLimit = 10000;
-    const used = c.kind === "credit" ? Math.max(0, c.account.balance) : 0;
+    // Credit-specific numbers (live from the account record)
+    const creditLimit = Number(c.account.credit_limit ?? 0) || 10000;
+    const used = c.kind === "credit" ? Math.max(0, Number(c.account.balance) || 0) : 0;
     const utilization = c.kind === "credit" ? Math.min(100, (used / creditLimit) * 100) : 0;
+    const minPayment = Number(c.account.minimum_payment || 0);
+    const dueDate = c.account.payment_due_date ? new Date(`${c.account.payment_due_date}T00:00:00`) : null;
+    const daysToDue = dueDate ? Math.ceil((dueDate.getTime() - Date.now()) / 864e5) : null;
+    const isOverdue = daysToDue !== null && daysToDue < 0 && used > 0;
+
 
     return (
       <Card
@@ -262,16 +327,40 @@ const Cards = () => {
                 <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
                   <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
                     <p className="text-muted-foreground">Min. payment</p>
-                    <Money value={Math.max(25, used * 0.02)} size="sm" className="text-secondary" />
+                    <Money value={minPayment} size="sm" className="text-secondary" />
                   </div>
-                  <div className="rounded-xl border border-border/50 bg-background/70 p-2.5">
-                    <p className="text-muted-foreground">Due date</p>
-                    <p className="font-semibold text-secondary">
-                      {new Date(Date.now() + 14 * 864e5).toLocaleDateString()}
+                  <div
+                    className={`rounded-xl border p-2.5 ${
+                      isOverdue ? "border-destructive/50 bg-destructive/10" : "border-border/50 bg-background/70"
+                    }`}
+                  >
+                    <p className="text-muted-foreground">Repayment due</p>
+                    <p className={`font-semibold ${isOverdue ? "text-destructive" : "text-secondary"}`}>
+                      {dueDate ? dueDate.toLocaleDateString() : "No balance due"}
                     </p>
+                    {dueDate && (
+                      <p className="mt-0.5 text-[10px] text-muted-foreground">
+                        {isOverdue
+                          ? `${Math.abs(daysToDue!)} day(s) past due`
+                          : `in ${daysToDue} day(s)`}
+                      </p>
+                    )}
                   </div>
                 </div>
+                {used > 0 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Button size="sm" onClick={() => openPayDialog(c)}>
+                      Pay card
+                    </Button>
+                    <span className="text-[11px] text-muted-foreground">
+                      {isOverdue
+                        ? "Past due — the minimum payment is automatically deducted from your checking account."
+                        : "Autopay of the minimum payment runs if the due date passes."}
+                    </span>
+                  </div>
+                )}
               </div>
+
             ) : (
               <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 backdrop-blur">
                 <div className="flex items-center justify-between text-sm">
@@ -429,20 +518,11 @@ const Cards = () => {
                 Statement
               </Button>
               {c.kind === "credit" && (
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    toast({
-                      title: "Payment scheduled",
-                      description: `${format(Math.max(25, used * 0.02))} scheduled for ${new Date(
-                        Date.now() + 3 * 864e5,
-                      ).toLocaleDateString()}`,
-                    })
-                  }
-                >
+                <Button size="sm" onClick={() => openPayDialog(c)} disabled={used <= 0}>
                   Pay card
                 </Button>
               )}
+
             </div>
           </div>
         </CardContent>
@@ -695,6 +775,87 @@ const Cards = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Credit card payment dialog */}
+      <Dialog open={!!payDialog} onOpenChange={(o) => !o && setPayDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pay credit card •••• {payDialog?.last4}</DialogTitle>
+            <DialogDescription>
+              {payDialog?.account.payment_due_date
+                ? `Repayment due ${new Date(`${payDialog.account.payment_due_date}T00:00:00`).toLocaleDateString()}`
+                : "Choose an amount and the account to pay from."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-lg border bg-muted/40 p-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Balance owed</span>
+                <Money value={Number(payDialog?.account.balance || 0)} size="sm" className="text-secondary" />
+              </div>
+              <div className="mt-1 flex items-center justify-between">
+                <span className="text-muted-foreground">Minimum payment</span>
+                <Money value={Number(payDialog?.account.minimum_payment || 0)} size="sm" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pay-from">Pay from</Label>
+              <select
+                id="pay-from"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                value={payFrom}
+                onChange={(e) => setPayFrom(e.target.value)}
+              >
+                {fundingAccounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.account_name} ••{a.account_number.slice(-4)} — {format(Number(a.available_balance) || 0)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pay-amount">Amount</Label>
+              <input
+                id="pay-amount"
+                type="number"
+                min="0"
+                step="0.01"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm tabular-nums"
+                value={payAmount}
+                onChange={(e) => setPayAmount(e.target.value)}
+              />
+              <div className="flex gap-2 pt-1">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPayAmount(String(Number(payDialog?.account.minimum_payment || 0)))}
+                >
+                  Minimum
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPayAmount(String(Number(payDialog?.account.balance || 0)))}
+                >
+                  Full balance
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setPayDialog(null)} disabled={paying}>
+              Cancel
+            </Button>
+            <Button onClick={submitPayment} disabled={paying}>
+              {paying ? "Processing…" : "Pay now"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
       <VerifyCodeDialog
         open={!!verifyState}
         onOpenChange={(o) => !o && setVerifyState(null)}

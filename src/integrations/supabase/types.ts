@@ -19,6 +19,7 @@ export type Database = {
           account_name: string
           account_number: string
           account_type: string
+          autopay_enabled: boolean
           available_balance: number
           balance: number
           created_at: string | null
@@ -26,6 +27,9 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_frozen: boolean
+          last_payment_at: string | null
+          minimum_payment: number
+          payment_due_date: string | null
           updated_at: string | null
           user_id: string
         }
@@ -33,6 +37,7 @@ export type Database = {
           account_name: string
           account_number: string
           account_type: string
+          autopay_enabled?: boolean
           available_balance?: number
           balance?: number
           created_at?: string | null
@@ -40,6 +45,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_frozen?: boolean
+          last_payment_at?: string | null
+          minimum_payment?: number
+          payment_due_date?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -47,6 +55,7 @@ export type Database = {
           account_name?: string
           account_number?: string
           account_type?: string
+          autopay_enabled?: boolean
           available_balance?: number
           balance?: number
           created_at?: string | null
@@ -54,6 +63,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_frozen?: boolean
+          last_payment_at?: string | null
+          minimum_payment?: number
+          payment_due_date?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -772,6 +784,10 @@ export type Database = {
         Args: { p_status: string; p_tx: string }
         Returns: boolean
       }
+      apply_balance_delta: {
+        Args: { p_account: string; p_delta: number }
+        Returns: number
+      }
       generate_ticket_number: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -792,6 +808,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      pay_credit_card: {
+        Args: { p_amount: number; p_credit: string; p_from: string }
+        Returns: number
+      }
+      process_my_overdue_credit_payments: { Args: never; Returns: number }
       set_staff_pin: { Args: { _pin: string }; Returns: boolean }
       set_transfer_pin: { Args: { _pin: string }; Returns: boolean }
       staff_claim_ticket: {
