@@ -775,6 +775,87 @@ const Cards = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Credit card payment dialog */}
+      <Dialog open={!!payDialog} onOpenChange={(o) => !o && setPayDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pay credit card •••• {payDialog?.last4}</DialogTitle>
+            <DialogDescription>
+              {payDialog?.account.payment_due_date
+                ? `Repayment due ${new Date(`${payDialog.account.payment_due_date}T00:00:00`).toLocaleDateString()}`
+                : "Choose an amount and the account to pay from."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-lg border bg-muted/40 p-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Balance owed</span>
+                <Money value={Number(payDialog?.account.balance || 0)} size="sm" className="text-secondary" />
+              </div>
+              <div className="mt-1 flex items-center justify-between">
+                <span className="text-muted-foreground">Minimum payment</span>
+                <Money value={Number(payDialog?.account.minimum_payment || 0)} size="sm" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pay-from">Pay from</Label>
+              <select
+                id="pay-from"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                value={payFrom}
+                onChange={(e) => setPayFrom(e.target.value)}
+              >
+                {fundingAccounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.account_name} ••{a.account_number.slice(-4)} — {format(Number(a.available_balance) || 0)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pay-amount">Amount</Label>
+              <input
+                id="pay-amount"
+                type="number"
+                min="0"
+                step="0.01"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm tabular-nums"
+                value={payAmount}
+                onChange={(e) => setPayAmount(e.target.value)}
+              />
+              <div className="flex gap-2 pt-1">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPayAmount(String(Number(payDialog?.account.minimum_payment || 0)))}
+                >
+                  Minimum
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPayAmount(String(Number(payDialog?.account.balance || 0)))}
+                >
+                  Full balance
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setPayDialog(null)} disabled={paying}>
+              Cancel
+            </Button>
+            <Button onClick={submitPayment} disabled={paying}>
+              {paying ? "Processing…" : "Pay now"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
       <VerifyCodeDialog
         open={!!verifyState}
         onOpenChange={(o) => !o && setVerifyState(null)}
