@@ -232,10 +232,15 @@ const Cards = () => {
         ? "from-secondary via-secondary/90 to-primary"
         : "from-primary via-primary/85 to-secondary";
 
-    // Credit-specific numbers
-    const creditLimit = 10000;
-    const used = c.kind === "credit" ? Math.max(0, c.account.balance) : 0;
+    // Credit-specific numbers (live from the account record)
+    const creditLimit = Number(c.account.credit_limit ?? 0) || 10000;
+    const used = c.kind === "credit" ? Math.max(0, Number(c.account.balance) || 0) : 0;
     const utilization = c.kind === "credit" ? Math.min(100, (used / creditLimit) * 100) : 0;
+    const minPayment = Number(c.account.minimum_payment || 0);
+    const dueDate = c.account.payment_due_date ? new Date(`${c.account.payment_due_date}T00:00:00`) : null;
+    const daysToDue = dueDate ? Math.ceil((dueDate.getTime() - Date.now()) / 864e5) : null;
+    const isOverdue = daysToDue !== null && daysToDue < 0 && used > 0;
+
 
     return (
       <Card
