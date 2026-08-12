@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { playSound } from "@/lib/sounds";
 import { MessageSquare, Send, Plus, ArrowLeft, Paperclip, X, PhoneCall, Headset } from "lucide-react";
 import { AttachmentPreview, uploadTicketAttachment, MAX_ATTACHMENT_BYTES, formatBytes } from "@/components/TicketAttachment";
 import { Seo } from "@/components/Seo";
@@ -124,7 +125,11 @@ export default function Support() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_messages", filter: `ticket_id=eq.${id}` },
         (p) => {
           const row = p.new as MsgRow;
-          setMessages((m) => (m.some((x) => x.id === row.id) ? m : [...m, row]));
+          setMessages((m) => {
+            if (m.some((x) => x.id === row.id)) return m;
+            if (row.sender_type !== "customer") playSound("message");
+            return [...m, row];
+          });
           markViewed(id);
         })
       .subscribe();

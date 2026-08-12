@@ -16,6 +16,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { getBankingProfile, getBankingSchemes } from "@/lib/bank-profiles";
 import { getCountryMethods, type CountryMethod } from "@/lib/country-methods";
 import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
+import { playSound } from "@/lib/sounds";
 import { CashAppPayDialog } from "@/components/CashAppPayDialog";
 import { PayPalPayDialog } from "@/components/PayPalPayDialog";
 import { VenmoPayDialog } from "@/components/VenmoPayDialog";
@@ -404,6 +405,7 @@ const Transfers = () => {
         ((authUser?.user_metadata?.full_name as string) || "").trim() ||
         (authUser?.email ?? "You");
 
+      playSound("moneyOut");
       setReceipt({
         method: smMethod,
         amount: amtDisplay,
