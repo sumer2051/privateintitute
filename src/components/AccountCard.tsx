@@ -16,6 +16,7 @@ interface AccountCardProps {
 
 export const AccountCard = ({ name, balance, accountNumber, type, onTransferClick, onZelleClick, onPayBillClick }: AccountCardProps) => {
   const { format } = useCurrency();
+  const navigate = useNavigate();
   const formatCurrency = (amount: number) => format(amount);
 
   return (
