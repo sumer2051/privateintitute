@@ -285,7 +285,7 @@ const Accounts = () => {
                     <Button
                       size="sm"
                       className="flex-1 h-10 md:h-11 rounded-xl bg-primary text-primary-foreground text-xs md:text-sm font-semibold shadow-md shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/95 hover:shadow-lg active:scale-[0.98]"
-                      onClick={() => setTransferOpen(true)}
+                      onClick={() => navigate("/transfers")}
                     >
                       <ArrowUpDown className="mr-1.5 h-4 w-4" />
                       Transfer
