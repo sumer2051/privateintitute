@@ -31,26 +31,31 @@ export const AccountCard = ({ name, balance, accountNumber, type, onTransferClic
         <p className="text-sm text-muted-foreground">**** {accountNumber}</p>
       </CardHeader>
       <CardContent className="flex gap-2">
-        {type !== "credit" ? (
-          <>
-            <Button variant="secondary" size="sm" className="flex-1" onClick={onTransferClick}>
-              <ArrowRightLeft className="mr-1 h-4 w-4" />
-              Transfer
-            </Button>
-            <Button 
-              size="sm" 
+        <>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex-1"
+            onClick={() => onTransferClick ? onTransferClick() : navigate("/transfers")}
+          >
+            <ArrowRightLeft className="mr-1 h-4 w-4" />
+            Transfer
+          </Button>
+          {type !== "credit" ? (
+            <Button
+              size="sm"
               className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90"
               onClick={onZelleClick}
             >
               <Send className="mr-1 h-4 w-4" />
               Zelle
             </Button>
-          </>
-        ) : (
-          <Button variant="default" size="sm" className="flex-1" onClick={onPayBillClick}>
-            Pay Bill
-          </Button>
-        )}
+          ) : (
+            <Button variant="default" size="sm" className="flex-1" onClick={onPayBillClick}>
+              Pay Bill
+            </Button>
+          )}
+        </>}
       </CardContent>
     </Card>
   );
