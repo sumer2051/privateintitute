@@ -273,7 +273,7 @@ const Index = () => {
                   balance={account.balance}
                   accountNumber={account.account_number}
                   type={account.account_type}
-                  onTransferClick={() => setShowTransferModal(true)}
+                  onTransferClick={() => navigate("/transfers")}
                   onZelleClick={() => setShowZelleModal(true)}
                   onPayBillClick={() => showNotification("Pay Bill", "Credit card payment feature coming soon", "info")}
                 />

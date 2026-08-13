@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpDown, Download, TrendingUp, Sparkles, Camera, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useNavigate } from "react-router-dom";
 import { CountUp } from "@/components/CountUp";
 import { TransferModal } from "@/components/TransferModal";
 import { CurrencySelector } from "@/components/CurrencySelector";
@@ -31,6 +32,7 @@ const Accounts = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -283,7 +285,7 @@ const Accounts = () => {
                     <Button
                       size="sm"
                       className="flex-1 h-10 md:h-11 rounded-xl bg-primary text-primary-foreground text-xs md:text-sm font-semibold shadow-md shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/95 hover:shadow-lg active:scale-[0.98]"
-                      onClick={() => setTransferOpen(true)}
+                      onClick={() => navigate("/transfers")}
                     >
                       <ArrowUpDown className="mr-1.5 h-4 w-4" />
                       Transfer
