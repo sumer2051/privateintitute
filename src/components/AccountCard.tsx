@@ -55,7 +55,7 @@ export const AccountCard = ({ name, balance, accountNumber, type, onTransferClic
               Pay Bill
             </Button>
           )}
-        </>}
+        </>
       </CardContent>
     </Card>
   );
