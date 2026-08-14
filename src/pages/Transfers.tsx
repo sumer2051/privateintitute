@@ -955,6 +955,47 @@ const Transfers = () => {
           setMethodOpen(false);
         }}
       />
+      <ExternalTransferDialog
+        open={extOpen}
+        onOpenChange={setExtOpen}
+        profile={profile}
+        currencyCode={currency.code}
+        currencySymbol={currency.symbol}
+        amount={extAmount}
+        setAmount={setExtAmount}
+        recipient={extRecipient}
+        setRecipient={setExtRecipient}
+        email={extEmail}
+        setEmail={setExtEmail}
+        memo={extMemo}
+        setMemo={setExtMemo}
+        fields={extFields}
+        setFields={setExtFields}
+        fromAccount={extFrom}
+        setFromAccount={setExtFrom}
+        accounts={accounts}
+        formatCurrency={formatCurrency}
+        loading={extLoading}
+        onSubmit={() => handleExternalTransfer()}
+      />
+      <InternalTransferDialog
+        open={intOpen}
+        onOpenChange={setIntOpen}
+        accounts={accounts}
+        fromAccount={fromAccount}
+        setFromAccount={setFromAccount}
+        toAccount={toAccount}
+        setToAccount={setToAccount}
+        amount={amount}
+        setAmount={setAmount}
+        note={intNote}
+        setNote={setIntNote}
+        formatCurrency={formatCurrency}
+        currencyCode={currency.code}
+        currencySymbol={currency.symbol}
+        loading={loading}
+        onSubmit={() => handleInternalTransfer()}
+      />
       <TransferPinGate ref={pinRef} />
     </AuthLayout>
   );
