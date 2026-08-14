@@ -562,20 +562,19 @@ const Transfers = () => {
                             setSmMethodId(m.id);
                             setSmFields({});
                             setSmVariant("");
+                            if (!smFrom) {
+                              const checking = accounts.find((a) => a.account_type === "checking");
+                              setSmFrom(checking?.id || accounts[0]?.id || "");
+                            }
                             if (m.id === "cashapp") {
-                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setCashAppOpen(true);
                             } else if (m.id === "paypal" || m.id === "paypal_uk" || m.id === "paypal_eu") {
-                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setPayPalOpen(true);
                             } else if (m.id === "venmo") {
-                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setVenmoOpen(true);
                             } else if (m.id === "zelle") {
-                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setZelleOpen(true);
                             } else {
-                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setMethodOpen(true);
                             }
                           }}
