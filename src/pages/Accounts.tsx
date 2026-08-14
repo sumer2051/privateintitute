@@ -295,10 +295,10 @@ const Accounts = () => {
                     )}
 
                   </div>
-                  <div className="flex gap-3 pt-1">
+                  <div className="flex flex-col sm:flex-row gap-3 pt-1">
                     <Button
                       size="sm"
-                      className="flex-1 h-10 md:h-11 rounded-xl bg-primary text-primary-foreground text-xs md:text-sm font-semibold shadow-md shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/95 hover:shadow-lg active:scale-[0.98]"
+                      className="luxe-btn-primary flex-1 h-11 md:h-12 rounded-2xl bg-primary text-primary-foreground text-xs md:text-sm font-semibold tracking-wide shadow-md shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/95 hover:shadow-lg active:scale-[0.98]"
                       onClick={() => navigate("/transfers")}
                     >
                       <ArrowUpDown className="mr-1.5 h-4 w-4" />
@@ -307,7 +307,7 @@ const Accounts = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="flex-1 h-10 md:h-11 rounded-xl border-border bg-card text-xs md:text-sm font-semibold transition-all hover:scale-[1.02] hover:bg-accent/5 hover:text-accent active:scale-[0.98]"
+                      className="luxe-btn-ghost flex-1 h-11 md:h-12 rounded-2xl border-border bg-card text-xs md:text-sm font-semibold tracking-wide transition-all hover:scale-[1.02] hover:bg-accent/5 active:scale-[0.98]"
                       onClick={() =>
                         toast({
                           title: "Statement ready",
