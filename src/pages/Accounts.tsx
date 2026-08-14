@@ -215,7 +215,11 @@ const Accounts = () => {
               </div>
               <CurrencySelector variant="compact" />
             </div>
-            {displayName ? <MickeyNameShow name={displayName} /> : null}
+            {displayName ? (
+              <h2 className="truncate text-xl md:text-3xl font-bold tracking-tight text-secondary">
+                Welcome back, {displayName}
+              </h2>
+            ) : null}
           </div>
         </div>
       </div>
