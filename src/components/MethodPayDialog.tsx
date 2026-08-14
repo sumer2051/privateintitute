@@ -59,6 +59,40 @@ const parseAccent = (accent: string): { from: string; to: string } => {
   return { from: TW_COLORS[fromKey] ?? "#334155", to: TW_COLORS[toKey] ?? "#0f172a" };
 };
 
+// --- Bank-style input recognition helpers -------------------------------
+const isNameKey = (key: string) => /name/.test(key) && !/bank|business|user|tag/.test(key);
+
+const autoCompleteFor = (key: string) => {
+  if (key === "email") return "email";
+  if (/phone/.test(key)) return "tel";
+  if (isNameKey(key)) return "name";
+  return "off";
+};
+
+const group = (v: string, size: number) =>
+  v.replace(/\s+/g, "").replace(new RegExp(`(.{${size}})`, "g"), "$1 ").trim();
+
+/** Formats values the way a bank recognises them (IBAN in blocks of 4, BIC uppercase, digits only for account/routing numbers, tidy names). */
+const formatFieldValue = (key: string, raw: string) => {
+  const k = key.toLowerCase();
+  if (/iban/.test(k)) return group(raw.toUpperCase().replace(/[^A-Z0-9]/g, ""), 4);
+  if (/bic|swift/.test(k)) return raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 11);
+  if (/sort_?code/.test(k)) return group(raw.replace(/\D/g, "").slice(0, 6), 2).replace(/ /g, "-");
+  if (/card/.test(k)) return group(raw.replace(/\D/g, "").slice(0, 19), 4);
+  if (/account_?number|routing|clabe|bsb|ifsc_?account|transit/.test(k)) {
+    if (/ifsc/.test(k)) return raw.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    return raw.replace(/\D/g, "");
+  }
+  if (/ifsc|upi|tag|username|handle/.test(k)) return raw.replace(/\s+/g, "");
+  if (isNameKey(k)) {
+    return raw
+      .replace(/[^\p{L}\p{M}'.\- ]/gu, "")
+      .replace(/\s{2,}/g, " ")
+      .replace(/(^|[\s'\-])(\p{L})/gu, (_m, p, c) => p + c.toLocaleUpperCase());
+  }
+  return raw;
+};
+
 export const MethodPayDialog = ({
   open, onOpenChange, method,
   amount, setAmount, note, setNote,
