@@ -246,6 +246,8 @@ const Accounts = () => {
               key={account.id}
               className="luxe-card overflow-hidden rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-md shadow-lg shadow-primary/10 transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
+              <LuxeIcon name="emblem" className="luxe-emblem" />
+
               <CardHeader className="luxe-card-head relative bg-primary/25 backdrop-blur-md border-b border-primary/20 p-5 md:p-6 text-primary-foreground">
                 <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
                 <div className="relative flex items-start justify-between gap-3">
