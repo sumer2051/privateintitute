@@ -651,3 +651,34 @@ html.theme-luxe .luxe-delta {
   box-shadow: 0 0 16px hsl(148 90% 50% / 0.45), 0 0 0 1px hsl(148 90% 60% / 0.4) inset;
   text-shadow: 0 0 10px hsl(148 90% 55% / 0.7);
 }
+
+/* Luxe greeting plate: pearl-rose with copper edge */
+html.theme-luxe .luxe-greet {
+  background:
+    repeating-linear-gradient(45deg, hsl(0 0% 100% / 0.35) 0 2px, transparent 2px 7px),
+    radial-gradient(120% 120% at 90% -20%, hsl(14 65% 94% / 0.95), transparent 65%),
+    linear-gradient(165deg, hsl(12 44% 93%) 0%, hsl(8 34% 87%) 60%, hsl(6 30% 82%) 100%) !important;
+  border: 1px solid hsl(8 28% 74%) !important;
+  border-radius: 1.5rem !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.9) inset,
+    0 -2px 0 hsl(6 30% 62% / 0.4) inset,
+    0 26px 50px -28px hsl(4 40% 26% / 0.5) !important;
+}
+html.theme-luxe .luxe-greet h2 {
+  color: hsl(220 34% 14%) !important;
+  text-shadow: 0 1px 0 hsl(0 0% 100% / 0.85);
+}
+html.theme-luxe .luxe-greet .text-muted-foreground { color: hsl(12 18% 38%) !important; }
+
+/* Stronger marble in the page gutters */
+html.theme-luxe body {
+  background:
+    radial-gradient(120% 80% at 10% -10%, hsl(10 55% 97% / 0.95), transparent 58%),
+    radial-gradient(85% 65% at 100% 8%, hsl(4 50% 70% / 0.5), transparent 62%),
+    radial-gradient(80% 60% at 38% 112%, hsl(18 55% 62% / 0.4), transparent 62%),
+    repeating-linear-gradient(115deg, hsl(8 30% 84% / 0.55) 0px, hsl(8 30% 84% / 0.55) 2px, transparent 2px, transparent 22px),
+    repeating-linear-gradient(58deg, hsl(6 26% 80% / 0.3) 0px, hsl(6 26% 80% / 0.3) 1px, transparent 1px, transparent 34px),
+    linear-gradient(180deg, hsl(10 28% 93%) 0%, hsl(6 24% 88%) 100%) !important;
+  background-attachment: fixed;
+}
