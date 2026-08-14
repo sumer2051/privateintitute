@@ -105,6 +105,14 @@ const Transfers = () => {
     fetchPending();
   }, []);
 
+  useEffect(() => {
+    if (accounts.length && !smFrom) {
+      const checking = accounts.find((a) => a.account_type === "checking");
+      setSmFrom(checking?.id || accounts[0].id);
+    }
+  }, [accounts, smFrom]);
+
+
   const fetchAccounts = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
