@@ -1109,3 +1109,212 @@ html.theme-luxe .luxe-glow-green {
   color: hsl(152 62% 30%) !important;
   text-shadow: 0 0 12px hsl(150 75% 55% / 0.4);
 }
+
+/* =============================================================
+   Private-banking polish — restraint pass.
+   Calms the neon, refines typography, adds gold hairlines and
+   quieter, more expensive-feeling depth. Purely presentational.
+   ============================================================= */
+
+html.theme-luxe {
+  --luxe-gold: 34 42% 62%;
+  --luxe-ink: 8 30% 22%;
+}
+
+/* Numerals: tabular, tighter, engraved rather than glowing */
+html.theme-luxe .luxe-money,
+html.theme-luxe .luxe-money-sm,
+html.theme-luxe .luxe-serial,
+html.theme-luxe .luxe-delta,
+html.theme-luxe [class*="tabular"] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+html.theme-luxe .luxe-card .luxe-money {
+  letter-spacing: -0.015em;
+  text-shadow:
+    0 1px 0 hsl(6 50% 16% / 0.6),
+    0 0 1px hsl(20 60% 97% / 0.35) !important;
+}
+html.theme-luxe .luxe-card .luxe-money-sm {
+  text-shadow: 0 1px 0 hsl(6 50% 16% / 0.5) !important;
+}
+html.theme-luxe .luxe-money,
+html.theme-luxe .luxe-money-sm {
+  text-shadow: 0 1px 0 hsl(20 55% 99% / 0.75) !important;
+}
+html.theme-luxe .luxe-glow-green {
+  color: hsl(154 40% 26%) !important;
+  text-shadow: none !important;
+}
+
+/* Delta pill: discreet emerald on ivory, no halo */
+html.theme-luxe .luxe-delta {
+  padding: 0.12rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: hsl(154 45% 92%) !important;
+  background: linear-gradient(180deg, hsl(154 32% 30%) 0%, hsl(156 34% 22%) 100%) !important;
+  border: 1px solid hsl(154 30% 44% / 0.65) !important;
+  box-shadow: 0 1px 0 hsl(150 40% 80% / 0.22) inset, 0 6px 14px -10px hsl(156 40% 12% / 0.7) !important;
+}
+
+/* Notification bell: single calm ring instead of a pulsing flare */
+html.theme-luxe .luxe-bell-alert::before {
+  background: none !important;
+  box-shadow: 0 0 0 1px hsl(4 55% 52% / 0.45), 0 0 14px -2px hsl(4 60% 50% / 0.28) !important;
+  animation: luxe-bell-breathe 3.6s ease-in-out infinite !important;
+}
+@keyframes luxe-bell-breathe {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.95; }
+}
+html.theme-luxe .luxe-bell-badge {
+  box-shadow: 0 0 0 2px hsl(20 55% 98% / 0.95) !important;
+}
+
+/* Wordmark: quieter engraved copper with letter-spaced authority */
+html.theme-luxe header h1 {
+  letter-spacing: 0.06em !important;
+  font-weight: 600 !important;
+}
+html.theme-luxe header h1 > span {
+  background: linear-gradient(180deg, hsl(12 32% 36%) 0%, hsl(8 34% 26%) 100%);
+  text-shadow: 0 1px 0 hsl(0 0% 100% / 0.7);
+}
+html.theme-luxe header h1 > span.text-primary {
+  background: linear-gradient(180deg, hsl(4 46% 44%) 0%, hsl(4 44% 33%) 100%);
+}
+
+/* Eyebrow labels: fine spaced small caps, the private-bank tell */
+html.theme-luxe .luxe-label,
+html.theme-luxe .text-\[10px\].uppercase,
+html.theme-luxe .text-xs.uppercase {
+  letter-spacing: 0.26em !important;
+  font-weight: 600 !important;
+  font-size: 0.625rem !important;
+}
+
+/* Account plates: deeper, matte leather with a gold hairline */
+html.theme-luxe .luxe-card {
+  border: 1px solid hsl(var(--luxe-gold) / 0.45) !important;
+  border-radius: 1.15rem !important;
+  box-shadow:
+    0 1px 0 hsl(var(--luxe-gold) / 0.35) inset,
+    0 0 0 1px hsl(6 45% 14% / 0.35),
+    0 26px 50px -32px hsl(6 45% 10% / 0.75) !important;
+}
+html.theme-luxe .luxe-card::after {
+  opacity: 0.35 !important;
+}
+html.theme-luxe .luxe-card-head {
+  border-bottom: 1px solid hsl(var(--luxe-gold) / 0.28) !important;
+}
+html.theme-luxe .luxe-chip {
+  border-color: hsl(var(--luxe-gold) / 0.5) !important;
+  letter-spacing: 0.18em;
+}
+
+/* Ivory plates: flatter, more paper than plastic */
+html.theme-luxe main .bg-card:not(.luxe-card):not([role="dialog"]) {
+  border-radius: 1rem !important;
+  border-color: hsl(14 26% 84% / 0.95) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.85) inset,
+    0 14px 32px -28px hsl(6 35% 20% / 0.45) !important;
+}
+
+/* Header icon plates: thin, quiet, gold-edged */
+html.theme-luxe header button[aria-label],
+html.theme-luxe header .luxe-hdr-icon {
+  border-color: hsl(var(--luxe-gold) / 0.5) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.9) inset,
+    0 6px 14px -12px hsl(6 40% 20% / 0.5) !important;
+  color: hsl(var(--luxe-ink)) !important;
+}
+html.theme-luxe header button[aria-label]:hover {
+  transform: none;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.9) inset,
+    0 0 0 1px hsl(var(--luxe-gold) / 0.7),
+    0 8px 18px -12px hsl(6 40% 20% / 0.55) !important;
+}
+html.theme-luxe [data-currency-trigger],
+html.theme-luxe button[aria-label*="urrency"] {
+  border-color: hsl(var(--luxe-gold) / 0.5) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.9) inset,
+    0 6px 14px -12px hsl(6 40% 20% / 0.5) !important;
+}
+
+/* Tabs: understated, gold underline for the active pill */
+html.theme-luxe [role="tablist"] {
+  border-color: hsl(var(--luxe-gold) / 0.35) !important;
+}
+html.theme-luxe [role="tab"][data-state="active"] {
+  background: linear-gradient(180deg, hsl(4 44% 42%) 0%, hsl(4 42% 30%) 100%) !important;
+  box-shadow:
+    0 1px 0 hsl(var(--luxe-gold) / 0.45) inset,
+    0 6px 14px -10px hsl(4 45% 14% / 0.7) !important;
+}
+
+/* Primary actions: matte burgundy, gold hairline, no shine */
+html.theme-luxe main button.bg-primary,
+html.theme-luxe main .bg-primary[role="button"] {
+  background:
+    linear-gradient(180deg, hsl(4 46% 40%) 0%, hsl(4 44% 28%) 100%),
+    var(--tex-leather) center / cover no-repeat !important;
+  border: 1px solid hsl(var(--luxe-gold) / 0.45) !important;
+  letter-spacing: 0.06em;
+  box-shadow:
+    0 1px 0 hsl(var(--luxe-gold) / 0.35) inset,
+    0 8px 18px -14px hsl(4 45% 12% / 0.75) !important;
+}
+
+/* Greeting plate: calmer paper, thinner gold frame, softer monogram */
+html.theme-luxe .luxe-greet {
+  border: 1px solid hsl(var(--luxe-gold) / 0.4) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.85) inset,
+    0 18px 40px -34px hsl(6 40% 18% / 0.5) !important;
+}
+html.theme-luxe .luxe-greet h2 {
+  letter-spacing: -0.005em;
+  color: hsl(var(--luxe-ink)) !important;
+}
+html.theme-luxe .luxe-monogram {
+  background: linear-gradient(160deg, hsl(30 40% 88%) 0%, hsl(20 30% 62%) 48%, hsl(10 28% 40%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 1px 0 hsl(0 0% 100% / 0.8)) drop-shadow(0 2px 4px hsl(6 40% 24% / 0.28));
+  opacity: 0.95;
+}
+
+/* Backdrop: fewer stripes, softer bloom — quiet stone, not fabric noise */
+html.theme-luxe main::before {
+  background:
+    radial-gradient(120% 60% at 50% -10%, hsl(28 45% 99% / 0.5), transparent 60%),
+    radial-gradient(80% 50% at 100% 70%, hsl(6 34% 62% / 0.1), transparent 70%),
+    linear-gradient(180deg, hsl(24 36% 97% / 0.55) 0%, hsl(14 24% 93% / 0.45) 100%),
+    var(--tex-marble) center / cover no-repeat !important;
+}
+
+/* Dialogs & sheets: solid ivory stock with a gold hairline */
+html.theme-luxe [role="dialog"],
+html.theme-luxe [role="alertdialog"] {
+  background:
+    linear-gradient(180deg, hsl(28 45% 99%) 0%, hsl(16 26% 95%) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border: 1px solid hsl(var(--luxe-gold) / 0.45) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.9) inset,
+    0 40px 80px -40px hsl(6 45% 12% / 0.6) !important;
+  color: hsl(var(--luxe-ink)) !important;
+}
+html.theme-luxe.dark [role="dialog"],
+html.theme-luxe.dark [role="alertdialog"] {
+  background: linear-gradient(180deg, hsl(6 24% 14%) 0%, hsl(6 24% 10%) 100%) !important;
+  color: hsl(20 40% 92%) !important;
+}
