@@ -248,14 +248,12 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               />
             </span>
             <span className="flex min-w-0 flex-col items-start leading-tight">
-              <h1 className="flex items-end tracking-tight">
-                <MickeyBankName
-                  segments={[
-                    { text: "BoA " },
-                    { text: "private", className: "text-primary" },
-                    { text: " institute" },
-                  ]}
-                />
+              <h1 className="flex items-end whitespace-nowrap text-base md:text-xl font-bold tracking-tight text-secondary">
+                <span>BoA&nbsp;</span>
+                <span className="text-primary">private</span>
+                <span>&nbsp;institute</span>
+              </h1>
+
               </h1>
 
 
