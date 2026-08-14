@@ -405,6 +405,14 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
       <main className="container mx-auto px-3 md:px-4 py-4 md:py-8">{children}</main>
 
+      {uiTheme === "luxe" && (
+        <div className="luxe-session-strip pointer-events-none fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-1.5 border-t border-success/40 bg-background/80 py-1 text-[10px] font-semibold uppercase text-success backdrop-blur">
+          <span>Session_live: Secure 4.1</span>
+          <Lock className="h-3 w-3" />
+        </div>
+      )}
+
+
 
       <Dialog open={signOutDialogOpen} onOpenChange={setSignOutDialogOpen}>
         <DialogContent>
