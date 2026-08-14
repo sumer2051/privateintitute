@@ -310,6 +310,12 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
 
 
+            {!staffOnlyAccount && (
+              <Button variant="ghost" size="icon" aria-label="Settings" className="h-9 w-9 md:h-10 md:w-10" onClick={() => navigate("/settings")} title="Settings">
+                <SettingsIcon className="h-5 w-5" />
+              </Button>
+            )}
+
             <Button variant="ghost" size="icon" aria-label="Sign out" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
               {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
             </Button>
