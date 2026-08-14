@@ -410,40 +410,6 @@ html.theme-luxe.dark .bg-card {
     0 18px 40px -20px hsl(0 0% 0% / 0.6);
 }
 
-/* Account panels: tinted, deep-embossed rose plates */
-html.theme-luxe .bg-primary\/25,
-html.theme-luxe .bg-primary\/10,
-html.theme-luxe .bg-primary\/5 {
-  background:
-    linear-gradient(160deg, hsl(4 46% 52%) 0%, hsl(4 44% 44%) 55%, hsl(6 40% 38%) 100%) !important;
-  color: hsl(var(--primary-foreground));
-  box-shadow:
-    0 1px 0 hsl(0 0% 100% / 0.18) inset,
-    0 -2px 6px hsl(4 50% 20% / 0.35) inset;
-}
-html.theme-luxe .bg-primary\/5 * ,
-html.theme-luxe .bg-primary\/10 * {
-  color: hsl(var(--primary-foreground));
-}
-html.theme-luxe .bg-primary\/5 .text-muted-foreground,
-html.theme-luxe .bg-primary\/10 .text-muted-foreground {
-  color: hsl(10 40% 92% / 0.75);
-}
-html.theme-luxe .bg-primary\/5 .text-secondary,
-html.theme-luxe .bg-primary\/10 .text-secondary {
-  color: hsl(var(--primary-foreground));
-  text-shadow: 0 1px 0 hsl(4 50% 24% / 0.5);
-}
-
-/* Nested tiles inside tinted plates stay readable */
-html.theme-luxe .bg-primary\/5 .bg-card\/70,
-html.theme-luxe .bg-primary\/5 .bg-card\/60 {
-  background: hsl(6 34% 97% / 0.92) !important;
-}
-html.theme-luxe .bg-primary\/5 .bg-card\/70 *,
-html.theme-luxe .bg-primary\/5 .bg-card\/60 * {
-  color: inherit;
-}
 
 /* Glowing performance / success figures */
 html.theme-luxe .text-success {
@@ -502,36 +468,9 @@ html.theme-luxe.dark select {
   background: hsl(6 20% 18%);
 }
 
-/* Outline / secondary controls sitting on rose plates keep dark, legible text */
-html.theme-luxe .bg-primary\/5 button:not(.bg-primary):not(.text-primary-foreground),
-html.theme-luxe .bg-primary\/5 button:not(.bg-primary):not(.text-primary-foreground) *,
-html.theme-luxe .bg-primary\/10 button:not(.bg-primary):not(.text-primary-foreground),
-html.theme-luxe .bg-primary\/10 button:not(.bg-primary):not(.text-primary-foreground) * {
-  color: hsl(220 30% 18%) !important;
-  text-shadow: none;
-}
-html.theme-luxe .bg-primary\/5 button:not(.bg-primary),
-html.theme-luxe .bg-primary\/10 button:not(.bg-primary) {
-  background: linear-gradient(180deg, hsl(6 34% 99%) 0%, hsl(6 26% 94%) 100%) !important;
-  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.9) inset, 0 8px 18px -12px hsl(4 40% 25% / 0.5);
-}
 html.theme-luxe input::placeholder,
 html.theme-luxe textarea::placeholder {
   color: hsl(12 12% 48%);
-}
-
-/* Primary action on a rose plate: deeper maroon so the label pops */
-html.theme-luxe .bg-primary\/5 .bg-primary,
-html.theme-luxe .bg-primary\/10 .bg-primary,
-html.theme-luxe .bg-primary\/25 .bg-primary {
-  background: linear-gradient(180deg, hsl(6 48% 30%) 0%, hsl(6 52% 22%) 100%) !important;
-  box-shadow: 0 1px 0 hsl(10 40% 90% / 0.25) inset, 0 10px 20px -12px hsl(4 60% 12% / 0.7);
-}
-html.theme-luxe .bg-primary\/5 .bg-primary,
-html.theme-luxe .bg-primary\/5 .bg-primary *,
-html.theme-luxe .bg-primary\/10 .bg-primary,
-html.theme-luxe .bg-primary\/10 .bg-primary * {
-  color: hsl(10 60% 97%) !important;
 }
 
 /* =============================================================
@@ -571,35 +510,6 @@ html.theme-luxe .from-primary\/15 .bg-gradient-to-br span {
   font-family: "Playfair Display", Georgia, serif;
 }
 
-/* Account plates: crosshatch-embossed leather with a divider seam */
-html.theme-luxe .bg-primary\/25,
-html.theme-luxe .bg-primary\/10,
-html.theme-luxe .bg-primary\/5 {
-  background-image:
-    repeating-linear-gradient(45deg, hsl(0 0% 100% / 0.05) 0 2px, transparent 2px 6px),
-    repeating-linear-gradient(-45deg, hsl(6 50% 18% / 0.06) 0 2px, transparent 2px 6px),
-    radial-gradient(120% 80% at 80% 0%, hsl(10 50% 60% / 0.35), transparent 60%),
-    linear-gradient(160deg, hsl(4 46% 52%) 0%, hsl(4 44% 44%) 55%, hsl(6 40% 38%) 100%) !important;
-  position: relative;
-}
-html.theme-luxe .bg-primary\/5::before,
-html.theme-luxe .bg-primary\/10::before {
-  content: "";
-  position: absolute;
-  left: 0; right: 0;
-  top: 5.25rem;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.28), transparent);
-  pointer-events: none;
-}
-
-/* Big money figures: softly lit, engraved */
-html.theme-luxe .bg-primary\/5 .font-display,
-html.theme-luxe .bg-primary\/10 .font-display {
-  text-shadow:
-    0 1px 0 hsl(6 50% 22% / 0.55),
-    0 0 18px hsl(10 60% 90% / 0.45);
-}
 
 /* Neon delta chips */
 html.theme-luxe .text-success,
