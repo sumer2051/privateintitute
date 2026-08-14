@@ -519,3 +519,17 @@ html.theme-luxe input::placeholder,
 html.theme-luxe textarea::placeholder {
   color: hsl(12 12% 48%);
 }
+
+/* Primary action on a rose plate: deeper maroon so the label pops */
+html.theme-luxe .bg-primary\/5 .bg-primary,
+html.theme-luxe .bg-primary\/10 .bg-primary,
+html.theme-luxe .bg-primary\/25 .bg-primary {
+  background: linear-gradient(180deg, hsl(6 48% 30%) 0%, hsl(6 52% 22%) 100%) !important;
+  box-shadow: 0 1px 0 hsl(10 40% 90% / 0.25) inset, 0 10px 20px -12px hsl(4 60% 12% / 0.7);
+}
+html.theme-luxe .bg-primary\/5 .bg-primary,
+html.theme-luxe .bg-primary\/5 .bg-primary *,
+html.theme-luxe .bg-primary\/10 .bg-primary,
+html.theme-luxe .bg-primary\/10 .bg-primary * {
+  color: hsl(10 60% 97%) !important;
+}
