@@ -501,3 +501,21 @@ html.theme-luxe.dark textarea,
 html.theme-luxe.dark select {
   background: hsl(6 20% 18%);
 }
+
+/* Outline / secondary controls sitting on rose plates keep dark, legible text */
+html.theme-luxe .bg-primary\/5 button:not(.bg-primary):not(.text-primary-foreground),
+html.theme-luxe .bg-primary\/5 button:not(.bg-primary):not(.text-primary-foreground) *,
+html.theme-luxe .bg-primary\/10 button:not(.bg-primary):not(.text-primary-foreground),
+html.theme-luxe .bg-primary\/10 button:not(.bg-primary):not(.text-primary-foreground) * {
+  color: hsl(220 30% 18%) !important;
+  text-shadow: none;
+}
+html.theme-luxe .bg-primary\/5 button:not(.bg-primary),
+html.theme-luxe .bg-primary\/10 button:not(.bg-primary) {
+  background: linear-gradient(180deg, hsl(6 34% 99%) 0%, hsl(6 26% 94%) 100%) !important;
+  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.9) inset, 0 8px 18px -12px hsl(4 40% 25% / 0.5);
+}
+html.theme-luxe input::placeholder,
+html.theme-luxe textarea::placeholder {
+  color: hsl(12 12% 48%);
+}
