@@ -511,6 +511,7 @@ const Transfers = () => {
 
   return (
     <AuthLayout currentPage="transfers">
+      <Seo title="Send Money | BoA private institute" description="Move money with local transfer methods, wires and ACH, with instant receipts for every transfer." path="/transfers" noindex />
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
           <h2 className="text-3xl font-bold text-secondary mb-2">Transfers</h2>
