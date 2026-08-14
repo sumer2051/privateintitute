@@ -169,7 +169,7 @@ const Accounts = () => {
       <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="luxe-greet relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="flex h-28 md:h-36">
-          <div className="relative w-1/4 overflow-hidden">
+          <div className="luxe-greet-panel relative w-1/4 overflow-hidden">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -177,9 +177,10 @@ const Accounts = () => {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-accent">
-                <span className="font-display text-3xl md:text-5xl font-bold text-primary-foreground">
-                  {initials}
+              <div className="relative flex h-full w-full items-center justify-center">
+                <LuxeIcon name="emblem" className="h-16 w-16 md:h-24 md:w-24 opacity-95" />
+                <span className="absolute bottom-1.5 left-0 right-0 text-center text-[8px] md:text-[9px] font-semibold uppercase tracking-[0.28em] text-primary-foreground/85">
+                  No-Reply
                 </span>
               </div>
             )}
@@ -204,6 +205,7 @@ const Accounts = () => {
               onChange={handleAvatarUpload}
             />
           </div>
+
           <div className="flex w-3/4 flex-col justify-between p-3 md:p-4">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 text-muted-foreground">
