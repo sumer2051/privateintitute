@@ -254,8 +254,6 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 <span>&nbsp;institute</span>
               </h1>
 
-              </h1>
-
 
               <span
                 className="hidden md:inline text-[10px] uppercase tracking-[0.25em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer"
