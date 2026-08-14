@@ -215,16 +215,22 @@ const Accounts = () => {
               <CurrencySelector variant="compact" />
             </div>
             {displayName ? (
-              <h2 className="truncate text-xl md:text-3xl font-bold tracking-tight text-secondary">
-                Welcome back, {displayName}
-              </h2>
+              <div className="flex items-end justify-between gap-2">
+                <h2 className="truncate font-display text-xl md:text-3xl font-bold tracking-tight text-secondary">
+                  {displayName}
+                </h2>
+                <span className="luxe-delta shrink-0">
+                  <TrendingUp className="h-3 w-3" />
+                  Live
+                </span>
+              </div>
             ) : null}
           </div>
         </div>
       </div>
 
 
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 xl:grid-cols-2">
         {accounts
           .slice()
           .sort((a, b) => {
@@ -244,7 +250,10 @@ const Accounts = () => {
                       {account.account_name}
                     </CardTitle>
                     <p className="luxe-sub mt-1 text-xs md:text-sm text-primary-foreground/80">
-                      ****{account.account_number}
+                      ••••{account.account_number}
+                    </p>
+                    <p className="luxe-serial mt-1.5 truncate">
+                      {`SEC-${account.account_type.slice(0, 3).toUpperCase()}-${account.id.slice(0, 4).toUpperCase()}-CONF`}
                     </p>
                   </div>
                   <span className="luxe-chip shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-[10px] md:text-xs font-semibold uppercase tracking-wider text-primary-foreground backdrop-blur-sm">
@@ -292,10 +301,10 @@ const Accounts = () => {
                     )}
 
                   </div>
-                  <div className="flex gap-3 pt-1">
+                  <div className="flex flex-row gap-3 pt-1">
                     <Button
                       size="sm"
-                      className="flex-1 h-10 md:h-11 rounded-xl bg-primary text-primary-foreground text-xs md:text-sm font-semibold shadow-md shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/95 hover:shadow-lg active:scale-[0.98]"
+                      className="luxe-btn-primary flex-1 h-11 md:h-12 rounded-2xl bg-primary text-primary-foreground text-xs md:text-sm font-semibold tracking-wide shadow-md shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/95 hover:shadow-lg active:scale-[0.98]"
                       onClick={() => navigate("/transfers")}
                     >
                       <ArrowUpDown className="mr-1.5 h-4 w-4" />
@@ -304,7 +313,7 @@ const Accounts = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="flex-1 h-10 md:h-11 rounded-xl border-border bg-card text-xs md:text-sm font-semibold transition-all hover:scale-[1.02] hover:bg-accent/5 hover:text-accent active:scale-[0.98]"
+                      className="luxe-btn-ghost flex-1 h-11 md:h-12 rounded-2xl border-border bg-card text-xs md:text-sm font-semibold tracking-wide transition-all hover:scale-[1.02] hover:bg-accent/5 active:scale-[0.98]"
                       onClick={() =>
                         toast({
                           title: "Statement ready",
