@@ -611,45 +611,28 @@ const Transfers = () => {
           <TabsContent value="internal">
             <Card>
               <CardHeader><CardTitle>Transfer Between Your Accounts</CardTitle></CardHeader>
-              <CardContent>
-                <form onSubmit={handleInternalTransfer} className="space-y-4">
-                  <div>
-                    <Label>From Account</Label>
-                    <Select value={fromAccount} onValueChange={setFromAccount}>
-                      <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((acc) => (
-                          <SelectItem key={acc.id} value={acc.id}>
-                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(acc.balance)})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>To Account</Label>
-                    <Select value={toAccount} onValueChange={setToAccount}>
-                      <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
-                      <SelectContent>
-                        {accounts.filter((a) => a.id !== fromAccount).map((acc) => (
-                          <SelectItem key={acc.id} value={acc.id}>{acc.account_name} - ****{acc.account_number}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Amount</Label>
-                    <Input type="number" step="0.01" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
-                  </div>
-                  <div>
-                    <Label>Note <span className="text-xs text-muted-foreground">(optional)</span></Label>
-                    <Input value={intNote} onChange={(e) => setIntNote(e.target.value)} placeholder="e.g. Savings top-up" />
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Processing..." : "Transfer Now"}
-                  </Button>
-                </form>
+              <CardContent className="space-y-3">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {accounts.map((acc) => (
+                    <button
+                      key={acc.id}
+                      type="button"
+                      onClick={() => {
+                        setFromAccount(acc.id);
+                        setToAccount("");
+                        setIntOpen(true);
+                      }}
+                      className="text-left rounded-xl border border-border bg-card p-3 transition-all hover:border-primary/40 hover:bg-muted/50 active:scale-[0.98]"
+                    >
+                      <div className="text-sm font-semibold text-secondary">{acc.account_name}</div>
+                      <p className="text-xs text-muted-foreground">****{acc.account_number}</p>
+                      <p className="mt-1 text-sm font-bold text-secondary">{formatCurrency(acc.balance)}</p>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Choose the account to move money from — the transfer sheet opens instantly.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
