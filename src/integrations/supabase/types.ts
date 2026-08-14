@@ -249,6 +249,7 @@ export type Database = {
           transfer_pin_hash: string | null
           two_factor_enabled: boolean
           two_factor_method: string | null
+          ui_theme: string
           updated_at: string | null
         }
         Insert: {
@@ -266,6 +267,7 @@ export type Database = {
           transfer_pin_hash?: string | null
           two_factor_enabled?: boolean
           two_factor_method?: string | null
+          ui_theme?: string
           updated_at?: string | null
         }
         Update: {
@@ -283,6 +285,7 @@ export type Database = {
           transfer_pin_hash?: string | null
           two_factor_enabled?: boolean
           two_factor_method?: string | null
+          ui_theme?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -762,6 +765,7 @@ export type Database = {
         Args: { p_account: string; p_frozen: boolean; p_reason?: string }
         Returns: boolean
       }
+      admin_set_all_ui_theme: { Args: { p_theme: string }; Returns: number }
       admin_set_device_blocked: {
         Args: { p_blocked: boolean; p_device: string }
         Returns: boolean
@@ -778,6 +782,10 @@ export type Database = {
           p_notes?: string
           p_view_only: boolean
         }
+        Returns: boolean
+      }
+      admin_set_user_ui_theme: {
+        Args: { p_theme: string; p_user: string }
         Returns: boolean
       }
       admin_update_transaction_status: {

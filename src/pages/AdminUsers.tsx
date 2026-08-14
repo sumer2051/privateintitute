@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet, CreditCard, PiggyBank, Monitor, Smartphone, Lock, Unlock, LogOut, MapPin } from "lucide-react";
+import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet, CreditCard, PiggyBank, Monitor, Smartphone, Lock, Unlock, LogOut, MapPin, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AdminDeviceDetailDialog, type AdminDevice } from "@/components/AdminDeviceDetailDialog";
 
-type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null };
+type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
 type Role = { user_id: string; role: "admin" | "support" | "tx_support" | "user" };
 type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
@@ -68,6 +68,26 @@ export default function AdminUsers() {
   const [quickDepositOpen, setQuickDepositOpen] = useState(false);
   const [quickDepositUserId, setQuickDepositUserId] = useState<string>("");
   const [quickDepositAccountId, setQuickDepositAccountId] = useState<string>("");
+  const [themeBusy, setThemeBusy] = useState(false);
+
+  const setAllTheme = async (theme: "luxe" | "classic") => {
+    setThemeBusy(true);
+    const { data, error } = await supabase.rpc("admin_set_all_ui_theme", { p_theme: theme } as any);
+    setThemeBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`${theme === "luxe" ? "Premium" : "Classic"} style applied to ${data ?? 0} user(s)`);
+    load();
+  };
+
+  const setUserTheme = async (userId: string, theme: "luxe" | "classic") => {
+    setThemeBusy(true);
+    const { error } = await supabase.rpc("admin_set_user_ui_theme", { p_user: userId, p_theme: theme } as any);
+    setThemeBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Style updated to ${theme === "luxe" ? "Premium" : "Classic"}`);
+    setSelected(prev => (prev && prev.id === userId ? { ...prev, ui_theme: theme } : prev));
+    load();
+  };
 
   useEffect(() => {
     (async () => {
@@ -80,7 +100,7 @@ export default function AdminUsers() {
 
   const load = async () => {
     const [{ data: p }, { data: a }, { data: r }] = await Promise.all([
-      supabase.from("profiles").select("id,email,full_name,phone,created_at,device_limit").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id,email,full_name,phone,created_at,device_limit,ui_theme").order("created_at", { ascending: false }),
       supabase.from("accounts").select("id,user_id,account_type,account_name,account_number,balance,available_balance,credit_limit,is_frozen"),
       supabase.from("user_roles").select("user_id,role"),
     ]);
@@ -377,6 +397,38 @@ export default function AdminUsers() {
           <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Deposits held</p><p className="text-lg md:text-2xl font-bold text-emerald-600 truncate">${totalDeposits.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</p></CardContent></Card>
           <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Staff</p><p className="text-lg md:text-2xl font-bold text-secondary">{roles.filter(r=>r.role!=="user").length}</p></CardContent></Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Palette className="h-5 w-5 text-primary" /> Interface style</CardTitle>
+            <CardDescription>
+              Switch every customer between the premium marble look and the classic look. Changes apply live on all their devices.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button disabled={themeBusy} onClick={() => setAllTheme("luxe")}>
+                Apply premium style to all users
+              </Button>
+              <Button variant="outline" disabled={themeBusy} onClick={() => setAllTheme("classic")}>
+                Restore classic style for all users
+              </Button>
+            </div>
+            {selected && (
+              <div className="rounded-lg border p-3 space-y-2">
+                <p className="text-sm">
+                  Selected: <span className="font-semibold">{selected.full_name || selected.email}</span>
+                  <Badge className="ml-2" variant="secondary">{selected.ui_theme === "luxe" ? "Premium" : "Classic"}</Badge>
+                </p>
+                <div className="flex gap-2">
+                  <Button size="sm" disabled={themeBusy} onClick={() => setUserTheme(selected.id, "luxe")}>Premium</Button>
+                  <Button size="sm" variant="outline" disabled={themeBusy} onClick={() => setUserTheme(selected.id, "classic")}>Classic</Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
 
         <Card>
           <CardHeader>

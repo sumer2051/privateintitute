@@ -26,6 +26,7 @@ import NotFound from "./pages/NotFound";
 import WillVsTrust from "./pages/WillVsTrust";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
+import { UiThemeProvider } from "./contexts/UiThemeContext";
 import { AppLock } from "./components/AppLock";
 import { DeviceFrame } from "./components/DeviceFrame";
 import { DeviceBlockedNotice } from "./components/DeviceBlockedNotice";
@@ -38,6 +39,7 @@ const App = () => (
   <HelmetProvider>
   <QueryClientProvider client={queryClient}>
     <CurrencyProvider>
+      <UiThemeProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -73,6 +75,7 @@ const App = () => (
           </AppLock>
         </BrowserRouter>
       </TooltipProvider>
+      </UiThemeProvider>
     </CurrencyProvider>
   </QueryClientProvider>
   </HelmetProvider>
