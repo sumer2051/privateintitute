@@ -7,7 +7,7 @@ interface UiThemeContextValue {
   theme: UiTheme;
 }
 
-const UiThemeContext = createContext<UiThemeContextValue>({ theme: "classic" });
+const UiThemeContext = createContext<UiThemeContextValue>({ theme: "luxe" });
 const STORAGE_KEY = "app.uiTheme";
 
 const isTheme = (v: unknown): v is UiTheme => v === "classic" || v === "luxe";
