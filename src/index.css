@@ -712,10 +712,10 @@ html.theme-luxe body {
    Luxe materials — photoreal textures, 3D icons, embossed depth
    ============================================================= */
 :root {
-  --tex-marble: url("/src/assets/textures/marble-rose.jpg");
-  --tex-leather: url("/src/assets/textures/leather-burgundy.jpg");
-  --tex-fabric: url("/src/assets/textures/fabric-ivory.jpg");
-  --tex-emblem: url("/src/assets/icons/emblem-b.png");
+  --tex-marble: url("./assets/textures/marble-rose.jpg");
+  --tex-leather: url("./assets/textures/leather-burgundy.jpg");
+  --tex-fabric: url("./assets/textures/fabric-ivory.jpg");
+  --tex-emblem: url("./assets/icons/emblem-b.png");
 }
 
 /* 3D material icons */
