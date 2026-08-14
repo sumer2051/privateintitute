@@ -1008,3 +1008,104 @@ html.theme-luxe main::before {
     radial-gradient(70% 45% at 100% 60%, hsl(4 50% 55% / 0.14), transparent 68%),
     var(--tex-marble) center / cover no-repeat !important;
 }
+
+/* =============================================================
+   Luxe reference pass 2 — apply the circled styles app-wide:
+   header icon plates, nav pills, currency plate, glowing money
+   ============================================================= */
+
+/* Header icon buttons (theme toggle, bell, sign out, staff, lock) */
+html.theme-luxe header button:not([class*="rounded-xl"]).inline-flex,
+html.theme-luxe header .luxe-hdr-icon {
+  border-radius: 9999px !important;
+}
+html.theme-luxe header button[aria-label],
+html.theme-luxe header .luxe-hdr-icon {
+  background:
+    linear-gradient(180deg, hsl(24 55% 99% / 0.96) 0%, hsl(10 26% 92% / 0.94) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border: 1px solid hsl(14 42% 78%) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.95) inset,
+    0 -1px 0 hsl(4 34% 68% / 0.4) inset,
+    0 8px 16px -10px hsl(4 40% 24% / 0.55) !important;
+  color: hsl(8 45% 32%) !important;
+}
+html.theme-luxe header button[aria-label]:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.95) inset,
+    0 12px 22px -10px hsl(4 45% 24% / 0.6) !important;
+}
+html.theme-luxe.dark header button[aria-label] {
+  background: linear-gradient(180deg, hsl(6 24% 18%) 0%, hsl(6 24% 13%) 100%) !important;
+  border-color: hsl(8 26% 30%) !important;
+  color: hsl(18 55% 84%) !important;
+}
+
+/* Currency / flag selector trigger — same physical plate */
+html.theme-luxe [data-currency-trigger],
+html.theme-luxe button[aria-label*="urrency"] {
+  background:
+    linear-gradient(180deg, hsl(24 55% 99% / 0.96) 0%, hsl(10 26% 92% / 0.94) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border: 1px solid hsl(14 42% 78%) !important;
+  border-radius: 0.9rem !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.95) inset,
+    0 -1px 0 hsl(4 34% 68% / 0.4) inset,
+    0 8px 16px -10px hsl(4 40% 24% / 0.55) !important;
+  color: hsl(8 45% 32%) !important;
+}
+
+/* Content surfaces across every page: ivory fabric plates */
+html.theme-luxe main .bg-card:not(.luxe-card):not([role="dialog"]) {
+  background:
+    linear-gradient(180deg, hsl(24 55% 99% / 0.94) 0%, hsl(10 28% 93% / 0.94) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border-color: hsl(14 40% 80% / 0.9) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.9) inset,
+    0 18px 40px -30px hsl(4 40% 22% / 0.55) !important;
+}
+html.theme-luxe.dark main .bg-card:not(.luxe-card) {
+  background: linear-gradient(180deg, hsl(6 24% 15%) 0%, hsl(6 24% 11%) 100%) !important;
+  border-color: hsl(8 26% 26%) !important;
+}
+
+/* Tabs / segmented controls read as pressed rose-gold pills */
+html.theme-luxe [role="tablist"] {
+  background:
+    linear-gradient(180deg, hsl(18 45% 97% / 0.85) 0%, hsl(8 28% 91% / 0.9) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border: 1px solid hsl(14 42% 80% / 0.8) !important;
+  border-radius: 9999px !important;
+  padding: 0.25rem !important;
+}
+html.theme-luxe [role="tab"] { border-radius: 9999px !important; color: hsl(8 40% 34%) !important; }
+html.theme-luxe [role="tab"][data-state="active"] {
+  background: linear-gradient(180deg, hsl(4 58% 46%) 0%, hsl(4 54% 34%) 100%) !important;
+  color: hsl(20 60% 97%) !important;
+  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.35) inset, 0 8px 18px -10px hsl(4 50% 20% / 0.7) !important;
+}
+
+/* Primary actions everywhere: burgundy leather buttons */
+html.theme-luxe main button.bg-primary,
+html.theme-luxe main .bg-primary[role="button"] {
+  background:
+    linear-gradient(180deg, hsl(4 58% 46%) 0%, hsl(4 54% 32%) 100%),
+    var(--tex-leather) center / cover no-repeat !important;
+  border: 1px solid hsl(6 45% 26%) !important;
+  color: hsl(20 60% 97%) !important;
+  box-shadow: 0 1px 0 hsl(20 60% 90% / 0.28) inset, 0 10px 22px -12px hsl(4 50% 18% / 0.75) !important;
+}
+
+/* Money + delta glow beyond the account plates (cards, transfers, admin) */
+html.theme-luxe .luxe-money,
+html.theme-luxe .luxe-money-sm {
+  text-shadow: 0 1px 0 hsl(6 40% 88% / 0.6), 0 0 12px hsl(150 70% 55% / 0.22);
+}
+html.theme-luxe .luxe-glow-green {
+  color: hsl(152 62% 30%) !important;
+  text-shadow: 0 0 12px hsl(150 75% 55% / 0.4);
+}
