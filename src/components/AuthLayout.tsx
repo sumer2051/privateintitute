@@ -14,6 +14,8 @@ import { StaffPinDialog } from "@/components/StaffPinDialog";
 import { AchOneTimeDialog } from "@/components/AchOneTimeDialog";
 import { TicketReplyToaster } from "@/components/TicketReplyToaster";
 import { BankSoundListener } from "@/components/BankSoundListener";
+import { Lock as LockIcon } from "lucide-react";
+import { useUiTheme } from "@/contexts/UiThemeContext";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +34,7 @@ interface AuthLayoutProps {
 
 export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutProps) => {
   const navigate = useNavigate();
+  const { theme: uiTheme } = useUiTheme();
   const [darkMode, setDarkMode] = useState(() =>
     typeof document !== "undefined" && document.documentElement.classList.contains("dark")
   );
@@ -408,7 +411,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
       {uiTheme === "luxe" && (
         <div className="luxe-session-strip pointer-events-none fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-1.5 border-t border-success/40 bg-background/80 py-1 text-[10px] font-semibold uppercase text-success backdrop-blur">
           <span>Session_live: Secure 4.1</span>
-          <Lock className="h-3 w-3" />
+          <LockIcon className="h-3 w-3" />
         </div>
       )}
 
