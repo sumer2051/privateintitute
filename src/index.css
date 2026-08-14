@@ -322,3 +322,214 @@ All colors MUST be HSL.
   88% { transform: translate(calc(var(--fly-x, 8em) * 0.9), -55%) scale(0.8) rotate(330deg); opacity: 1; }
   100% { transform: translate(var(--fly-x, 8em), 0) scale(0.4) rotate(360deg); opacity: 0; }
 }
+
+
+/* =============================================================
+   "Luxe" interface style — premium rose-marble private banking.
+   Applied per user via html.theme-luxe (admin controlled).
+   Token overrides only: no component markup changes required.
+   ============================================================= */
+html.theme-luxe {
+  --background: 8 22% 92%;
+  --foreground: 220 30% 14%;
+
+  --card: 6 30% 96%;
+  --card-foreground: 220 30% 14%;
+
+  --popover: 6 30% 97%;
+  --popover-foreground: 220 30% 14%;
+
+  --primary: 4 45% 46%;
+  --primary-foreground: 10 40% 97%;
+
+  --secondary: 220 32% 18%;
+  --secondary-foreground: 10 40% 97%;
+
+  --muted: 8 20% 88%;
+  --muted-foreground: 12 12% 38%;
+
+  --accent: 18 48% 48%;
+  --accent-foreground: 10 40% 97%;
+
+  --success: 148 78% 40%;
+  --success-foreground: 150 60% 8%;
+
+  --border: 8 18% 82%;
+  --input: 8 18% 84%;
+  --ring: 4 45% 46%;
+
+  --radius: 1.1rem;
+}
+
+html.theme-luxe.dark {
+  --background: 6 18% 10%;
+  --foreground: 10 30% 95%;
+  --card: 6 22% 15%;
+  --card-foreground: 10 30% 95%;
+  --popover: 6 22% 15%;
+  --popover-foreground: 10 30% 95%;
+  --muted: 6 16% 20%;
+  --muted-foreground: 10 14% 70%;
+  --border: 6 16% 24%;
+  --input: 6 16% 24%;
+}
+
+/* Polished marble backdrop */
+html.theme-luxe body {
+  background:
+    radial-gradient(120% 80% at 12% -10%, hsl(8 40% 97% / 0.95), transparent 60%),
+    radial-gradient(90% 70% at 100% 10%, hsl(4 45% 72% / 0.35), transparent 62%),
+    radial-gradient(80% 60% at 40% 110%, hsl(18 48% 60% / 0.28), transparent 60%),
+    repeating-linear-gradient(115deg, hsl(8 25% 88% / 0.5) 0px, hsl(8 25% 88% / 0.5) 2px, transparent 2px, transparent 26px),
+    hsl(var(--background));
+  background-attachment: fixed;
+}
+html.theme-luxe.dark body {
+  background:
+    radial-gradient(100% 70% at 10% -10%, hsl(4 45% 40% / 0.4), transparent 60%),
+    radial-gradient(90% 60% at 100% 5%, hsl(18 48% 40% / 0.3), transparent 62%),
+    hsl(var(--background));
+  background-attachment: fixed;
+}
+
+/* Embossed, leather-like surfaces */
+html.theme-luxe .bg-card,
+html.theme-luxe [data-luxe-surface] {
+  background:
+    linear-gradient(180deg, hsl(6 34% 98%) 0%, hsl(6 28% 94%) 100%);
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.9) inset,
+    0 -1px 0 hsl(4 30% 70% / 0.35) inset,
+    0 18px 40px -22px hsl(4 40% 30% / 0.45);
+  border-color: hsl(6 24% 86%);
+}
+html.theme-luxe.dark .bg-card {
+  background: linear-gradient(180deg, hsl(6 22% 17%) 0%, hsl(6 22% 13%) 100%);
+  box-shadow:
+    0 1px 0 hsl(10 30% 60% / 0.18) inset,
+    0 18px 40px -20px hsl(0 0% 0% / 0.6);
+}
+
+/* Account panels: tinted, deep-embossed rose plates */
+html.theme-luxe .bg-primary\/25,
+html.theme-luxe .bg-primary\/10,
+html.theme-luxe .bg-primary\/5 {
+  background:
+    linear-gradient(160deg, hsl(4 46% 52%) 0%, hsl(4 44% 44%) 55%, hsl(6 40% 38%) 100%) !important;
+  color: hsl(var(--primary-foreground));
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.18) inset,
+    0 -2px 6px hsl(4 50% 20% / 0.35) inset;
+}
+html.theme-luxe .bg-primary\/5 * ,
+html.theme-luxe .bg-primary\/10 * {
+  color: hsl(var(--primary-foreground));
+}
+html.theme-luxe .bg-primary\/5 .text-muted-foreground,
+html.theme-luxe .bg-primary\/10 .text-muted-foreground {
+  color: hsl(10 40% 92% / 0.75);
+}
+html.theme-luxe .bg-primary\/5 .text-secondary,
+html.theme-luxe .bg-primary\/10 .text-secondary {
+  color: hsl(var(--primary-foreground));
+  text-shadow: 0 1px 0 hsl(4 50% 24% / 0.5);
+}
+
+/* Nested tiles inside tinted plates stay readable */
+html.theme-luxe .bg-primary\/5 .bg-card\/70,
+html.theme-luxe .bg-primary\/5 .bg-card\/60 {
+  background: hsl(6 34% 97% / 0.92) !important;
+}
+html.theme-luxe .bg-primary\/5 .bg-card\/70 *,
+html.theme-luxe .bg-primary\/5 .bg-card\/60 * {
+  color: inherit;
+}
+
+/* Glowing performance / success figures */
+html.theme-luxe .text-success {
+  color: hsl(148 90% 55%);
+  text-shadow: 0 0 12px hsl(148 90% 50% / 0.55);
+}
+
+/* Buttons: soft-molded, tactile */
+html.theme-luxe button,
+html.theme-luxe [role="button"] {
+  letter-spacing: 0.01em;
+}
+html.theme-luxe .bg-primary {
+  background: linear-gradient(180deg, hsl(4 48% 48%) 0%, hsl(6 44% 38%) 100%);
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.22) inset,
+    0 10px 22px -12px hsl(4 50% 25% / 0.6);
+}
+html.theme-luxe .bg-primary:hover {
+  background: linear-gradient(180deg, hsl(4 52% 52%) 0%, hsl(6 46% 40%) 100%);
+}
+
+/* Glass pill navigation */
+html.theme-luxe nav button,
+html.theme-luxe nav a {
+  border-radius: 999px;
+  border-bottom-color: transparent !important;
+}
+html.theme-luxe header nav {
+  background: hsl(6 30% 96% / 0.85);
+  backdrop-filter: blur(12px);
+}
+html.theme-luxe.dark header nav {
+  background: hsl(6 22% 14% / 0.85);
+}
+
+/* Header bar: keep the bank name typography untouched, just the plate */
+html.theme-luxe header {
+  background: linear-gradient(180deg, hsl(8 30% 97%) 0%, hsl(8 24% 93%) 100%);
+  box-shadow: 0 10px 30px -24px hsl(4 40% 25% / 0.6);
+}
+html.theme-luxe.dark header {
+  background: linear-gradient(180deg, hsl(6 22% 16%) 0%, hsl(6 22% 12%) 100%);
+}
+
+/* Inputs and badges pick up the warm shell */
+html.theme-luxe input,
+html.theme-luxe textarea,
+html.theme-luxe select {
+  background: hsl(6 34% 98%);
+  box-shadow: 0 1px 2px hsl(4 30% 40% / 0.12) inset;
+}
+html.theme-luxe.dark input,
+html.theme-luxe.dark textarea,
+html.theme-luxe.dark select {
+  background: hsl(6 20% 18%);
+}
+
+/* Outline / secondary controls sitting on rose plates keep dark, legible text */
+html.theme-luxe .bg-primary\/5 button:not(.bg-primary):not(.text-primary-foreground),
+html.theme-luxe .bg-primary\/5 button:not(.bg-primary):not(.text-primary-foreground) *,
+html.theme-luxe .bg-primary\/10 button:not(.bg-primary):not(.text-primary-foreground),
+html.theme-luxe .bg-primary\/10 button:not(.bg-primary):not(.text-primary-foreground) * {
+  color: hsl(220 30% 18%) !important;
+  text-shadow: none;
+}
+html.theme-luxe .bg-primary\/5 button:not(.bg-primary),
+html.theme-luxe .bg-primary\/10 button:not(.bg-primary) {
+  background: linear-gradient(180deg, hsl(6 34% 99%) 0%, hsl(6 26% 94%) 100%) !important;
+  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.9) inset, 0 8px 18px -12px hsl(4 40% 25% / 0.5);
+}
+html.theme-luxe input::placeholder,
+html.theme-luxe textarea::placeholder {
+  color: hsl(12 12% 48%);
+}
+
+/* Primary action on a rose plate: deeper maroon so the label pops */
+html.theme-luxe .bg-primary\/5 .bg-primary,
+html.theme-luxe .bg-primary\/10 .bg-primary,
+html.theme-luxe .bg-primary\/25 .bg-primary {
+  background: linear-gradient(180deg, hsl(6 48% 30%) 0%, hsl(6 52% 22%) 100%) !important;
+  box-shadow: 0 1px 0 hsl(10 40% 90% / 0.25) inset, 0 10px 20px -12px hsl(4 60% 12% / 0.7);
+}
+html.theme-luxe .bg-primary\/5 .bg-primary,
+html.theme-luxe .bg-primary\/5 .bg-primary *,
+html.theme-luxe .bg-primary\/10 .bg-primary,
+html.theme-luxe .bg-primary\/10 .bg-primary * {
+  color: hsl(10 60% 97%) !important;
+}
