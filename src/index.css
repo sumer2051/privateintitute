@@ -591,3 +591,63 @@ html.theme-luxe [aria-label*="otification"] svg {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: 0.12em;
 }
+
+/* =============================================================
+   Luxe account plates — copper-embossed marble cards
+   ============================================================= */
+.luxe-card { position: relative; }
+html.theme-luxe .luxe-card {
+  background:
+    repeating-linear-gradient(45deg, hsl(0 0% 100% / 0.35) 0 2px, transparent 2px 7px),
+    radial-gradient(120% 90% at 85% -10%, hsl(14 60% 92% / 0.9), transparent 60%),
+    linear-gradient(165deg, hsl(12 42% 90%) 0%, hsl(8 34% 84%) 55%, hsl(6 30% 79%) 100%) !important;
+  border: 1px solid hsl(8 28% 74%) !important;
+  border-radius: 1.5rem !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.85) inset,
+    0 -2px 0 hsl(6 30% 62% / 0.4) inset,
+    0 26px 50px -28px hsl(4 40% 26% / 0.55) !important;
+  backdrop-filter: none !important;
+}
+html.theme-luxe .luxe-card-head {
+  background: linear-gradient(180deg, hsl(10 40% 95% / 0.75) 0%, hsl(8 30% 88% / 0.35) 100%) !important;
+  border-bottom: 1px solid hsl(8 26% 76%) !important;
+  color: hsl(220 32% 16%) !important;
+  backdrop-filter: none !important;
+}
+html.theme-luxe .luxe-card-head .luxe-title,
+html.theme-luxe .luxe-card-head .luxe-sub { color: hsl(220 32% 16%) !important; }
+html.theme-luxe .luxe-card-head .luxe-sub { color: hsl(12 16% 38%) !important; }
+html.theme-luxe .luxe-chip {
+  background: linear-gradient(180deg, hsl(14 46% 82%) 0%, hsl(8 38% 68%) 100%) !important;
+  color: hsl(6 48% 22%) !important;
+  border: 1px solid hsl(8 30% 60%);
+  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.7) inset;
+  backdrop-filter: none !important;
+}
+html.theme-luxe .luxe-card-body {
+  background: linear-gradient(180deg, hsl(10 34% 96% / 0.55) 0%, hsl(8 26% 90% / 0.25) 100%) !important;
+  backdrop-filter: none !important;
+}
+html.theme-luxe .luxe-label { color: hsl(12 16% 40%) !important; letter-spacing: 0.22em; }
+html.theme-luxe .luxe-money {
+  color: hsl(220 34% 14%) !important;
+  text-shadow: 0 1px 0 hsl(0 0% 100% / 0.85);
+}
+html.theme-luxe .luxe-money-sm { color: hsl(220 30% 20%) !important; }
+/* Neon delta pill */
+.luxe-delta {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  border-radius: 999px; padding: 0.15rem 0.55rem;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.02em;
+  color: hsl(150 55% 26%);
+  background: hsl(150 60% 92%);
+  border: 1px solid hsl(150 45% 70%);
+}
+html.theme-luxe .luxe-delta {
+  color: hsl(148 90% 62%);
+  background: hsl(150 60% 12%);
+  border-color: hsl(148 90% 55% / 0.75);
+  box-shadow: 0 0 16px hsl(148 90% 50% / 0.45), 0 0 0 1px hsl(148 90% 60% / 0.4) inset;
+  text-shadow: 0 0 10px hsl(148 90% 55% / 0.7);
+}
