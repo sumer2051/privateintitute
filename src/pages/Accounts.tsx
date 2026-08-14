@@ -12,7 +12,6 @@ import { TransferModal } from "@/components/TransferModal";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Seo } from "@/components/Seo";
 import { HomeActivity } from "@/components/HomeActivity";
-import { MickeyNameShow } from "@/components/MickeyNameShow";
 
 interface Account {
   id: string;
@@ -215,7 +214,11 @@ const Accounts = () => {
               </div>
               <CurrencySelector variant="compact" />
             </div>
-            {displayName ? <MickeyNameShow name={displayName} /> : null}
+            {displayName ? (
+              <h2 className="truncate text-xl md:text-3xl font-bold tracking-tight text-secondary">
+                Welcome back, {displayName}
+              </h2>
+            ) : null}
           </div>
         </div>
       </div>

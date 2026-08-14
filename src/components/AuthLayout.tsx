@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.png";
 import { AiChatWidget } from "@/components/AiChatWidget";
 import { NotificationsBell } from "@/components/NotificationsBell";
-import { MickeyBankName } from "@/components/MickeyNameShow";
 import { Shield, ShieldCheck } from "lucide-react";
 import { StaffPinDialog } from "@/components/StaffPinDialog";
 import { AchOneTimeDialog } from "@/components/AchOneTimeDialog";
@@ -202,7 +201,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard },
     { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight },
     { id: "support", label: "Support", path: "/support", Icon: LifeBuoy },
-    { id: "settings", label: "Settings", path: "/settings", Icon: SettingsIcon },
+    
   ];
 
   const staffNav = [
@@ -248,14 +247,10 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               />
             </span>
             <span className="flex min-w-0 flex-col items-start leading-tight">
-              <h1 className="flex items-end tracking-tight">
-                <MickeyBankName
-                  segments={[
-                    { text: "BoA " },
-                    { text: "private", className: "text-primary" },
-                    { text: " institute" },
-                  ]}
-                />
+              <h1 className="flex items-end whitespace-nowrap text-base md:text-xl font-bold tracking-tight text-secondary">
+                <span>BoA&nbsp;</span>
+                <span className="text-primary">private</span>
+                <span>&nbsp;institute</span>
               </h1>
 
 
@@ -314,6 +309,12 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
 
 
+            {!staffOnlyAccount && (
+              <Button variant="ghost" size="icon" aria-label="Settings" className="h-9 w-9 md:h-10 md:w-10" onClick={() => navigate("/settings")} title="Settings">
+                <SettingsIcon className="h-5 w-5" />
+              </Button>
+            )}
+
             <Button variant="ghost" size="icon" aria-label="Sign out" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
               {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
             </Button>
@@ -349,7 +350,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                       if (item.path) navigate(item.path);
                       if (onPageChange) onPageChange(item.id);
                     }}
-                    className={`relative group flex shrink-0 snap-start flex-col items-center justify-center gap-0.5 w-[calc(20%-0.4rem)] md:w-[calc(16.666%-0.42rem)] min-h-[2.9rem] md:min-h-[3.25rem] rounded-xl border px-1 py-1.5 text-[9px] md:text-[11px] font-semibold transition-all ${
+                    className={`relative group flex flex-1 min-w-[4.5rem] snap-start flex-col items-center justify-center gap-1 min-h-[3.5rem] md:min-h-[4rem] rounded-2xl border px-2 py-2 text-[10px] md:text-[12px] font-semibold transition-all ${
                       active
                         ? "bg-primary/15 border-primary/60 text-primary shadow"
                         : highlightUnread

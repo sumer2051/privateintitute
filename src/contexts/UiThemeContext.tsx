@@ -7,16 +7,16 @@ interface UiThemeContextValue {
   theme: UiTheme;
 }
 
-const UiThemeContext = createContext<UiThemeContextValue>({ theme: "classic" });
+const UiThemeContext = createContext<UiThemeContextValue>({ theme: "luxe" });
 const STORAGE_KEY = "app.uiTheme";
 
 const isTheme = (v: unknown): v is UiTheme => v === "classic" || v === "luxe";
 
 export const UiThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<UiTheme>(() => {
-    if (typeof window === "undefined") return "classic";
+    if (typeof window === "undefined") return "luxe";
     const saved = localStorage.getItem(STORAGE_KEY);
-    return isTheme(saved) ? saved : "classic";
+    return isTheme(saved) ? saved : "luxe";
   });
 
   const userId = useRef<string | null>(null);
