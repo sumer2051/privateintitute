@@ -244,7 +244,10 @@ const Accounts = () => {
                       {account.account_name}
                     </CardTitle>
                     <p className="luxe-sub mt-1 text-xs md:text-sm text-primary-foreground/80">
-                      ****{account.account_number}
+                      ••••{account.account_number}
+                    </p>
+                    <p className="luxe-serial mt-1.5 truncate">
+                      {`SEC-${account.account_type.slice(0, 3).toUpperCase()}-${account.id.slice(0, 4).toUpperCase()}-CONF`}
                     </p>
                   </div>
                   <span className="luxe-chip shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-[10px] md:text-xs font-semibold uppercase tracking-wider text-primary-foreground backdrop-blur-sm">
