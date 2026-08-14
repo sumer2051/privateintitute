@@ -224,7 +224,7 @@ const Accounts = () => {
       </div>
 
 
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 xl:grid-cols-2">
         {accounts
           .slice()
           .sort((a, b) => {
