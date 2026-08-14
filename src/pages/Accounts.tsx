@@ -12,6 +12,8 @@ import { TransferModal } from "@/components/TransferModal";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Seo } from "@/components/Seo";
 import { HomeActivity } from "@/components/HomeActivity";
+import { LuxeIcon } from "@/components/LuxeIcon";
+
 
 interface Account {
   id: string;
@@ -169,7 +171,7 @@ const Accounts = () => {
       <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="luxe-greet relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="flex h-28 md:h-36">
-          <div className="relative w-1/4 overflow-hidden">
+          <div className="luxe-greet-panel relative w-1/4 overflow-hidden">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -177,9 +179,10 @@ const Accounts = () => {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-accent">
-                <span className="font-display text-3xl md:text-5xl font-bold text-primary-foreground">
-                  {initials}
+              <div className="relative flex h-full w-full items-center justify-center">
+                <LuxeIcon name="emblem" className="h-16 w-16 md:h-24 md:w-24 opacity-95" />
+                <span className="absolute bottom-1.5 left-0 right-0 text-center text-[8px] md:text-[9px] font-semibold uppercase tracking-[0.28em] text-primary-foreground/85">
+                  No-Reply
                 </span>
               </div>
             )}
@@ -204,6 +207,7 @@ const Accounts = () => {
               onChange={handleAvatarUpload}
             />
           </div>
+
           <div className="flex w-3/4 flex-col justify-between p-3 md:p-4">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -242,6 +246,8 @@ const Accounts = () => {
               key={account.id}
               className="luxe-card overflow-hidden rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-md shadow-lg shadow-primary/10 transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
+              <LuxeIcon name="emblem" className="luxe-emblem" />
+
               <CardHeader className="luxe-card-head relative bg-primary/25 backdrop-blur-md border-b border-primary/20 p-5 md:p-6 text-primary-foreground">
                 <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
                 <div className="relative flex items-start justify-between gap-3">
@@ -307,7 +313,7 @@ const Accounts = () => {
                       className="luxe-btn-primary flex-1 h-11 md:h-12 rounded-2xl bg-primary text-primary-foreground text-xs md:text-sm font-semibold tracking-wide shadow-md shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/95 hover:shadow-lg active:scale-[0.98]"
                       onClick={() => navigate("/transfers")}
                     >
-                      <ArrowUpDown className="mr-1.5 h-4 w-4" />
+                      <LuxeIcon name="transfer" className="mr-2 h-5 w-5" />
                       Transfer
                     </Button>
                     <Button
@@ -321,8 +327,9 @@ const Accounts = () => {
                         })
                       }
                     >
-                      <Download className="mr-1.5 h-4 w-4" />
+                      <LuxeIcon name="statement" className="mr-2 h-5 w-5" />
                       Statement
+
                     </Button>
                   </div>
                 </div>

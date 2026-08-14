@@ -15,6 +15,8 @@ import { TicketReplyToaster } from "@/components/TicketReplyToaster";
 import { BankSoundListener } from "@/components/BankSoundListener";
 import { Lock as LockIcon } from "lucide-react";
 import { useUiTheme } from "@/contexts/UiThemeContext";
+import { LuxeIcon, type LuxeIconName } from "@/components/LuxeIcon";
+
 import {
   Dialog,
   DialogContent,
@@ -196,13 +198,15 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const showStaff = staffOnlyAccount ? true : (hasStaffAccess && staffMode);
 
   const userNav = [
-    { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet },
-    { id: "locations", label: "Locations", path: "/locations", Icon: MapPin },
-    { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard },
-    { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight },
-    { id: "support", label: "Support", path: "/support", Icon: LifeBuoy },
-    
+    { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet, luxe: "wallet" as LuxeIconName },
+    { id: "locations", label: "Locations", path: "/locations", Icon: MapPin, luxe: "pin" as LuxeIconName },
+    { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard, luxe: "cards" as LuxeIconName },
+    { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight, luxe: "transfer" as LuxeIconName },
+    { id: "support", label: "Support", path: "/support", Icon: LifeBuoy, luxe: "support" as LuxeIconName },
+    { id: "settings", label: "Settings", path: "/settings", Icon: SettingsIcon, luxe: "gear" as LuxeIconName },
+
   ];
+
 
   const staffNav = [
     ...((isAdmin || isSupport) ? [{ id: "admin-support", label: "Tickets", path: "/admin/support", Icon: LifeBuoy }] : []),
@@ -269,8 +273,11 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
             </div>
 
             <Button variant="ghost" size="icon" aria-label="Toggle dark mode" title="Toggle dark mode" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setDarkMode(!darkMode)}>
-              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {uiTheme === "luxe" && !darkMode ? (
+                <LuxeIcon name="moon" className="h-6 w-6" />
+              ) : darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
+
 
             <NotificationsBell />
 
@@ -311,12 +318,13 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
 
             {!staffOnlyAccount && (
               <Button variant="ghost" size="icon" aria-label="Settings" className="h-9 w-9 md:h-10 md:w-10" onClick={() => navigate("/settings")} title="Settings">
-                <SettingsIcon className="h-5 w-5" />
+                {uiTheme === "luxe" ? <LuxeIcon name="gear" className="h-6 w-6" /> : <SettingsIcon className="h-5 w-5" />}
               </Button>
             )}
 
             <Button variant="ghost" size="icon" aria-label="Sign out" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setSignOutDialogOpen(true)} title="Sign Out" disabled={signingOut}>
-              {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />}
+              {signingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : uiTheme === "luxe" ? <LuxeIcon name="exit" className="h-6 w-6" /> : <LogOut className="h-5 w-5" />}
+
             </Button>
           </div>
         </div>
@@ -359,7 +367,12 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                     }`}
                     title={item.label}
                   >
-                    {Icon ? <Icon className={`h-4 w-4 md:h-[1.15rem] md:w-[1.15rem] ${active ? "text-primary" : highlightUnread ? "text-emerald-600 dark:text-emerald-300" : "text-secondary group-hover:text-primary"}`} /> : null}
+                    {uiTheme === "luxe" && (item as any).luxe ? (
+                      <LuxeIcon name={(item as any).luxe as LuxeIconName} className="h-7 w-7 md:h-8 md:w-8" />
+                    ) : Icon ? (
+                      <Icon className={`h-4 w-4 md:h-[1.15rem] md:w-[1.15rem] ${active ? "text-primary" : highlightUnread ? "text-emerald-600 dark:text-emerald-300" : "text-secondary group-hover:text-primary"}`} />
+                    ) : null}
+
                     <span className="leading-none truncate w-full text-center">{item.label}</span>
                     {highlightUnread && (
                       <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-background" />
