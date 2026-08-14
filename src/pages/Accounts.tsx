@@ -167,7 +167,7 @@ const Accounts = () => {
         <>
 
       <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="luxe-greet relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/15 via-accent/10 to-transparent shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="flex h-28 md:h-36">
           <div className="relative w-1/4 overflow-hidden">
             {avatarUrl ? (
@@ -224,7 +224,7 @@ const Accounts = () => {
       </div>
 
 
-      <div className="grid gap-4 md:gap-6">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
         {accounts
           .slice()
           .sort((a, b) => {
@@ -234,48 +234,55 @@ const Accounts = () => {
           .map((account) => (
             <Card
               key={account.id}
-              className="overflow-hidden rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-md shadow-lg shadow-primary/10 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              className="luxe-card overflow-hidden rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-md shadow-lg shadow-primary/10 transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
-              <CardHeader className="relative bg-primary/25 backdrop-blur-md border-b border-primary/20 p-5 md:p-6 text-primary-foreground">
+              <CardHeader className="luxe-card-head relative bg-primary/25 backdrop-blur-md border-b border-primary/20 p-5 md:p-6 text-primary-foreground">
                 <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
                 <div className="relative flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <CardTitle className="text-base md:text-xl font-semibold tracking-tight text-primary-foreground">
+                    <CardTitle className="luxe-title text-base md:text-xl font-semibold tracking-tight text-primary-foreground">
                       {account.account_name}
                     </CardTitle>
-                    <p className="mt-1 text-xs md:text-sm text-primary-foreground/80">
+                    <p className="luxe-sub mt-1 text-xs md:text-sm text-primary-foreground/80">
                       ****{account.account_number}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-[10px] md:text-xs font-semibold uppercase tracking-wider text-primary-foreground backdrop-blur-sm">
+                  <span className="luxe-chip shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-[10px] md:text-xs font-semibold uppercase tracking-wider text-primary-foreground backdrop-blur-sm">
                     {account.account_type}
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="bg-primary/5 backdrop-blur-sm p-5 md:p-6">
+              <CardContent className="luxe-card-body bg-primary/5 backdrop-blur-sm p-5 md:p-6">
+
                 <div className="space-y-4 md:space-y-5">
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
                     <div>
-                      <p className="text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
+                      <p className="luxe-label text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
                         Current Balance
                       </p>
-                      <p className="mt-0.5 font-display text-3xl md:text-4xl font-bold text-secondary tracking-tight">
-                        <CountUp value={account.balance} format={formatCurrency} />
-                      </p>
+                      <div className="mt-0.5 flex items-end gap-2">
+                        <p className="luxe-money font-display text-3xl md:text-4xl font-bold text-secondary tracking-tight">
+                          <CountUp value={account.balance} format={formatCurrency} />
+                        </p>
+                        <span className="luxe-delta mb-1.5">
+                          <TrendingUp className="h-3 w-3" />
+                          {account.account_type === "credit" ? "0.00%" : account.account_type === "savings" ? "+2.41%" : "+1.28%"}
+                        </span>
+                      </div>
                     </div>
                     {account.account_type !== "credit" && (
                       <div className="text-left sm:text-right">
-                        <p className="text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
+                        <p className="luxe-label text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
                           Available
                         </p>
-                        <p className="mt-0.5 text-lg md:text-xl font-semibold text-foreground">
+                        <p className="luxe-money-sm mt-0.5 text-lg md:text-xl font-semibold text-foreground">
                           <CountUp value={account.available_balance} format={formatCurrency} />
                         </p>
                       </div>
                     )}
                     {account.account_type === "credit" && (
                       <div className="text-left sm:text-right">
-                        <p className="text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
+                        <p className="luxe-label text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
                           Available Credit
                         </p>
                         <p className="mt-0.5 text-lg md:text-xl font-semibold text-success">
@@ -283,6 +290,7 @@ const Accounts = () => {
                         </p>
                       </div>
                     )}
+
                   </div>
                   <div className="flex gap-3 pt-1">
                     <Button
