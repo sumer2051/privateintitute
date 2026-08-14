@@ -598,43 +598,68 @@ html.theme-luxe [aria-label*="otification"] svg {
 .luxe-card { position: relative; }
 html.theme-luxe .luxe-card {
   background:
-    repeating-linear-gradient(45deg, hsl(0 0% 100% / 0.35) 0 2px, transparent 2px 7px),
-    radial-gradient(120% 90% at 85% -10%, hsl(14 60% 92% / 0.9), transparent 60%),
-    linear-gradient(165deg, hsl(12 42% 90%) 0%, hsl(8 34% 84%) 55%, hsl(6 30% 79%) 100%) !important;
-  border: 1px solid hsl(8 28% 74%) !important;
-  border-radius: 1.5rem !important;
+    repeating-linear-gradient(38deg, hsl(0 0% 100% / 0.05) 0 2px, transparent 2px 6px),
+    radial-gradient(110% 80% at 88% -12%, hsl(6 62% 52% / 0.85), transparent 62%),
+    linear-gradient(168deg, hsl(4 52% 46%) 0%, hsl(4 50% 41%) 55%, hsl(6 48% 35%) 100%) !important;
+  border: 1px solid hsl(6 44% 30% / 0.85) !important;
+  border-radius: 1.75rem !important;
   box-shadow:
-    0 1px 0 hsl(0 0% 100% / 0.85) inset,
-    0 -2px 0 hsl(6 30% 62% / 0.4) inset,
-    0 26px 50px -28px hsl(4 40% 26% / 0.55) !important;
+    0 1px 0 hsl(10 70% 80% / 0.45) inset,
+    0 -2px 0 hsl(6 50% 22% / 0.55) inset,
+    0 30px 55px -28px hsl(4 50% 18% / 0.65) !important;
   backdrop-filter: none !important;
 }
 html.theme-luxe .luxe-card-head {
-  background: linear-gradient(180deg, hsl(10 40% 95% / 0.75) 0%, hsl(8 30% 88% / 0.35) 100%) !important;
-  border-bottom: 1px solid hsl(8 26% 76%) !important;
-  color: hsl(220 32% 16%) !important;
+  background: linear-gradient(180deg, hsl(6 52% 48% / 0.55) 0%, hsl(6 50% 42% / 0.25) 100%) !important;
+  border-bottom: 1px solid hsl(8 60% 70% / 0.28) !important;
+  color: hsl(10 60% 97%) !important;
   backdrop-filter: none !important;
 }
-html.theme-luxe .luxe-card-head .luxe-title,
-html.theme-luxe .luxe-card-head .luxe-sub { color: hsl(220 32% 16%) !important; }
-html.theme-luxe .luxe-card-head .luxe-sub { color: hsl(12 16% 38%) !important; }
+html.theme-luxe .luxe-card-head .luxe-title {
+  color: hsl(10 60% 98%) !important;
+  text-shadow: 0 1px 2px hsl(4 50% 18% / 0.55);
+}
+html.theme-luxe .luxe-card-head .luxe-sub { color: hsl(10 45% 90% / 0.8) !important; }
 html.theme-luxe .luxe-chip {
-  background: linear-gradient(180deg, hsl(14 46% 82%) 0%, hsl(8 38% 68%) 100%) !important;
-  color: hsl(6 48% 22%) !important;
-  border: 1px solid hsl(8 30% 60%);
-  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.7) inset;
+  background: linear-gradient(180deg, hsl(6 48% 52% / 0.9) 0%, hsl(6 46% 40% / 0.9) 100%) !important;
+  color: hsl(10 55% 96%) !important;
+  border: 1px solid hsl(10 60% 80% / 0.4);
+  box-shadow: 0 1px 0 hsl(10 70% 85% / 0.35) inset;
   backdrop-filter: none !important;
 }
 html.theme-luxe .luxe-card-body {
-  background: linear-gradient(180deg, hsl(10 34% 96% / 0.55) 0%, hsl(8 26% 90% / 0.25) 100%) !important;
+  background: linear-gradient(180deg, hsl(4 50% 42% / 0.35) 0%, hsl(6 48% 34% / 0.2) 100%) !important;
   backdrop-filter: none !important;
 }
-html.theme-luxe .luxe-label { color: hsl(12 16% 40%) !important; letter-spacing: 0.22em; }
-html.theme-luxe .luxe-money {
-  color: hsl(220 34% 14%) !important;
-  text-shadow: 0 1px 0 hsl(0 0% 100% / 0.85);
+html.theme-luxe .luxe-card .luxe-label { color: hsl(10 40% 92% / 0.78) !important; letter-spacing: 0.22em; }
+html.theme-luxe .luxe-label { color: hsl(12 16% 40%); letter-spacing: 0.22em; }
+html.theme-luxe .luxe-card .luxe-money {
+  color: hsl(10 40% 97%) !important;
+  text-shadow: 0 0 22px hsl(10 60% 92% / 0.35), 0 2px 3px hsl(4 50% 18% / 0.5);
 }
-html.theme-luxe .luxe-money-sm { color: hsl(220 30% 20%) !important; }
+html.theme-luxe .luxe-card .luxe-money-sm { color: hsl(10 40% 96%) !important; }
+html.theme-luxe .luxe-card .text-muted-foreground { color: hsl(10 40% 92% / 0.78) !important; }
+/* Engraved serial line inside each plate */
+.luxe-serial {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+html.theme-luxe .luxe-card .luxe-serial { color: hsl(10 40% 94%) !important; }
+/* Statement button reads as a pearl plate on the red leather */
+html.theme-luxe .luxe-card .luxe-btn-ghost {
+  background: linear-gradient(180deg, hsl(10 30% 97%) 0%, hsl(8 20% 89%) 100%) !important;
+  border-color: hsl(8 24% 78%) !important;
+  color: hsl(220 32% 18%) !important;
+  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.9) inset, 0 10px 20px -14px hsl(4 40% 20% / 0.6) !important;
+}
+html.theme-luxe .luxe-card .luxe-btn-primary {
+  background: linear-gradient(180deg, hsl(4 55% 34%) 0%, hsl(6 52% 26%) 100%) !important;
+  border: 1px solid hsl(10 50% 60% / 0.35) !important;
+  color: hsl(10 40% 97%) !important;
+}
 /* Neon delta pill */
 .luxe-delta {
   display: inline-flex; align-items: center; gap: 0.25rem;
