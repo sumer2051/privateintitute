@@ -12,7 +12,6 @@ import { TransferModal } from "@/components/TransferModal";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Seo } from "@/components/Seo";
 import { HomeActivity } from "@/components/HomeActivity";
-import { MickeyNameShow } from "@/components/MickeyNameShow";
 
 interface Account {
   id: string;
