@@ -403,9 +403,19 @@ Deno.serve(async (req) => {
 
     const code = (typeof currency === "string" ? currency : "USD").toUpperCase();
     const amountStr = fmtMoney(Number(amount), code);
-    const detailEntries: [string, string][] = details && typeof details === "object"
-      ? Object.entries(details as Record<string, string>).filter(([, v]) => v)
+    const norm = (s: string) => String(s ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+    const recipNorm = norm(recipient);
+    // Avoid printing the recipient name twice: the templates already render a
+    // dedicated "Recipient" row, so drop any duplicate detail field.
+    const rawEntries: [string, string][] = details && typeof details === "object"
+      ? Object.entries(details as Record<string, string>).filter(([, v]) => v) as [string, string][]
       : detail ? [["Details", String(detail)]] : [];
+    const detailEntries: [string, string][] = rawEntries.filter(([k, v]) => {
+      const key = norm(k);
+      const isNameKey = /(recipient|beneficiary|payee|account holder|full)\s*name/.test(key) || key === "name";
+      return !(isNameKey && norm(v) === recipNorm) && !(isNameKey && recipNorm.length > 0 && norm(v) === recipNorm);
+    });
+
 
     const effectiveScheme = typeof scheme === "string" && scheme ? scheme : type;
     const render = pickTemplate(effectiveScheme);
