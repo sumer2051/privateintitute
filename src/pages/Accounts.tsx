@@ -313,7 +313,7 @@ const Accounts = () => {
                       className="luxe-btn-primary flex-1 h-11 md:h-12 rounded-2xl bg-primary text-primary-foreground text-xs md:text-sm font-semibold tracking-wide shadow-md shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/95 hover:shadow-lg active:scale-[0.98]"
                       onClick={() => navigate("/transfers")}
                     >
-                      <ArrowUpDown className="mr-1.5 h-4 w-4" />
+                      <LuxeIcon name="transfer" className="mr-2 h-5 w-5" />
                       Transfer
                     </Button>
                     <Button
@@ -327,8 +327,9 @@ const Accounts = () => {
                         })
                       }
                     >
-                      <Download className="mr-1.5 h-4 w-4" />
+                      <LuxeIcon name="statement" className="mr-2 h-5 w-5" />
                       Statement
+
                     </Button>
                   </div>
                 </div>
