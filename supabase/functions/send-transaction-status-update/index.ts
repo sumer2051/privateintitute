@@ -30,8 +30,30 @@ const STATUS_META: Record<StatusKey, { label: string; sub: string; icon: string;
 };
 
 
-function fmtMoney(n: number) {
-  return `$${Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+// Balances/transactions are stored in USD; emails render in the customer's
+// preferred currency so a SEPA transfer shows € rather than $.
+const CURRENCY_RATES: Record<string, number> = {
+  USD: 1, EUR: 0.92, GBP: 0.78, JPY: 157, CAD: 1.36, AUD: 1.52, CHF: 0.88,
+  CNY: 7.24, INR: 83.2, MXN: 17.1, BRL: 5.05, NGN: 1550, ZAR: 18.5, AED: 3.67,
+};
+const CURRENCY_LOCALES: Record<string, string> = {
+  USD: "en-US", EUR: "de-DE", GBP: "en-GB", JPY: "ja-JP", CAD: "en-CA",
+  AUD: "en-AU", CHF: "de-CH", CNY: "zh-CN", INR: "en-IN", MXN: "es-MX",
+  BRL: "pt-BR", NGN: "en-NG", ZAR: "en-ZA", AED: "ar-AE",
+};
+
+function fmtMoney(n: number, code = "USD") {
+  const cur = CURRENCY_RATES[code] ? code : "USD";
+  const value = Math.abs(n) * (CURRENCY_RATES[cur] ?? 1);
+  try {
+    return new Intl.NumberFormat(CURRENCY_LOCALES[cur] || "en-US", {
+      style: "currency", currency: cur,
+      minimumFractionDigits: cur === "JPY" ? 0 : 2,
+      maximumFractionDigits: cur === "JPY" ? 0 : 2,
+    }).format(value);
+  } catch {
+    return `${cur} ${value.toFixed(2)}`;
+  }
 }
 
 type Ctx = {
@@ -40,6 +62,7 @@ type Ctx = {
   recipientName: string;
   amount: number;
   memo: string;
+  currencyCode: string;
   status: StatusKey;
   reference: string;
   category: string;
@@ -51,7 +74,7 @@ type Ctx = {
 function cashappStatusEmail(c: Ctx) {
   const meta = STATUS_META[c.status];
   const sign = c.audience === "recipient" ? "+" : "-";
-  const amountStr = `${sign}${fmtMoney(c.amount)}`;
+  const amountStr = `${sign}${fmtMoney(c.amount, c.currencyCode)}`;
   const headerName = c.audience === "recipient" ? c.senderName : c.recipientName;
   const initial = (headerName || "$").trim()[0]?.toUpperCase() || "$";
   const subLine = c.audience === "sender" && c.status === "completed" ? "Payment sent" : meta.sub;
@@ -68,7 +91,6 @@ function cashappStatusEmail(c: Ctx) {
       <div style="width:72px;height:72px;border-radius:50%;background:#d9d9d9;color:#555;font-size:32px;font-weight:800;line-height:72px;text-align:center;margin:0 0 18px;">${esc(initial)}</div>
       <div style="font-size:34px;font-weight:900;line-height:1.15;letter-spacing:-0.5px;">${esc(headerName || "—")}</div>
       <div style="font-size:16px;color:#8a8a8a;margin-top:10px;">${esc(c.dateStr)}</div>
-      ${c.memo ? `<div style="font-size:16px;color:#8a8a8a;margin-top:4px;">For ${esc(c.memo)}</div>` : ""}
       <div style="font-size:54px;font-weight:900;color:#000;margin:20px 0 6px;letter-spacing:-2px;">${amountStr}</div>
       <div style="height:1px;background:#e5e5e5;margin:18px 0 22px;"></div>
       <div style="font-size:22px;font-weight:800;margin-bottom:14px;">Transaction details</div>
@@ -129,7 +151,7 @@ function cashappStatusEmail(c: Ctx) {
 // ---------- Venmo status email (matches native "Balance transfer" style) ----------
 function venmoStatusEmail(c: Ctx) {
   const meta = STATUS_META[c.status];
-  const amountStr = `${c.audience === "recipient" ? "+" : "-"}${fmtMoney(c.amount)}`;
+  const amountStr = `${c.audience === "recipient" ? "+" : "-"}${fmtMoney(c.amount, c.currencyCode)}`;
   const txId = c.reference.replace(/[^A-Za-z0-9]/g, "").padEnd(19, "0").slice(0, 19);
   const from = `Venmo balance ${esc(c.senderName)}`;
   const destination = `Venmo balance ${esc(c.recipientName)}`;
@@ -178,7 +200,6 @@ function venmoStatusEmail(c: Ctx) {
       ${label("Transaction ID")}
       ${value(txId)}
 
-      ${c.memo ? `${label("Note")}${value(esc(c.memo))}` : ""}
       ${c.adminNote ? `${label("Note from support")}${value(esc(c.adminNote))}` : ""}
 
       <div style="margin-top:32px;font-size:15px;color:#2f3033;line-height:1.55;">
@@ -210,7 +231,7 @@ function venmoStatusEmail(c: Ctx) {
 // ---------- PayPal status email ----------
 function paypalStatusEmail(c: Ctx) {
   const meta = STATUS_META[c.status];
-  const amountStr = fmtMoney(c.amount);
+  const amountStr = fmtMoney(c.amount, c.currencyCode);
   const headline = c.audience === "sender"
     ? `Your payment to ${esc(c.recipientName)} is ${esc(meta.label.toLowerCase())}`
     : `Payment from ${esc(c.senderName)} is ${esc(meta.label.toLowerCase())}`;
@@ -245,9 +266,6 @@ function paypalStatusEmail(c: Ctx) {
           <div style="font-size:16px;font-weight:800;color:#000;">Status</div>
           <div style="font-size:16px;color:${meta.color};margin-top:4px;font-weight:700;">${esc(meta.label)} — ${esc(meta.sub)}</div>
         </td></tr>
-        ${c.memo ? `<tr><td style="padding:16px 28px 8px;">
-          <div style="font-size:18px;color:#000;border-bottom:1px solid #d0d0d0;padding-bottom:6px;">Note : ${esc(c.memo)}</div>
-        </td></tr>` : ""}
         ${c.adminNote ? `<tr><td style="padding:16px 28px 8px;">
           <div style="font-size:14px;font-weight:800;color:#000;">Note from support</div>
           <div style="font-size:15px;color:#2c2e2f;margin-top:4px;line-height:1.5;">${esc(c.adminNote)}</div>
@@ -268,7 +286,7 @@ function paypalStatusEmail(c: Ctx) {
 // ---------- Zelle status email ----------
 function zelleStatusEmail(c: Ctx) {
   const meta = STATUS_META[c.status];
-  const amountStr = fmtMoney(c.amount);
+  const amountStr = fmtMoney(c.amount, c.currencyCode);
   const senderUpper = esc((c.senderName || "").toUpperCase());
   const recipUpper = esc((c.recipientName || "").toUpperCase());
   const headline = c.audience === "recipient"
@@ -303,7 +321,6 @@ function zelleStatusEmail(c: Ctx) {
             ${row("Updated on", c.dateStr)}
             ${row("Transaction number", c.reference)}
             ${row("Status", `${meta.label} — ${meta.sub}`)}
-            ${row("Memo", c.memo || "N/A")}
           </table>
         </td></tr>
         ${c.adminNote ? `<tr><td style="padding:12px 26px 0;font-size:14px;color:#3a3a3a;line-height:1.55;">
@@ -329,7 +346,7 @@ function zelleStatusEmail(c: Ctx) {
 // ---------- Generic bank status email ----------
 function bankStatusEmail(c: Ctx, scheme: string) {
   const meta = STATUS_META[c.status];
-  const amountStr = fmtMoney(c.amount);
+  const amountStr = fmtMoney(c.amount, c.currencyCode);
   return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f6fb;font-family:Helvetica,Arial,sans-serif;color:#1a2238;">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 0;"><tr><td align="center">
   <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(10,20,50,0.08);">
@@ -359,7 +376,6 @@ function bankStatusEmail(c: Ctx, scheme: string) {
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">${c.audience === "sender" ? "Recipient" : "Sender"}</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.audience === "sender" ? c.recipientName : c.senderName)}</td></tr>
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Updated on</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.dateStr)}</td></tr>
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Reference</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.reference)}</td></tr>
-            ${c.memo ? `<tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Memo</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.memo)}</td></tr>` : ""}
           </table>
         </td></tr>
       </table>
@@ -373,7 +389,7 @@ function bankStatusEmail(c: Ctx, scheme: string) {
 // ---------- Deposit credit email (admin-posted deposits) ----------
 function depositEmail(c: Ctx) {
   const meta = STATUS_META[c.status];
-  const amountStr = fmtMoney(c.amount);
+  const amountStr = fmtMoney(c.amount, c.currencyCode);
   const credited = c.status === "completed";
   const headline = credited
     ? `Deposit credited — ${amountStr}`
@@ -406,7 +422,6 @@ function depositEmail(c: Ctx) {
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Status</td><td style="padding:5px 0;font-weight:700;font-size:13px;color:${credited ? "#00a63e" : meta.color};">${esc(meta.label)} — ${credited ? "Funds available" : esc(meta.sub)}</td></tr>
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Updated on</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.dateStr)}</td></tr>
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Reference</td><td style="padding:5px 0;font-weight:600;font-size:13px;font-family:monospace;">${esc(c.reference)}</td></tr>
-            ${c.memo ? `<tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Details</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.memo)}</td></tr>` : ""}
           </table>
         </td></tr>
       </table>
@@ -478,7 +493,7 @@ Deno.serve(async (req) => {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("email, full_name")
+      .select("email, full_name, preferred_currency")
       .eq("id", tx.user_id)
       .maybeSingle();
 
@@ -494,14 +509,10 @@ Deno.serve(async (req) => {
       (toMatch ? toMatch[1].trim() : "") ||
       "Recipient";
     const amount = Number(tx.amount || 0);
-    // Memo must never leak counterparty/routing details — keep only free-text notes
-    const memo = bare
-      .replace(/^to\s+[^—·]+/i, "")
-      .split(/\s+—\s+|\s+·\s+/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0 && !/^[^:]{1,30}:\s*\S/.test(s))
-      .join(" · ")
-      .slice(0, 140);
+    // Customer memos are intentionally omitted from status emails; only the
+    // support note (adminNote) is shown.
+    const memo = "";
+    const currencyCode = (profile as any)?.preferred_currency || "USD";
 
 
     const reference = tx.reference_number || tx.id.slice(0, 8).toUpperCase();
@@ -514,7 +525,7 @@ Deno.serve(async (req) => {
     const scheme = detectScheme(tx.description, tx.category);
 
     const baseCtx: Omit<Ctx, "audience"> = {
-      senderName, recipientName, amount, memo, status,
+      senderName, recipientName, amount, memo, currencyCode, status,
       reference, category, dateStr, adminNote,
     };
 
