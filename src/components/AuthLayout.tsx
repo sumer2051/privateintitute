@@ -273,8 +273,11 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
             </div>
 
             <Button variant="ghost" size="icon" aria-label="Toggle dark mode" title="Toggle dark mode" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setDarkMode(!darkMode)}>
-              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {uiTheme === "luxe" && !darkMode ? (
+                <LuxeIcon name="moon" className="h-6 w-6" />
+              ) : darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
+
 
             <NotificationsBell />
 
