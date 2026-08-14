@@ -215,9 +215,15 @@ const Accounts = () => {
               <CurrencySelector variant="compact" />
             </div>
             {displayName ? (
-              <h2 className="truncate text-xl md:text-3xl font-bold tracking-tight text-secondary">
-                Welcome back, {displayName}
-              </h2>
+              <div className="flex items-end justify-between gap-2">
+                <h2 className="truncate font-display text-xl md:text-3xl font-bold tracking-tight text-secondary">
+                  {displayName}
+                </h2>
+                <span className="luxe-delta shrink-0">
+                  <TrendingUp className="h-3 w-3" />
+                  Live
+                </span>
+              </div>
             ) : null}
           </div>
         </div>
