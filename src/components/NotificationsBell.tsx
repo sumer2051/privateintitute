@@ -97,7 +97,9 @@ const statusMeta = (status: string, isDebit: boolean) => {
 };
 
 export const NotificationsBell = () => {
+  const { theme: uiTheme } = useUiTheme();
   const [items, setItems] = useState<Notif[]>([]);
+
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Notif | null>(null);
