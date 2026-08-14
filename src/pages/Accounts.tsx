@@ -301,7 +301,7 @@ const Accounts = () => {
                     )}
 
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                  <div className="flex flex-row gap-3 pt-1">
                     <Button
                       size="sm"
                       className="luxe-btn-primary flex-1 h-11 md:h-12 rounded-2xl bg-primary text-primary-foreground text-xs md:text-sm font-semibold tracking-wide shadow-md shadow-primary/20 transition-all hover:scale-[1.02] hover:bg-primary/95 hover:shadow-lg active:scale-[0.98]"
