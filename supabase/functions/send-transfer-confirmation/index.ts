@@ -450,7 +450,7 @@ Deno.serve(async (req) => {
       scheme: effectiveScheme, amountStr,
       senderName: userName, recipientName: recipient,
       recipientEmail: recipientEmail || "", detailRows: detailEntries,
-      memo, reference, settlement, audience: "sender", status: effectiveStatus,
+      memo: effectiveMemo, reference, settlement, audience: "sender", status: effectiveStatus,
     };
     await sendOne(
       userEmail,
