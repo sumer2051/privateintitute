@@ -533,3 +533,151 @@ html.theme-luxe .bg-primary\/10 .bg-primary,
 html.theme-luxe .bg-primary\/10 .bg-primary * {
   color: hsl(10 60% 97%) !important;
 }
+
+/* =============================================================
+   Luxe refinements — texture, engraved type, neon deltas, glass nav
+   ============================================================= */
+
+/* Serif engraved headings + wide-tracked labels */
+html.theme-luxe .font-display,
+html.theme-luxe h1, html.theme-luxe h2, html.theme-luxe h3 {
+  letter-spacing: -0.01em;
+}
+html.theme-luxe .text-\[10px\].uppercase,
+html.theme-luxe .text-xs.uppercase {
+  letter-spacing: 0.22em;
+}
+
+/* Greeting card: pearl plate with copper monogram tile */
+html.theme-luxe .from-primary\/15 {
+  background:
+    linear-gradient(180deg, hsl(10 30% 97%) 0%, hsl(8 22% 91%) 100%) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.9) inset,
+    0 -1px 0 hsl(4 30% 68% / 0.4) inset,
+    0 22px 44px -26px hsl(4 40% 28% / 0.5);
+}
+html.theme-luxe .from-primary\/15 .bg-gradient-to-br {
+  background:
+    repeating-linear-gradient(45deg, hsl(14 42% 74% / 0.55) 0 3px, transparent 3px 7px),
+    linear-gradient(160deg, hsl(14 46% 82%) 0%, hsl(8 38% 68%) 60%, hsl(6 34% 58%) 100%) !important;
+  box-shadow: 0 0 0 1px hsl(8 30% 60% / 0.4) inset;
+}
+html.theme-luxe .from-primary\/15 .bg-gradient-to-br span {
+  color: hsl(6 45% 28%) !important;
+  text-shadow:
+    0 1px 0 hsl(14 60% 92% / 0.8),
+    0 -1px 0 hsl(6 40% 30% / 0.4);
+  font-family: "Playfair Display", Georgia, serif;
+}
+
+/* Account plates: crosshatch-embossed leather with a divider seam */
+html.theme-luxe .bg-primary\/25,
+html.theme-luxe .bg-primary\/10,
+html.theme-luxe .bg-primary\/5 {
+  background-image:
+    repeating-linear-gradient(45deg, hsl(0 0% 100% / 0.05) 0 2px, transparent 2px 6px),
+    repeating-linear-gradient(-45deg, hsl(6 50% 18% / 0.06) 0 2px, transparent 2px 6px),
+    radial-gradient(120% 80% at 80% 0%, hsl(10 50% 60% / 0.35), transparent 60%),
+    linear-gradient(160deg, hsl(4 46% 52%) 0%, hsl(4 44% 44%) 55%, hsl(6 40% 38%) 100%) !important;
+  position: relative;
+}
+html.theme-luxe .bg-primary\/5::before,
+html.theme-luxe .bg-primary\/10::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: 5.25rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.28), transparent);
+  pointer-events: none;
+}
+
+/* Big money figures: softly lit, engraved */
+html.theme-luxe .bg-primary\/5 .font-display,
+html.theme-luxe .bg-primary\/10 .font-display {
+  text-shadow:
+    0 1px 0 hsl(6 50% 22% / 0.55),
+    0 0 18px hsl(10 60% 90% / 0.45);
+}
+
+/* Neon delta chips */
+html.theme-luxe .text-success,
+html.theme-luxe .text-emerald-600,
+html.theme-luxe .text-emerald-700 {
+  color: hsl(148 90% 58%);
+  text-shadow: 0 0 10px hsl(148 90% 50% / 0.6);
+}
+html.theme-luxe .bg-success\/10,
+html.theme-luxe .bg-emerald-500\/10,
+html.theme-luxe .bg-emerald-500\/20 {
+  background: hsl(150 60% 12% / 0.55) !important;
+  border-color: hsl(148 90% 55% / 0.7) !important;
+  box-shadow: 0 0 14px hsl(148 90% 50% / 0.45), 0 0 0 1px hsl(148 90% 60% / 0.5) inset;
+  border-radius: 999px;
+}
+
+/* Glass squircle navigation pills with copper icons */
+html.theme-luxe header nav > div > div > button {
+  border-radius: 1.15rem !important;
+  background: linear-gradient(180deg, hsl(10 30% 98% / 0.95) 0%, hsl(8 22% 91% / 0.9) 100%) !important;
+  border-color: hsl(8 24% 82%) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.95) inset,
+    0 -1px 0 hsl(4 30% 66% / 0.4) inset,
+    0 10px 20px -14px hsl(4 40% 28% / 0.5);
+  color: hsl(220 30% 20%) !important;
+}
+html.theme-luxe header nav > div > div > button svg {
+  color: hsl(8 42% 44%) !important;
+  filter: drop-shadow(0 1px 0 hsl(0 0% 100% / 0.8));
+}
+html.theme-luxe header nav > div > div > button.bg-primary\/15 {
+  background: linear-gradient(180deg, hsl(6 42% 78%) 0%, hsl(6 38% 66%) 100%) !important;
+  border-color: hsl(6 40% 55%) !important;
+  color: hsl(6 50% 24%) !important;
+}
+html.theme-luxe header nav > div > div > button.bg-primary\/15 svg {
+  color: hsl(6 50% 28%) !important;
+}
+html.theme-luxe.dark header nav > div > div > button {
+  background: linear-gradient(180deg, hsl(6 20% 22% / 0.95) 0%, hsl(6 20% 15% / 0.95) 100%) !important;
+  border-color: hsl(6 18% 28%) !important;
+  color: hsl(10 30% 92%) !important;
+}
+html.theme-luxe.dark header nav > div > div > button svg {
+  color: hsl(10 55% 68%) !important;
+  filter: none;
+}
+
+/* Nav scroll arrows: rose glass discs */
+html.theme-luxe header nav button[aria-label^="Show"] {
+  background: linear-gradient(180deg, hsl(10 30% 98%) 0%, hsl(8 24% 90%) 100%);
+  border-color: hsl(8 24% 80%);
+  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.9) inset, 0 8px 16px -10px hsl(4 40% 28% / 0.55);
+}
+
+/* Notification bell: red halo when there are unread items */
+html.theme-luxe [aria-label*="otification"] {
+  position: relative;
+}
+html.theme-luxe [aria-label*="otification"]:has(.bg-destructive)::before,
+html.theme-luxe [aria-label*="otification"]:has([class*="bg-destructive"])::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 999px;
+  background: radial-gradient(circle, hsl(2 85% 55% / 0.55) 0%, transparent 70%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+html.theme-luxe [aria-label*="otification"] svg {
+  color: hsl(2 80% 50%);
+  filter: drop-shadow(0 0 6px hsl(2 85% 55% / 0.7));
+}
+
+/* Live session strip (luxe only) */
+.luxe-session-strip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.12em;
+}
