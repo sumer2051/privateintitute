@@ -351,7 +351,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                       if (item.path) navigate(item.path);
                       if (onPageChange) onPageChange(item.id);
                     }}
-                    className={`relative group flex shrink-0 snap-start flex-col items-center justify-center gap-0.5 w-[calc(20%-0.4rem)] md:w-[calc(16.666%-0.42rem)] min-h-[2.9rem] md:min-h-[3.25rem] rounded-xl border px-1 py-1.5 text-[9px] md:text-[11px] font-semibold transition-all ${
+                    className={`relative group flex flex-1 min-w-[4.5rem] snap-start flex-col items-center justify-center gap-1 min-h-[3.5rem] md:min-h-[4rem] rounded-2xl border px-2 py-2 text-[10px] md:text-[12px] font-semibold transition-all ${
                       active
                         ? "bg-primary/15 border-primary/60 text-primary shadow"
                         : highlightUnread
