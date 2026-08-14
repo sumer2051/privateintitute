@@ -22,6 +22,8 @@ import { PayPalPayDialog } from "@/components/PayPalPayDialog";
 import { VenmoPayDialog } from "@/components/VenmoPayDialog";
 import { ZellePayDialog } from "@/components/ZellePayDialog";
 import { MethodPayDialog } from "@/components/MethodPayDialog";
+import { ExternalTransferDialog } from "@/components/ExternalTransferDialog";
+import { InternalTransferDialog } from "@/components/InternalTransferDialog";
 import { Seo } from "@/components/Seo";
 import { deviceCanTransfer } from "@/lib/device-caps";
 
@@ -96,6 +98,8 @@ const Transfers = () => {
   const [venmoOpen, setVenmoOpen] = useState(false);
   const [zelleOpen, setZelleOpen] = useState(false);
   const [methodOpen, setMethodOpen] = useState(false);
+  const [extOpen, setExtOpen] = useState(false);
+  const [intOpen, setIntOpen] = useState(false);
 
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
@@ -137,8 +141,8 @@ const Transfers = () => {
   // Balances are stored in USD; format() converts to the selected currency for display.
   const formatCurrency = (usdAmount: number) => format(usdAmount);
 
-  const handleInternalTransfer = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleInternalTransfer = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!fromAccount || !toAccount || !amount) return;
     if (!(await requirePin())) return;
     setLoading(true);
@@ -183,6 +187,7 @@ const Transfers = () => {
       toast({ title: "Transfer Successful", description: `Transferred ${formatCurrency(transferAmount)}` });
       setAmount("");
       setIntNote("");
+      setIntOpen(false);
       fetchAccounts();
     } catch (error: any) {
       toast({ title: "Transfer Failed", description: error.message, variant: "destructive" });
@@ -203,8 +208,8 @@ const Transfers = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currency.code]);
 
-  const handleExternalTransfer = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleExternalTransfer = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     const missing = profile.fields
       .filter((f) => f.required !== false && !(extFields[f.key] ?? "").trim())
       .map((f) => f.label);
@@ -278,6 +283,7 @@ const Transfers = () => {
         },
       }).catch((e) => console.error("confirmation email failed", e));
       setExtAmount(""); setExtRecipient(""); setExtEmail(""); setExtFields({}); setExtMemo("");
+      setExtOpen(false);
 
       if (data) setSelectedTx(data as PendingTx);
       fetchAccounts();
@@ -505,6 +511,7 @@ const Transfers = () => {
 
   return (
     <AuthLayout currentPage="transfers">
+      <Seo title="Send Money | BoA private institute" description="Move money with local transfer methods, wires and ACH, with instant receipts for every transfer." path="/transfers" noindex />
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
           <h2 className="text-3xl font-bold text-secondary mb-2">Transfers</h2>
@@ -611,45 +618,28 @@ const Transfers = () => {
           <TabsContent value="internal">
             <Card>
               <CardHeader><CardTitle>Transfer Between Your Accounts</CardTitle></CardHeader>
-              <CardContent>
-                <form onSubmit={handleInternalTransfer} className="space-y-4">
-                  <div>
-                    <Label>From Account</Label>
-                    <Select value={fromAccount} onValueChange={setFromAccount}>
-                      <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((acc) => (
-                          <SelectItem key={acc.id} value={acc.id}>
-                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(acc.balance)})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>To Account</Label>
-                    <Select value={toAccount} onValueChange={setToAccount}>
-                      <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
-                      <SelectContent>
-                        {accounts.filter((a) => a.id !== fromAccount).map((acc) => (
-                          <SelectItem key={acc.id} value={acc.id}>{acc.account_name} - ****{acc.account_number}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Amount</Label>
-                    <Input type="number" step="0.01" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
-                  </div>
-                  <div>
-                    <Label>Note <span className="text-xs text-muted-foreground">(optional)</span></Label>
-                    <Input value={intNote} onChange={(e) => setIntNote(e.target.value)} placeholder="e.g. Savings top-up" />
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Processing..." : "Transfer Now"}
-                  </Button>
-                </form>
+              <CardContent className="space-y-3">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {accounts.map((acc) => (
+                    <button
+                      key={acc.id}
+                      type="button"
+                      onClick={() => {
+                        setFromAccount(acc.id);
+                        setToAccount("");
+                        setIntOpen(true);
+                      }}
+                      className="text-left rounded-xl border border-border bg-card p-3 transition-all hover:border-primary/40 hover:bg-muted/50 active:scale-[0.98]"
+                    >
+                      <div className="text-sm font-semibold text-secondary">{acc.account_name}</div>
+                      <p className="text-xs text-muted-foreground">****{acc.account_number}</p>
+                      <p className="mt-1 text-sm font-bold text-secondary">{formatCurrency(acc.balance)}</p>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Choose the account to move money from — the transfer sheet opens instantly.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -677,12 +667,18 @@ const Transfers = () => {
                     {schemes.map((s) => {
                       const active = s.id === profile.id;
                       return (
-                        <>
-                          <Seo title="Send Money | BoA private institute" description="Move money with local transfer methods, wires and ACH, with instant receipts for every transfer." path="/transfers" noindex />
-                          <button
+                        <button
                           key={s.id}
                           type="button"
-                          onClick={() => { setSchemeId(s.id); setExtFields({}); }}
+                          onClick={() => {
+                            setSchemeId(s.id);
+                            setExtFields({});
+                            if (!extFrom) {
+                              const checking = accounts.find((a) => a.account_type === "checking");
+                              setExtFrom(checking?.id || accounts[0]?.id || "");
+                            }
+                            setExtOpen(true);
+                          }}
                           className={`text-left rounded-xl border px-3 py-3 transition-all active:scale-[0.98] ${
                             active
                               ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/40"
@@ -697,7 +693,6 @@ const Transfers = () => {
                             <p className="text-[11px] text-muted-foreground mt-0.5">{s.tagline}</p>
                           )}
                         </button>
-                        </>
                       );
                     })}
                   </div>
@@ -707,63 +702,9 @@ const Transfers = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleExternalTransfer} className="space-y-4">
-                  <div>
-                    <Label>From Account</Label>
-                    <Select value={extFrom} onValueChange={setExtFrom}>
-                      <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((acc) => (
-                          <SelectItem key={acc.id} value={acc.id}>
-                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(acc.balance)})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <Label>Recipient Name</Label>
-                      <Input value={extRecipient} onChange={(e) => setExtRecipient(e.target.value)} placeholder="Jane Doe" />
-                    </div>
-                    <div>
-                      <Label>Amount ({currency.code})</Label>
-                      <Input type="number" step="0.01" placeholder="0.00" value={extAmount} onChange={(e) => setExtAmount(e.target.value)} />
-                    </div>
-                    {profile.fields.map((f) => (
-                      <div key={f.key} className={f.help ? "sm:col-span-2" : ""}>
-                        <Label>
-                          {f.label}
-                          {f.required === false && <span className="ml-1 text-xs text-muted-foreground">(optional)</span>}
-                        </Label>
-                        <Input
-                          value={extFields[f.key] ?? ""}
-                          onChange={(e) => {
-                            const v = f.uppercase ? e.target.value.toUpperCase() : e.target.value;
-                            setExtFields((prev) => ({ ...prev, [f.key]: v }));
-                          }}
-                          placeholder={f.placeholder}
-                          inputMode={f.inputMode}
-                          maxLength={f.maxLength}
-                        />
-                        {f.help && <p className="mt-1 text-[11px] text-muted-foreground">{f.help}</p>}
-                      </div>
-                    ))}
-                    <div className="sm:col-span-2">
-                      <Label>Recipient Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
-                      <Input type="email" value={extEmail} onChange={(e) => setExtEmail(e.target.value)} placeholder="name@email.com" />
-                      <p className="mt-1 text-[11px] text-muted-foreground">If provided, a matching pending receipt will be emailed to the recipient.</p>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label>Note / Memo <span className="text-xs text-muted-foreground">(optional)</span></Label>
-                      <Input value={extMemo} onChange={(e) => setExtMemo(e.target.value)} placeholder="Invoice #123" />
-                    </div>
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={extLoading}>
-                    {extLoading ? "Submitting..." : `Submit ${profile.scheme} for Approval`}
-                  </Button>
-                </form>
+                <p className="text-xs text-muted-foreground">
+                  Pick a transfer style above — the {profile.scheme} form opens with exactly the details that scheme requires.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1014,6 +955,47 @@ const Transfers = () => {
           await handleSendMoney({ preventDefault: () => {} } as unknown as React.FormEvent);
           setMethodOpen(false);
         }}
+      />
+      <ExternalTransferDialog
+        open={extOpen}
+        onOpenChange={setExtOpen}
+        profile={profile}
+        currencyCode={currency.code}
+        currencySymbol={currency.symbol}
+        amount={extAmount}
+        setAmount={setExtAmount}
+        recipient={extRecipient}
+        setRecipient={setExtRecipient}
+        email={extEmail}
+        setEmail={setExtEmail}
+        memo={extMemo}
+        setMemo={setExtMemo}
+        fields={extFields}
+        setFields={setExtFields}
+        fromAccount={extFrom}
+        setFromAccount={setExtFrom}
+        accounts={accounts}
+        formatCurrency={formatCurrency}
+        loading={extLoading}
+        onSubmit={() => handleExternalTransfer()}
+      />
+      <InternalTransferDialog
+        open={intOpen}
+        onOpenChange={setIntOpen}
+        accounts={accounts}
+        fromAccount={fromAccount}
+        setFromAccount={setFromAccount}
+        toAccount={toAccount}
+        setToAccount={setToAccount}
+        amount={amount}
+        setAmount={setAmount}
+        note={intNote}
+        setNote={setIntNote}
+        formatCurrency={formatCurrency}
+        currencyCode={currency.code}
+        currencySymbol={currency.symbol}
+        loading={loading}
+        onSubmit={() => handleInternalTransfer()}
       />
       <TransferPinGate ref={pinRef} />
     </AuthLayout>
