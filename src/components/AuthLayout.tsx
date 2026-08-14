@@ -15,6 +15,8 @@ import { TicketReplyToaster } from "@/components/TicketReplyToaster";
 import { BankSoundListener } from "@/components/BankSoundListener";
 import { Lock as LockIcon } from "lucide-react";
 import { useUiTheme } from "@/contexts/UiThemeContext";
+import { LuxeIcon, type LuxeIconName } from "@/components/LuxeIcon";
+
 import {
   Dialog,
   DialogContent,
