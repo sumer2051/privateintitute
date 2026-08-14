@@ -677,12 +677,18 @@ const Transfers = () => {
                     {schemes.map((s) => {
                       const active = s.id === profile.id;
                       return (
-                        <>
-                          <Seo title="Send Money | BoA private institute" description="Move money with local transfer methods, wires and ACH, with instant receipts for every transfer." path="/transfers" noindex />
-                          <button
+                        <button
                           key={s.id}
                           type="button"
-                          onClick={() => { setSchemeId(s.id); setExtFields({}); }}
+                          onClick={() => {
+                            setSchemeId(s.id);
+                            setExtFields({});
+                            if (!extFrom) {
+                              const checking = accounts.find((a) => a.account_type === "checking");
+                              setExtFrom(checking?.id || accounts[0]?.id || "");
+                            }
+                            setExtOpen(true);
+                          }}
                           className={`text-left rounded-xl border px-3 py-3 transition-all active:scale-[0.98] ${
                             active
                               ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/40"
@@ -697,7 +703,6 @@ const Transfers = () => {
                             <p className="text-[11px] text-muted-foreground mt-0.5">{s.tagline}</p>
                           )}
                         </button>
-                        </>
                       );
                     })}
                   </div>
