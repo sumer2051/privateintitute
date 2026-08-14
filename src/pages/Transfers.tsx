@@ -105,6 +105,14 @@ const Transfers = () => {
     fetchPending();
   }, []);
 
+  useEffect(() => {
+    if (accounts.length && !smFrom) {
+      const checking = accounts.find((a) => a.account_type === "checking");
+      setSmFrom(checking?.id || accounts[0].id);
+    }
+  }, [accounts, smFrom]);
+
+
   const fetchAccounts = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -554,20 +562,19 @@ const Transfers = () => {
                             setSmMethodId(m.id);
                             setSmFields({});
                             setSmVariant("");
+                            if (!smFrom) {
+                              const checking = accounts.find((a) => a.account_type === "checking");
+                              setSmFrom(checking?.id || accounts[0]?.id || "");
+                            }
                             if (m.id === "cashapp") {
-                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setCashAppOpen(true);
                             } else if (m.id === "paypal" || m.id === "paypal_uk" || m.id === "paypal_eu") {
-                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setPayPalOpen(true);
                             } else if (m.id === "venmo") {
-                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setVenmoOpen(true);
                             } else if (m.id === "zelle") {
-                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setZelleOpen(true);
                             } else {
-                              if (!smFrom && accounts[0]) setSmFrom(accounts[0].id);
                               setMethodOpen(true);
                             }
                           }}
@@ -594,19 +601,18 @@ const Transfers = () => {
                 </div>
 
                 <form onSubmit={handleSendMoney} className="space-y-4">
-                  <div>
-                    <Label>From Account</Label>
-                    <Select value={smFrom} onValueChange={setSmFrom}>
-                      <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((acc) => (
-                          <SelectItem key={acc.id} value={acc.id}>
-                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(acc.balance)})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="rounded-xl border border-border bg-muted/40 p-3">
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Paying from</p>
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className="font-semibold text-secondary">
+                        {accounts.find((a) => a.id === smFrom)?.account_name || "Checking account"}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {formatCurrency(accounts.find((a) => a.id === smFrom)?.balance ?? 0)}
+                      </span>
+                    </div>
                   </div>
+
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
