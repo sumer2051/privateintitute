@@ -409,9 +409,19 @@ Deno.serve(async (req) => {
     const rawEntries: [string, string][] = details && typeof details === "object"
       ? Object.entries(details as Record<string, string>).filter(([, v]) => v) as [string, string][]
       : detail ? [["Details", String(detail)]] : [];
+    // Note-style fields collected on the form are the same thing as the memo,
+    // so they are folded into a single "Memo" row instead of being printed twice.
+    const isNoteKey = (k: string) => /^(note|memo|message|comment|description)\b/.test(norm(k));
+    const noteEntry = rawEntries.find(([k]) => isNoteKey(k));
+    const effectiveMemo =
+      (typeof memo === "string" && memo.trim() ? memo.trim() : (noteEntry?.[1] ?? "").trim()) || undefined;
     const detailEntries: [string, string][] = rawEntries.filter(
-      ([, v]) => !(recipNorm.length > 0 && norm(v) === recipNorm),
+      ([k, v]) =>
+        !isNoteKey(k) &&
+        !(recipNorm.length > 0 && norm(v) === recipNorm) &&
+        !(effectiveMemo && norm(v) === norm(effectiveMemo)),
     );
+
 
 
 
@@ -440,7 +450,7 @@ Deno.serve(async (req) => {
       scheme: effectiveScheme, amountStr,
       senderName: userName, recipientName: recipient,
       recipientEmail: recipientEmail || "", detailRows: detailEntries,
-      memo, reference, settlement, audience: "sender", status: effectiveStatus,
+      memo: effectiveMemo, reference, settlement, audience: "sender", status: effectiveStatus,
     };
     await sendOne(
       userEmail,
