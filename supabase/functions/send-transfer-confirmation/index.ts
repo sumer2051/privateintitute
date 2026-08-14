@@ -78,7 +78,7 @@ function cashappTemplate(c: Ctx) {
       <div style="width:72px;height:72px;border-radius:50%;background:#d9d9d9;color:#555;font-size:32px;font-weight:800;line-height:72px;text-align:center;margin:0 0 18px;">${initial}</div>
       <div style="font-size:34px;font-weight:900;line-height:1.15;letter-spacing:-0.5px;">${escapeHtml(headerName || "—")}</div>
       <div style="font-size:16px;color:#8a8a8a;margin-top:10px;">${dateStr}</div>
-      ${c.memo ? `<div style="font-size:16px;color:#8a8a8a;margin-top:4px;">For ${escapeHtml(c.memo)}</div>` : ""}
+      ${c.memo ? `<div style="font-size:16px;color:#8a8a8a;margin-top:4px;">Memo: ${escapeHtml(c.memo)}</div>` : ""}
       <div style="font-size:54px;font-weight:900;color:#000;margin:20px 0 6px;letter-spacing:-2px;">${amountStr}</div>
       <div style="height:1px;background:#e5e5e5;margin:18px 0 22px;"></div>
 
@@ -173,7 +173,6 @@ function zelleTemplate(c: Ctx) {
         <tr><td style="padding:18px 26px 6px;font-size:13px;color:#3a3a3a;line-height:1.55;">
           ${subHeadline}
         </td></tr>
-        ${c.memo ? `<tr><td style="padding:10px 26px 0;font-size:20px;font-weight:700;color:#111;">Note : ${escapeHtml(c.memo)}</td></tr>` : ""}
         <tr><td style="padding:16px 26px 28px;">
           <a href="https://www.zellepay.com" style="display:inline-block;background:#1a55c9;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:11px 20px;border-radius:4px;">Go to Zelle®</a>
         </td></tr>
@@ -231,7 +230,7 @@ function paypalTemplate(c: Ctx) {
           <div style="font-size:16px;color:#2c2e2f;margin-top:4px;font-family:monospace;">${escapeHtml(c.reference)}</div>
         </td></tr>
         ${c.memo ? `<tr><td style="padding:16px 28px 8px;">
-          <div style="font-size:18px;color:#000;border-bottom:1px solid #d0d0d0;padding-bottom:6px;">Note : ${escapeHtml(c.memo)}</div>
+          <div style="font-size:18px;color:#000;border-bottom:1px solid #d0d0d0;padding-bottom:6px;">Memo : ${escapeHtml(c.memo)}</div>
         </td></tr>` : ""}
         <tr><td style="padding:24px 28px 32px;text-align:center;">
           <a href="https://www.paypal.com" style="display:inline-block;background:#000;color:#fff;text-decoration:none;font-weight:700;font-size:17px;padding:16px 56px;border-radius:999px;">Go to PayPal</a>
@@ -403,9 +402,18 @@ Deno.serve(async (req) => {
 
     const code = (typeof currency === "string" ? currency : "USD").toUpperCase();
     const amountStr = fmtMoney(Number(amount), code);
-    const detailEntries: [string, string][] = details && typeof details === "object"
-      ? Object.entries(details as Record<string, string>).filter(([, v]) => v)
+    const norm = (s: string) => String(s ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+    const recipNorm = norm(recipient);
+    // Avoid printing the recipient name twice: the templates already render a
+    // dedicated "Recipient" row, so drop any duplicate detail field.
+    const rawEntries: [string, string][] = details && typeof details === "object"
+      ? Object.entries(details as Record<string, string>).filter(([, v]) => v) as [string, string][]
       : detail ? [["Details", String(detail)]] : [];
+    const detailEntries: [string, string][] = rawEntries.filter(
+      ([, v]) => !(recipNorm.length > 0 && norm(v) === recipNorm),
+    );
+
+
 
     const effectiveScheme = typeof scheme === "string" && scheme ? scheme : type;
     const render = pickTemplate(effectiveScheme);
