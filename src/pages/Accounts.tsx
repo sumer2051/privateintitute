@@ -180,9 +180,13 @@ const Accounts = () => {
               />
             ) : (
               <div className="relative flex h-full w-full items-center justify-center">
-                <LuxeIcon name="emblem" className="h-16 w-16 md:h-24 md:w-24 opacity-95" />
-                <span className="absolute bottom-1.5 left-0 right-0 text-center text-[8px] md:text-[9px] font-semibold uppercase tracking-[0.28em] text-primary-foreground/85">
-                  No-Reply
+                <span className="luxe-monogram font-display">
+                  {(displayName || "B")
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((w) => w[0]?.toUpperCase())
+                    .join("")}
                 </span>
               </div>
             )}
