@@ -707,3 +707,177 @@ html.theme-luxe body {
     linear-gradient(180deg, hsl(10 28% 93%) 0%, hsl(6 24% 88%) 100%) !important;
   background-attachment: fixed;
 }
+
+/* =============================================================
+   Luxe materials — photoreal textures, 3D icons, embossed depth
+   ============================================================= */
+:root {
+  --tex-marble: url("/src/assets/textures/marble-rose.jpg");
+  --tex-leather: url("/src/assets/textures/leather-burgundy.jpg");
+  --tex-fabric: url("/src/assets/textures/fabric-ivory.jpg");
+  --tex-emblem: url("/src/assets/icons/emblem-b.png");
+}
+
+/* 3D material icons */
+.luxe-icon {
+  filter: drop-shadow(0 2px 3px hsl(4 40% 22% / 0.35)) drop-shadow(0 0 1px hsl(0 0% 100% / 0.5));
+}
+html.theme-luxe .luxe-icon-plate {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 0.85rem;
+  background: linear-gradient(180deg, hsl(20 40% 99%) 0%, hsl(10 26% 92%) 100%);
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.95) inset,
+    0 -1px 0 hsl(4 34% 68% / 0.45) inset,
+    0 6px 14px -8px hsl(4 40% 24% / 0.5);
+}
+
+/* Layered marble + fabric backdrop */
+html.theme-luxe body {
+  background:
+    linear-gradient(180deg, hsl(10 40% 96% / 0.55) 0%, hsl(4 34% 84% / 0.5) 100%),
+    radial-gradient(120% 70% at 12% -8%, hsl(20 60% 98% / 0.75), transparent 62%),
+    radial-gradient(90% 60% at 100% 6%, hsl(4 50% 62% / 0.28), transparent 64%),
+    repeating-linear-gradient(115deg, hsl(8 30% 80% / 0.14) 0 1px, transparent 1px 26px),
+    var(--tex-marble) center / cover no-repeat,
+    linear-gradient(180deg, hsl(10 28% 92%) 0%, hsl(6 24% 86%) 100%) !important;
+  background-attachment: fixed !important;
+}
+html.theme-luxe.dark body {
+  background:
+    linear-gradient(180deg, hsl(4 40% 10% / 0.88) 0%, hsl(6 34% 8% / 0.92) 100%),
+    var(--tex-marble) center / cover no-repeat,
+    hsl(6 18% 8%) !important;
+  background-attachment: fixed !important;
+}
+
+/* Header + nav: ivory fabric plates with a thin rose-gold divider */
+html.theme-luxe header {
+  background:
+    linear-gradient(180deg, hsl(24 55% 99% / 0.92) 0%, hsl(10 30% 93% / 0.94) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border-bottom: 1px solid hsl(14 40% 76% / 0.8) !important;
+  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.8) inset, 0 14px 34px -26px hsl(4 40% 22% / 0.6) !important;
+}
+html.theme-luxe header nav {
+  background:
+    linear-gradient(180deg, hsl(18 45% 97% / 0.8) 0%, hsl(8 28% 91% / 0.85) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border-top: 1px solid hsl(14 45% 80% / 0.7) !important;
+}
+html.theme-luxe.dark header,
+html.theme-luxe.dark header nav {
+  background: linear-gradient(180deg, hsl(6 22% 15%) 0%, hsl(6 22% 11%) 100%) !important;
+  border-color: hsl(8 26% 26%) !important;
+}
+
+/* Navigation tiles as physical rose-gold-edged plates */
+html.theme-luxe header nav > div > div > button {
+  background:
+    linear-gradient(180deg, hsl(24 55% 99% / 0.96) 0%, hsl(10 26% 92% / 0.94) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border: 1px solid hsl(14 42% 78%) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.95) inset,
+    0 -2px 0 hsl(6 34% 66% / 0.45) inset,
+    0 10px 20px -12px hsl(4 40% 24% / 0.55) !important;
+}
+html.theme-luxe header nav > div > div > button:active {
+  box-shadow:
+    0 2px 6px hsl(4 40% 24% / 0.35) inset,
+    0 1px 0 hsl(0 0% 100% / 0.6) inset !important;
+  transform: translateY(1px);
+}
+html.theme-luxe header nav > div > div > button.bg-primary\/15 {
+  background:
+    linear-gradient(180deg, hsl(8 48% 82%) 0%, hsl(6 40% 68%) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border-color: hsl(6 44% 52%) !important;
+  box-shadow:
+    0 2px 7px hsl(4 45% 26% / 0.35) inset,
+    0 1px 0 hsl(20 70% 92% / 0.7) inset,
+    0 8px 16px -12px hsl(4 40% 22% / 0.6) !important;
+}
+
+/* Account plates: real burgundy leather with rose-gold inner rule */
+html.theme-luxe .luxe-card {
+  background:
+    linear-gradient(168deg, hsl(4 46% 40% / 0.82) 0%, hsl(4 44% 33% / 0.86) 55%, hsl(6 44% 26% / 0.9) 100%),
+    radial-gradient(110% 80% at 85% -14%, hsl(8 60% 55% / 0.5), transparent 60%),
+    var(--tex-leather) center / cover no-repeat !important;
+  border: 1px solid hsl(14 45% 60% / 0.5) !important;
+  border-radius: 1.75rem !important;
+  box-shadow:
+    0 1px 0 hsl(16 70% 82% / 0.35) inset,
+    0 0 0 1px hsl(14 50% 62% / 0.22) inset,
+    0 -2px 0 hsl(6 50% 16% / 0.6) inset,
+    0 34px 60px -30px hsl(4 50% 14% / 0.7) !important;
+}
+html.theme-luxe .luxe-card::after {
+  content: "";
+  position: absolute; inset: 8px;
+  border-radius: 1.4rem;
+  border: 1px solid hsl(18 60% 80% / 0.22);
+  pointer-events: none;
+}
+html.theme-luxe .luxe-card-head,
+html.theme-luxe .luxe-card-body { background: transparent !important; }
+html.theme-luxe .luxe-card-head { border-bottom: 1px solid hsl(18 60% 82% / 0.22) !important; }
+
+/* Embossed emblem watermark tooled into the leather */
+.luxe-emblem {
+  position: absolute;
+  right: 6%;
+  bottom: -8%;
+  width: 12rem;
+  opacity: 0.16;
+  mix-blend-mode: luminosity;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 0 hsl(20 70% 88% / 0.5));
+}
+html:not(.theme-luxe) .luxe-emblem { display: none; }
+
+/* Physical controls */
+html.theme-luxe .luxe-card .luxe-btn-primary {
+  background:
+    linear-gradient(180deg, hsl(4 56% 32% / 0.92) 0%, hsl(6 54% 22% / 0.95) 100%),
+    var(--tex-leather) center / cover no-repeat !important;
+  border: 1px solid hsl(16 55% 68% / 0.45) !important;
+  box-shadow:
+    0 1px 0 hsl(20 70% 85% / 0.35) inset,
+    0 -2px 0 hsl(6 60% 12% / 0.6) inset,
+    0 12px 22px -14px hsl(4 50% 14% / 0.7) !important;
+}
+html.theme-luxe .luxe-card .luxe-btn-ghost {
+  background:
+    linear-gradient(180deg, hsl(24 55% 99%) 0%, hsl(10 24% 90%) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border: 1px solid hsl(14 40% 78%) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.95) inset,
+    0 -2px 0 hsl(6 30% 66% / 0.4) inset,
+    0 12px 22px -14px hsl(4 40% 18% / 0.6) !important;
+}
+
+/* Welcome plate: ivory fabric with deep-red leather side panel */
+html.theme-luxe .luxe-greet {
+  background:
+    linear-gradient(165deg, hsl(24 50% 99% / 0.9) 0%, hsl(10 30% 92% / 0.92) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border: 1px solid hsl(14 42% 76%) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.95) inset,
+    0 -2px 0 hsl(6 32% 64% / 0.45) inset,
+    0 28px 52px -30px hsl(4 40% 22% / 0.55) !important;
+}
+html.theme-luxe .luxe-greet-panel {
+  background:
+    linear-gradient(160deg, hsl(4 48% 38% / 0.85) 0%, hsl(6 46% 26% / 0.9) 100%),
+    var(--tex-leather) center / cover no-repeat !important;
+  box-shadow:
+    -1px 0 0 hsl(16 60% 82% / 0.3) inset,
+    0 0 24px hsl(4 50% 14% / 0.45) inset;
+}
+html.theme-luxe .luxe-greet h2 {
+  font-family: "Playfair Display", Georgia, serif;
+}
