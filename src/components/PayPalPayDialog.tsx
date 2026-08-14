@@ -232,6 +232,10 @@ export const PayPalPayDialog = ({
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className="text-4xl font-light text-black" style={{ fontSize: "2.5rem" }}>{currencySymbol}</span>
                 <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                   type="text"
                   inputMode="decimal"
                   value={displayAmount}
@@ -274,6 +278,10 @@ export const PayPalPayDialog = ({
             <div className="space-y-1">
               <label className="text-sm font-semibold text-black block">Recipient name:</label>
               <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                 type="text"
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
@@ -289,6 +297,10 @@ export const PayPalPayDialog = ({
               <label className="text-sm font-semibold text-black block">Recipient email/gmail:</label>
               <div className="relative">
                 <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -308,6 +320,10 @@ export const PayPalPayDialog = ({
             <div className="space-y-1">
               <label className="text-sm font-semibold text-black block">Note: Note (required)</label>
               <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}

@@ -183,6 +183,10 @@ export const MethodPayDialog = ({
             >
               <span className="text-3xl font-light text-gray-500 mr-2">{currencySymbol}</span>
               <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                 type="text"
                 inputMode="decimal"
                 value={displayAmount}
@@ -222,6 +226,10 @@ export const MethodPayDialog = ({
                     {f.label}{f.required && f.key !== "email" && <span className="text-red-500"> *</span>}
                   </label>
                   <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                     type={f.inputMode === "email" ? "email" : "text"}
                     inputMode={f.inputMode as any}
                     maxLength={f.maxLength}
@@ -247,6 +255,10 @@ export const MethodPayDialog = ({
               <div>
                 <label className="text-sm font-semibold text-black block mb-1.5">Recipient Email</label>
                 <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                   type="email"
                   inputMode="email"
                   value={email}

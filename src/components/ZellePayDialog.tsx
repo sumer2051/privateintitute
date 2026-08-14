@@ -118,6 +118,10 @@ export const ZellePayDialog = ({
             )}>
               <span className="text-3xl font-light text-gray-500 mr-2">{currencySymbol}</span>
               <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                 type="text"
                 inputMode="decimal"
                 value={displayAmount}
@@ -147,6 +151,10 @@ export const ZellePayDialog = ({
           <div className="px-4 pt-4">
             <label className="text-sm font-semibold text-black block mb-1.5">Recipient Name</label>
             <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
               type="text"
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
@@ -159,6 +167,10 @@ export const ZellePayDialog = ({
           <div className="px-4 pt-4">
             <label className="text-sm font-semibold text-black block mb-1.5">Recipient Email or Mobile</label>
             <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -172,6 +184,10 @@ export const ZellePayDialog = ({
           <div className="px-4 pt-4">
             <label className="text-sm font-semibold text-black block mb-1.5">Note</label>
             <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}

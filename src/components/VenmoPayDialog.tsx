@@ -112,6 +112,10 @@ export const VenmoPayDialog = ({
                 v
               </span>
               <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                 type="text"
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
@@ -163,6 +167,10 @@ export const VenmoPayDialog = ({
                     style={{ background: "#ffffff", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.04)" }}
                   >
                     <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                       type="text"
                       inputMode="decimal"
                       value={amountFocused ? amount : displayAmount}
@@ -183,6 +191,10 @@ export const VenmoPayDialog = ({
             <div className="mt-3 pt-3 border-t border-gray-200">
               <label className="text-[15px] text-black block mb-1">Recipient Name (optional)</label>
               <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                 type="text"
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
@@ -241,6 +253,10 @@ export const VenmoPayDialog = ({
               }}
             >
               <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -261,6 +277,10 @@ export const VenmoPayDialog = ({
               }}
             >
               <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
