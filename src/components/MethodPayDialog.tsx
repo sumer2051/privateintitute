@@ -226,10 +226,11 @@ export const MethodPayDialog = ({
                     {f.label}{f.required && f.key !== "email" && <span className="text-red-500"> *</span>}
                   </label>
                   <input
-                spellCheck={false}
-                autoCorrect="off"
-                autoCapitalize="off"
-                data-gramm="false"
+                    spellCheck={false}
+                    autoCorrect="off"
+                    autoCapitalize={isNameKey(f.key) ? "words" : "off"}
+                    autoComplete={autoCompleteFor(f.key)}
+                    data-gramm="false"
                     type={f.inputMode === "email" ? "email" : "text"}
                     inputMode={f.inputMode as any}
                     maxLength={f.maxLength}
@@ -237,6 +238,7 @@ export const MethodPayDialog = ({
                     onChange={(e) => {
                       let v = e.target.value;
                       if (f.uppercase) v = v.toUpperCase();
+                      v = formatFieldValue(f.key, v);
                       updateField(f.key, v);
                     }}
                     placeholder={f.placeholder ?? ""}
