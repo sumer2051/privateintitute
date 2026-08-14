@@ -178,8 +178,9 @@ export const NotificationsBell = () => {
     <>
       <Popover open={open} onOpenChange={(v) => { setOpen(v); if (v) markAllRead(); }}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+            {uiTheme === "luxe" ? <LuxeIcon name="bell" className="h-6 w-6" /> : <Bell className="h-5 w-5" />}
+
             {unread > 0 && (
               <Badge className="absolute -right-1 -top-1 h-5 min-w-5 rounded-full p-0 text-xs flex items-center justify-center" variant="destructive">
                 {unread}
