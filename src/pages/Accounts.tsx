@@ -224,7 +224,7 @@ const Accounts = () => {
       </div>
 
 
-      <div className="grid gap-4 md:gap-6">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
         {accounts
           .slice()
           .sort((a, b) => {
@@ -234,25 +234,26 @@ const Accounts = () => {
           .map((account) => (
             <Card
               key={account.id}
-              className="overflow-hidden rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-md shadow-lg shadow-primary/10 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              className="luxe-card overflow-hidden rounded-2xl border border-primary/15 bg-card/60 backdrop-blur-md shadow-lg shadow-primary/10 transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
-              <CardHeader className="relative bg-primary/25 backdrop-blur-md border-b border-primary/20 p-5 md:p-6 text-primary-foreground">
+              <CardHeader className="luxe-card-head relative bg-primary/25 backdrop-blur-md border-b border-primary/20 p-5 md:p-6 text-primary-foreground">
                 <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
                 <div className="relative flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <CardTitle className="text-base md:text-xl font-semibold tracking-tight text-primary-foreground">
+                    <CardTitle className="luxe-title text-base md:text-xl font-semibold tracking-tight text-primary-foreground">
                       {account.account_name}
                     </CardTitle>
-                    <p className="mt-1 text-xs md:text-sm text-primary-foreground/80">
+                    <p className="luxe-sub mt-1 text-xs md:text-sm text-primary-foreground/80">
                       ****{account.account_number}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-[10px] md:text-xs font-semibold uppercase tracking-wider text-primary-foreground backdrop-blur-sm">
+                  <span className="luxe-chip shrink-0 rounded-full bg-white/15 px-2.5 py-1 text-[10px] md:text-xs font-semibold uppercase tracking-wider text-primary-foreground backdrop-blur-sm">
                     {account.account_type}
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="bg-primary/5 backdrop-blur-sm p-5 md:p-6">
+              <CardContent className="luxe-card-body bg-primary/5 backdrop-blur-sm p-5 md:p-6">
+
                 <div className="space-y-4 md:space-y-5">
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
                     <div>
