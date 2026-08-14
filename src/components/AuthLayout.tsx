@@ -196,13 +196,15 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const showStaff = staffOnlyAccount ? true : (hasStaffAccess && staffMode);
 
   const userNav = [
-    { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet },
-    { id: "locations", label: "Locations", path: "/locations", Icon: MapPin },
-    { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard },
-    { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight },
-    { id: "support", label: "Support", path: "/support", Icon: LifeBuoy },
-    
+    { id: "accounts", label: "Account", path: "/accounts", Icon: Wallet, luxe: "wallet" as LuxeIconName },
+    { id: "locations", label: "Locations", path: "/locations", Icon: MapPin, luxe: "pin" as LuxeIconName },
+    { id: "cards", label: "Cards", path: "/cards", Icon: CreditCard, luxe: "cards" as LuxeIconName },
+    { id: "transfers", label: "Transfers", path: "/transfers", Icon: ArrowLeftRight, luxe: "transfer" as LuxeIconName },
+    { id: "support", label: "Support", path: "/support", Icon: LifeBuoy, luxe: "support" as LuxeIconName },
+    { id: "settings", label: "Settings", path: "/settings", Icon: SettingsIcon, luxe: "gear" as LuxeIconName },
+
   ];
+
 
   const staffNav = [
     ...((isAdmin || isSupport) ? [{ id: "admin-support", label: "Tickets", path: "/admin/support", Icon: LifeBuoy }] : []),
