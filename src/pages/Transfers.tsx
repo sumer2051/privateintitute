@@ -707,63 +707,9 @@ const Transfers = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleExternalTransfer} className="space-y-4">
-                  <div>
-                    <Label>From Account</Label>
-                    <Select value={extFrom} onValueChange={setExtFrom}>
-                      <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((acc) => (
-                          <SelectItem key={acc.id} value={acc.id}>
-                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(acc.balance)})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <Label>Recipient Name</Label>
-                      <Input value={extRecipient} onChange={(e) => setExtRecipient(e.target.value)} placeholder="Jane Doe" />
-                    </div>
-                    <div>
-                      <Label>Amount ({currency.code})</Label>
-                      <Input type="number" step="0.01" placeholder="0.00" value={extAmount} onChange={(e) => setExtAmount(e.target.value)} />
-                    </div>
-                    {profile.fields.map((f) => (
-                      <div key={f.key} className={f.help ? "sm:col-span-2" : ""}>
-                        <Label>
-                          {f.label}
-                          {f.required === false && <span className="ml-1 text-xs text-muted-foreground">(optional)</span>}
-                        </Label>
-                        <Input
-                          value={extFields[f.key] ?? ""}
-                          onChange={(e) => {
-                            const v = f.uppercase ? e.target.value.toUpperCase() : e.target.value;
-                            setExtFields((prev) => ({ ...prev, [f.key]: v }));
-                          }}
-                          placeholder={f.placeholder}
-                          inputMode={f.inputMode}
-                          maxLength={f.maxLength}
-                        />
-                        {f.help && <p className="mt-1 text-[11px] text-muted-foreground">{f.help}</p>}
-                      </div>
-                    ))}
-                    <div className="sm:col-span-2">
-                      <Label>Recipient Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
-                      <Input type="email" value={extEmail} onChange={(e) => setExtEmail(e.target.value)} placeholder="name@email.com" />
-                      <p className="mt-1 text-[11px] text-muted-foreground">If provided, a matching pending receipt will be emailed to the recipient.</p>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label>Note / Memo <span className="text-xs text-muted-foreground">(optional)</span></Label>
-                      <Input value={extMemo} onChange={(e) => setExtMemo(e.target.value)} placeholder="Invoice #123" />
-                    </div>
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={extLoading}>
-                    {extLoading ? "Submitting..." : `Submit ${profile.scheme} for Approval`}
-                  </Button>
-                </form>
+                <p className="text-xs text-muted-foreground">
+                  Pick a transfer style above — the {profile.scheme} form opens with exactly the details that scheme requires.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
