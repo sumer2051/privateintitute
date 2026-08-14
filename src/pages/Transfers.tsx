@@ -600,75 +600,9 @@ const Transfers = () => {
                   </div>
                 </div>
 
-                <form onSubmit={handleSendMoney} className="space-y-4">
-                  <div className="rounded-xl border border-border bg-muted/40 p-3">
-                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Paying from</p>
-                    <div className="mt-1 flex items-center justify-between">
-                      <span className="font-semibold text-secondary">
-                        {accounts.find((a) => a.id === smFrom)?.account_name || "Checking account"}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {formatCurrency(accounts.find((a) => a.id === smFrom)?.balance ?? 0)}
-                      </span>
-                    </div>
-                  </div>
-
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <Label>Amount ({currency.code})</Label>
-                      <Input type="number" step="0.01" placeholder="0.00" value={smAmount} onChange={(e) => setSmAmount(e.target.value)} />
-                    </div>
-                    <div>
-                      <Label>Recipient Name</Label>
-                      <Input value={smRecipient} onChange={(e) => setSmRecipient(e.target.value)} placeholder="Jane Doe" />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label>Recipient Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
-                      <Input type="email" value={smEmail} onChange={(e) => setSmEmail(e.target.value)} placeholder="name@email.com" />
-                      <p className="mt-1 text-[11px] text-muted-foreground">If provided, the recipient will receive a matching receipt with pending status.</p>
-                    </div>
-
-                    {smMethod.variants && (
-                      <div className="sm:col-span-2">
-                        <Label>Payment Type</Label>
-                        <Select value={smVariant} onValueChange={setSmVariant}>
-                          <SelectTrigger><SelectValue placeholder="Select payment type" /></SelectTrigger>
-                          <SelectContent>
-                            {smMethod.variants.map((v) => (
-                              <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    {smMethod.fields.map((f) => (
-                      <div key={f.key} className={f.help || f.key === "note" ? "sm:col-span-2" : ""}>
-                        <Label>
-                          {f.label}
-                          {f.required === false && <span className="ml-1 text-xs text-muted-foreground">(optional)</span>}
-                        </Label>
-                        <Input
-                          value={f.key === "note" ? smNote : (smFields[f.key] ?? "")}
-                          onChange={(e) => {
-                            const v = f.uppercase ? e.target.value.toUpperCase() : e.target.value;
-                            if (f.key === "note") setSmNote(v);
-                            else setSmFields((prev) => ({ ...prev, [f.key]: v }));
-                          }}
-                          placeholder={f.placeholder}
-                          inputMode={f.inputMode}
-                          maxLength={f.maxLength}
-                        />
-                        {f.help && <p className="mt-1 text-[11px] text-muted-foreground">{f.help}</p>}
-                      </div>
-                    ))}
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={smLoading}>
-                    {smLoading ? "Sending..." : `Send with ${smMethod.name}`}
-                  </Button>
-                </form>
+                <p className="text-xs text-muted-foreground">
+                  Pick a method above — the {currency.name} payment form opens right away with the fields that method requires.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
