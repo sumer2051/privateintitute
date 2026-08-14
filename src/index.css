@@ -1300,3 +1300,21 @@ html.theme-luxe main::before {
     linear-gradient(180deg, hsl(24 36% 97% / 0.55) 0%, hsl(14 24% 93% / 0.45) 100%),
     var(--tex-marble) center / cover no-repeat !important;
 }
+
+/* Dialogs & sheets: solid ivory stock with a gold hairline */
+html.theme-luxe [role="dialog"],
+html.theme-luxe [role="alertdialog"] {
+  background:
+    linear-gradient(180deg, hsl(28 45% 99%) 0%, hsl(16 26% 95%) 100%),
+    var(--tex-fabric) center / cover no-repeat !important;
+  border: 1px solid hsl(var(--luxe-gold) / 0.45) !important;
+  box-shadow:
+    0 1px 0 hsl(0 0% 100% / 0.9) inset,
+    0 40px 80px -40px hsl(6 45% 12% / 0.6) !important;
+  color: hsl(var(--luxe-ink)) !important;
+}
+html.theme-luxe.dark [role="dialog"],
+html.theme-luxe.dark [role="alertdialog"] {
+  background: linear-gradient(180deg, hsl(6 24% 14%) 0%, hsl(6 24% 10%) 100%) !important;
+  color: hsl(20 40% 92%) !important;
+}
