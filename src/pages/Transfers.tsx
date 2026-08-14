@@ -22,6 +22,8 @@ import { PayPalPayDialog } from "@/components/PayPalPayDialog";
 import { VenmoPayDialog } from "@/components/VenmoPayDialog";
 import { ZellePayDialog } from "@/components/ZellePayDialog";
 import { MethodPayDialog } from "@/components/MethodPayDialog";
+import { ExternalTransferDialog } from "@/components/ExternalTransferDialog";
+import { InternalTransferDialog } from "@/components/InternalTransferDialog";
 import { Seo } from "@/components/Seo";
 import { deviceCanTransfer } from "@/lib/device-caps";
 
@@ -139,8 +141,8 @@ const Transfers = () => {
   // Balances are stored in USD; format() converts to the selected currency for display.
   const formatCurrency = (usdAmount: number) => format(usdAmount);
 
-  const handleInternalTransfer = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleInternalTransfer = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!fromAccount || !toAccount || !amount) return;
     if (!(await requirePin())) return;
     setLoading(true);
@@ -185,6 +187,7 @@ const Transfers = () => {
       toast({ title: "Transfer Successful", description: `Transferred ${formatCurrency(transferAmount)}` });
       setAmount("");
       setIntNote("");
+      setIntOpen(false);
       fetchAccounts();
     } catch (error: any) {
       toast({ title: "Transfer Failed", description: error.message, variant: "destructive" });
@@ -205,8 +208,8 @@ const Transfers = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currency.code]);
 
-  const handleExternalTransfer = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleExternalTransfer = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     const missing = profile.fields
       .filter((f) => f.required !== false && !(extFields[f.key] ?? "").trim())
       .map((f) => f.label);
@@ -280,6 +283,7 @@ const Transfers = () => {
         },
       }).catch((e) => console.error("confirmation email failed", e));
       setExtAmount(""); setExtRecipient(""); setExtEmail(""); setExtFields({}); setExtMemo("");
+      setExtOpen(false);
 
       if (data) setSelectedTx(data as PendingTx);
       fetchAccounts();
