@@ -201,6 +201,10 @@ export const CashAppPayDialog = ({
             <div className="px-5 py-3 border-t border-black/10 flex items-center gap-6">
               <span className="text-sm font-bold text-black w-10">To</span>
               <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
                 placeholder="$Cashtag,"
@@ -213,6 +217,10 @@ export const CashAppPayDialog = ({
             <div className="px-5 py-3 border-t border-black/10 flex items-center gap-6">
               <span className="text-sm font-bold text-black w-10">For</span>
               <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Note (required)"
@@ -240,6 +248,10 @@ export const CashAppPayDialog = ({
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Gmail</label>
                 <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
@@ -250,6 +262,10 @@ export const CashAppPayDialog = ({
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Recipient name</label>
                 <input
+                spellCheck={false}
+                autoCorrect="off"
+                autoCapitalize="off"
+                data-gramm="false"
                   value={recipient}
                   onChange={(e) => setRecipient(e.target.value)}
                   placeholder="Full name on account"
