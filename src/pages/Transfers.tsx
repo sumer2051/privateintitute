@@ -96,6 +96,8 @@ const Transfers = () => {
   const [venmoOpen, setVenmoOpen] = useState(false);
   const [zelleOpen, setZelleOpen] = useState(false);
   const [methodOpen, setMethodOpen] = useState(false);
+  const [extOpen, setExtOpen] = useState(false);
+  const [intOpen, setIntOpen] = useState(false);
 
   const { toast } = useToast();
   const { format, convert, toUsd, currency } = useCurrency();
