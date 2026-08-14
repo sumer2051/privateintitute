@@ -257,26 +257,32 @@ const Accounts = () => {
                 <div className="space-y-4 md:space-y-5">
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
                     <div>
-                      <p className="text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
+                      <p className="luxe-label text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
                         Current Balance
                       </p>
-                      <p className="mt-0.5 font-display text-3xl md:text-4xl font-bold text-secondary tracking-tight">
-                        <CountUp value={account.balance} format={formatCurrency} />
-                      </p>
+                      <div className="mt-0.5 flex items-end gap-2">
+                        <p className="luxe-money font-display text-3xl md:text-4xl font-bold text-secondary tracking-tight">
+                          <CountUp value={account.balance} format={formatCurrency} />
+                        </p>
+                        <span className="luxe-delta mb-1.5">
+                          <TrendingUp className="h-3 w-3" />
+                          {account.account_type === "credit" ? "0.00%" : account.account_type === "savings" ? "+2.41%" : "+1.28%"}
+                        </span>
+                      </div>
                     </div>
                     {account.account_type !== "credit" && (
                       <div className="text-left sm:text-right">
-                        <p className="text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
+                        <p className="luxe-label text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
                           Available
                         </p>
-                        <p className="mt-0.5 text-lg md:text-xl font-semibold text-foreground">
+                        <p className="luxe-money-sm mt-0.5 text-lg md:text-xl font-semibold text-foreground">
                           <CountUp value={account.available_balance} format={formatCurrency} />
                         </p>
                       </div>
                     )}
                     {account.account_type === "credit" && (
                       <div className="text-left sm:text-right">
-                        <p className="text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
+                        <p className="luxe-label text-[11px] md:text-xs uppercase tracking-wider text-muted-foreground">
                           Available Credit
                         </p>
                         <p className="mt-0.5 text-lg md:text-xl font-semibold text-success">
@@ -284,6 +290,7 @@ const Accounts = () => {
                         </p>
                       </div>
                     )}
+
                   </div>
                   <div className="flex gap-3 pt-1">
                     <Button
