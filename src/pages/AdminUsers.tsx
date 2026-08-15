@@ -75,7 +75,7 @@ export default function AdminUsers() {
     const { data, error } = await supabase.rpc("admin_set_all_ui_theme", { p_theme: theme } as any);
     setThemeBusy(false);
     if (error) { toast.error(error.message); return; }
-    toast.success(`${theme === "luxe" ? "Premium" : "Classic"} style applied to ${data ?? 0} user(s)`);
+    toast.success(`${theme === "luxe" ? "Premium" : theme === "chime" ? "Chime" : "Classic"} style applied to ${data ?? 0} user(s)`);
     load();
   };
 
@@ -84,7 +84,7 @@ export default function AdminUsers() {
     const { error } = await supabase.rpc("admin_set_user_ui_theme", { p_user: userId, p_theme: theme } as any);
     setThemeBusy(false);
     if (error) { toast.error(error.message); return; }
-    toast.success(`Style updated to ${theme === "luxe" ? "Premium" : "Classic"}`);
+    toast.success(`Style updated to ${theme === "luxe" ? "Premium" : theme === "chime" ? "Chime" : "Classic"}`);
     setSelected(prev => (prev && prev.id === userId ? { ...prev, ui_theme: theme } : prev));
     load();
   };
