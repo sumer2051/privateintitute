@@ -231,65 +231,46 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     return () => window.removeEventListener("resize", handleResize);
   }, [navItems.length]);
 
-  const isChime = uiTheme === "chime";
-
   return (
     <div
       className={`min-h-screen bg-background transition-colors duration-300 ${
         signingOut ? "animate-fade-out-scale" : "animate-in fade-in duration-500"
       }`}
     >
-      <header className={`sticky top-0 z-50 border-b bg-card/95 backdrop-blur ${isChime ? "" : "shadow-sm"}`}>
+      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur shadow-sm">
         <div className="container mx-auto flex h-14 md:h-16 items-center justify-between gap-2 px-3 md:px-4">
-          {isChime ? (
-            <button onClick={() => navigate("/accounts")} className="group flex min-w-0 items-center gap-2.5">
+          <button onClick={() => navigate("/accounts")} className="group flex min-w-0 items-center gap-2 md:gap-3">
+            <span className="relative inline-flex shrink-0">
+              <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/40 via-accent/30 to-primary/40 blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
               <img
                 src={logo}
                 alt="BoA private institute logo"
-                width={36}
-                height={36}
-                className="h-8 w-8 md:h-9 md:w-9 rounded-full object-contain"
+                width={44}
+                height={44}
+                className="relative h-9 w-9 md:h-11 md:w-11 rounded-full object-contain ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all animate-logo-glow"
               />
-              <span className="truncate text-[15px] md:text-lg font-extrabold tracking-tight text-foreground">
-                BoA <span className="text-primary">private</span> institute
-              </span>
-            </button>
-          ) : (
-            <button onClick={() => navigate("/accounts")} className="group flex min-w-0 items-center gap-2 md:gap-3">
-              <span className="relative inline-flex shrink-0">
-                <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/40 via-accent/30 to-primary/40 blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
-                <img
-                  src={logo}
-                  alt="BoA private institute logo"
-                  width={44}
-                  height={44}
-                  className="relative h-9 w-9 md:h-11 md:w-11 rounded-full object-contain ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all animate-logo-glow"
-                />
-              </span>
-              <span className="flex min-w-0 flex-col items-start leading-tight">
-                <h1 className="flex items-end whitespace-nowrap text-base md:text-xl font-bold tracking-tight text-secondary">
-                  <span>BoA&nbsp;</span>
-                  <span className="text-primary">private</span>
-                  <span>&nbsp;institute</span>
-                </h1>
+            </span>
+            <span className="flex min-w-0 flex-col items-start leading-tight">
+              <h1 className="flex items-end whitespace-nowrap text-base md:text-xl font-bold tracking-tight text-secondary">
+                <span>BoA&nbsp;</span>
+                <span className="text-primary">private</span>
+                <span>&nbsp;institute</span>
+              </h1>
 
-                <span
-                  className="hidden md:inline text-[10px] uppercase tracking-[0.25em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer"
-                >
-                  Wealth · Trust · Legacy
-                </span>
+
+              <span
+                className="hidden md:inline text-[10px] uppercase tracking-[0.25em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer"
+              >
+                Wealth · Trust · Legacy
               </span>
-            </button>
-          )}
+            </span>
+          </button>
 
           <div className="flex items-center gap-1 md:gap-3 shrink-0">
-            {!isChime && (
-              <div className="relative hidden md:block">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input type="search" placeholder="Search accounts, services..." className="w-64 pl-10" />
-              </div>
-            )}
-
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input type="search" placeholder="Search accounts, services..." className="w-64 pl-10" />
+            </div>
 
             <Button variant="ghost" size="icon" aria-label="Toggle dark mode" title="Toggle dark mode" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setDarkMode(!darkMode)}>
               {uiTheme === "luxe" && !darkMode ? (
@@ -348,14 +329,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
           </div>
         </div>
 
-        <nav
-          className={
-            isChime
-              ? "fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
-              : "border-t bg-gradient-to-b from-card/80 to-card/40 backdrop-blur"
-          }
-        >
-          <div className={`container mx-auto relative px-2 md:px-4 ${isChime ? "py-1" : "py-2"}`}>
+        <nav className="border-t bg-gradient-to-b from-card/80 to-card/40 backdrop-blur">
+          <div className="container mx-auto relative px-2 md:px-4 py-2">
             <button
               type="button"
               aria-label="Show previous navigation items"
@@ -383,29 +358,19 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                       if (item.path) navigate(item.path);
                       if (onPageChange) onPageChange(item.id);
                     }}
-                    className={
-                      isChime
-                        ? `relative group flex flex-1 min-w-[4rem] snap-start flex-col items-center justify-center gap-1 min-h-[3.25rem] rounded-2xl px-2 py-1.5 text-[11px] font-semibold transition-colors ${
-                            active
-                              ? "text-primary bg-primary/10"
-                              : highlightUnread
-                              ? "text-primary bg-primary/10"
-                              : "text-muted-foreground hover:text-foreground"
-                          }`
-                        : `relative group flex flex-1 min-w-[4.5rem] snap-start flex-col items-center justify-center gap-1 min-h-[3.5rem] md:min-h-[4rem] rounded-2xl border px-2 py-2 text-[10px] md:text-[12px] font-semibold transition-all ${
-                            active
-                              ? "bg-primary/15 border-primary/60 text-primary shadow"
-                              : highlightUnread
-                              ? "bg-emerald-500/20 border-emerald-500/60 text-emerald-700 dark:text-emerald-300 shadow-[0_0_0_1px_rgba(16,185,129,0.35)] animate-pulse hover:-translate-y-0.5"
-                              : "bg-card/50 dark:bg-card/30 backdrop-blur-md border-border/60 text-secondary hover:border-primary/60 hover:text-primary hover:-translate-y-0.5 hover:shadow-md"
-                          }`
-                    }
+                    className={`relative group flex flex-1 min-w-[4.5rem] snap-start flex-col items-center justify-center gap-1 min-h-[3.5rem] md:min-h-[4rem] rounded-2xl border px-2 py-2 text-[10px] md:text-[12px] font-semibold transition-all ${
+                      active
+                        ? "bg-primary/15 border-primary/60 text-primary shadow"
+                        : highlightUnread
+                        ? "bg-emerald-500/20 border-emerald-500/60 text-emerald-700 dark:text-emerald-300 shadow-[0_0_0_1px_rgba(16,185,129,0.35)] animate-pulse hover:-translate-y-0.5"
+                        : "bg-card/50 dark:bg-card/30 backdrop-blur-md border-border/60 text-secondary hover:border-primary/60 hover:text-primary hover:-translate-y-0.5 hover:shadow-md"
+                    }`}
                     title={item.label}
                   >
                     {uiTheme === "luxe" && (item as any).luxe ? (
                       <LuxeIcon name={(item as any).luxe as LuxeIconName} className="h-7 w-7 md:h-8 md:w-8" />
                     ) : Icon ? (
-                      <Icon className={`${isChime ? "h-5 w-5" : "h-4 w-4 md:h-[1.15rem] md:w-[1.15rem]"} ${active ? "text-primary" : highlightUnread ? (isChime ? "text-primary" : "text-emerald-600 dark:text-emerald-300") : isChime ? "" : "text-secondary group-hover:text-primary"}`} />
+                      <Icon className={`h-4 w-4 md:h-[1.15rem] md:w-[1.15rem] ${active ? "text-primary" : highlightUnread ? "text-emerald-600 dark:text-emerald-300" : "text-secondary group-hover:text-primary"}`} />
                     ) : null}
 
                     <span className="leading-none truncate w-full text-center">{item.label}</span>
@@ -455,7 +420,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
         </div>
       )}
 
-      <main className={`container mx-auto px-3 md:px-4 py-4 md:py-8 ${isChime ? "pb-28" : ""}`}>{children}</main>
+      <main className="container mx-auto px-3 md:px-4 py-4 md:py-8">{children}</main>
 
       {uiTheme === "luxe" && (
         <div className="luxe-session-strip pointer-events-none fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-1.5 border-t border-success/40 bg-background/80 py-1 text-[10px] font-semibold uppercase text-success backdrop-blur">
