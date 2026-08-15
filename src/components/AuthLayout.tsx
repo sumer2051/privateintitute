@@ -5,7 +5,7 @@ import { Bell, Search, Moon, Sun, LogOut, Loader2, Megaphone, AlertTriangle, Inf
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import logo from "@/assets/logo.png";
+
 import { AiChatWidget } from "@/components/AiChatWidget";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { Shield, ShieldCheck } from "lucide-react";
