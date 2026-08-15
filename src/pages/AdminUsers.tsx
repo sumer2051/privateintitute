@@ -70,7 +70,7 @@ export default function AdminUsers() {
   const [quickDepositAccountId, setQuickDepositAccountId] = useState<string>("");
   const [themeBusy, setThemeBusy] = useState(false);
 
-  const setAllTheme = async (theme: "luxe" | "classic") => {
+  const setAllTheme = async (theme: "luxe" | "classic" | "chime") => {
     setThemeBusy(true);
     const { data, error } = await supabase.rpc("admin_set_all_ui_theme", { p_theme: theme } as any);
     setThemeBusy(false);
@@ -79,7 +79,7 @@ export default function AdminUsers() {
     load();
   };
 
-  const setUserTheme = async (userId: string, theme: "luxe" | "classic") => {
+  const setUserTheme = async (userId: string, theme: "luxe" | "classic" | "chime") => {
     setThemeBusy(true);
     const { error } = await supabase.rpc("admin_set_user_ui_theme", { p_user: userId, p_theme: theme } as any);
     setThemeBusy(false);
