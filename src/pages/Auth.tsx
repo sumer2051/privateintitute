@@ -250,7 +250,7 @@ const Auth = () => {
 
   return (
     <>
-      <Seo title="Sign In | BoA private institute" description="Securely sign in to your BoA private institute account or activate an invitation to access accounts, transfers and support." path="/auth" />
+      <Seo title="Sign In | private institute" description="Securely sign in to your private institute account or activate an invitation to access accounts, transfers and support." path="/auth" />
       <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-secondary via-secondary to-[hsl(222_60%_8%)] p-4">
       {/* Animated background orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
