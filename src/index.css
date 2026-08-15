@@ -1110,3 +1110,178 @@ html.theme-luxe .luxe-glow-green {
   text-shadow: 0 0 12px hsl(150 75% 55% / 0.4);
 }
 
+
+/* ============================================================
+   CHIME THEME — bright mint fintech look
+   Applied per user via html.theme-chime (admin controlled).
+   ============================================================ */
+html.theme-chime {
+  --background: 210 20% 97%;
+  --foreground: 158 48% 8%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 158 48% 8%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 158 48% 8%;
+
+  --primary: 156 73% 45%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 158 48% 10%;
+  --secondary-foreground: 0 0% 100%;
+
+  --muted: 210 20% 95%;
+  --muted-foreground: 210 8% 45%;
+
+  --accent: 156 73% 95%;
+  --accent-foreground: 158 48% 12%;
+
+  --success: 156 73% 40%;
+  --success-foreground: 0 0% 100%;
+
+  --border: 210 18% 90%;
+  --input: 210 18% 90%;
+  --ring: 156 73% 45%;
+
+  --radius: 1rem;
+}
+
+html.theme-chime.dark {
+  --background: 158 22% 7%;
+  --foreground: 150 30% 96%;
+  --card: 158 18% 11%;
+  --card-foreground: 150 30% 96%;
+  --popover: 158 18% 11%;
+  --popover-foreground: 150 30% 96%;
+  --muted: 158 14% 16%;
+  --muted-foreground: 150 10% 68%;
+  --accent: 158 20% 18%;
+  --accent-foreground: 150 30% 96%;
+  --border: 158 14% 20%;
+  --input: 158 14% 20%;
+  --secondary: 150 30% 96%;
+  --secondary-foreground: 158 48% 10%;
+}
+
+html.theme-chime body {
+  background:
+    radial-gradient(1200px 500px at 50% -10%, hsl(156 73% 45% / 0.10), transparent 70%),
+    hsl(var(--background));
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Typography: no serif anywhere, tight bold headings */
+html.theme-chime h1,
+html.theme-chime h2,
+html.theme-chime h3,
+html.theme-chime .font-display {
+  font-family: Inter, system-ui, sans-serif !important;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: hsl(var(--foreground));
+}
+
+/* Cards: soft white sheets, generous radius */
+html.theme-chime .bg-card,
+html.theme-chime [data-luxe-surface] {
+  background: hsl(var(--card));
+  border-radius: 1.25rem;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 2px 4px hsl(158 30% 10% / 0.04), 0 12px 28px -12px hsl(158 30% 10% / 0.10);
+}
+
+/* Header + bottom nav: clean, flat, sticky white */
+html.theme-chime header {
+  background: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  box-shadow: none;
+}
+html.theme-chime header nav,
+html.theme-chime nav {
+  background: hsl(var(--card));
+}
+
+/* Nav items become mint pills */
+html.theme-chime nav button,
+html.theme-chime nav a {
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Buttons: pill shaped, mint fill, springy press */
+html.theme-chime button,
+html.theme-chime [role="button"] {
+  border-radius: 999px;
+  transition: transform 140ms cubic-bezier(.34,1.56,.64,1), box-shadow 160ms ease, background-color 160ms ease;
+}
+html.theme-chime button:active,
+html.theme-chime [role="button"]:active {
+  transform: scale(0.97);
+}
+html.theme-chime .bg-primary {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 8px 18px -8px hsl(156 73% 40% / 0.55);
+}
+html.theme-chime .bg-primary:hover {
+  background: hsl(156 73% 40%);
+}
+
+/* Inputs: rounded, filled, mint focus ring */
+html.theme-chime input,
+html.theme-chime textarea,
+html.theme-chime select {
+  border-radius: 0.875rem;
+  background: hsl(var(--muted));
+  border-color: transparent;
+}
+html.theme-chime input:focus-visible,
+html.theme-chime textarea:focus-visible,
+html.theme-chime select:focus-visible {
+  background: hsl(var(--card));
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 4px hsl(156 73% 45% / 0.18);
+}
+
+/* Balances: big, tight, tabular */
+html.theme-chime .text-3xl,
+html.theme-chime .text-4xl,
+html.theme-chime .text-2xl {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+}
+
+/* Positive money + status chips in mint */
+html.theme-chime .text-success,
+html.theme-chime .text-emerald-600,
+html.theme-chime .text-emerald-700 {
+  color: hsl(156 73% 38%);
+}
+html.theme-chime .bg-success\/10,
+html.theme-chime .bg-emerald-500\/10,
+html.theme-chime .bg-emerald-500\/20 {
+  background: hsl(156 73% 45% / 0.12);
+}
+html.theme-chime .rounded-full.bg-muted,
+html.theme-chime [data-chime-chip] {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+/* Eyebrow labels: quiet, no small-caps drama */
+html.theme-chime .text-\[10px\].uppercase,
+html.theme-chime .text-xs.uppercase {
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Dialogs and sheets */
+html.theme-chime [role="dialog"] {
+  border-radius: 1.5rem;
+  border: 1px solid hsl(var(--border));
+}
