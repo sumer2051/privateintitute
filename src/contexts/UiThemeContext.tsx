@@ -1,22 +1,22 @@
 import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type UiTheme = "classic" | "luxe";
+export type UiTheme = "classic" | "luxe" | "chime";
 
 interface UiThemeContextValue {
   theme: UiTheme;
 }
 
-const UiThemeContext = createContext<UiThemeContextValue>({ theme: "luxe" });
+const UiThemeContext = createContext<UiThemeContextValue>({ theme: "chime" });
 const STORAGE_KEY = "app.uiTheme";
 
-const isTheme = (v: unknown): v is UiTheme => v === "classic" || v === "luxe";
+const isTheme = (v: unknown): v is UiTheme => v === "classic" || v === "luxe" || v === "chime";
 
 export const UiThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<UiTheme>(() => {
-    if (typeof window === "undefined") return "luxe";
+    if (typeof window === "undefined") return "chime";
     const saved = localStorage.getItem(STORAGE_KEY);
-    return isTheme(saved) ? saved : "luxe";
+    return isTheme(saved) ? saved : "chime";
   });
 
   const userId = useRef<string | null>(null);
@@ -26,7 +26,9 @@ export const UiThemeProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(STORAGE_KEY, theme);
     const root = document.documentElement;
     root.classList.toggle("theme-luxe", theme === "luxe");
+    root.classList.toggle("theme-chime", theme === "chime");
   }, [theme]);
+
 
   useEffect(() => {
     let channel: ReturnType<typeof supabase.channel> | null = null;
