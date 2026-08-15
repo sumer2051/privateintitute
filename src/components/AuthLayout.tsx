@@ -231,46 +231,65 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
     return () => window.removeEventListener("resize", handleResize);
   }, [navItems.length]);
 
+  const isChime = uiTheme === "chime";
+
   return (
     <div
       className={`min-h-screen bg-background transition-colors duration-300 ${
         signingOut ? "animate-fade-out-scale" : "animate-in fade-in duration-500"
       }`}
     >
-      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur shadow-sm">
+      <header className={`sticky top-0 z-50 border-b bg-card/95 backdrop-blur ${isChime ? "" : "shadow-sm"}`}>
         <div className="container mx-auto flex h-14 md:h-16 items-center justify-between gap-2 px-3 md:px-4">
-          <button onClick={() => navigate("/accounts")} className="group flex min-w-0 items-center gap-2 md:gap-3">
-            <span className="relative inline-flex shrink-0">
-              <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/40 via-accent/30 to-primary/40 blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
+          {isChime ? (
+            <button onClick={() => navigate("/accounts")} className="group flex min-w-0 items-center gap-2.5">
               <img
                 src={logo}
                 alt="BoA private institute logo"
-                width={44}
-                height={44}
-                className="relative h-9 w-9 md:h-11 md:w-11 rounded-full object-contain ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all animate-logo-glow"
+                width={36}
+                height={36}
+                className="h-8 w-8 md:h-9 md:w-9 rounded-full object-contain"
               />
-            </span>
-            <span className="flex min-w-0 flex-col items-start leading-tight">
-              <h1 className="flex items-end whitespace-nowrap text-base md:text-xl font-bold tracking-tight text-secondary">
-                <span>BoA&nbsp;</span>
-                <span className="text-primary">private</span>
-                <span>&nbsp;institute</span>
-              </h1>
-
-
-              <span
-                className="hidden md:inline text-[10px] uppercase tracking-[0.25em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer"
-              >
-                Wealth · Trust · Legacy
+              <span className="truncate text-[15px] md:text-lg font-extrabold tracking-tight text-foreground">
+                BoA <span className="text-primary">private</span> institute
               </span>
-            </span>
-          </button>
+            </button>
+          ) : (
+            <button onClick={() => navigate("/accounts")} className="group flex min-w-0 items-center gap-2 md:gap-3">
+              <span className="relative inline-flex shrink-0">
+                <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/40 via-accent/30 to-primary/40 blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
+                <img
+                  src={logo}
+                  alt="BoA private institute logo"
+                  width={44}
+                  height={44}
+                  className="relative h-9 w-9 md:h-11 md:w-11 rounded-full object-contain ring-2 ring-primary/30 group-hover:ring-primary/60 transition-all animate-logo-glow"
+                />
+              </span>
+              <span className="flex min-w-0 flex-col items-start leading-tight">
+                <h1 className="flex items-end whitespace-nowrap text-base md:text-xl font-bold tracking-tight text-secondary">
+                  <span>BoA&nbsp;</span>
+                  <span className="text-primary">private</span>
+                  <span>&nbsp;institute</span>
+                </h1>
+
+                <span
+                  className="hidden md:inline text-[10px] uppercase tracking-[0.25em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer"
+                >
+                  Wealth · Trust · Legacy
+                </span>
+              </span>
+            </button>
+          )}
 
           <div className="flex items-center gap-1 md:gap-3 shrink-0">
-            <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input type="search" placeholder="Search accounts, services..." className="w-64 pl-10" />
-            </div>
+            {!isChime && (
+              <div className="relative hidden md:block">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input type="search" placeholder="Search accounts, services..." className="w-64 pl-10" />
+              </div>
+            )}
+
 
             <Button variant="ghost" size="icon" aria-label="Toggle dark mode" title="Toggle dark mode" className="h-9 w-9 md:h-10 md:w-10" onClick={() => setDarkMode(!darkMode)}>
               {uiTheme === "luxe" && !darkMode ? (
