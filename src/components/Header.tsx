@@ -8,10 +8,7 @@ export const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-card shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 shadow-lg">
-            <span className="text-xl font-bold text-primary-foreground">B</span>
-          </div>
-          <h1 className="text-xl font-bold text-secondary">BoA private institute</h1>
+          <h1 className="text-xl font-bold text-secondary">private institute</h1>
         </div>
 
         <div className="flex items-center gap-4">
