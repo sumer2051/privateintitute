@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/
 import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, Lock, Sparkles, Eye, EyeOff, Mail, User, CheckCircle2, AlertCircle, MailCheck, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import logo from "@/assets/logo.png";
+
 import { Seo } from "@/components/Seo";
 import { DEVICE_BLOCKED_EVENT, DEVICE_BLOCKED_KEY } from "@/components/DeviceBlockedNotice";
 
@@ -276,22 +276,8 @@ const Auth = () => {
         <div className="pointer-events-none absolute -inset-px rounded-lg bg-gradient-to-r from-primary via-accent to-primary opacity-40 blur-sm" />
         <div className="relative bg-card rounded-lg">
           <CardHeader className="space-y-1 pt-8">
-            <div className="flex justify-center mb-4">
-              <div className="relative group">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary via-accent to-primary blur-xl opacity-70 group-hover:opacity-100 transition-opacity animate-pulse" />
-                <div className="absolute inset-0 rounded-full bg-gradient-conic from-primary via-accent to-primary opacity-50" />
-                <img
-                  src={logo}
-                  alt="BoA private institute"
-                  width={96}
-                  height={96}
-                  className="relative h-24 w-24 rounded-full object-contain ring-4 ring-primary/40 shadow-2xl animate-logo-glow hover:scale-105 transition-transform duration-500"
-                />
-                <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-accent animate-pulse" />
-              </div>
-            </div>
-            <h1 className="text-center font-display text-3xl font-bold text-secondary tracking-tight">
-              BoA <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">private</span> institute
+            <h1 className="text-center font-display text-3xl font-bold text-secondary tracking-tight pt-4">
+              private institute
               <span className="sr-only"> — sign in to the wealth management portal</span>
             </h1>
             <p className="text-center text-[10px] uppercase tracking-[0.3em] font-semibold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer">
@@ -398,7 +384,7 @@ const Auth = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-display text-sm font-semibold text-secondary">
-                      Welcome to <span className="text-primary">BoA</span> private institute
+                      Welcome to private institute
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       Your invitation for{" "}
