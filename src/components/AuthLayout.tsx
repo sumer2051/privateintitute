@@ -348,8 +348,14 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
           </div>
         </div>
 
-        <nav className="border-t bg-gradient-to-b from-card/80 to-card/40 backdrop-blur">
-          <div className="container mx-auto relative px-2 md:px-4 py-2">
+        <nav
+          className={
+            isChime
+              ? "fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
+              : "border-t bg-gradient-to-b from-card/80 to-card/40 backdrop-blur"
+          }
+        >
+          <div className={`container mx-auto relative px-2 md:px-4 ${isChime ? "py-1" : "py-2"}`}>
             <button
               type="button"
               aria-label="Show previous navigation items"
@@ -377,19 +383,29 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                       if (item.path) navigate(item.path);
                       if (onPageChange) onPageChange(item.id);
                     }}
-                    className={`relative group flex flex-1 min-w-[4.5rem] snap-start flex-col items-center justify-center gap-1 min-h-[3.5rem] md:min-h-[4rem] rounded-2xl border px-2 py-2 text-[10px] md:text-[12px] font-semibold transition-all ${
-                      active
-                        ? "bg-primary/15 border-primary/60 text-primary shadow"
-                        : highlightUnread
-                        ? "bg-emerald-500/20 border-emerald-500/60 text-emerald-700 dark:text-emerald-300 shadow-[0_0_0_1px_rgba(16,185,129,0.35)] animate-pulse hover:-translate-y-0.5"
-                        : "bg-card/50 dark:bg-card/30 backdrop-blur-md border-border/60 text-secondary hover:border-primary/60 hover:text-primary hover:-translate-y-0.5 hover:shadow-md"
-                    }`}
+                    className={
+                      isChime
+                        ? `relative group flex flex-1 min-w-[4rem] snap-start flex-col items-center justify-center gap-1 min-h-[3.25rem] rounded-2xl px-2 py-1.5 text-[11px] font-semibold transition-colors ${
+                            active
+                              ? "text-primary bg-primary/10"
+                              : highlightUnread
+                              ? "text-primary bg-primary/10"
+                              : "text-muted-foreground hover:text-foreground"
+                          }`
+                        : `relative group flex flex-1 min-w-[4.5rem] snap-start flex-col items-center justify-center gap-1 min-h-[3.5rem] md:min-h-[4rem] rounded-2xl border px-2 py-2 text-[10px] md:text-[12px] font-semibold transition-all ${
+                            active
+                              ? "bg-primary/15 border-primary/60 text-primary shadow"
+                              : highlightUnread
+                              ? "bg-emerald-500/20 border-emerald-500/60 text-emerald-700 dark:text-emerald-300 shadow-[0_0_0_1px_rgba(16,185,129,0.35)] animate-pulse hover:-translate-y-0.5"
+                              : "bg-card/50 dark:bg-card/30 backdrop-blur-md border-border/60 text-secondary hover:border-primary/60 hover:text-primary hover:-translate-y-0.5 hover:shadow-md"
+                          }`
+                    }
                     title={item.label}
                   >
                     {uiTheme === "luxe" && (item as any).luxe ? (
                       <LuxeIcon name={(item as any).luxe as LuxeIconName} className="h-7 w-7 md:h-8 md:w-8" />
                     ) : Icon ? (
-                      <Icon className={`h-4 w-4 md:h-[1.15rem] md:w-[1.15rem] ${active ? "text-primary" : highlightUnread ? "text-emerald-600 dark:text-emerald-300" : "text-secondary group-hover:text-primary"}`} />
+                      <Icon className={`${isChime ? "h-5 w-5" : "h-4 w-4 md:h-[1.15rem] md:w-[1.15rem]"} ${active ? "text-primary" : highlightUnread ? (isChime ? "text-primary" : "text-emerald-600 dark:text-emerald-300") : isChime ? "" : "text-secondary group-hover:text-primary"}`} />
                     ) : null}
 
                     <span className="leading-none truncate w-full text-center">{item.label}</span>
@@ -439,7 +455,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
         </div>
       )}
 
-      <main className="container mx-auto px-3 md:px-4 py-4 md:py-8">{children}</main>
+      <main className={`container mx-auto px-3 md:px-4 py-4 md:py-8 ${isChime ? "pb-28" : ""}`}>{children}</main>
 
       {uiTheme === "luxe" && (
         <div className="luxe-session-strip pointer-events-none fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-1.5 border-t border-success/40 bg-background/80 py-1 text-[10px] font-semibold uppercase text-success backdrop-blur">
