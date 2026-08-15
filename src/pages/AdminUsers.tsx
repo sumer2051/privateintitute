@@ -402,12 +402,15 @@ export default function AdminUsers() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Palette className="h-5 w-5 text-primary" /> Interface style</CardTitle>
             <CardDescription>
-              Switch every customer between the premium marble look and the classic look. Changes apply live on all their devices.
+              Switch every customer between the bright Chime-style look, the premium marble look, or the classic look. Changes apply live on all their devices.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button disabled={themeBusy} onClick={() => setAllTheme("luxe")}>
+              <Button disabled={themeBusy} onClick={() => setAllTheme("chime")}>
+                Apply Chime style to all users
+              </Button>
+              <Button variant="secondary" disabled={themeBusy} onClick={() => setAllTheme("luxe")}>
                 Apply premium style to all users
               </Button>
               <Button variant="outline" disabled={themeBusy} onClick={() => setAllTheme("classic")}>
@@ -418,16 +421,18 @@ export default function AdminUsers() {
               <div className="rounded-lg border p-3 space-y-2">
                 <p className="text-sm">
                   Selected: <span className="font-semibold">{selected.full_name || selected.email}</span>
-                  <Badge className="ml-2" variant="secondary">{selected.ui_theme === "luxe" ? "Premium" : "Classic"}</Badge>
+                  <Badge className="ml-2" variant="secondary">{selected.ui_theme === "luxe" ? "Premium" : selected.ui_theme === "chime" ? "Chime" : "Classic"}</Badge>
                 </p>
-                <div className="flex gap-2">
-                  <Button size="sm" disabled={themeBusy} onClick={() => setUserTheme(selected.id, "luxe")}>Premium</Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" disabled={themeBusy} onClick={() => setUserTheme(selected.id, "chime")}>Chime</Button>
+                  <Button size="sm" variant="secondary" disabled={themeBusy} onClick={() => setUserTheme(selected.id, "luxe")}>Premium</Button>
                   <Button size="sm" variant="outline" disabled={themeBusy} onClick={() => setUserTheme(selected.id, "classic")}>Classic</Button>
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
+
 
 
         <Card>
