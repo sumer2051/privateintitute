@@ -539,23 +539,31 @@ Deno.serve(async (req) => {
       reference, category, dateStr, adminNote,
     };
 
+    // Unique per notice: keeps every status update / resend as its own
+    // conversation in the customer's inbox.
+    const noticeId = crypto.randomUUID();
+    const noticeTag = noticeId.slice(0, 6).toUpperCase();
+    const stamp = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
     const jobs: Promise<unknown>[] = [];
     if (profile?.email) {
       const ctx: Ctx = { ...baseCtx, audience: "sender" };
       jobs.push(resendSend(
         profile.email,
-        `${scheme} ${meta.label.toLowerCase()} · ${reference}`,
+        `${scheme} ${meta.label.toLowerCase()} · ${reference} · notice ${noticeTag} (${stamp})`,
         renderEmail(scheme, ctx),
+        `${noticeId}-sender`,
       ));
     }
     if (tx.recipient_email) {
       const ctx: Ctx = { ...baseCtx, audience: "recipient" };
       jobs.push(resendSend(
         tx.recipient_email,
-        status === "completed"
+        (status === "completed"
           ? `${scheme} received · ${reference}`
-          : `${scheme} ${meta.label.toLowerCase()} · ${reference}`,
+          : `${scheme} ${meta.label.toLowerCase()} · ${reference}`) + ` · notice ${noticeTag} (${stamp})`,
         renderEmail(scheme, ctx),
+        `${noticeId}-recipient`,
       ));
     }
     const results = await Promise.allSettled(jobs);
