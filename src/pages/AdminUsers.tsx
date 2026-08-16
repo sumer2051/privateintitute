@@ -11,8 +11,9 @@ import { toast } from "sonner";
 import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet, CreditCard, PiggyBank, Monitor, Smartphone, Lock, Unlock, LogOut, MapPin, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AdminDeviceDetailDialog, type AdminDevice } from "@/components/AdminDeviceDetailDialog";
+import { formatIn, formatAbsIn, currencyInfo } from "@/lib/fx";
 
-type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null };
+type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null; preferred_currency?: string | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
 type Role = { user_id: string; role: "admin" | "support" | "tx_support" | "user" };
 type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
@@ -100,7 +101,7 @@ export default function AdminUsers() {
 
   const load = async () => {
     const [{ data: p }, { data: a }, { data: r }] = await Promise.all([
-      supabase.from("profiles").select("id,email,full_name,phone,created_at,device_limit,ui_theme").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id,email,full_name,phone,created_at,device_limit,ui_theme,preferred_currency").order("created_at", { ascending: false }),
       supabase.from("accounts").select("id,user_id,account_type,account_name,account_number,balance,available_balance,credit_limit,is_frozen"),
       supabase.from("user_roles").select("user_id,role"),
     ]);
@@ -323,6 +324,9 @@ export default function AdminUsers() {
 
   const rolesFor = (uid: string) => roles.filter(r => r.user_id === uid).map(r => r.role);
   const accountsFor = (uid: string) => accounts.filter(a => a.user_id === uid);
+  /** Currency the customer transacts in — staff figures are shown in it. */
+  const curOf = (uid?: string | null) =>
+    (uid ? profiles.find(p => p.id === uid)?.preferred_currency : null) || "USD";
 
   const totalDeposits = accounts
     .filter(a => a.account_type !== "credit")
@@ -502,11 +506,15 @@ export default function AdminUsers() {
 
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg break-words">{selected?.full_name || selected?.email}</DialogTitle>
-              <DialogDescription className="text-xs md:text-sm break-words">{selected?.email}{selected?.phone ? ` · ${selected.phone}` : ""}</DialogDescription>
+              <DialogDescription className="text-xs md:text-sm break-words">
+                {selected?.email}{selected?.phone ? ` · ${selected.phone}` : ""}
+                {selected ? ` · figures in ${currencyInfo(curOf(selected.id)).flag} ${currencyInfo(curOf(selected.id)).code}` : ""}
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
               {selected && accountsFor(selected.id).map(acc => {
                 const Icon = iconFor(acc.account_type);
+                const cur = curOf(acc.user_id);
                 return (
                   <div key={acc.id} className="border rounded-lg p-3 flex flex-col sm:flex-row sm:items-center gap-3">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -518,8 +526,8 @@ export default function AdminUsers() {
                         </p>
                         <p className="text-xs text-muted-foreground break-words">
                           {acc.account_type === "credit"
-                            ? `Used $${Number(acc.balance).toLocaleString()} · Available $${Number(acc.available_balance).toLocaleString()} · Limit $${Number(acc.credit_limit||0).toLocaleString()}`
-                            : `Balance $${Number(acc.balance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`}
+                            ? `Used ${formatIn(cur, Number(acc.balance))} · Available ${formatIn(cur, Number(acc.available_balance))} · Limit ${formatIn(cur, Number(acc.credit_limit || 0))}`
+                            : `Balance ${formatIn(cur, Number(acc.balance))}`}
                         </p>
                       </div>
                     </div>
@@ -565,7 +573,7 @@ export default function AdminUsers() {
                         </p>
                       </div>
                       <div className={`text-sm font-semibold ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
-                        {Number(tx.amount) < 0 ? "-" : "+"}${Math.abs(Number(tx.amount)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
+                        {Number(tx.amount) < 0 ? "-" : "+"}{formatAbsIn(curOf(tx.user_id), Number(tx.amount))}
                       </div>
                       <Select value={tx.status} onValueChange={(v) => { setTxNote(""); setTxPending({ tx, status: v }); }} disabled={txBusy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-40 text-xs"><SelectValue /></SelectTrigger>
@@ -771,6 +779,11 @@ export default function AdminUsers() {
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
                 <Input type="number" step="0.01" placeholder="e.g. 250 or -100" value={adjustAmount} onChange={e => setAdjustAmount(e.target.value)} />
+                {!!parseFloat(adjustAmount) && curOf(adjustAccount?.user_id) !== "USD" && (
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Customer sees {formatIn(curOf(adjustAccount?.user_id), parseFloat(adjustAmount))}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Note</label>
@@ -811,7 +824,7 @@ export default function AdminUsers() {
                   <SelectContent>
                     {accountsFor(quickDepositUserId).filter(a => a.account_type !== "credit").map(a => (
                       <SelectItem key={a.id} value={a.id}>
-                        {a.account_name} ••••{a.account_number.slice(-4)} · ${Number(a.balance).toLocaleString()}
+                        {a.account_name} ••••{a.account_number.slice(-4)} · {formatIn(curOf(a.user_id), Number(a.balance))}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -832,6 +845,11 @@ export default function AdminUsers() {
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
                   <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+                  {!!parseFloat(depositAmount) && curOf(quickDepositUserId) !== "USD" && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Customer sees {formatIn(curOf(quickDepositUserId), parseFloat(depositAmount))}
+                    </p>
+                  )}
                 </div>
               </div>
               <div>
@@ -903,6 +921,11 @@ export default function AdminUsers() {
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
                   <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+                  {!!parseFloat(depositAmount) && curOf(depositAccount?.user_id) !== "USD" && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Customer sees {formatIn(curOf(depositAccount?.user_id), parseFloat(depositAmount))}
+                    </p>
+                  )}
                 </div>
               </div>
               <div>

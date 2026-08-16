@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 import { ShieldAlert, ListChecks, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { formatAbsIn, currencyInfo } from "@/lib/fx";
 
 type Tx = {
   id: string;
@@ -23,7 +24,7 @@ type Tx = {
   created_at: string;
   reference_number: string | null;
 };
-type Profile = { id: string; email: string; full_name: string | null };
+type Profile = { id: string; email: string; full_name: string | null; preferred_currency?: string | null };
 
 const TX_STATUSES = ["pending", "processing", "under_review", "reviewed", "completed", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
@@ -75,7 +76,7 @@ export default function AdminTransactions() {
     setTxs(list);
     const uids = Array.from(new Set(list.map(x => x.user_id)));
     if (uids.length) {
-      const { data: p } = await supabase.from("profiles").select("id,email,full_name").in("id", uids);
+      const { data: p } = await supabase.from("profiles").select("id,email,full_name,preferred_currency").in("id", uids);
       const map: Record<string, Profile> = {};
       ((p as Profile[]) || []).forEach(pr => { map[pr.id] = pr; });
       setProfiles(map);
@@ -176,6 +177,7 @@ export default function AdminTransactions() {
               <div className="space-y-2">
                 {filtered.map(tx => {
                   const p = profiles[tx.user_id];
+                  const cur = currencyInfo(p?.preferred_currency);
                   return (
                     <div key={tx.id} className="border rounded-lg p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
                       <div className="flex-1 min-w-0">
@@ -189,6 +191,10 @@ export default function AdminTransactions() {
                           {p?.full_name || p?.email || "Customer"} · {new Date(tx.created_at).toLocaleString()}
                           {tx.reference_number ? ` · ${tx.reference_number}` : ""}
                         </p>
+                      </div>
+                      <div className={`text-sm font-semibold whitespace-nowrap ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
+                        {Number(tx.amount) < 0 ? "-" : "+"}{formatAbsIn(cur.code, Number(tx.amount))}
+                        <span className="ml-1 text-[10px] font-normal text-muted-foreground">{cur.flag} {cur.code}</span>
                       </div>
                       <Select value={tx.status} onValueChange={(v) => { setNote(""); setPending({ tx, status: v }); }} disabled={busy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-44 text-xs"><SelectValue /></SelectTrigger>
