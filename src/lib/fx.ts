@@ -4,8 +4,10 @@ import { CURRENCIES } from "@/contexts/CurrencyContext";
  * Admin-side helpers: balances/transactions are stored in USD, but staff should
  * see each customer's figures in the currency that customer transacts in.
  */
-export const currencyInfo = (code?: string | null) =>
-  CURRENCIES.find((c) => c.code === (code || "USD")) || CURRENCIES[0];
+export const currencyInfo = (code?: string | null) => {
+  const normalized = (code || "USD").trim().toUpperCase();
+  return CURRENCIES.find((c) => c.code === normalized) || CURRENCIES[0];
+};
 
 /** Convert a USD amount into `code` and format it with that currency's locale. */
 export const formatIn = (code: string | null | undefined, usd: number) => {
