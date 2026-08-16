@@ -572,8 +572,11 @@ export default function AdminUsers() {
                           {new Date(tx.created_at).toLocaleString()} {tx.reference_number ? `· ${tx.reference_number}` : ""}
                         </p>
                       </div>
-                      <div className={`text-sm font-semibold ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
-                        {Number(tx.amount) < 0 ? "-" : "+"}{formatAbsIn(tx.currency || curOf(tx.user_id), Number(tx.amount))}
+                      <div className={`text-sm font-semibold whitespace-nowrap ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
+                        {Number(tx.amount) < 0 ? "-" : "+"}{formatAbsIn(tx.currency, Number(tx.amount))}
+                        <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                          {currencyInfo(tx.currency).flag} {currencyInfo(tx.currency).code}
+                        </span>
                       </div>
                       <Select value={tx.status} onValueChange={(v) => { setTxNote(""); setTxPending({ tx, status: v }); }} disabled={txBusy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-40 text-xs"><SelectValue /></SelectTrigger>

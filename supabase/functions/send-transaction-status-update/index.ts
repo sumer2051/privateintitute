@@ -496,7 +496,7 @@ Deno.serve(async (req) => {
 
     const { data: tx, error: txErr } = await supabase
       .from("transactions")
-      .select("id, user_id, amount, description, category, reference_number, recipient_email, recipient_name, created_at")
+      .select("id, user_id, amount, currency, description, category, reference_number, recipient_email, recipient_name, created_at")
       .eq("id", transactionId)
       .maybeSingle();
     if (txErr || !tx) throw new Error(txErr?.message || "Transaction not found");
@@ -522,7 +522,11 @@ Deno.serve(async (req) => {
     // Customer memos are intentionally omitted from status emails; only the
     // support note (adminNote) is shown.
     const memo = "";
-    const currencyCode = (profile as any)?.preferred_currency || "USD";
+    // A transfer keeps the currency selected when it was created. Never use the
+    // customer's current preference for a resend because they may have switched
+    // currencies since the original transfer.
+    const storedCurrency = typeof tx.currency === "string" ? tx.currency.trim().toUpperCase() : "";
+    const currencyCode = CURRENCY_RATES[storedCurrency] ? storedCurrency : "USD";
 
 
     const reference = tx.reference_number || tx.id.slice(0, 8).toUpperCase();
@@ -530,6 +534,8 @@ Deno.serve(async (req) => {
     const dateStr = new Date().toLocaleDateString(undefined, {
       month: "short", day: "numeric", year: "numeric",
     });
+    // The request note is the complete support note for this notice. Do not
+    // recover or append memo/note text from the original transaction description.
     const adminNote = typeof note === "string" ? note.trim().slice(0, 500) : "";
     const meta = STATUS_META[status];
     const scheme = detectScheme(tx.description, tx.category);
