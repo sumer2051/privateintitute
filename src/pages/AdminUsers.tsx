@@ -779,6 +779,11 @@ export default function AdminUsers() {
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
                 <Input type="number" step="0.01" placeholder="e.g. 250 or -100" value={adjustAmount} onChange={e => setAdjustAmount(e.target.value)} />
+                {!!parseFloat(adjustAmount) && curOf(adjustAccount?.user_id) !== "USD" && (
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Customer sees {formatIn(curOf(adjustAccount?.user_id), parseFloat(adjustAmount))}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Note</label>
