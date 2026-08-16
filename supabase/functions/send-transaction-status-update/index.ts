@@ -77,11 +77,11 @@ function resolveCurrency(stored: unknown, description: string | null, category: 
   const haystack = `${category || ""} ${description || ""}`;
   const hinted = SCHEME_CURRENCY_HINTS.find(([pattern]) => pattern.test(haystack))?.[1];
 
-  // A non-USD stored currency is authoritative. For missing/USD legacy rows,
-  // an exclusive local payment rail is stronger evidence than the bad default.
-  if (normalized && normalized !== "USD" && CURRENCY_RATES[normalized]) return normalized;
+  // Exclusive local payment rails are definitive even if a legacy row contains
+  // another bad default (for example a PayID transfer stored as GBP).
   if (hinted && CURRENCY_RATES[hinted]) return hinted;
-  return CURRENCY_RATES[normalized] ? normalized : "USD";
+  if (normalized && CURRENCY_RATES[normalized]) return normalized;
+  return "USD";
 }
 
 type Ctx = {
