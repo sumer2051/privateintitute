@@ -119,7 +119,7 @@ export default function AdminUsers() {
       const [{ data: tx }, { data: dv }] = await Promise.all([
         supabase
           .from("transactions")
-          .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+          .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number,currency")
           .eq("user_id", selected.id)
           .order("created_at", { ascending: false })
           .limit(50),
@@ -247,7 +247,7 @@ export default function AdminUsers() {
   const reloadUserTx = async (uid: string) => {
     const { data } = await supabase
       .from("transactions")
-      .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+      .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number,currency")
       .eq("user_id", uid)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -573,7 +573,7 @@ export default function AdminUsers() {
                         </p>
                       </div>
                       <div className={`text-sm font-semibold ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
-                        {Number(tx.amount) < 0 ? "-" : "+"}{formatAbsIn(curOf(tx.user_id), Number(tx.amount))}
+                        {Number(tx.amount) < 0 ? "-" : "+"}{formatAbsIn(tx.currency || curOf(tx.user_id), Number(tx.amount))}
                       </div>
                       <Select value={tx.status} onValueChange={(v) => { setTxNote(""); setTxPending({ tx, status: v }); }} disabled={txBusy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-40 text-xs"><SelectValue /></SelectTrigger>

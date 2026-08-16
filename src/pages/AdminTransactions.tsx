@@ -177,7 +177,7 @@ export default function AdminTransactions() {
               <div className="space-y-2">
                 {filtered.map(tx => {
                   const p = profiles[tx.user_id];
-                  const cur = currencyInfo(p?.preferred_currency);
+                  const cur = currencyInfo(tx.currency || p?.preferred_currency);
                   return (
                     <div key={tx.id} className="border rounded-lg p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
                       <div className="flex-1 min-w-0">
