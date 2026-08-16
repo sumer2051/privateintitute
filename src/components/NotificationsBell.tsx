@@ -79,6 +79,12 @@ const statusMeta = (status: string, isDebit: boolean) => {
       return { Icon: Loader2, label: "Processing", pillClass: "bg-primary/10 text-primary", iconBg: "bg-primary/10 text-primary", showTypeIcon: false, failed: false };
     case "under_review":
       return { Icon: AlertTriangle, label: "Under review", pillClass: "bg-amber-500/15 text-amber-600", iconBg: "bg-amber-500/15 text-amber-600", showTypeIcon: false, failed: false };
+    case "compliance_hold":
+      return { Icon: AlertTriangle, label: "Compliance hold", pillClass: "bg-orange-500/15 text-orange-600", iconBg: "bg-orange-500/15 text-orange-600", showTypeIcon: false, failed: false };
+    case "reviewed":
+      return { Icon: Loader2, label: "Reviewed · clearance ongoing", pillClass: "bg-cyan-500/15 text-cyan-600", iconBg: "bg-cyan-500/15 text-cyan-600", showTypeIcon: false, failed: false };
+    case "clearing":
+      return { Icon: Loader2, label: "Clearing & settlement", pillClass: "bg-indigo-500/15 text-indigo-600", iconBg: "bg-indigo-500/15 text-indigo-600", showTypeIcon: false, failed: false };
     case "failed":
       return { Icon: XCircle, label: "Failed", pillClass: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/15 text-destructive", showTypeIcon: false, failed: true };
     case "cancelled":
@@ -331,6 +337,21 @@ export const NotificationsBell = () => {
                 {selected.status === "under_review" && (
                   <p className="text-xs text-muted-foreground">
                     This transfer is under review by our compliance team. We'll update you soon.
+                  </p>
+                )}
+                {selected.status === "compliance_hold" && (
+                  <p className="text-xs text-muted-foreground">
+                    This transfer is on a temporary compliance hold. Our team is completing the required checks.
+                  </p>
+                )}
+                {selected.status === "reviewed" && (
+                  <p className="text-xs text-muted-foreground">
+                    Review is complete and clearance is now in progress.
+                  </p>
+                )}
+                {selected.status === "clearing" && (
+                  <p className="text-xs text-muted-foreground">
+                    Funds are clearing with the beneficiary bank and will settle shortly.
                   </p>
                 )}
                 {selected.status === "failed" && (
