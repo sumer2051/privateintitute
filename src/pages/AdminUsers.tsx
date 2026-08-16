@@ -324,6 +324,9 @@ export default function AdminUsers() {
 
   const rolesFor = (uid: string) => roles.filter(r => r.user_id === uid).map(r => r.role);
   const accountsFor = (uid: string) => accounts.filter(a => a.user_id === uid);
+  /** Currency the customer transacts in — staff figures are shown in it. */
+  const curOf = (uid?: string | null) =>
+    (uid ? profiles.find(p => p.id === uid)?.preferred_currency : null) || "USD";
 
   const totalDeposits = accounts
     .filter(a => a.account_type !== "credit")
