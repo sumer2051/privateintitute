@@ -506,11 +506,15 @@ export default function AdminUsers() {
 
             <DialogHeader>
               <DialogTitle className="text-base md:text-lg break-words">{selected?.full_name || selected?.email}</DialogTitle>
-              <DialogDescription className="text-xs md:text-sm break-words">{selected?.email}{selected?.phone ? ` · ${selected.phone}` : ""}</DialogDescription>
+              <DialogDescription className="text-xs md:text-sm break-words">
+                {selected?.email}{selected?.phone ? ` · ${selected.phone}` : ""}
+                {selected ? ` · figures in ${currencyInfo(curOf(selected.id)).flag} ${currencyInfo(curOf(selected.id)).code}` : ""}
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
               {selected && accountsFor(selected.id).map(acc => {
                 const Icon = iconFor(acc.account_type);
+                const cur = curOf(acc.user_id);
                 return (
                   <div key={acc.id} className="border rounded-lg p-3 flex flex-col sm:flex-row sm:items-center gap-3">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -522,8 +526,8 @@ export default function AdminUsers() {
                         </p>
                         <p className="text-xs text-muted-foreground break-words">
                           {acc.account_type === "credit"
-                            ? `Used $${Number(acc.balance).toLocaleString()} · Available $${Number(acc.available_balance).toLocaleString()} · Limit $${Number(acc.credit_limit||0).toLocaleString()}`
-                            : `Balance $${Number(acc.balance).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`}
+                            ? `Used ${formatIn(cur, Number(acc.balance))} · Available ${formatIn(cur, Number(acc.available_balance))} · Limit ${formatIn(cur, Number(acc.credit_limit || 0))}`
+                            : `Balance ${formatIn(cur, Number(acc.balance))}`}
                         </p>
                       </div>
                     </div>
