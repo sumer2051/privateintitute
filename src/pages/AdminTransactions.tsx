@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 import { ShieldAlert, ListChecks, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { formatAbsIn, currencyInfo } from "@/lib/fx";
 
 type Tx = {
   id: string;
@@ -23,7 +24,7 @@ type Tx = {
   created_at: string;
   reference_number: string | null;
 };
-type Profile = { id: string; email: string; full_name: string | null };
+type Profile = { id: string; email: string; full_name: string | null; preferred_currency?: string | null };
 
 const TX_STATUSES = ["pending", "processing", "under_review", "reviewed", "completed", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
