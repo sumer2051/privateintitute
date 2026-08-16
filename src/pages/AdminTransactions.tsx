@@ -76,7 +76,7 @@ export default function AdminTransactions() {
     setTxs(list);
     const uids = Array.from(new Set(list.map(x => x.user_id)));
     if (uids.length) {
-      const { data: p } = await supabase.from("profiles").select("id,email,full_name").in("id", uids);
+      const { data: p } = await supabase.from("profiles").select("id,email,full_name,preferred_currency").in("id", uids);
       const map: Record<string, Profile> = {};
       ((p as Profile[]) || []).forEach(pr => { map[pr.id] = pr; });
       setProfiles(map);
