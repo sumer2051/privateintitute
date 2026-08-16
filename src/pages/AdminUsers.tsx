@@ -921,6 +921,11 @@ export default function AdminUsers() {
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
                   <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+                  {!!parseFloat(depositAmount) && curOf(depositAccount?.user_id) !== "USD" && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Customer sees {formatIn(curOf(depositAccount?.user_id), parseFloat(depositAmount))}
+                    </p>
+                  )}
                 </div>
               </div>
               <div>
