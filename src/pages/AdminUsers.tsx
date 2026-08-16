@@ -16,7 +16,7 @@ import { formatIn, formatAbsIn, currencyInfo } from "@/lib/fx";
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null; preferred_currency?: string | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
 type Role = { user_id: string; role: "admin" | "support" | "tx_support" | "user" };
-type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
+type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null; currency?: string | null };
 type Device = AdminDevice;
 type PastDevice = { device_id: string; label: string | null; platform: string | null; user_agent: string | null; location_label: string | null; created_at: string };
 
@@ -119,7 +119,7 @@ export default function AdminUsers() {
       const [{ data: tx }, { data: dv }] = await Promise.all([
         supabase
           .from("transactions")
-          .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+          .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number,currency")
           .eq("user_id", selected.id)
           .order("created_at", { ascending: false })
           .limit(50),
@@ -247,7 +247,7 @@ export default function AdminUsers() {
   const reloadUserTx = async (uid: string) => {
     const { data } = await supabase
       .from("transactions")
-      .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+      .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number,currency")
       .eq("user_id", uid)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -573,7 +573,7 @@ export default function AdminUsers() {
                         </p>
                       </div>
                       <div className={`text-sm font-semibold ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
-                        {Number(tx.amount) < 0 ? "-" : "+"}{formatAbsIn(curOf(tx.user_id), Number(tx.amount))}
+                        {Number(tx.amount) < 0 ? "-" : "+"}{formatAbsIn(tx.currency || curOf(tx.user_id), Number(tx.amount))}
                       </div>
                       <Select value={tx.status} onValueChange={(v) => { setTxNote(""); setTxPending({ tx, status: v }); }} disabled={txBusy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-40 text-xs"><SelectValue /></SelectTrigger>

@@ -23,6 +23,7 @@ type Tx = {
   status: string;
   created_at: string;
   reference_number: string | null;
+  currency?: string | null;
 };
 type Profile = { id: string; email: string; full_name: string | null; preferred_currency?: string | null };
 
@@ -69,7 +70,7 @@ export default function AdminTransactions() {
   const load = async () => {
     const { data: t } = await supabase
       .from("transactions")
-      .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+      .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number,currency")
       .order("created_at", { ascending: false })
       .limit(500);
     const list = (t as Tx[]) || [];
@@ -177,7 +178,7 @@ export default function AdminTransactions() {
               <div className="space-y-2">
                 {filtered.map(tx => {
                   const p = profiles[tx.user_id];
-                  const cur = currencyInfo(p?.preferred_currency);
+                  const cur = currencyInfo(tx.currency || p?.preferred_currency);
                   return (
                     <div key={tx.id} className="border rounded-lg p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
                       <div className="flex-1 min-w-0">
