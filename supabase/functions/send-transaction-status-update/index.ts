@@ -32,8 +32,9 @@ const STATUS_META: Record<StatusKey, { label: string; sub: string; icon: string;
 };
 
 
-// Balances/transactions are stored in USD; emails render in the customer's
-// preferred currency so a SEPA transfer shows € rather than $.
+// Amounts are stored in USD; emails convert them back to the currency selected
+// for the transfer. Some older rows were saved as USD despite using an
+// unambiguously local scheme, so resolve those from the scheme as a safeguard.
 const CURRENCY_RATES: Record<string, number> = {
   USD: 1, EUR: 0.92, GBP: 0.78, JPY: 157, CAD: 1.36, AUD: 1.52, CHF: 0.88,
   CNY: 7.24, INR: 83.2, MXN: 17.1, BRL: 5.05, NGN: 1550, ZAR: 18.5, AED: 3.67,
@@ -56,6 +57,31 @@ function fmtMoney(n: number, code = "USD") {
   } catch {
     return `${cur} ${value.toFixed(2)}`;
   }
+}
+
+const SCHEME_CURRENCY_HINTS: Array<[RegExp, string]> = [
+  [/\b(faster payments|chaps|bacs)\b/i, "GBP"],
+  [/\b(sepa|target2)\b/i, "EUR"],
+  [/\b(interac|canadian)\b/i, "CAD"],
+  [/\b(payid|osko|bsb)\b/i, "AUD"],
+  [/\b(upi|imps|neft|rtgs|ifsc)\b/i, "INR"],
+  [/\b(pix|ted|doc|cpf|cnpj)\b/i, "BRL"],
+  [/\b(spei|clabe)\b/i, "MXN"],
+  [/\b(zengin|furikomi)\b/i, "JPY"],
+  [/\b(sic transfer|swift international \(chf\))\b/i, "CHF"],
+  [/\b(aani|uaefts)\b/i, "AED"],
+];
+
+function resolveCurrency(stored: unknown, description: string | null, category: string | null) {
+  const normalized = typeof stored === "string" ? stored.trim().toUpperCase() : "";
+  const haystack = `${category || ""} ${description || ""}`;
+  const hinted = SCHEME_CURRENCY_HINTS.find(([pattern]) => pattern.test(haystack))?.[1];
+
+  // Exclusive local payment rails are definitive even if a legacy row contains
+  // another bad default (for example a PayID transfer stored as GBP).
+  if (hinted && CURRENCY_RATES[hinted]) return hinted;
+  if (normalized && CURRENCY_RATES[normalized]) return normalized;
+  return "USD";
 }
 
 type Ctx = {
@@ -531,8 +557,7 @@ Deno.serve(async (req) => {
     // A transfer keeps the currency selected when it was created. Never use the
     // customer's current preference for a resend because they may have switched
     // currencies since the original transfer.
-    const storedCurrency = typeof tx.currency === "string" ? tx.currency.trim().toUpperCase() : "";
-    const currencyCode = CURRENCY_RATES[storedCurrency] ? storedCurrency : "USD";
+    const currencyCode = resolveCurrency(tx.currency, tx.description, tx.category);
 
 
     const reference = tx.reference_number || tx.id.slice(0, 8).toUpperCase();
