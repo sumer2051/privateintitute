@@ -573,7 +573,7 @@ export default function AdminUsers() {
                         </p>
                       </div>
                       <div className={`text-sm font-semibold ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
-                        {Number(tx.amount) < 0 ? "-" : "+"}${Math.abs(Number(tx.amount)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
+                        {Number(tx.amount) < 0 ? "-" : "+"}{formatAbsIn(curOf(tx.user_id), Number(tx.amount))}
                       </div>
                       <Select value={tx.status} onValueChange={(v) => { setTxNote(""); setTxPending({ tx, status: v }); }} disabled={txBusy === tx.id}>
                         <SelectTrigger className="h-8 w-full md:w-40 text-xs"><SelectValue /></SelectTrigger>
