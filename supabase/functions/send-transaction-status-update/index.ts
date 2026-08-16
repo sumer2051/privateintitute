@@ -456,11 +456,21 @@ function renderEmail(scheme: string, c: Ctx): string {
   return bankStatusEmail(c, scheme);
 }
 
-async function resendSend(to: string, subject: string, html: string) {
+async function resendSend(to: string, subject: string, html: string, refId?: string) {
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
-    body: JSON.stringify({ from: FROM_EMAIL, to: [to], subject, html }),
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: [to],
+      subject,
+      html,
+      // Unique per send so mail clients start a NEW conversation instead of
+      // grouping this update under the previous one.
+      headers: refId
+        ? { "X-Entity-Ref-ID": refId, "X-Notice-Id": refId }
+        : undefined,
+    }),
   });
   if (!r.ok) {
     const t = await r.text();
