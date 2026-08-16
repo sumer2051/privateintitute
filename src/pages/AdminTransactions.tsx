@@ -23,6 +23,7 @@ type Tx = {
   status: string;
   created_at: string;
   reference_number: string | null;
+  currency?: string | null;
 };
 type Profile = { id: string; email: string; full_name: string | null; preferred_currency?: string | null };
 
@@ -69,7 +70,7 @@ export default function AdminTransactions() {
   const load = async () => {
     const { data: t } = await supabase
       .from("transactions")
-      .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number")
+      .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number,currency")
       .order("created_at", { ascending: false })
       .limit(500);
     const list = (t as Tx[]) || [];

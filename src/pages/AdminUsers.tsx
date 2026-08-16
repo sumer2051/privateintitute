@@ -16,7 +16,7 @@ import { formatIn, formatAbsIn, currencyInfo } from "@/lib/fx";
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null; preferred_currency?: string | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
 type Role = { user_id: string; role: "admin" | "support" | "tx_support" | "user" };
-type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null };
+type Tx = { id: string; user_id: string; account_id: string; description: string | null; category: string | null; amount: number; status: string; created_at: string; reference_number: string | null; currency?: string | null };
 type Device = AdminDevice;
 type PastDevice = { device_id: string; label: string | null; platform: string | null; user_agent: string | null; location_label: string | null; created_at: string };
 
