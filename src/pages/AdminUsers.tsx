@@ -824,7 +824,7 @@ export default function AdminUsers() {
                   <SelectContent>
                     {accountsFor(quickDepositUserId).filter(a => a.account_type !== "credit").map(a => (
                       <SelectItem key={a.id} value={a.id}>
-                        {a.account_name} ••••{a.account_number.slice(-4)} · ${Number(a.balance).toLocaleString()}
+                        {a.account_name} ••••{a.account_number.slice(-4)} · {formatIn(curOf(a.user_id), Number(a.balance))}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -845,6 +845,11 @@ export default function AdminUsers() {
                 <div>
                   <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (USD)</label>
                   <Input type="number" step="0.01" min="0" placeholder="e.g. 1500" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+                  {!!parseFloat(depositAmount) && curOf(quickDepositUserId) !== "USD" && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Customer sees {formatIn(curOf(quickDepositUserId), parseFloat(depositAmount))}
+                    </p>
+                  )}
                 </div>
               </div>
               <div>
