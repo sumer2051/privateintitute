@@ -1,0 +1,1 @@
+UPDATE public.transactions t SET currency = p.preferred_currency FROM public.profiles p WHERE p.id = t.user_id AND coalesce(p.preferred_currency,'USD') <> 'USD' AND t.currency = 'USD';
