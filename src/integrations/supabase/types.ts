@@ -541,6 +541,7 @@ export type Database = {
           balance_after: number
           category: string
           created_at: string | null
+          currency: string
           description: string
           id: string
           recipient_email: string | null
@@ -556,6 +557,7 @@ export type Database = {
           balance_after: number
           category: string
           created_at?: string | null
+          currency?: string
           description: string
           id?: string
           recipient_email?: string | null
@@ -571,6 +573,7 @@ export type Database = {
           balance_after?: number
           category?: string
           created_at?: string | null
+          currency?: string
           description?: string
           id?: string
           recipient_email?: string | null
