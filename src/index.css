@@ -1310,15 +1310,7 @@ html [data-brand-skin] .bg-card {
 }
 html [data-brand-skin] button,
 html [data-brand-skin] [role="button"] {
-  border-radius: inherit;
   box-shadow: none;
-}
-html [data-brand-skin] input,
-html [data-brand-skin] textarea,
-html [data-brand-skin] select {
-  background: inherit;
-  border-radius: inherit;
-  border-color: inherit;
 }
 html [data-brand-skin] .text-3xl,
 html [data-brand-skin] .text-4xl,
