@@ -48,7 +48,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const contact = fields.email || fields.phone || recipientEmail || "";
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent className="max-w-md p-0 overflow-hidden border-0 bg-[#f4f5f7] sm:rounded-2xl [&>button]:hidden">
+        <DialogContent data-brand-skin className="max-w-md p-0 overflow-hidden border-0 bg-[#f4f5f7] sm:rounded-2xl [&>button]:hidden">
           <div className="flex min-h-[640px] flex-col">
             <div className="flex items-center justify-between bg-[#2a5c99] px-4 py-3 text-white">
               <div className="flex flex-col gap-1">
@@ -102,7 +102,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const firstName = (recipientName || displayTo).split(" ")[0];
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent className="max-w-md p-0 overflow-hidden border-0 bg-white sm:rounded-2xl [&>button]:hidden">
+        <DialogContent data-brand-skin className="max-w-md p-0 overflow-hidden border-0 bg-white sm:rounded-2xl [&>button]:hidden">
           <div className="relative flex min-h-[620px] flex-col bg-white">
             <button
               onClick={onClose}
@@ -175,7 +175,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   if (isCashApp) {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent
+        <DialogContent data-brand-skin
           className="ios-safe-sheet p-0 gap-0 overflow-hidden border-0 bg-black text-white [&>button]:hidden top-0 left-0 right-0 bottom-0 translate-x-0 translate-y-0 w-screen h-[100dvh] max-w-none rounded-none sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:h-auto sm:max-w-[380px] sm:min-h-[640px] sm:rounded-3xl"
         >
           <div className="flex h-full flex-col px-5 pb-5 pt-4 sm:min-h-[640px]">

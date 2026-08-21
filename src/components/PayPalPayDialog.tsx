@@ -125,7 +125,7 @@ export const PayPalPayDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
+      <DialogContent data-brand-skin
         className={cn(
           "p-0 gap-0 overflow-hidden border-0 bg-white [&>button]:hidden",
           "ios-safe-sheet !left-0 !top-0 !translate-x-0 !translate-y-0 !m-0 !max-w-none !w-screen !h-[100dvh] !rounded-none",

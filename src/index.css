@@ -1285,3 +1285,44 @@ html.theme-chime [role="dialog"] {
   border-radius: 1.5rem;
   border: 1px solid hsl(var(--border));
 }
+
+/* ------------------------------------------------------------------
+   Brand-accurate surfaces (Cash App, PayPal, Venmo, Zelle receipts)
+   opt out of app theme overrides so they keep their native look.
+------------------------------------------------------------------ */
+html [data-brand-skin] h1,
+html [data-brand-skin] h2,
+html [data-brand-skin] h3,
+html [data-brand-skin] .font-display {
+  color: inherit !important;
+  font-family: inherit !important;
+  letter-spacing: inherit;
+}
+html [data-brand-skin],
+html [data-brand-skin] [role="dialog"] {
+  border: 0 !important;
+}
+html [data-brand-skin] .bg-card {
+  background: inherit;
+  box-shadow: none;
+  border: 0;
+  border-radius: inherit;
+}
+html [data-brand-skin] button,
+html [data-brand-skin] [role="button"] {
+  border-radius: inherit;
+  box-shadow: none;
+}
+html [data-brand-skin] input,
+html [data-brand-skin] textarea,
+html [data-brand-skin] select {
+  background: inherit;
+  border-radius: inherit;
+  border-color: inherit;
+}
+html [data-brand-skin] .text-3xl,
+html [data-brand-skin] .text-4xl,
+html [data-brand-skin] .text-2xl {
+  letter-spacing: inherit;
+  font-weight: inherit;
+}

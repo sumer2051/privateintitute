@@ -89,7 +89,7 @@ export const CashAppPayDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
+      <DialogContent data-brand-skin
         className="ios-safe-sheet p-0 gap-0 overflow-hidden border-0 [&>button]:hidden top-0 left-0 right-0 bottom-0 translate-x-0 translate-y-0 w-screen h-[100dvh] max-w-none rounded-none sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:h-auto sm:max-w-[400px] sm:rounded-3xl"
       >
         {step === "amount" ? (
