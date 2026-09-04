@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { ShieldAlert, ListChecks, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatAbsIn, currencyInfo } from "@/lib/fx";
+import { postingLabel } from "@/lib/tx-status";
+
 
 type Tx = {
   id: string;
@@ -27,7 +29,7 @@ type Tx = {
 };
 type Profile = { id: string; email: string; full_name: string | null; preferred_currency?: string | null };
 
-const TX_STATUSES = ["pending", "processing", "under_review", "compliance_hold", "reviewed", "clearing", "completed", "failed", "cancelled"] as const;
+const TX_STATUSES = ["pending", "processing", "under_review", "compliance_hold", "reviewed", "clearing", "completed", "posting", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pending",
   processing: "Processing",
@@ -36,6 +38,7 @@ const STATUS_LABEL: Record<string, string> = {
   reviewed: "Reviewed · clearance ongoing",
   clearing: "Clearing & settlement",
   completed: "Successful",
+  posting: "Successful · posting by recipient bank",
   failed: "Failed",
   cancelled: "Cancelled",
 };
@@ -47,9 +50,11 @@ const STATUS_COLOR: Record<string, string> = {
   reviewed: "bg-cyan-100 text-cyan-800",
   clearing: "bg-indigo-100 text-indigo-800",
   completed: "bg-emerald-100 text-emerald-800",
+  posting: "bg-teal-100 text-teal-800",
   failed: "bg-red-100 text-red-800",
   cancelled: "bg-muted text-muted-foreground",
 };
+
 
 
 export default function AdminTransactions() {
@@ -189,8 +194,9 @@ export default function AdminTransactions() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium text-secondary text-sm truncate">{tx.description || tx.category || "Transaction"}</span>
                           <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${STATUS_COLOR[tx.status] || "bg-muted"}`}>
-                            {STATUS_LABEL[tx.status] || tx.status}
+                            {tx.status === "posting" ? postingLabel(tx.description) : (STATUS_LABEL[tx.status] || tx.status)}
                           </span>
+
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
                           {p?.full_name || p?.email || "Customer"} · {new Date(tx.created_at).toLocaleString()}

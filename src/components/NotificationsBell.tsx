@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, ArrowDownLeft, ArrowUpRight, Clock, CheckCircle2, Receipt, XCircle, AlertTriangle, Loader2, Ban } from "lucide-react";
+import { recipientBankFromDescription } from "@/lib/tx-status";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +86,8 @@ const statusMeta = (status: string, isDebit: boolean) => {
       return { Icon: Loader2, label: "Reviewed · clearance ongoing", pillClass: "bg-cyan-500/15 text-cyan-600", iconBg: "bg-cyan-500/15 text-cyan-600", showTypeIcon: false, failed: false };
     case "clearing":
       return { Icon: Loader2, label: "Clearing & settlement", pillClass: "bg-indigo-500/15 text-indigo-600", iconBg: "bg-indigo-500/15 text-indigo-600", showTypeIcon: false, failed: false };
+    case "posting":
+      return { Icon: CheckCircle2, label: "Successful · posting by recipient bank", pillClass: "bg-teal-500/15 text-teal-700", iconBg: "bg-teal-500/15 text-teal-700", showTypeIcon: false, failed: false };
     case "failed":
       return { Icon: XCircle, label: "Failed", pillClass: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/15 text-destructive", showTypeIcon: false, failed: true };
     case "cancelled":
@@ -347,6 +350,11 @@ export const NotificationsBell = () => {
                 {selected.status === "reviewed" && (
                   <p className="text-xs text-muted-foreground">
                     Review is complete and clearance is now in progress.
+                  </p>
+                )}
+                {selected.status === "posting" && (
+                  <p className="text-xs text-muted-foreground">
+                    Payment successful — {recipientBankFromDescription(selected.description) || "the recipient bank"} is posting the funds to the beneficiary account.
                   </p>
                 )}
                 {selected.status === "clearing" && (

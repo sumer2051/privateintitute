@@ -12,6 +12,7 @@ import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet,
 import { useNavigate } from "react-router-dom";
 import { AdminDeviceDetailDialog, type AdminDevice } from "@/components/AdminDeviceDetailDialog";
 import { formatIn, formatAbsIn, currencyInfo } from "@/lib/fx";
+import { postingLabel } from "@/lib/tx-status";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null; preferred_currency?: string | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
@@ -20,7 +21,7 @@ type Tx = { id: string; user_id: string; account_id: string; description: string
 type Device = AdminDevice;
 type PastDevice = { device_id: string; label: string | null; platform: string | null; user_agent: string | null; location_label: string | null; created_at: string };
 
-const TX_STATUSES = ["pending", "processing", "under_review", "compliance_hold", "reviewed", "clearing", "completed", "failed", "cancelled"] as const;
+const TX_STATUSES = ["pending", "processing", "under_review", "compliance_hold", "reviewed", "clearing", "completed", "posting", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string,string> = {
   pending: "Pending",
   processing: "Processing",
@@ -29,6 +30,7 @@ const STATUS_LABEL: Record<string,string> = {
   reviewed: "Reviewed · clearance ongoing",
   clearing: "Clearing & settlement",
   completed: "Successful",
+  posting: "Successful · posting by recipient bank",
   failed: "Failed",
   cancelled: "Cancelled",
 };
@@ -40,6 +42,7 @@ const STATUS_COLOR: Record<string,string> = {
   reviewed: "bg-cyan-100 text-cyan-800",
   clearing: "bg-indigo-100 text-indigo-800",
   completed: "bg-emerald-100 text-emerald-800",
+  posting: "bg-teal-100 text-teal-800",
   failed: "bg-red-100 text-red-800",
   cancelled: "bg-muted text-muted-foreground",
 };
@@ -569,7 +572,7 @@ export default function AdminUsers() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium text-secondary text-sm truncate">{tx.description || tx.category || "Transaction"}</span>
                           <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${STATUS_COLOR[tx.status] || "bg-muted"}`}>
-                            {STATUS_LABEL[tx.status] || tx.status}
+                            {tx.status === "posting" ? postingLabel(tx.description) : (STATUS_LABEL[tx.status] || tx.status)}
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
