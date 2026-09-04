@@ -17,7 +17,7 @@ function esc(s: string) {
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
-type StatusKey = "pending" | "processing" | "under_review" | "compliance_hold" | "reviewed" | "clearing" | "completed" | "failed" | "cancelled";
+type StatusKey = "pending" | "processing" | "under_review" | "compliance_hold" | "reviewed" | "clearing" | "completed" | "posting" | "failed" | "cancelled";
 
 const STATUS_META: Record<StatusKey, { label: string; sub: string; icon: string; color: string; bg: string }> = {
   pending:      { label: "Pending",      sub: "Awaiting review",                       icon: "⏳", color: "#8a6d00", bg: "#fff7d6" },
@@ -27,6 +27,7 @@ const STATUS_META: Record<StatusKey, { label: string; sub: string; icon: string;
   reviewed:     { label: "Reviewed — clearance ongoing", sub: "Review complete, clearance in progress", icon: "🛡", color: "#0e7490", bg: "#e0f7fb" },
   clearing:     { label: "Clearing & settlement", sub: "Funds are clearing with the beneficiary bank", icon: "🏦", color: "#4338ca", bg: "#eef2ff" },
   completed:    { label: "Complete",     sub: "Payment received",                      icon: "✓", color: "#00a63e", bg: "#e6f9ee" },
+  posting:      { label: "Successful · posting", sub: "Recipient bank is posting the funds", icon: "✓", color: "#0f766e", bg: "#e6fbf7" },
   failed:       { label: "Failed",       sub: "Payment could not be completed",        icon: "✕", color: "#b91c1c", bg: "#fee2e2" },
   cancelled:    { label: "Cancelled",    sub: "Payment was cancelled",                 icon: "⊘", color: "#525252", bg: "#f0f0f0" },
 };
@@ -186,7 +187,9 @@ function venmoStatusEmail(c: Ctx) {
   const label = (t: string) => `<div style="font-size:12px;font-weight:700;letter-spacing:0.5px;color:#2f3033;text-transform:uppercase;margin-top:22px;">${t}</div>`;
   const value = (t: string) => `<div style="font-size:16px;color:#2f3033;margin-top:4px;line-height:1.4;">${t}</div>`;
 
-  const heading = c.status === "completed"
+  const heading = c.status === "posting"
+    ? "Balance transfer Successful — Posting"
+    : c.status === "completed"
     ? "Balance transfer Complete"
     : c.status === "failed"
       ? "Balance transfer Failed"
@@ -568,6 +571,17 @@ Deno.serve(async (req) => {
     // The request note is the complete support note for this notice. Do not
     // recover or append memo/note text from the original transaction description.
     const adminNote = typeof note === "string" ? note.trim().slice(0, 500) : "";
+    // Name the receiving institution captured on the transfer form so the
+    // "Successful · posting by <bank>" stage reads like a real settlement notice.
+    const bankMatch = /(?:Beneficiary bank|Recipient(?:'s)? bank|Bank name|Bank)\s*:\s*([^·—\n]+)/i.exec(tx.description || "");
+    const recipientBank = (bankMatch ? bankMatch[1] : "").trim();
+    if (status === "posting") {
+      STATUS_META.posting = {
+        ...STATUS_META.posting,
+        label: `Successful · posting by ${recipientBank || "recipient bank"}`,
+        sub: `${recipientBank || "The recipient bank"} is posting the funds to the beneficiary account`,
+      };
+    }
     const meta = STATUS_META[status];
     const scheme = detectScheme(tx.description, tx.category);
 
@@ -596,7 +610,7 @@ Deno.serve(async (req) => {
       const ctx: Ctx = { ...baseCtx, audience: "recipient" };
       jobs.push(resendSend(
         tx.recipient_email,
-        (status === "completed"
+        ((status === "completed" || status === "posting")
           ? `${scheme} received · ${reference}`
           : `${scheme} ${meta.label.toLowerCase()} · ${reference}`) + ` · notice ${noticeTag} (${stamp})`,
         renderEmail(scheme, ctx),
