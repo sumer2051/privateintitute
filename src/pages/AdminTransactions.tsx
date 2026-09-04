@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { ShieldAlert, ListChecks, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatAbsIn, currencyInfo } from "@/lib/fx";
+import { postingLabel } from "@/lib/tx-status";
+
 
 type Tx = {
   id: string;
