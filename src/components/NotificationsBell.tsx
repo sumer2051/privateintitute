@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, ArrowDownLeft, ArrowUpRight, Clock, CheckCircle2, Receipt, XCircle, AlertTriangle, Loader2, Ban } from "lucide-react";
-import { recipientBankFromDescription } from "@/lib/tx-status";
+import { postingVia } from "@/lib/tx-status";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -354,7 +354,7 @@ export const NotificationsBell = () => {
                 )}
                 {selected.status === "posting" && (
                   <p className="text-xs text-muted-foreground">
-                    Payment successful — {recipientBankFromDescription(selected.description) || "the recipient bank"} is posting the funds to the beneficiary account.
+                    Payment successful — {postingVia(selected.description) || "the recipient bank"} is posting the funds to the beneficiary account.
                   </p>
                 )}
                 {selected.status === "clearing" && (
