@@ -110,7 +110,7 @@ export default function AdminTransactions() {
     setBusy(null);
     setPending(null);
     setNote("");
-    toast.success(`Marked ${STATUS_LABEL[status]} · notifications sent`);
+    toast.success(`Marked ${status === "posting" ? postingLabel(tx.description) : STATUS_LABEL[status]} · notifications sent`);
     setTxs(prev => prev.map(t => t.id === tx.id ? { ...t, status } : t));
   };
 
@@ -208,9 +208,11 @@ export default function AdminTransactions() {
                         <span className="ml-1 text-[10px] font-normal text-muted-foreground">{cur.flag} {cur.code}</span>
                       </div>
                       <Select value={tx.status} onValueChange={(v) => { setNote(""); setPending({ tx, status: v }); }} disabled={busy === tx.id}>
-                        <SelectTrigger className="h-8 w-full md:w-44 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-8 w-full md:w-44 text-xs">
+                          <SelectValue>{tx.status === "posting" ? postingLabel(tx.description) : (STATUS_LABEL[tx.status] || tx.status)}</SelectValue>
+                        </SelectTrigger>
                         <SelectContent>
-                          {TX_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}
+                          {TX_STATUSES.map(s => <SelectItem key={s} value={s}>{s === "posting" ? postingLabel(tx.description) : STATUS_LABEL[s]}</SelectItem>)}
                         </SelectContent>
                       </Select>
                       <Button
@@ -235,7 +237,7 @@ export default function AdminTransactions() {
         <Dialog open={!!pending} onOpenChange={(v) => { if (!v) { setPending(null); setNote(""); } }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Move to “{pending ? (STATUS_LABEL[pending.status] || pending.status) : ""}”</DialogTitle>
+              <DialogTitle>Move to “{pending ? (pending.status === "posting" ? postingLabel(pending.tx.description) : (STATUS_LABEL[pending.status] || pending.status)) : ""}”</DialogTitle>
               <DialogDescription>Add an optional note for the customer. This is included in the email notification.</DialogDescription>
             </DialogHeader>
             <Textarea rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional note to the customer" />
