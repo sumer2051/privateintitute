@@ -12,6 +12,7 @@ import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet,
 import { useNavigate } from "react-router-dom";
 import { AdminDeviceDetailDialog, type AdminDevice } from "@/components/AdminDeviceDetailDialog";
 import { formatIn, formatAbsIn, currencyInfo } from "@/lib/fx";
+import { postingLabel } from "@/lib/tx-status";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null; preferred_currency?: string | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
@@ -571,7 +572,7 @@ export default function AdminUsers() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium text-secondary text-sm truncate">{tx.description || tx.category || "Transaction"}</span>
                           <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${STATUS_COLOR[tx.status] || "bg-muted"}`}>
-                            {STATUS_LABEL[tx.status] || tx.status}
+                            {tx.status === "posting" ? postingLabel(tx.description) : (STATUS_LABEL[tx.status] || tx.status)}
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
