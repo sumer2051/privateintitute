@@ -192,8 +192,9 @@ export default function AdminTransactions() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium text-secondary text-sm truncate">{tx.description || tx.category || "Transaction"}</span>
                           <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${STATUS_COLOR[tx.status] || "bg-muted"}`}>
-                            {STATUS_LABEL[tx.status] || tx.status}
+                            {tx.status === "posting" ? postingLabel(tx.description) : (STATUS_LABEL[tx.status] || tx.status)}
                           </span>
+
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
                           {p?.full_name || p?.email || "Customer"} · {new Date(tx.created_at).toLocaleString()}
