@@ -97,7 +97,29 @@ type Ctx = {
   category: string;
   dateStr: string;
   adminNote?: string;
+  recipientBank?: string;
 };
+
+// Plain-language explanation of the "Successful · posting by <bank>" stage,
+// shown to both sender and recipient. Returns "" for every other status.
+function postingExplainer(c: Ctx): string {
+  if (c.status !== "posting") return "";
+  const bank = c.recipientBank || "the recipient's bank";
+  const who = c.audience === "recipient"
+    ? `<strong>${esc(bank)}</strong> is now posting your incoming payment to your account.`
+    : `<strong>${esc(bank)}</strong> (${esc(c.recipientName)}'s bank) is now posting the funds to their account.`;
+  return `${who} Posting is the standard settlement step between banks — the money has left this institution and is being credited by the receiving bank. This typically completes within <strong>24–48 business hours</strong>. Depending on the receiving bank's normal processing times, it can occasionally take up to <strong>72 business hours</strong>. No action is needed on your part — you'll receive a final confirmation as soon as the funds are fully available.`;
+}
+
+// Styled explainer box, matched to each receipt's palette.
+function postingBox(c: Ctx, style: { bg: string; border: string; color: string; title: string; radius?: string }): string {
+  const text = postingExplainer(c);
+  if (!text) return "";
+  return `<div style="margin-top:18px;padding:14px 16px;background:${style.bg};border:1px solid ${style.border};border-radius:${style.radius ?? "8px"};font-size:14px;line-height:1.6;color:${style.color};">
+    <div style="font-weight:800;margin-bottom:4px;">🏦 ${esc(style.title)}</div>
+    ${text}
+  </div>`;
+}
 
 // ---------- Cash App status email ----------
 function cashappStatusEmail(c: Ctx) {
@@ -168,6 +190,7 @@ function cashappStatusEmail(c: Ctx) {
           </td>
         </tr>` : ""}
       </table>
+      ${postingBox(c, { bg: "#f0faf5", border: "#c9ecd9", color: "#0f5132", title: "What happens next", radius: "10px" })}
       <div style="margin-top:26px;font-size:12px;color:#a0a0a0;line-height:1.5;">
         Status updates are issued whenever your transfer progresses through review.
       </div>
@@ -237,6 +260,8 @@ function venmoStatusEmail(c: Ctx) {
 
       ${c.adminNote ? `${label("Note from support")}${value(esc(c.adminNote))}` : ""}
 
+      ${postingBox(c, { bg: "#f2f9ff", border: "#cfe7ff", color: "#2f3033", title: "What happens next", radius: "8px" })}
+
       <div style="margin-top:32px;font-size:15px;color:#2f3033;line-height:1.55;">
         Transfers are reviewed which may result in delays or funds being frozen or removed from your Venmo account. <a href="#" style="color:#008cff;text-decoration:none;">Learn more</a>.
       </div>
@@ -305,6 +330,9 @@ function paypalStatusEmail(c: Ctx) {
           <div style="font-size:14px;font-weight:800;color:#000;">Note from support</div>
           <div style="font-size:15px;color:#2c2e2f;margin-top:4px;line-height:1.5;">${esc(c.adminNote)}</div>
         </td></tr>` : ""}
+        ${c.status === "posting" ? `<tr><td colspan="2" style="padding:8px 28px 0;">
+          ${postingBox(c, { bg: "#f5f8ff", border: "#d6e2ff", color: "#2c2e2f", title: "What happens next", radius: "12px" })}
+        </td></tr>` : ""}
         <tr><td style="padding:24px 28px 32px;text-align:center;">
           <a href="https://www.paypal.com" style="display:inline-block;background:#000;color:#fff;text-decoration:none;font-weight:700;font-size:17px;padding:16px 56px;border-radius:999px;">Go to PayPal</a>
         </td></tr>
@@ -361,6 +389,9 @@ function zelleStatusEmail(c: Ctx) {
         ${c.adminNote ? `<tr><td style="padding:12px 26px 0;font-size:14px;color:#3a3a3a;line-height:1.55;">
           <strong>Note from support:</strong> ${esc(c.adminNote)}
         </td></tr>` : ""}
+        ${c.status === "posting" ? `<tr><td style="padding:12px 26px 0;">
+          ${postingBox(c, { bg: "#f4f7ff", border: "#cdd9f5", color: "#1f2937", title: "What happens next", radius: "6px" })}
+        </td></tr>` : ""}
         <tr><td style="padding:16px 26px 28px;">
           <a href="https://www.zellepay.com" style="display:inline-block;background:#1a55c9;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:11px 20px;border-radius:4px;">Go to Zelle®</a>
         </td></tr>
@@ -415,6 +446,7 @@ function bankStatusEmail(c: Ctx, scheme: string) {
         </td></tr>
       </table>
       ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Note from support:</strong> ${esc(c.adminNote)}</div>` : ""}
+      ${postingBox(c, { bg: "#f0f6ff", border: "#d7e3f8", color: "#3a4660", title: "What happens next" })}
     </td></tr>
     <tr><td style="background:#0a1a3f;color:#c9c9d4;padding:16px;text-align:center;font-size:11px;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
   </table>
@@ -587,7 +619,7 @@ Deno.serve(async (req) => {
 
     const baseCtx: Omit<Ctx, "audience"> = {
       senderName, recipientName, amount, memo, currencyCode, status,
-      reference, category, dateStr, adminNote,
+      reference, category, dateStr, adminNote, recipientBank,
     };
 
     // Unique per notice: keeps every status update / resend as its own
