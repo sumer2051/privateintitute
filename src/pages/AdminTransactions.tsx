@@ -27,7 +27,7 @@ type Tx = {
 };
 type Profile = { id: string; email: string; full_name: string | null; preferred_currency?: string | null };
 
-const TX_STATUSES = ["pending", "processing", "under_review", "compliance_hold", "reviewed", "clearing", "completed", "failed", "cancelled"] as const;
+const TX_STATUSES = ["pending", "processing", "under_review", "compliance_hold", "reviewed", "clearing", "completed", "posting", "failed", "cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pending",
   processing: "Processing",
@@ -36,6 +36,7 @@ const STATUS_LABEL: Record<string, string> = {
   reviewed: "Reviewed · clearance ongoing",
   clearing: "Clearing & settlement",
   completed: "Successful",
+  posting: "Successful · posting by recipient bank",
   failed: "Failed",
   cancelled: "Cancelled",
 };
@@ -47,9 +48,11 @@ const STATUS_COLOR: Record<string, string> = {
   reviewed: "bg-cyan-100 text-cyan-800",
   clearing: "bg-indigo-100 text-indigo-800",
   completed: "bg-emerald-100 text-emerald-800",
+  posting: "bg-teal-100 text-teal-800",
   failed: "bg-red-100 text-red-800",
   cancelled: "bg-muted text-muted-foreground",
 };
+
 
 
 export default function AdminTransactions() {
