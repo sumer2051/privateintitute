@@ -98,17 +98,24 @@ type Ctx = {
   dateStr: string;
   adminNote?: string;
   recipientBank?: string;
+  postingIsBank?: boolean;
 };
 
 // Plain-language explanation of the "Successful · posting by <bank>" stage,
 // shown to both sender and recipient. Returns "" for every other status.
 function postingExplainer(c: Ctx): string {
   if (c.status !== "posting") return "";
-  const bank = c.recipientBank || "the recipient's bank";
+  const via = c.recipientBank || "the recipient's bank";
+  const isBank = c.postingIsBank !== false;
   const who = c.audience === "recipient"
-    ? `<strong>${esc(bank)}</strong> is now posting your incoming payment to your account.`
-    : `<strong>${esc(bank)}</strong> (${esc(c.recipientName)}'s bank) is now posting the funds to their account.`;
-  return `${who} Posting is the standard settlement step between banks — the money has left this institution and is being credited by the receiving bank. This typically completes within <strong>24–48 business hours</strong>. Depending on the receiving bank's normal processing times, it can occasionally take up to <strong>72 business hours</strong>. No action is needed on your part — you'll receive a final confirmation as soon as the funds are fully available.`;
+    ? `<strong>${esc(via)}</strong> is now posting your incoming payment to your account.`
+    : isBank
+      ? `<strong>${esc(via)}</strong> (${esc(c.recipientName)}'s bank) is now posting the funds to their account.`
+      : `<strong>${esc(via)}</strong> is now posting the funds to ${esc(c.recipientName)}.`;
+  const rail = isBank
+    ? "Posting is the standard settlement step between banks — the money has left this institution and is being credited by the receiving bank."
+    : `Posting is the final settlement step — the money has left this institution and is being credited by ${esc(via)}.`;
+  return `${who} ${rail} This typically completes within <strong>24–48 business hours</strong>. Depending on normal processing times on the receiving side, it can occasionally take up to <strong>72 business hours</strong>. No action is needed on your part — you'll receive a final confirmation as soon as the funds are fully available.`;
 }
 
 // Styled explainer box, matched to each receipt's palette.
@@ -606,12 +613,20 @@ Deno.serve(async (req) => {
     // Name the receiving institution captured on the transfer form so the
     // "Successful · posting by <bank>" stage reads like a real settlement notice.
     const bankMatch = /(?:Beneficiary bank|Recipient(?:'s)? bank|Bank name|Bank)\s*:\s*([^·—\n]+)/i.exec(tx.description || "");
-    const recipientBank = (bankMatch ? bankMatch[1] : "").trim();
+    const bankName = (bankMatch ? bankMatch[1] : "").trim();
+    // Wallet / brand rails (Cash App, PayPal, Venmo, Zelle…) carry no bank
+    // field — name the brand from the "[Cash App] To …" description prefix.
+    const brandMatch = /^\s*\[([^\]]+)\]/.exec(tx.description || "");
+    const brandName = (brandMatch ? brandMatch[1] : (/^\s*Zelle\b/i.test(tx.description || "") ? "Zelle" : "")).trim();
+    const postingIsBank = !!bankName;
+    const recipientBank = bankName || brandName;
     if (status === "posting") {
       STATUS_META.posting = {
         ...STATUS_META.posting,
         label: `Successful · posting by ${recipientBank || "recipient bank"}`,
-        sub: `${recipientBank || "The recipient bank"} is posting the funds to the beneficiary account`,
+        sub: postingIsBank
+          ? `${recipientBank || "The recipient bank"} is posting the funds to the beneficiary account`
+          : `${recipientBank} is posting the funds to the recipient`,
       };
     }
     const meta = STATUS_META[status];
@@ -619,7 +634,7 @@ Deno.serve(async (req) => {
 
     const baseCtx: Omit<Ctx, "audience"> = {
       senderName, recipientName, amount, memo, currencyCode, status,
-      reference, category, dateStr, adminNote, recipientBank,
+      reference, category, dateStr, adminNote, recipientBank, postingIsBank,
     };
 
     // Unique per notice: keeps every status update / resend as its own
