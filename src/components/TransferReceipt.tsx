@@ -219,8 +219,6 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const fee = readFeeFromForm(fields, note, reference);
     const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
     const totalStr = fee !== null ? fmt(amount + fee, currencyCode) : null;
-    const payeeRef =
-      fields["Reference"] || fields["Payment Reference"] || note || "";
     const accountBits = Object.entries(fields)
       .filter(([k, v]) => v && !isFeeField(k) && !/recipient name|note|reference|email/i.test(k))
       .map(([, v]) => v);
