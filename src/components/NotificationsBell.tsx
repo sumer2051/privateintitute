@@ -67,7 +67,9 @@ const parseDetails = (desc?: string | null): Record<string, string> => {
     const idx = pair.indexOf(":");
     if (idx > 0) {
       const k = pair.slice(0, idx).trim().toLowerCase().replace(/\s+/g, "_");
-      const v = pair.slice(idx + 1).trim();
+      // The form note is appended bare after " — " at the end of the
+      // description, so it glues onto the last field's value — strip it.
+      const v = pair.slice(idx + 1).split(" — ")[0].trim();
       if (k && v) out[k] = v;
     }
   });
