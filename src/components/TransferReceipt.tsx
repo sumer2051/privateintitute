@@ -242,18 +242,43 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               Confirmation
             </div>
 
-            <div className="px-5 py-3.5 text-center">
-              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[#2b7a72]">
-                <Check className="h-6 w-6 text-white" strokeWidth={3} />
+            {method.id === "ach" ? (
+              <div className="px-5 py-3">
+                {[
+                  { icon: <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />, filled: true, title: "Transfer submitted", sub: "Today" },
+                  { icon: <Clock className="h-3.5 w-3.5 text-[#2b7a72]" strokeWidth={2.5} />, filled: false, title: "Processing", sub: method.settlement },
+                  { icon: <Briefcase className="h-3.5 w-3.5 text-[#2b7a72]" strokeWidth={2.5} />, filled: false, title: "Money will be delivered", sub: "" },
+                ].map((s, i, arr) => (
+                  <div key={s.title} className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className={`flex h-7 w-7 items-center justify-center rounded-full ${s.filled ? "bg-[#2b7a72]" : "bg-neutral-100"}`}>
+                        {s.icon}
+                      </div>
+                      {i < arr.length - 1 && <div className="my-1 w-px flex-1 border-l border-dashed border-neutral-300" />}
+                    </div>
+                    <div className={i < arr.length - 1 ? "pb-2.5" : ""}>
+                      <div className="text-[12px] text-neutral-500">{s.title}</div>
+                      {s.sub && <div className="text-[13px] text-neutral-900">{s.sub}</div>}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <h1 className="mt-2 text-[24px] font-normal leading-tight text-neutral-900">Thank you</h1>
-              <p className="mx-auto mt-1.5 max-w-[310px] text-[12px] leading-snug text-neutral-800">
-                Your instruction has been sent and will be credited to the payees account
-                {method.settlement ? ` ${method.settlement.toLowerCase()}` : " immediately"}, subject to our standard checks. This cannot be recalled.
-              </p>
-            </div>
+            ) : (
+              <div className="px-5 py-3.5 text-center">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[#2b7a72]">
+                  <Check className="h-6 w-6 text-white" strokeWidth={3} />
+                </div>
+                <h1 className="mt-2 text-[24px] font-normal leading-tight text-neutral-900">Thank you</h1>
+                <p className="mx-auto mt-1.5 max-w-[310px] text-[12px] leading-snug text-neutral-800">
+                  Your instruction has been sent and will be credited to the payees account
+                  {method.settlement ? ` ${method.settlement.toLowerCase()}` : " immediately"}, subject to our standard checks. This cannot be recalled.
+                </p>
+              </div>
+            )}
 
             <div className="border-t border-neutral-200">
+              {method.id === "ach" && <Row label="Confirmation #" value={<span className="font-mono text-[12px]">{reference}</span>} />}
+
               <Row
                 label="From"
                 value={
