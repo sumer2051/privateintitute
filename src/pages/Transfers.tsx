@@ -437,6 +437,7 @@ const Transfers = () => {
         variant: smVariant || undefined,
         reference: ref,
         timestamp: new Date().toISOString(),
+        fromLabel: `${fromAcc.account_name} ****${fromAcc.account_number}`,
       });
 
       setSmAmount(""); setSmRecipient(""); setSmEmail(""); setSmFields({}); setSmNote(""); setSmVariant("");
