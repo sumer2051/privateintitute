@@ -67,8 +67,8 @@ export const COUNTRY_METHODS: Record<string, CountryMethod[]> = {
   ],
   INR: [
     { id: "upi",  name: "UPI",  tagline: "Pay any UPI ID instantly", settlement: "Instant",             glyph: "U", accent: "from-orange-500 to-pink-600", receiptStyle: "minimal", fields: [{ key: "upi_id", label: "UPI ID / VPA", placeholder: "name@bank", required: true }] },
-    { id: "imps", name: "IMPS", tagline: "24/7 instant transfer",   settlement: "Within seconds",       glyph: "I", accent: "from-green-500 to-emerald-700", receiptStyle: "minimal", fields: [BANK, ACCOUNT, IFSC] },
-    { id: "neft", name: "NEFT", tagline: "Standard batch transfer", settlement: "Same business day",    glyph: "N", accent: "from-sky-600 to-blue-700",     receiptStyle: "minimal", fields: [BANK, ACCOUNT, IFSC] },
+    { id: "imps", name: "IMPS", tagline: "24/7 instant transfer",   settlement: "Within seconds",       glyph: "I", accent: "from-green-500 to-emerald-700", receiptStyle: "confirmation", fields: [BANK, ACCOUNT, IFSC, FEE] },
+    { id: "neft", name: "NEFT", tagline: "Standard batch transfer", settlement: "Same business day",    glyph: "N", accent: "from-sky-600 to-blue-700",     receiptStyle: "confirmation", fields: [BANK, ACCOUNT, IFSC, FEE] },
     { id: "rtgs", name: "RTGS", tagline: "High-value real-time",    settlement: "Within 30 minutes",    glyph: "R", accent: "from-slate-700 to-slate-900",  receiptStyle: "formal",  fields: [BANK, ACCOUNT, IFSC] },
   ],
   CNY: [
@@ -82,28 +82,28 @@ export const COUNTRY_METHODS: Record<string, CountryMethod[]> = {
   ],
   NGN: [
     { id: "mpesa_ng", name: "Mobile Money", tagline: "M-Pesa-style wallet", settlement: "Instant", glyph: "M", accent: "from-green-600 to-emerald-700", receiptStyle: "minimal", fields: [{ key: "phone", label: "Mobile Wallet Number", required: true, placeholder: "+234…", inputMode: "tel" }] },
-    { id: "nip_ng",   name: "Bank Transfer (NIP)", tagline: "Instant NUBAN transfer", settlement: "Instant", glyph: "N", accent: "from-emerald-700 to-teal-800", receiptStyle: "minimal", fields: [BANK, { ...ACCOUNT, label: "NUBAN Account Number", placeholder: "10 digits" }] },
+    { id: "nip_ng",   name: "Bank Transfer (NIP)", tagline: "Instant NUBAN transfer", settlement: "Instant", glyph: "N", accent: "from-emerald-700 to-teal-800", receiptStyle: "confirmation", fields: [BANK, { ...ACCOUNT, label: "NUBAN Account Number", placeholder: "10 digits" }, FEE] },
   ],
   ZAR: [
     { id: "mpesa_ke", name: "Mobile Money", tagline: "M-Pesa-style wallet",  settlement: "Instant", glyph: "M", accent: "from-green-600 to-emerald-700", receiptStyle: "minimal", fields: [{ key: "phone", label: "Mobile Wallet Number", required: true, placeholder: "+27…", inputMode: "tel" }] },
-    { id: "eft_za",   name: "Bank Transfer (EFT)", tagline: "Standard South African EFT", settlement: "1–2 business days", glyph: "E", accent: "from-amber-600 to-yellow-700", receiptStyle: "minimal", fields: [BANK, { key: "branch_code", label: "Branch Code", inputMode: "numeric", required: true, placeholder: "6 digits" }, ACCOUNT] },
+    { id: "eft_za",   name: "Bank Transfer (EFT)", tagline: "Standard South African EFT", settlement: "1–2 business days", glyph: "E", accent: "from-amber-600 to-yellow-700", receiptStyle: "confirmation", fields: [BANK, { key: "branch_code", label: "Branch Code", inputMode: "numeric", required: true, placeholder: "6 digits" }, ACCOUNT, FEE] },
   ],
   AUD: [
     { id: "payid", name: "PayID / Osko", tagline: "Near-instant Australian transfer", settlement: "Near-instant",  glyph: "P", accent: "from-emerald-500 to-teal-600", receiptStyle: "minimal", fields: [{ key: "payid", label: "PayID (phone / email / ABN)", required: true, placeholder: "name@email.com or +61…" }] },
     { id: "wire_au", name: "Wire Transfer", tagline: "Bank wire (BSB + Account)",  settlement: "1 business day", glyph: "W", accent: "from-slate-700 to-slate-900", receiptStyle: "formal", fields: [BANK, { key: "bsb", label: "BSB", inputMode: "numeric", required: true, placeholder: "000-000" }, ACCOUNT] },
   ],
   JPY: [
-    { id: "zengin", name: "Zengin Bank Transfer", tagline: "Standard Japanese transfer", settlement: "Same business day", glyph: "銀", accent: "from-red-600 to-rose-700", receiptStyle: "minimal", fields: [BANK, { key: "branch", label: "Branch Name / Code", required: true, placeholder: "e.g. Shibuya 001" }, { key: "account_type", label: "Account Type", required: true, placeholder: "Futsu / Toza" }, { ...ACCOUNT, placeholder: "7 digits" }] },
+    { id: "zengin", name: "Zengin Bank Transfer", tagline: "Standard Japanese transfer", settlement: "Same business day", glyph: "銀", accent: "from-red-600 to-rose-700", receiptStyle: "confirmation", fields: [BANK, { key: "branch", label: "Branch Name / Code", required: true, placeholder: "e.g. Shibuya 001" }, { key: "account_type", label: "Account Type", required: true, placeholder: "Futsu / Toza" }, { ...ACCOUNT, placeholder: "7 digits" }, FEE] },
     { id: "paypay", name: "PayPay-style", tagline: "QR / phone wallet",   settlement: "Instant", glyph: "P", accent: "from-red-500 to-orange-500", receiptStyle: "casual", fields: [{ key: "phone", label: "PayPay Phone", required: true, placeholder: "+81…", inputMode: "tel" }, NOTE] },
   ],
   // South Korea uses KRW which we don't ship — expose under JPY-like fallback? Keep separate under a synthetic KRW key would break switcher.
   // Mexico
   MXN: [
-    { id: "spei",    name: "SPEI",  tagline: "Instant Mexican transfer", settlement: "Near-instant",     glyph: "S", accent: "from-emerald-600 to-green-700", receiptStyle: "minimal", fields: [BANK, { key: "clabe", label: "CLABE", inputMode: "numeric", maxLength: 18, required: true, placeholder: "18 digits" }] },
+    { id: "spei",    name: "SPEI",  tagline: "Instant Mexican transfer", settlement: "Near-instant",     glyph: "S", accent: "from-emerald-600 to-green-700", receiptStyle: "confirmation", fields: [BANK, { key: "clabe", label: "CLABE", inputMode: "numeric", maxLength: 18, required: true, placeholder: "18 digits" }, FEE] },
     { id: "wire_mx", name: "Wire",  tagline: "International bank wire",  settlement: "1–3 business days", glyph: "W", accent: "from-slate-700 to-slate-900",  receiptStyle: "formal",  fields: [BANK, SWIFT, { key: "clabe", label: "CLABE", inputMode: "numeric", maxLength: 18, required: true }] },
   ],
   CHF: [
-    { id: "sic_chf", name: "SIC Transfer", tagline: "Swiss RTGS", settlement: "Same business day", glyph: "S", accent: "from-red-600 to-rose-700", receiptStyle: "minimal", fields: [BANK, IBAN, BIC] },
+    { id: "sic_chf", name: "SIC Transfer", tagline: "Swiss RTGS", settlement: "Same business day", glyph: "S", accent: "from-red-600 to-rose-700", receiptStyle: "confirmation", fields: [BANK, IBAN, BIC, FEE] },
     { id: "swift_chf", name: "SWIFT Wire", tagline: "Cross-border wire", settlement: "1–3 business days", glyph: "W", accent: "from-slate-700 to-slate-900", receiptStyle: "formal", fields: [BANK, SWIFT, IBAN, { key: "bank_address", label: "Bank Address", required: true }] },
   ],
   AED: [
