@@ -39,7 +39,6 @@ const BIC: BankField = { key: "bic", label: "BIC / SWIFT", placeholder: "COBADEF
 const SWIFT: BankField = { key: "swift", label: "SWIFT / BIC Code", placeholder: "8 or 11 chars", uppercase: true, maxLength: 11, required: true };
 const IFSC: BankField = { key: "ifsc", label: "IFSC Code", placeholder: "HDFC0001234", uppercase: true, maxLength: 11, required: true };
 const SORT_CODE: BankField = { key: "sort_code", label: "Sort Code", placeholder: "00-00-00", inputMode: "numeric", required: true };
-const FEE: BankField = { key: "fee", label: "Fee (if any)", placeholder: "e.g. 2.50", inputMode: "numeric", required: false };
 
 export const COUNTRY_METHODS: Record<string, CountryMethod[]> = {
   USD: [
