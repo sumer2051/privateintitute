@@ -35,6 +35,7 @@ interface Notif {
   reference_number: string | null;
   recipient_email: string | null;
   recipient_name: string | null;
+  currency: string | null;
   created_at: string | null;
 }
 
