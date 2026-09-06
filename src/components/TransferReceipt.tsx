@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, ShieldCheck, ArrowRight, Sparkles, X } from "lucide-react";
+import { Check, ShieldCheck, ArrowRight, Sparkles, X, Clock, Briefcase } from "lucide-react";
 import type { CountryMethod } from "@/lib/country-methods";
 import { readFeeFromForm, isFeeField } from "@/lib/fees";
 
@@ -239,7 +239,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
         <DialogContent data-brand-skin className="max-w-sm p-0 overflow-hidden border-0 bg-white sm:rounded-xl [&>button]:hidden">
           <div className="flex max-h-[96dvh] flex-col overflow-y-auto bg-white">
             <div className="border-b border-neutral-200 py-2.5 text-center text-[15px] font-bold text-neutral-900">
-              Confirmation
+              {method.id === "ach" ? "Confirm" : "Confirmation"}
             </div>
 
             {method.id === "ach" ? (
@@ -309,7 +309,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               {totalStr && <Row label="Total" value={<span className="font-semibold">{totalStr}</span>} strong />}
               {payeeRef && <Row label="Reference" value={payeeRef} />}
               <Row label="Payment type" value={method.name} />
-              <Row label="Confirmation" value={<span className="font-mono text-[11px]">{reference}</span>} />
+              {method.id !== "ach" && <Row label="Confirmation" value={<span className="font-mono text-[11px]">{reference}</span>} />}
               <Row
                 label="Date"
                 value={
