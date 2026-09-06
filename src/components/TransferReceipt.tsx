@@ -226,7 +226,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const vName = recipientName || fields.recipient_name || displayTo;
     const vHandle = findField(/handle|username|tag/i) || fields.handle || "";
     const handleLine = vHandle ? (vHandle.startsWith("@") ? vHandle : `@${vHandle}`) : `@${vName.replace(/\s+/g, "-")}`;
-    const vNote = note || findField(/^note|_note/i) || fields.note || "";
+    
     const initials = vName.split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
     const bankName = findField(/\bbank\b|bank name/i) || fields.bank || "";
     const VRow = ({ label, children }: { label: string; children: ReactNode }) => (
