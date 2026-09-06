@@ -170,6 +170,15 @@ export const NotificationsBell = () => {
 
   const selectedMethod = useMemo(() => findMethod(selected?.category), [selected]);
 
+  /** Every other transfer that went to the same recipient name. */
+  const related = useMemo(() => {
+    const name = (selected?.recipient_name || "").trim().toLowerCase();
+    if (!selected || !name) return [] as Notif[];
+    return items.filter(
+      (i) => i.id !== selected.id && (i.recipient_name || "").trim().toLowerCase() === name,
+    );
+  }, [items, selected]);
+
   const openReceipt = () => {
     if (!selected) return;
     const method = selectedMethod || SWIFT_FALLBACK;
