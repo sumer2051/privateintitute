@@ -53,8 +53,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const contact = fields.email || fields.phone || recipientEmail || "";
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="max-w-md p-0 overflow-hidden border-0 bg-[#f4f5f7] sm:rounded-2xl [&>button]:hidden">
-          <div className="flex min-h-[640px] flex-col">
+        <DialogContent data-brand-skin className="w-[calc(100vw-1rem)] max-w-md max-h-[calc(100dvh-1rem)] p-0 overflow-hidden border-0 bg-[#f4f5f7] sm:rounded-2xl [&>button]:hidden">
+          <div className="flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain sm:min-h-[min(640px,calc(100dvh-1rem))]">
             <div className="flex items-center justify-between bg-[#2a5c99] px-4 py-3 text-white">
               <div className="flex flex-col gap-1">
                 <span className="block h-0.5 w-5 bg-white" />
@@ -65,11 +65,11 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               <div className="w-5" />
             </div>
 
-            <div className="flex flex-1 flex-col items-center px-6 pt-8 pb-6 text-center">
+            <div className="flex min-h-0 flex-1 flex-col items-center px-5 pb-5 pt-5 text-center sm:px-6 sm:pb-6 sm:pt-8">
               <h1 className="text-[32px] font-normal text-neutral-900">Sent {amountStr}</h1>
 
-              <div className="relative mt-6 mb-4">
-                <div className="flex h-[130px] w-[130px] items-center justify-center rounded-full bg-neutral-300 text-[42px] font-medium text-neutral-800">
+              <div className="relative mb-3 mt-4 sm:mb-4 sm:mt-6">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-neutral-300 text-[36px] font-medium text-neutral-800 sm:h-[130px] sm:w-[130px] sm:text-[42px]">
                   {initials || "•"}
                 </div>
                 <div className="absolute -bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow">
@@ -85,7 +85,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 The money will be available in {firstName}'s account shortly, typically in minutes.
               </p>
 
-              <div className="mt-auto w-full pt-10">
+              <div className="mt-auto w-full pt-5 sm:pt-10">
                 <div className="text-center text-[13px] text-neutral-500">
                   Confirmation: {reference}
                 </div>
@@ -107,8 +107,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const firstName = (recipientName || displayTo).split(" ")[0];
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="max-w-md p-0 overflow-hidden border-0 bg-white sm:rounded-2xl [&>button]:hidden">
-          <div className="relative flex min-h-[620px] flex-col bg-white">
+        <DialogContent data-brand-skin className="w-[calc(100vw-1rem)] max-w-md max-h-[calc(100dvh-1rem)] p-0 overflow-hidden border-0 bg-white sm:rounded-2xl [&>button]:hidden">
+          <div className="relative flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white sm:min-h-[min(620px,calc(100dvh-1rem))]">
             <button
               onClick={onClose}
               aria-label="Close"
@@ -117,12 +117,12 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               <X className="h-6 w-6" strokeWidth={2} />
             </button>
 
-            <div className="px-6 pt-24 pb-10 text-center">
+            <div className="px-5 pb-6 pt-14 text-center sm:px-6 sm:pb-10 sm:pt-20">
               <div className="flex items-center justify-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#00857A]">
                   <Check className="h-4 w-4 text-[#00857A]" strokeWidth={3} />
                 </div>
-                <h1 className="text-[34px] font-bold tracking-tight text-black">
+                <h1 className="break-words text-[28px] font-bold tracking-tight text-black sm:text-[34px]">
                   {amountStr} <span className="font-semibold">sent</span>
                 </h1>
               </div>
@@ -139,7 +139,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               <div className="absolute right-6 bottom-32 h-14 w-14 rounded-full bg-black/[0.04]" />
 
               <div className="relative flex flex-col items-center px-6 pt-6 pb-8">
-                <div className="mb-6 flex h-[130px] w-[210px] flex-col justify-between rounded-xl bg-gradient-to-br from-[#0070ba] to-[#1546a0] p-4 shadow-lg">
+                <div className="mb-4 flex h-[104px] w-[180px] flex-col justify-between rounded-xl bg-gradient-to-br from-[#0070ba] to-[#1546a0] p-4 shadow-lg sm:mb-6 sm:h-[130px] sm:w-[210px]">
                   <div className="text-[28px] font-extrabold italic tracking-tight text-[#5ec0ff]" style={{ fontFamily: "Georgia, serif" }}>
                     PayPal
                   </div>
@@ -183,7 +183,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
         <DialogContent data-brand-skin
           className="ios-safe-sheet p-0 gap-0 overflow-hidden border-0 bg-black text-white [&>button]:hidden top-0 left-0 right-0 bottom-0 translate-x-0 translate-y-0 w-screen h-[100dvh] max-w-none rounded-none sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:h-auto sm:max-w-[380px] sm:min-h-[640px] sm:rounded-3xl"
         >
-          <div className="flex h-full flex-col px-5 pb-5 pt-4 sm:min-h-[640px]">
+          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-5 pb-5 pt-4 sm:min-h-[min(640px,calc(100dvh-1rem))]">
             <button
               onClick={onClose}
               aria-label="Close"
@@ -196,7 +196,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#00D64F] animate-in zoom-in-50 duration-300">
                 <Check className="h-9 w-9 text-black" strokeWidth={3.5} />
               </div>
-              <h1 className="mt-6 text-[32px] sm:text-[34px] font-bold leading-[1.15] tracking-tight">
+              <h1 className="mt-6 break-words text-[32px] sm:text-[34px] font-bold leading-[1.15] tracking-tight">
                 You sent {amountStr} to {displayTo}
               </h1>
             </div>
@@ -480,7 +480,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md p-0 overflow-hidden">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-md max-h-[calc(100dvh-1rem)] p-0 overflow-hidden">
+        <div className="max-h-[calc(100dvh-1rem)] min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain">
         {style === "casual" && (
           <div className="bg-white">
             <div className={`bg-gradient-to-br ${method.accent} p-6 text-white`}>
@@ -508,7 +509,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               {Object.entries(fields).filter(([, v]) => v).map(([k, v]) => (
                 <div key={k} className="flex justify-between text-muted-foreground">
                   <span className="capitalize">{k.replace(/_/g, " ")}</span>
-                  <span className="font-medium text-foreground">{v}</span>
+                   <span className="min-w-0 max-w-[65%] break-words text-right font-medium text-foreground">{v}</span>
                 </div>
               ))}
               <div className="flex justify-between text-muted-foreground pt-2 border-t"><span>Reference</span><span className="font-mono text-xs">{reference}</span></div>
@@ -535,7 +536,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               {Object.entries(fields).filter(([, v]) => v).map(([k, v]) => (
                 <div key={k} className="flex justify-between">
                   <span className="text-muted-foreground capitalize">{k.replace(/_/g, " ")}</span>
-                  <span className="font-medium">{v}</span>
+                   <span className="min-w-0 max-w-[65%] break-words text-right font-medium">{v}</span>
                 </div>
               ))}
               {note && <div className="flex justify-between"><span className="text-muted-foreground">Note</span><span className="font-medium text-right">{note}</span></div>}
@@ -570,15 +571,15 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 </div>
                 <div>
                   <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Beneficiary</div>
-                  <div className="font-medium">{recipientName}</div>
-                  <div className="text-xs text-muted-foreground">{recipientEmail}</div>
+                   <div className="break-words font-medium">{recipientName}</div>
+                   <div className="break-all text-xs text-muted-foreground">{recipientEmail}</div>
                 </div>
               </div>
               <div className="rounded border p-3 space-y-1.5">
                 {Object.entries(fields).filter(([, v]) => v).map(([k, v]) => (
                   <div key={k} className="flex justify-between text-xs">
                     <span className="text-muted-foreground capitalize">{k.replace(/_/g, " ")}</span>
-                    <span className="font-mono">{v}</span>
+                     <span className="min-w-0 max-w-[65%] break-all text-right font-mono">{v}</span>
                   </div>
                 ))}
                 <div className="flex justify-between text-xs"><span className="text-muted-foreground">Settlement</span><span>{method.settlement}</span></div>
@@ -596,6 +597,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
           <Button variant="secondary" onClick={() => window.print()}>Print</Button>
           <Button onClick={onClose}>Done</Button>
         </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
