@@ -215,6 +215,86 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     );
   }
 
+  const isOsko = /payid|osko/i.test(method.id) || /payid|osko/i.test(method.name);
+  if (isOsko) {
+    const fee = readFeeFromForm(fields, note, reference);
+    const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
+    const totalStr = fee !== null ? fmt(amount + fee, currencyCode) : null;
+    const idBits = Object.entries(fields)
+      .filter(([k, v]) => v && !isFeeField(k) && !/recipient name|\bnote\b|\breference\b|^recipient email$|^email$/i.test(k))
+      .map(([, v]) => v)
+      .join(" ");
+    const desc = note || "";
+    const ref = fields["Reference"] || fields.reference || "";
+    const ORow = ({ label, children }: { label: string; children: ReactNode }) => (
+      <div className="mt-2.5">
+        <div className="text-[13px] font-bold text-neutral-900">{label}</div>
+        <div className="text-[13px] text-neutral-800 break-words">{children}</div>
+      </div>
+    );
+    return (
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent data-brand-skin className="max-w-[340px] p-0 overflow-hidden border-0 bg-white sm:rounded-xl [&>button]:hidden">
+          <div className="flex max-h-[94dvh] flex-col overflow-y-auto bg-white">
+            <div className="flex items-center justify-between border-b border-neutral-200 bg-[#f6f6f6] px-4 py-2.5">
+              <button onClick={onClose} aria-label="Close"><X className="h-4 w-4 text-neutral-900" strokeWidth={2.5} /></button>
+              <div className="text-[15px] font-bold text-neutral-900">Receipt</div>
+              <span className="text-[13px] text-neutral-500">Share</span>
+            </div>
+
+            <div className="px-4 pb-4 pt-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3aab3a]">
+                <Check className="h-5 w-5 text-white" strokeWidth={3.5} />
+              </div>
+              <h1 className="mt-2.5 text-[19px] font-bold leading-tight text-neutral-900">
+                Paid {amountStr}
+                <br />to {recipientName || displayTo}
+              </h1>
+              {idBits && <div className="text-[13px] text-neutral-800">{idBits}</div>}
+              <div className="mt-1.5 text-[13px] text-neutral-500">Receipt no: {reference}</div>
+
+              <div className="my-3 h-px bg-neutral-200" />
+
+              <ORow label="From">
+                {senderName}
+                {fromLabel && <div className="text-neutral-500">({fromLabel})</div>}
+              </ORow>
+              {desc && <ORow label="Description">{desc}</ORow>}
+              {ref && <ORow label="Reference">{ref}</ORow>}
+              {feeStr && (
+                <ORow label="Fee">
+                  {feeStr}
+                  {totalStr && <span className="text-neutral-500"> · Total {totalStr}</span>}
+                </ORow>
+              )}
+              <ORow label="Transaction Date">
+                {new Date(timestamp).toLocaleString("en-AU", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} (Syd/Melb time)
+              </ORow>
+
+              <p className="mt-3 text-[13px] text-neutral-800">This payment should be received instantly.</p>
+              <div className="mt-2 flex items-center gap-2 text-[13px] text-neutral-500">
+                Sent through
+                <span className="flex items-center gap-1 text-[14px] font-bold text-neutral-900">
+                  Osko
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-neutral-900">
+                    <span className="h-1.5 w-1.5 rounded-full bg-neutral-900" />
+                  </span>
+                </span>
+              </div>
+
+              <button
+                onClick={onClose}
+                className="mt-4 w-full rounded-full bg-[#f5c518] py-2.5 text-[15px] font-bold text-neutral-900 hover:bg-[#e5b716] transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   const isWire = /wire|swift|uaefts/i.test(method.id) || /wire|swift/i.test(method.name);
   if (isWire) {
     const fee = readFeeFromForm(fields, note, reference);
