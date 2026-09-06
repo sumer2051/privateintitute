@@ -251,7 +251,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 {initials || "•"}
               </div>
               <h1 className="mt-3 break-words text-[28px] font-bold leading-tight text-neutral-900">{vName}</h1>
-              {vNote && <p className="mt-1 break-words text-[17px] text-neutral-800">"{vNote.replace(/^\w+\s+(wants|says)\s*:?\s*/i, "")}"</p>}
+              {vNote && <p className="mt-1 break-words text-[17px] text-neutral-800">"{vNote}"</p>}
               <div className="mt-2 text-[30px] font-bold text-[#d02a2e]">
                 - {amountStr.replace(/^[−-]\s*/, "")}
               </div>
