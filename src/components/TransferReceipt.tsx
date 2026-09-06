@@ -1,8 +1,10 @@
+import type { ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, ShieldCheck, ArrowRight, Sparkles, X } from "lucide-react";
 import type { CountryMethod } from "@/lib/country-methods";
+import { readFeeFromForm, isFeeField } from "@/lib/fees";
 
 export interface ReceiptData {
   method: CountryMethod;
@@ -17,6 +19,8 @@ export interface ReceiptData {
   variant?: string;
   reference: string;
   timestamp: string;
+  /** "Checking Account · ****1234" style label for the funding account. */
+  fromLabel?: string;
 }
 
 interface Props {
@@ -33,13 +37,14 @@ const fmt = (n: number, code: string) => {
 
 export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   if (!receipt) return null;
-  const { method, amount, currencyCode, senderName, recipientName, recipientEmail, fields, note, variant, reference, timestamp } = receipt;
+  const { method, amount, currencyCode, senderName, recipientName, recipientEmail, fields, note, variant, reference, timestamp, fromLabel } = receipt;
   const style = method.receiptStyle;
   const amountStr = fmt(amount, currencyCode);
   const isCashApp = method.id === "cashapp";
   const isPayPal = method.id === "paypal" || method.id === "paypal_uk" || method.id === "paypal_eu";
   const isZelle = method.id === "zelle";
   const displayTo = recipientName || fields.handle || fields.recipient_name || fields.email || fields.wallet_id || fields.upi_id || fields.pix_key || fields.payid || recipientEmail || "recipient";
+
 
   if (isZelle) {
     const nameUpper = (recipientName || fields.recipient_name || displayTo).toUpperCase();
@@ -209,6 +214,101 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
       </Dialog>
     );
   }
+
+  if (style === "confirmation") {
+    const fee = readFeeFromForm(fields, note, reference);
+    const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
+    const totalStr = fee !== null ? fmt(amount + fee, currencyCode) : null;
+    const payeeRef =
+      fields["Reference"] || fields["Payment Reference"] || note || "";
+    const accountBits = Object.entries(fields)
+      .filter(([k, v]) => v && !isFeeField(k) && !/recipient name|note|reference|email/i.test(k))
+      .map(([, v]) => v);
+    const toLine = accountBits.slice(1).join(" ");
+    const bankLine = accountBits[0] || "";
+
+    const Row = ({ label, value, strong }: { label: string; value: ReactNode; strong?: boolean }) => (
+      <div className="flex items-start justify-between gap-6 border-b border-neutral-200 px-6 py-4 last:border-b-0">
+        <div className="text-[15px] text-neutral-800">{label}</div>
+        <div className={`text-right text-[15px] ${strong ? "font-semibold text-neutral-900" : "text-neutral-900"}`}>{value}</div>
+      </div>
+    );
+
+    return (
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent data-brand-skin className="max-w-md p-0 overflow-hidden border-0 bg-white sm:rounded-2xl [&>button]:hidden">
+          <div className="flex max-h-[92dvh] flex-col overflow-y-auto bg-white">
+            <div className="border-b border-neutral-200 py-4 text-center text-[17px] font-bold text-neutral-900">
+              Confirmation
+            </div>
+
+            <div className="px-6 pt-8 pb-6 text-center">
+              <div className="mx-auto flex h-[68px] w-[68px] items-center justify-center rounded-full bg-[#2b7a72]">
+                <Check className="h-9 w-9 text-white" strokeWidth={3} />
+              </div>
+              <h1 className="mt-5 text-[34px] font-normal leading-tight text-neutral-900">Thank you</h1>
+              <p className="mx-auto mt-3 max-w-[330px] text-[16px] leading-snug text-neutral-800">
+                Your instruction has been sent and will be credited to the payees account
+                {method.settlement ? ` ${method.settlement.toLowerCase()}` : " immediately"}, subject to our standard checks. This cannot be recalled.
+              </p>
+            </div>
+
+            <div className="border-t border-neutral-200">
+              <Row
+                label="From"
+                value={
+                  <>
+                    <div className="uppercase">{fromLabel || "BANK A/C"}</div>
+                    <div className="text-neutral-700">{senderName}</div>
+                  </>
+                }
+              />
+              <Row
+                label="To"
+                value={
+                  <>
+                    <div>{recipientName || displayTo}</div>
+                    {toLine && <div className="text-neutral-700">{toLine}</div>}
+                    {bankLine && <div className="text-neutral-500 text-[13px]">{bankLine}</div>}
+                  </>
+                }
+              />
+              <div className="flex items-center gap-3 border-b border-neutral-200 px-6 py-4">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#2b7a72]">
+                  <Check className="h-3.5 w-3.5 text-white" strokeWidth={4} />
+                </span>
+                <span className="text-[15px] text-neutral-800">Payee details matched</span>
+              </div>
+              <Row label="Amount" value={<span className="font-semibold">{amountStr}</span>} />
+              {feeStr && <Row label="Fee" value={feeStr} />}
+              {totalStr && <Row label="Total" value={<span className="font-semibold">{totalStr}</span>} strong />}
+              {payeeRef && <Row label="Reference" value={payeeRef} />}
+              <Row label="Payment type" value={method.name} />
+              <Row label="Confirmation" value={<span className="font-mono text-[13px]">{reference}</span>} />
+              <Row
+                label="Date"
+                value={
+                  new Date(timestamp).toDateString() === new Date().toDateString()
+                    ? "Today"
+                    : new Date(timestamp).toLocaleDateString()
+                }
+              />
+            </div>
+
+            <div className="border-t border-neutral-200 p-5">
+              <button
+                onClick={onClose}
+                className="w-full border border-neutral-400 bg-white py-4 text-[17px] text-neutral-900 hover:bg-neutral-50 transition-colors"
+              >
+                Make another transfer
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
