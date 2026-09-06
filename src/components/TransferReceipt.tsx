@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -226,7 +227,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const toLine = accountBits.slice(1).join(" ");
     const bankLine = accountBits[0] || "";
 
-    const Row = ({ label, value, strong }: { label: string; value: React.ReactNode; strong?: boolean }) => (
+    const Row = ({ label, value, strong }: { label: string; value: ReactNode; strong?: boolean }) => (
       <div className="flex items-start justify-between gap-6 border-b border-neutral-200 px-6 py-4 last:border-b-0">
         <div className="text-[15px] text-neutral-800">{label}</div>
         <div className={`text-right text-[15px] ${strong ? "font-semibold text-neutral-900" : "text-neutral-900"}`}>{value}</div>
@@ -280,7 +281,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               </div>
               <Row label="Amount" value={<span className="font-semibold">{amountStr}</span>} />
               {feeStr && <Row label="Fee" value={feeStr} />}
-              {totalStr && <Row label="Total debited" value={<span className="font-semibold">{totalStr}</span>} strong />}
+              {totalStr && <Row label="Total" value={<span className="font-semibold">{totalStr}</span>} strong />}
               {payeeRef && <Row label="Reference" value={payeeRef} />}
               <Row label="Payment type" value={method.name} />
               <Row label="Confirmation" value={<span className="font-mono text-[13px]">{reference}</span>} />
