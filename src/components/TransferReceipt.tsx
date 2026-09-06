@@ -224,7 +224,6 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
       .filter(([k, v]) => v && !isFeeField(k) && !/recipient name|\bnote\b|\breference\b|^recipient email$|^email$/i.test(k))
       .map(([, v]) => v)
       .join(" ");
-    const desc = note || "";
     const ref = fields["Reference"] || fields.reference || "";
     const ORow = ({ label, children }: { label: string; children: ReactNode }) => (
       <div className="mt-2.5">
@@ -259,7 +258,6 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 {senderName}
                 {fromLabel && <div className="text-neutral-500">({fromLabel})</div>}
               </ORow>
-              {desc && <ORow label="Description">{desc}</ORow>}
               {ref && <ORow label="Reference">{ref}</ORow>}
               {feeStr && (
                 <ORow label="Fee">
@@ -300,7 +298,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const fee = readFeeFromForm(fields, note, reference);
     const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
     const memo =
-      fields["Reference"] || fields["Payment Reference"] || fields.reference || note || "";
+      fields["Reference"] || fields["Payment Reference"] || fields.reference || "";
     const WRow = ({ label, children }: { label: string; children: ReactNode }) => (
       <div className="border-b border-neutral-200 px-4 py-2">
         <div className="text-[12px] font-bold text-neutral-900">{label}</div>
@@ -505,11 +503,6 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 <div className="text-4xl font-bold">{amountStr}</div>
                 <div className="text-sm opacity-90 mt-1">to <span className="font-semibold">{recipientName || fields.handle}</span></div>
               </div>
-              {note && (
-                <div className="mt-4 rounded-2xl bg-white/20 px-4 py-3 text-sm backdrop-blur">
-                  "{note}"
-                </div>
-              )}
             </div>
             <div className="p-5 space-y-2 text-sm">
               {Object.entries(fields).filter(([, v]) => v).map(([k, v]) => (
@@ -545,7 +538,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                   <span className="font-medium">{v}</span>
                 </div>
               ))}
-              {note && <div className="flex justify-between"><span className="text-muted-foreground">Note</span><span className="font-medium text-right">{note}</span></div>}
+              
               <div className="flex justify-between pt-2 border-t"><span className="text-muted-foreground">Reference</span><span className="font-mono text-xs">{reference}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Sent</span><span>{new Date(timestamp).toLocaleString()}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Receipt to</span><span>{recipientEmail}</span></div>
