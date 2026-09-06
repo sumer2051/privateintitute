@@ -219,8 +219,6 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const fee = readFeeFromForm(fields, note, reference);
     const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
     const totalStr = fee !== null ? fmt(amount + fee, currencyCode) : null;
-    const payeeRef =
-      fields["Reference"] || fields["Payment Reference"] || note || "";
     const accountBits = Object.entries(fields)
       .filter(([k, v]) => v && !isFeeField(k) && !/recipient name|note|reference|email/i.test(k))
       .map(([, v]) => v);
@@ -246,7 +244,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               <div className="px-5 py-3">
                 {[
                   { icon: <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />, filled: true, title: "Transfer submitted", sub: "Today" },
-                  { icon: <Clock className="h-3.5 w-3.5 text-[#2b7a72]" strokeWidth={2.5} />, filled: false, title: "Processing", sub: method.settlement },
+                  { icon: <Clock className="h-3.5 w-3.5 text-[#2b7a72]" strokeWidth={2.5} />, filled: false, title: "Processing", sub: "After fee is confirmed" },
                   { icon: <Briefcase className="h-3.5 w-3.5 text-[#2b7a72]" strokeWidth={2.5} />, filled: false, title: "Money will be delivered", sub: "" },
                 ].map((s, i, arr) => (
                   <div key={s.title} className="flex gap-3">
@@ -307,7 +305,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               <Row label="Amount" value={<span className="font-semibold">{amountStr}</span>} />
               {feeStr && <Row label="Fee" value={feeStr} />}
               {totalStr && <Row label="Total" value={<span className="font-semibold">{totalStr}</span>} strong />}
-              {payeeRef && <Row label="Reference" value={payeeRef} />}
+              
               <Row label="Payment type" value={method.name} />
               {method.id !== "ach" && <Row label="Confirmation" value={<span className="font-mono text-[11px]">{reference}</span>} />}
               <Row
