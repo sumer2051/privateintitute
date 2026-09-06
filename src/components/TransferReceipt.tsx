@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, ShieldCheck, ArrowRight, Sparkles, X } from "lucide-react";
 import type { CountryMethod } from "@/lib/country-methods";
+import { readFeeFromForm, isFeeField } from "@/lib/fees";
 
 export interface ReceiptData {
   method: CountryMethod;
@@ -17,6 +18,8 @@ export interface ReceiptData {
   variant?: string;
   reference: string;
   timestamp: string;
+  /** "Checking Account · ****1234" style label for the funding account. */
+  fromLabel?: string;
 }
 
 interface Props {
@@ -33,13 +36,14 @@ const fmt = (n: number, code: string) => {
 
 export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   if (!receipt) return null;
-  const { method, amount, currencyCode, senderName, recipientName, recipientEmail, fields, note, variant, reference, timestamp } = receipt;
+  const { method, amount, currencyCode, senderName, recipientName, recipientEmail, fields, note, variant, reference, timestamp, fromLabel } = receipt;
   const style = method.receiptStyle;
   const amountStr = fmt(amount, currencyCode);
   const isCashApp = method.id === "cashapp";
   const isPayPal = method.id === "paypal" || method.id === "paypal_uk" || method.id === "paypal_eu";
   const isZelle = method.id === "zelle";
   const displayTo = recipientName || fields.handle || fields.recipient_name || fields.email || fields.wallet_id || fields.upi_id || fields.pix_key || fields.payid || recipientEmail || "recipient";
+
 
   if (isZelle) {
     const nameUpper = (recipientName || fields.recipient_name || displayTo).toUpperCase();
