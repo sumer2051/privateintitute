@@ -216,6 +216,104 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     );
   }
 
+  const isVenmo = method.id === "venmo";
+  if (isVenmo) {
+    const fee = readFeeFromForm(fields, note, reference);
+    const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
+    const totalStr = fee !== null ? fmt(amount + fee, currencyCode) : null;
+    const vName = recipientName || fields.recipient_name || displayTo;
+    const vHandle = fields.handle || fields.username || fields.tag || "";
+    const handleLine = vHandle ? (vHandle.startsWith("@") ? vHandle : `@${vHandle}`) : `@${vName.replace(/\s+/g, "-")}`;
+    const vNote = note || fields.note || "";
+    const initials = vName.split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+    const bankName = fields.bank || fields.bank_name || "";
+    const VRow = ({ label, children }: { label: string; children: ReactNode }) => (
+      <div className="mt-4">
+        <div className="text-[15px] text-neutral-900">{label}</div>
+        <div className="mt-1 break-words text-[19px] font-semibold leading-snug text-neutral-900">{children}</div>
+      </div>
+    );
+    return (
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
+          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
+            {/* Header */}
+            <div className="relative flex items-center justify-center border-b border-neutral-100 px-4 py-3.5">
+              <button onClick={onClose} aria-label="Back" className="absolute left-3 flex h-9 w-9 items-center justify-center text-neutral-700 hover:text-black">
+                <ArrowRight className="h-6 w-6 rotate-180" strokeWidth={2} />
+              </button>
+              <div className="text-[17px] font-medium text-neutral-900">Payment details</div>
+            </div>
+
+            {/* Recipient + amount */}
+            <div className="flex flex-col items-center px-5 pt-6 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-neutral-300 text-[26px] font-semibold text-neutral-700">
+                {initials || "•"}
+              </div>
+              <h1 className="mt-3 break-words text-[28px] font-bold leading-tight text-neutral-900">{vName}</h1>
+              {vNote && <p className="mt-1 break-words text-[17px] text-neutral-800">"{vNote.replace(/^\w+\s+(wants|says)\s*:?\s*/i, "")}"</p>}
+              <div className="mt-2 text-[30px] font-bold text-[#d02a2e]">
+                - {amountStr.replace(/^[−-]\s*/, "")}
+              </div>
+              {feeStr && (
+                <div className="mt-1 text-[14px] text-neutral-600">
+                  Fee {feeStr} · Total {totalStr}
+                </div>
+              )}
+            </div>
+
+            {/* Social activity */}
+            <div className="px-5 pt-4">
+              <div className="text-[17px] text-neutral-900">Social activity</div>
+              <div className="mt-2 flex items-center gap-5 text-neutral-400">
+                <span className="flex items-center gap-1.5 text-[17px]">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-neutral-400"><path d="M12 21s-8-5.5-8-11a4.5 4.5 0 0 1 8-3 4.5 4.5 0 0 1 8 3c0 5.5-8 11-8 11z" /></svg>
+                  0
+                </span>
+                <span className="flex items-center gap-1.5 text-[17px]">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-neutral-400"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5z" /></svg>
+                  0
+                </span>
+              </div>
+              <div className="mt-4 h-px bg-neutral-200" />
+            </div>
+
+            {/* Details */}
+            <div className="px-5 pb-6">
+              <VRow label="Status">Complete</VRow>
+              <VRow label="Payment method">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-8 w-10 shrink-0 items-center justify-center rounded-sm bg-[#1173b1] text-[14px] font-bold text-white">
+                    {method.glyph}
+                  </span>
+                  <span className="min-w-0">
+                    {bankName && <div className="break-words uppercase">{bankName}</div>}
+                    <div>{fromLabel || senderName}</div>
+                  </span>
+                </div>
+              </VRow>
+              <VRow label="Transaction details">
+                <div className="flex items-center gap-3">
+                  <span className="text-[15px] font-normal text-neutral-800">
+                    {new Date(timestamp).toLocaleString("en-US", { month: "long", day: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                  <span className="flex items-center gap-1 text-[15px] font-semibold text-[#008cff]">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-[#008cff]"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 1 1 6 0v3H9z" /></svg>
+                    Private
+                  </span>
+                </div>
+              </VRow>
+              <VRow label="Paid to">{handleLine}</VRow>
+              <VRow label="Transaction ID">
+                <span className="font-mono text-[15px] font-normal text-neutral-800">{reference}</span>
+              </VRow>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   const isOsko = /payid|osko/i.test(method.id) || /payid|osko/i.test(method.name);
   if (isOsko) {
     const fee = readFeeFromForm(fields, note, reference);
