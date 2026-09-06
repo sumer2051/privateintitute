@@ -221,7 +221,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
     const totalStr = fee !== null ? fmt(amount + fee, currencyCode) : null;
     const idBits = Object.entries(fields)
-      .filter(([k, v]) => v && !isFeeField(k) && !/recipient name|\bnote\b|\breference\b|^recipient email$|^email$/i.test(k))
+      .filter(([k, v]) => v && !isFeeField(k) && !/recipient name|^note|_note|\breference\b|^recipient email$|^email$/i.test(k))
       .map(([, v]) => v)
       .join(" ");
     const ref = fields["Reference"] || fields.reference || "";
@@ -365,7 +365,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
     const totalStr = fee !== null ? fmt(amount + fee, currencyCode) : null;
     const accountBits = Object.entries(fields)
-      .filter(([k, v]) => v && !isFeeField(k) && !/recipient name|\bnote\b|\breference\b|^recipient email$|^email$/i.test(k))
+      .filter(([k, v]) => v && !isFeeField(k) && !/recipient name|^note|_note|\breference\b|^recipient email$|^email$/i.test(k))
       .map(([, v]) => v);
     const toLine = accountBits.slice(1).join(" ");
     const bankLine = accountBits[0] || "";
