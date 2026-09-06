@@ -154,6 +154,26 @@ export const NotificationsBell = () => {
     return () => clearInterval(t);
   }, [limit]);
 
+  // Every time the list re-opens, put it back where the user left off.
+  useEffect(() => {
+    if (!open) return;
+    const target = scrollPosRef.current;
+    if (target <= 0) return;
+    restoringRef.current = true;
+    let frames = 0;
+    let raf = 0;
+    const tick = () => {
+      const el = listRef.current;
+      if (el) el.scrollTop = target;
+      frames += 1;
+      if (frames < 12) raf = requestAnimationFrame(tick);
+      else restoringRef.current = false;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); restoringRef.current = false; };
+  }, [open, items.length]);
+
+
   const markAllRead = () => {
     localStorage.setItem(READ_KEY, String(Date.now()));
     setUnread(0);
