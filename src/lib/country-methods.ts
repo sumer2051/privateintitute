@@ -61,8 +61,8 @@ export const COUNTRY_METHODS: Record<string, CountryMethod[]> = {
     { id: "bacs",            name: "BACS",            tagline: "Batch UK payroll-style", settlement: "3 business days", glyph: "B", accent: "from-emerald-700 to-teal-800", receiptStyle: "confirmation", fields: [BANK, SORT_CODE, { ...ACCOUNT, placeholder: "8 digits" }, { key: "reference", label: "Reference", required: false, placeholder: "e.g. Invoice 204" }, FEE] },
   ],
   EUR: [
-    { id: "sepa",         name: "SEPA Credit Transfer", tagline: "Standard Euro payment", settlement: "Same day – 1 business day", glyph: "S", accent: "from-blue-500 to-cyan-600", receiptStyle: "minimal", fields: [BANK, IBAN, BIC] },
-    { id: "sepa_instant", name: "SEPA Instant",         tagline: "Within 10 seconds",     settlement: "Seconds (24/7)",           glyph: "⚡", accent: "from-amber-400 to-orange-500", receiptStyle: "minimal", fields: [BANK, IBAN, BIC] },
+    { id: "sepa",         name: "SEPA Credit Transfer", tagline: "Standard Euro payment", settlement: "Same day – 1 business day", glyph: "S", accent: "from-blue-500 to-cyan-600", receiptStyle: "confirmation", fields: [BANK, IBAN, BIC, { key: "reference", label: "Reference", required: false, placeholder: "e.g. Invoice 204" }, FEE] },
+    { id: "sepa_instant", name: "SEPA Instant",         tagline: "Within 10 seconds",     settlement: "Seconds (24/7)",           glyph: "⚡", accent: "from-amber-400 to-orange-500", receiptStyle: "confirmation", fields: [BANK, IBAN, BIC, { key: "reference", label: "Reference", required: false, placeholder: "e.g. Rent" }, FEE] },
     { id: "paypal_eu",    name: "PayPal",               tagline: "Friends or Goods & Services", settlement: "Minutes",           glyph: "P", accent: "from-blue-600 to-indigo-700", receiptStyle: "formal", fields: [EMAIL], variants: [{ value: "ff", label: "Friends & Family" }, { value: "gs", label: "Goods & Services" }] },
   ],
   INR: [
