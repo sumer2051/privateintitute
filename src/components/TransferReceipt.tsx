@@ -298,7 +298,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const fee = readFeeFromForm(fields, note, reference);
     const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
     const memo =
-      fields["Reference"] || fields["Payment Reference"] || fields.reference || "";
+      fields["Reference"] || fields["Payment Reference"] || fields.reference || note || "";
     const WRow = ({ label, children }: { label: string; children: ReactNode }) => (
       <div className="border-b border-neutral-200 px-4 py-2">
         <div className="text-[12px] font-bold text-neutral-900">{label}</div>
