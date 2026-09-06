@@ -120,6 +120,8 @@ export const NotificationsBell = () => {
   const [limit, setLimit] = useState(40);
   const [hasMore, setHasMore] = useState(false);
   const limitRef = useRef(40);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const scrollPosRef = useRef(0);
   const navigate = useNavigate();
   const { format, currency } = useCurrency();
 
