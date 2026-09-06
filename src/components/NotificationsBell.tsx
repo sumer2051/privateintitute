@@ -24,6 +24,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { TransactionMapCard } from "@/components/TransactionMapCard";
 import { COUNTRY_METHODS, SWIFT_FALLBACK, type CountryMethod } from "@/lib/country-methods";
 import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
+import { currencyInfo, formatIn } from "@/lib/fx";
 
 interface Notif {
   id: string;
@@ -35,6 +36,7 @@ interface Notif {
   reference_number: string | null;
   recipient_email: string | null;
   recipient_name: string | null;
+  currency: string | null;
   created_at: string | null;
 }
 
@@ -113,6 +115,7 @@ export const NotificationsBell = () => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Notif | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+  const [returnTo, setReturnTo] = useState<Notif | null>(null);
   const [senderName, setSenderName] = useState<string>("You");
   const [limit, setLimit] = useState(40);
   const [hasMore, setHasMore] = useState(false);
@@ -130,7 +133,7 @@ export const NotificationsBell = () => {
     if (!ids.length) return;
     const { data } = await supabase
       .from("transactions")
-      .select("id, category, description, amount, transaction_type, status, reference_number, recipient_email, recipient_name, created_at")
+      .select("id, category, description, amount, transaction_type, status, reference_number, recipient_email, recipient_name, currency, created_at")
       .in("account_id", ids)
       .order("created_at", { ascending: false })
       .limit(limitRef.current);
@@ -153,7 +156,8 @@ export const NotificationsBell = () => {
     setUnread(0);
   };
 
-  const fmt = (n: number) => format(n);
+  /** Show each transaction in the currency it was actually made in. */
+  const fmtTx = (n: Notif) => (n.currency ? formatIn(n.currency, n.amount) : format(n.amount));
 
   const timeAgo = (iso: string | null) => {
     if (!iso) return "";
@@ -166,17 +170,28 @@ export const NotificationsBell = () => {
 
   const selectedMethod = useMemo(() => findMethod(selected?.category), [selected]);
 
+  /** Every other transfer that went to the same recipient name. */
+  const related = useMemo(() => {
+    const name = (selected?.recipient_name || "").trim().toLowerCase();
+    if (!selected || !name) return [] as Notif[];
+    return items.filter(
+      (i) => i.id !== selected.id && (i.recipient_name || "").trim().toLowerCase() === name,
+    );
+  }, [items, selected]);
+
   const openReceipt = () => {
     if (!selected) return;
     const method = selectedMethod || SWIFT_FALLBACK;
     const fields = parseDetails(selected.description);
     if (selected.recipient_name && !fields.recipient_name) fields.recipient_name = selected.recipient_name;
     if (selected.recipient_email && !fields.email) fields.email = selected.recipient_email;
+    const txCur = currencyInfo(selected.currency || currency.code);
     setReceipt({
       method,
-      amount: selected.amount,
-      currencyCode: currency.code,
-      currencySymbol: currency.symbol,
+      // Stored amounts are USD — show the exact figure typed on the form.
+      amount: (Number(selected.amount) || 0) * txCur.rate,
+      currencyCode: txCur.code,
+      currencySymbol: txCur.symbol,
       senderName,
       recipientName: selected.recipient_name || fields.recipient_name || fields.handle || "Recipient",
       recipientEmail: selected.recipient_email || fields.email || "",
@@ -185,6 +200,7 @@ export const NotificationsBell = () => {
       reference: selected.reference_number || selected.id.slice(0, 8).toUpperCase(),
       timestamp: selected.created_at || new Date().toISOString(),
     });
+    setReturnTo(selected);
     setSelected(null);
   };
 
@@ -242,7 +258,7 @@ export const NotificationsBell = () => {
                     <div className="flex items-center justify-between gap-2">
                       <p className="truncate text-sm font-semibold text-secondary">{n.category || "Transaction"}</p>
                       <span className={`text-sm font-bold ${meta.failed ? "text-muted-foreground line-through" : isDebit ? "text-destructive" : "text-success"}`}>
-                        {isDebit ? "-" : "+"}{fmt(n.amount)}
+                        {isDebit ? "-" : "+"}{fmtTx(n)}
                       </span>
                     </div>
                     <p className="truncate text-xs text-muted-foreground">{n.description}</p>
@@ -300,7 +316,7 @@ export const NotificationsBell = () => {
               <div className="rounded-xl border bg-muted/40 p-4">
                 <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Amount</div>
                 <div className={`text-3xl font-bold ${selected.transaction_type === "debit" ? "text-destructive" : "text-success"}`}>
-                  {selected.transaction_type === "debit" ? "-" : "+"}{fmt(selected.amount)}
+                  {selected.transaction_type === "debit" ? "-" : "+"}{fmtTx(selected)}
                 </div>
                 <div className="mt-1 flex items-center gap-2">
                   {(() => {
@@ -374,6 +390,38 @@ export const NotificationsBell = () => {
                 )}
               </div>
 
+              {related.length > 0 && (
+                <div className="rounded-xl border bg-muted/30 p-3">
+                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Other transfers to {selected.recipient_name}
+                  </div>
+                  <div className="space-y-1">
+                    {related.map((r) => {
+                      const rDebit = r.transaction_type === "debit";
+                      const m = statusMeta((r.status || "completed").toLowerCase(), rDebit);
+                      return (
+                        <button
+                          key={r.id}
+                          onClick={() => setSelected(r)}
+                          className="flex w-full items-center justify-between gap-2 rounded-lg bg-background/70 px-2.5 py-2 text-left text-xs hover:bg-background transition"
+                        >
+                          <span className="min-w-0">
+                            <span className="block truncate font-medium text-secondary">{r.category || "Transfer"}</span>
+                            <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${m.pillClass}`}>
+                              {m.label}
+                            </span>
+                            <span className="ml-1 text-muted-foreground">· {timeAgo(r.created_at)}</span>
+                          </span>
+                          <span className={`shrink-0 font-bold ${rDebit ? "text-destructive" : "text-success"}`}>
+                            {rDebit ? "-" : "+"}{fmtTx(r)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => setSelected(null)}>Close</Button>
                 <Button onClick={openReceipt} className="gap-2">
@@ -385,7 +433,18 @@ export const NotificationsBell = () => {
         </DialogContent>
       </Dialog>
 
-      <TransferReceipt open={!!receipt} onClose={() => setReceipt(null)} receipt={receipt} />
+      <TransferReceipt
+        open={!!receipt}
+        onClose={() => {
+          setReceipt(null);
+          // Go back to the notification we came from instead of closing everything.
+          if (returnTo) {
+            setSelected(returnTo);
+            setReturnTo(null);
+          }
+        }}
+        receipt={receipt}
+      />
     </>
   );
 };
