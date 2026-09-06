@@ -122,6 +122,7 @@ export const NotificationsBell = () => {
   const limitRef = useRef(40);
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrollPosRef = useRef(0);
+  const restoringRef = useRef(false);
   const navigate = useNavigate();
   const { format, currency } = useCurrency();
 
