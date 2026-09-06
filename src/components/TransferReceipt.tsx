@@ -269,22 +269,22 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                   <>
                     <div>{recipientName || displayTo}</div>
                     {toLine && <div className="text-neutral-700">{toLine}</div>}
-                    {bankLine && <div className="text-[11px] text-neutral-500">{bankLine}</div>}
+                    {bankLine && <div className="text-neutral-500 text-[13px]">{bankLine}</div>}
                   </>
                 }
               />
-              <div className="flex items-center gap-2 border-b border-neutral-200 px-5 py-2.5">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#2b7a72]">
-                  <Check className="h-3 w-3 text-white" strokeWidth={4} />
+              <div className="flex items-center gap-3 border-b border-neutral-200 px-6 py-4">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#2b7a72]">
+                  <Check className="h-3.5 w-3.5 text-white" strokeWidth={4} />
                 </span>
-                <span className="text-[13px] text-neutral-800">Payee details matched</span>
+                <span className="text-[15px] text-neutral-800">Payee details matched</span>
               </div>
               <Row label="Amount" value={<span className="font-semibold">{amountStr}</span>} />
               {feeStr && <Row label="Fee" value={feeStr} />}
               {totalStr && <Row label="Total" value={<span className="font-semibold">{totalStr}</span>} strong />}
               {payeeRef && <Row label="Reference" value={payeeRef} />}
               <Row label="Payment type" value={method.name} />
-              <Row label="Confirmation" value={<span className="font-mono text-[11px]">{reference}</span>} />
+              <Row label="Confirmation" value={<span className="font-mono text-[13px]">{reference}</span>} />
               <Row
                 label="Date"
                 value={
@@ -295,10 +295,10 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               />
             </div>
 
-            <div className="border-t border-neutral-200 p-3">
+            <div className="border-t border-neutral-200 p-5">
               <button
                 onClick={onClose}
-                className="w-full border border-neutral-400 bg-white py-2.5 text-[14px] text-neutral-900 hover:bg-neutral-50 transition-colors"
+                className="w-full border border-neutral-400 bg-white py-4 text-[17px] text-neutral-900 hover:bg-neutral-50 transition-colors"
               >
                 Make another transfer
               </button>
