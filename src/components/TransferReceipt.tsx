@@ -233,8 +233,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     );
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="max-w-[340px] p-0 overflow-hidden border-0 bg-white sm:rounded-xl [&>button]:hidden">
-          <div className="flex max-h-[94dvh] flex-col overflow-y-auto bg-white">
+        <DialogContent data-brand-skin className="w-[calc(100vw-1rem)] max-w-[340px] max-h-[calc(100dvh-1rem)] p-0 overflow-hidden border-0 bg-white rounded-xl [&>button]:hidden">
+          <div className="flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
             <div className="flex items-center justify-between border-b border-neutral-200 bg-[#f6f6f6] px-4 py-2.5">
               <button onClick={onClose} aria-label="Close"><X className="h-4 w-4 text-neutral-900" strokeWidth={2.5} /></button>
               <div className="text-[15px] font-bold text-neutral-900">Receipt</div>
@@ -245,12 +245,12 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3aab3a]">
                 <Check className="h-5 w-5 text-white" strokeWidth={3.5} />
               </div>
-              <h1 className="mt-2.5 text-[19px] font-bold leading-tight text-neutral-900">
+              <h1 className="mt-2.5 break-words text-[19px] font-bold leading-tight text-neutral-900">
                 Paid {amountStr}
                 <br />to {recipientName || displayTo}
               </h1>
-              {idBits && <div className="text-[13px] text-neutral-800">{idBits}</div>}
-              <div className="mt-1.5 text-[13px] text-neutral-500">Receipt no: {reference}</div>
+              {idBits && <div className="break-all text-[13px] text-neutral-800">{idBits}</div>}
+              <div className="mt-1.5 break-all text-[13px] text-neutral-500">Receipt no: {reference}</div>
 
               <div className="my-3 h-px bg-neutral-200" />
 
@@ -302,13 +302,13 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const WRow = ({ label, children }: { label: string; children: ReactNode }) => (
       <div className="border-b border-neutral-200 px-4 py-2">
         <div className="text-[12px] font-bold text-neutral-900">{label}</div>
-        <div className="text-[13px] text-neutral-600">{children}</div>
+        <div className="break-words text-[13px] text-neutral-600">{children}</div>
       </div>
     );
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="max-w-[340px] p-0 overflow-hidden border-0 bg-white sm:rounded-md [&>button]:hidden">
-          <div className="flex max-h-[94dvh] flex-col overflow-y-auto border-2 border-[#00875a] bg-white">
+        <DialogContent data-brand-skin className="w-[calc(100vw-1rem)] max-w-[340px] max-h-[calc(100dvh-1rem)] p-0 overflow-hidden border-0 bg-white rounded-md [&>button]:hidden">
+          <div className="flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain border-2 border-[#00875a] bg-white">
             <div className="bg-[#00875a] py-2 text-center text-[16px] font-bold text-white">
               Wire Scheduled
             </div>
@@ -323,12 +323,12 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
             </div>
             <WRow label="Reference #">{reference}</WRow>
             <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2">
-              <div>
+              <div className="min-w-0">
                 <div className="text-[12px] font-bold text-neutral-900">Amount</div>
-                <div className="text-[13px] text-neutral-600">{amountStr}</div>
+                <div className="break-all text-[13px] text-neutral-600">{amountStr}</div>
               </div>
               {feeStr && (
-                <div className="text-[12px] font-bold text-neutral-900">+ {feeStr} Service Fee</div>
+                <div className="min-w-0 break-words text-right text-[12px] font-bold text-neutral-900">+ {feeStr} Service Fee</div>
               )}
             </div>
             <WRow label="Send To">{recipientName || displayTo}</WRow>
@@ -373,14 +373,14 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const Row = ({ label, value, strong }: { label: string; value: ReactNode; strong?: boolean }) => (
       <div className="flex items-start justify-between gap-4 border-b border-neutral-200 px-5 py-2.5 last:border-b-0">
         <div className="text-[13px] text-neutral-800">{label}</div>
-        <div className={`max-w-[68%] break-words text-right text-[13px] leading-tight ${strong ? "font-semibold text-neutral-900" : "text-neutral-900"}`}>{value}</div>
+        <div className={`min-w-0 max-w-[68%] break-words text-right text-[13px] leading-tight ${strong ? "font-semibold text-neutral-900" : "text-neutral-900"}`}>{value}</div>
       </div>
     );
 
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="max-w-sm p-0 overflow-hidden border-0 bg-white sm:rounded-xl [&>button]:hidden">
-          <div className="flex max-h-[96dvh] flex-col overflow-y-auto bg-white">
+        <DialogContent data-brand-skin className="w-[calc(100vw-1rem)] max-w-sm max-h-[calc(100dvh-1rem)] p-0 overflow-hidden border-0 bg-white rounded-xl [&>button]:hidden">
+          <div className="flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
             <div className="border-b border-neutral-200 py-2.5 text-center text-[15px] font-bold text-neutral-900">
               {method.id === "ach" ? "Confirm" : "Confirmation"}
             </div>
