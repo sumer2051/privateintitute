@@ -289,7 +289,7 @@ export const NotificationsBell = () => {
       </Popover>
 
       {/* Notification detail dialog */}
-      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+      <Dialog open={!!selected} onOpenChange={(o) => { if (!o) { setSelected(null); setOpen(true); } }}>
         <DialogContent className="w-[calc(100vw-1rem)] max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain p-4 sm:p-6">
           {selected && (
             <>
