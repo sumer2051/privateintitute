@@ -228,26 +228,26 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const bankLine = accountBits[0] || "";
 
     const Row = ({ label, value, strong }: { label: string; value: ReactNode; strong?: boolean }) => (
-      <div className="flex items-start justify-between gap-6 border-b border-neutral-200 px-6 py-4 last:border-b-0">
-        <div className="text-[15px] text-neutral-800">{label}</div>
-        <div className={`text-right text-[15px] ${strong ? "font-semibold text-neutral-900" : "text-neutral-900"}`}>{value}</div>
+      <div className="flex items-start justify-between gap-4 border-b border-neutral-200 px-5 py-2.5 last:border-b-0">
+        <div className="text-[13px] text-neutral-800">{label}</div>
+        <div className={`max-w-[68%] break-words text-right text-[13px] leading-tight ${strong ? "font-semibold text-neutral-900" : "text-neutral-900"}`}>{value}</div>
       </div>
     );
 
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="max-w-md p-0 overflow-hidden border-0 bg-white sm:rounded-2xl [&>button]:hidden">
-          <div className="flex max-h-[92dvh] flex-col overflow-y-auto bg-white">
-            <div className="border-b border-neutral-200 py-4 text-center text-[17px] font-bold text-neutral-900">
+        <DialogContent data-brand-skin className="max-w-sm p-0 overflow-hidden border-0 bg-white sm:rounded-xl [&>button]:hidden">
+          <div className="flex max-h-[96dvh] flex-col overflow-y-auto bg-white">
+            <div className="border-b border-neutral-200 py-2.5 text-center text-[15px] font-bold text-neutral-900">
               Confirmation
             </div>
 
-            <div className="px-6 pt-8 pb-6 text-center">
-              <div className="mx-auto flex h-[68px] w-[68px] items-center justify-center rounded-full bg-[#2b7a72]">
-                <Check className="h-9 w-9 text-white" strokeWidth={3} />
+            <div className="px-5 py-3.5 text-center">
+              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[#2b7a72]">
+                <Check className="h-6 w-6 text-white" strokeWidth={3} />
               </div>
-              <h1 className="mt-5 text-[34px] font-normal leading-tight text-neutral-900">Thank you</h1>
-              <p className="mx-auto mt-3 max-w-[330px] text-[16px] leading-snug text-neutral-800">
+              <h1 className="mt-2 text-[24px] font-normal leading-tight text-neutral-900">Thank you</h1>
+              <p className="mx-auto mt-1.5 max-w-[310px] text-[12px] leading-snug text-neutral-800">
                 Your instruction has been sent and will be credited to the payees account
                 {method.settlement ? ` ${method.settlement.toLowerCase()}` : " immediately"}, subject to our standard checks. This cannot be recalled.
               </p>
@@ -269,22 +269,22 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                   <>
                     <div>{recipientName || displayTo}</div>
                     {toLine && <div className="text-neutral-700">{toLine}</div>}
-                    {bankLine && <div className="text-neutral-500 text-[13px]">{bankLine}</div>}
+                    {bankLine && <div className="text-[11px] text-neutral-500">{bankLine}</div>}
                   </>
                 }
               />
-              <div className="flex items-center gap-3 border-b border-neutral-200 px-6 py-4">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#2b7a72]">
-                  <Check className="h-3.5 w-3.5 text-white" strokeWidth={4} />
+              <div className="flex items-center gap-2 border-b border-neutral-200 px-5 py-2.5">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#2b7a72]">
+                  <Check className="h-3 w-3 text-white" strokeWidth={4} />
                 </span>
-                <span className="text-[15px] text-neutral-800">Payee details matched</span>
+                <span className="text-[13px] text-neutral-800">Payee details matched</span>
               </div>
               <Row label="Amount" value={<span className="font-semibold">{amountStr}</span>} />
               {feeStr && <Row label="Fee" value={feeStr} />}
               {totalStr && <Row label="Total" value={<span className="font-semibold">{totalStr}</span>} strong />}
               {payeeRef && <Row label="Reference" value={payeeRef} />}
               <Row label="Payment type" value={method.name} />
-              <Row label="Confirmation" value={<span className="font-mono text-[13px]">{reference}</span>} />
+              <Row label="Confirmation" value={<span className="font-mono text-[11px]">{reference}</span>} />
               <Row
                 label="Date"
                 value={
@@ -295,10 +295,10 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               />
             </div>
 
-            <div className="border-t border-neutral-200 p-5">
+            <div className="border-t border-neutral-200 p-3">
               <button
                 onClick={onClose}
-                className="w-full border border-neutral-400 bg-white py-4 text-[17px] text-neutral-900 hover:bg-neutral-50 transition-colors"
+                className="w-full border border-neutral-400 bg-white py-2.5 text-[14px] text-neutral-900 hover:bg-neutral-50 transition-colors"
               >
                 Make another transfer
               </button>
