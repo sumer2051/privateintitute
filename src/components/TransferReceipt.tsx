@@ -298,7 +298,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const fee = readFeeFromForm(fields, note, reference);
     const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
     const memo =
-      fields["Reference"] || fields["Payment Reference"] || fields.reference || "";
+      fields["Reference"] || fields["Payment Reference"] || fields.reference || note || "";
     const WRow = ({ label, children }: { label: string; children: ReactNode }) => (
       <div className="border-b border-neutral-200 px-4 py-2">
         <div className="text-[12px] font-bold text-neutral-900">{label}</div>
@@ -538,7 +538,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                   <span className="font-medium">{v}</span>
                 </div>
               ))}
-              
+              {note && <div className="flex justify-between"><span className="text-muted-foreground">Note</span><span className="font-medium text-right">{note}</span></div>}
               <div className="flex justify-between pt-2 border-t"><span className="text-muted-foreground">Reference</span><span className="font-mono text-xs">{reference}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Sent</span><span>{new Date(timestamp).toLocaleString()}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Receipt to</span><span>{recipientEmail}</span></div>
