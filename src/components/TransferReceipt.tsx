@@ -44,6 +44,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   const isPayPal = method.id === "paypal" || method.id === "paypal_uk" || method.id === "paypal_eu";
   const isZelle = method.id === "zelle";
   const displayTo = recipientName || fields.handle || fields.recipient_name || fields.email || fields.wallet_id || fields.upi_id || fields.pix_key || fields.payid || recipientEmail || "recipient";
+  const fittedReceiptShell = "ios-safe-sheet top-0 left-0 right-0 bottom-0 translate-x-0 translate-y-0 h-[100dvh] w-screen max-w-none rounded-none p-0 overflow-hidden sm:top-1/2 sm:left-1/2 sm:right-auto sm:bottom-auto sm:-translate-x-1/2 sm:-translate-y-1/2 sm:h-auto sm:max-h-[calc(100dvh-1rem)] sm:w-full sm:max-w-[380px] sm:rounded-2xl";
 
 
   if (isZelle) {
@@ -53,8 +54,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const contact = fields.email || fields.phone || recipientEmail || "";
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="w-[calc(100vw-1rem)] max-w-md max-h-[calc(100dvh-1rem)] p-0 overflow-hidden border-0 bg-[#f4f5f7] sm:rounded-2xl [&>button]:hidden">
-          <div className="flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain sm:min-h-[min(640px,calc(100dvh-1rem))]">
+        <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-[#f4f5f7] [&>button]:hidden`}>
+          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain sm:min-h-[min(640px,calc(100dvh-1rem))]">
             <div className="flex items-center justify-between bg-[#2a5c99] px-4 py-3 text-white">
               <div className="flex flex-col gap-1">
                 <span className="block h-0.5 w-5 bg-white" />
@@ -107,8 +108,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const firstName = (recipientName || displayTo).split(" ")[0];
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="w-[calc(100vw-1rem)] max-w-md max-h-[calc(100dvh-1rem)] p-0 overflow-hidden border-0 bg-white sm:rounded-2xl [&>button]:hidden">
-          <div className="relative flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white sm:min-h-[min(620px,calc(100dvh-1rem))]">
+        <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
+          <div className="relative flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white sm:min-h-[min(620px,calc(100dvh-1rem))]">
             <button
               onClick={onClose}
               aria-label="Close"
@@ -181,7 +182,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent data-brand-skin
-          className="ios-safe-sheet p-0 gap-0 overflow-hidden border-0 bg-black text-white [&>button]:hidden top-0 left-0 right-0 bottom-0 translate-x-0 translate-y-0 w-screen h-[100dvh] max-w-none rounded-none sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:h-auto sm:max-w-[380px] sm:min-h-[640px] sm:rounded-3xl"
+          className={`${fittedReceiptShell} gap-0 border-0 bg-black text-white [&>button]:hidden sm:min-h-[min(640px,calc(100dvh-1rem))] sm:rounded-3xl`}
         >
           <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-5 pb-5 pt-4 sm:min-h-[min(640px,calc(100dvh-1rem))]">
             <button
@@ -233,8 +234,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     );
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="w-[calc(100vw-1rem)] max-w-[340px] max-h-[calc(100dvh-1rem)] p-0 overflow-hidden border-0 bg-white rounded-xl [&>button]:hidden">
-          <div className="flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
+        <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
+          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
             <div className="flex items-center justify-between border-b border-neutral-200 bg-[#f6f6f6] px-4 py-2.5">
               <button onClick={onClose} aria-label="Close"><X className="h-4 w-4 text-neutral-900" strokeWidth={2.5} /></button>
               <div className="text-[15px] font-bold text-neutral-900">Receipt</div>
@@ -307,8 +308,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     );
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="w-[calc(100vw-1rem)] max-w-[340px] max-h-[calc(100dvh-1rem)] p-0 overflow-hidden border-0 bg-white rounded-md [&>button]:hidden">
-          <div className="flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain border-2 border-[#00875a] bg-white">
+        <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden sm:rounded-md`}>
+          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain border-2 border-[#00875a] bg-white">
             <div className="bg-[#00875a] py-2 text-center text-[16px] font-bold text-white">
               Wire Scheduled
             </div>
@@ -379,8 +380,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
 
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent data-brand-skin className="w-[calc(100vw-1rem)] max-w-sm max-h-[calc(100dvh-1rem)] p-0 overflow-hidden border-0 bg-white rounded-xl [&>button]:hidden">
-          <div className="flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
+        <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
+          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
             <div className="border-b border-neutral-200 py-2.5 text-center text-[15px] font-bold text-neutral-900">
               {method.id === "ach" ? "Confirm" : "Confirmation"}
             </div>
@@ -480,8 +481,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="w-[calc(100vw-1rem)] max-w-md max-h-[calc(100dvh-1rem)] p-0 overflow-hidden">
-        <div className="max-h-[calc(100dvh-1rem)] min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain">
+      <DialogContent className={fittedReceiptShell}>
+        <div className="h-full min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain">
         {style === "casual" && (
           <div className="bg-white">
             <div className={`bg-gradient-to-br ${method.accent} p-6 text-white`}>
