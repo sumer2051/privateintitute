@@ -120,6 +120,8 @@ export const NotificationsBell = () => {
   const [limit, setLimit] = useState(40);
   const [hasMore, setHasMore] = useState(false);
   const limitRef = useRef(40);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const scrollPosRef = useRef(0);
   const navigate = useNavigate();
   const { format, currency } = useCurrency();
 
@@ -238,7 +240,17 @@ export const NotificationsBell = () => {
               View transfers
             </Button>
           </div>
-          <div className="max-h-[min(70vh,26rem)] overflow-y-auto overscroll-contain">
+          <div
+            ref={(el) => {
+              listRef.current = el;
+              // Restore the position the user was at before opening a transaction.
+              if (el && scrollPosRef.current > 0) {
+                requestAnimationFrame(() => { el.scrollTop = scrollPosRef.current; });
+              }
+            }}
+            onScroll={(e) => { scrollPosRef.current = (e.target as HTMLDivElement).scrollTop; }}
+            className="max-h-[min(70vh,26rem)] overflow-y-auto overscroll-contain"
+          >
             {items.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">No notifications yet.</div>
             ) : items.map((n) => {
