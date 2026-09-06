@@ -122,6 +122,7 @@ export const NotificationsBell = () => {
   const limitRef = useRef(40);
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrollPosRef = useRef(0);
+  const restoringRef = useRef(false);
   const navigate = useNavigate();
   const { format, currency } = useCurrency();
 
@@ -152,6 +153,26 @@ export const NotificationsBell = () => {
     const t = setInterval(fetchItems, 20000);
     return () => clearInterval(t);
   }, [limit]);
+
+  // Every time the list re-opens, put it back where the user left off.
+  useEffect(() => {
+    if (!open) return;
+    const target = scrollPosRef.current;
+    if (target <= 0) return;
+    restoringRef.current = true;
+    let frames = 0;
+    let raf = 0;
+    const tick = () => {
+      const el = listRef.current;
+      if (el) el.scrollTop = target;
+      frames += 1;
+      if (frames < 12) raf = requestAnimationFrame(tick);
+      else restoringRef.current = false;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); restoringRef.current = false; };
+  }, [open, items.length]);
+
 
   const markAllRead = () => {
     localStorage.setItem(READ_KEY, String(Date.now()));
@@ -241,14 +262,12 @@ export const NotificationsBell = () => {
             </Button>
           </div>
           <div
-            ref={(el) => {
-              listRef.current = el;
-              // Restore the position the user was at before opening a transaction.
-              if (el && scrollPosRef.current > 0) {
-                requestAnimationFrame(() => { el.scrollTop = scrollPosRef.current; });
-              }
+            ref={(el) => { listRef.current = el; }}
+            onScroll={(e) => {
+              // Ignore the browser's reset-to-top while we are re-opening the list.
+              if (restoringRef.current) return;
+              scrollPosRef.current = (e.target as HTMLDivElement).scrollTop;
             }}
-            onScroll={(e) => { scrollPosRef.current = (e.target as HTMLDivElement).scrollTop; }}
             className="max-h-[min(70vh,26rem)] overflow-y-auto overscroll-contain"
           >
             {items.length === 0 ? (
