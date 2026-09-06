@@ -132,7 +132,7 @@ export const NotificationsBell = () => {
     if (!ids.length) return;
     const { data } = await supabase
       .from("transactions")
-      .select("id, category, description, amount, transaction_type, status, reference_number, recipient_email, recipient_name, created_at")
+      .select("id, category, description, amount, transaction_type, status, reference_number, recipient_email, recipient_name, currency, created_at")
       .in("account_id", ids)
       .order("created_at", { ascending: false })
       .limit(limitRef.current);
