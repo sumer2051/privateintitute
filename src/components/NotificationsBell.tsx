@@ -115,6 +115,7 @@ export const NotificationsBell = () => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Notif | null>(null);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+  const [returnTo, setReturnTo] = useState<Notif | null>(null);
   const [senderName, setSenderName] = useState<string>("You");
   const [limit, setLimit] = useState(40);
   const [hasMore, setHasMore] = useState(false);
@@ -175,11 +176,13 @@ export const NotificationsBell = () => {
     const fields = parseDetails(selected.description);
     if (selected.recipient_name && !fields.recipient_name) fields.recipient_name = selected.recipient_name;
     if (selected.recipient_email && !fields.email) fields.email = selected.recipient_email;
+    const txCur = currencyInfo(selected.currency || currency.code);
     setReceipt({
       method,
-      amount: selected.amount,
-      currencyCode: currency.code,
-      currencySymbol: currency.symbol,
+      // Stored amounts are USD — show the exact figure typed on the form.
+      amount: (Number(selected.amount) || 0) * txCur.rate,
+      currencyCode: txCur.code,
+      currencySymbol: txCur.symbol,
       senderName,
       recipientName: selected.recipient_name || fields.recipient_name || fields.handle || "Recipient",
       recipientEmail: selected.recipient_email || fields.email || "",
@@ -188,6 +191,7 @@ export const NotificationsBell = () => {
       reference: selected.reference_number || selected.id.slice(0, 8).toUpperCase(),
       timestamp: selected.created_at || new Date().toISOString(),
     });
+    setReturnTo(selected);
     setSelected(null);
   };
 
@@ -245,7 +249,7 @@ export const NotificationsBell = () => {
                     <div className="flex items-center justify-between gap-2">
                       <p className="truncate text-sm font-semibold text-secondary">{n.category || "Transaction"}</p>
                       <span className={`text-sm font-bold ${meta.failed ? "text-muted-foreground line-through" : isDebit ? "text-destructive" : "text-success"}`}>
-                        {isDebit ? "-" : "+"}{fmt(n.amount)}
+                        {isDebit ? "-" : "+"}{fmtTx(n)}
                       </span>
                     </div>
                     <p className="truncate text-xs text-muted-foreground">{n.description}</p>
@@ -303,7 +307,7 @@ export const NotificationsBell = () => {
               <div className="rounded-xl border bg-muted/40 p-4">
                 <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Amount</div>
                 <div className={`text-3xl font-bold ${selected.transaction_type === "debit" ? "text-destructive" : "text-success"}`}>
-                  {selected.transaction_type === "debit" ? "-" : "+"}{fmt(selected.amount)}
+                  {selected.transaction_type === "debit" ? "-" : "+"}{fmtTx(selected)}
                 </div>
                 <div className="mt-1 flex items-center gap-2">
                   {(() => {
@@ -388,7 +392,18 @@ export const NotificationsBell = () => {
         </DialogContent>
       </Dialog>
 
-      <TransferReceipt open={!!receipt} onClose={() => setReceipt(null)} receipt={receipt} />
+      <TransferReceipt
+        open={!!receipt}
+        onClose={() => {
+          setReceipt(null);
+          // Go back to the notification we came from instead of closing everything.
+          if (returnTo) {
+            setSelected(returnTo);
+            setReturnTo(null);
+          }
+        }}
+        receipt={receipt}
+      />
     </>
   );
 };
