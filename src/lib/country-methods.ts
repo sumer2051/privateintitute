@@ -10,7 +10,7 @@
  */
 import type { BankField } from "./bank-profiles";
 
-export type ReceiptStyle = "casual" | "formal" | "minimal";
+export type ReceiptStyle = "casual" | "formal" | "minimal" | "confirmation";
 
 export interface CountryMethod {
   id: string;
