@@ -88,7 +88,7 @@ export const COUNTRY_METHODS: Record<string, CountryMethod[]> = {
     { id: "eft_za",   name: "Bank Transfer (EFT)", tagline: "Standard South African EFT", settlement: "1–2 business days", glyph: "E", accent: "from-amber-600 to-yellow-700", receiptStyle: "confirmation", fields: [BANK, { key: "branch_code", label: "Branch Code", inputMode: "numeric", required: true, placeholder: "6 digits" }, ACCOUNT] },
   ],
   AUD: [
-    { id: "payid", name: "PayID / Osko", tagline: "Near-instant Australian transfer", settlement: "Near-instant",  glyph: "P", accent: "from-emerald-500 to-teal-600", receiptStyle: "minimal", fields: [{ key: "payid", label: "PayID (phone / email / ABN)", required: true, placeholder: "name@email.com or +61…" }] },
+    { id: "payid", name: "PayID / Osko", tagline: "Near-instant Australian transfer", settlement: "Near-instant",  glyph: "P", accent: "from-emerald-500 to-teal-600", receiptStyle: "confirmation", fields: [{ key: "payid", label: "PayID (phone / email / ABN)", required: true, placeholder: "name@email.com or +61…" }] },
     { id: "wire_au", name: "Wire Transfer", tagline: "Bank wire (BSB + Account)",  settlement: "1 business day", glyph: "W", accent: "from-slate-700 to-slate-900", receiptStyle: "formal", fields: [BANK, { key: "bsb", label: "BSB", inputMode: "numeric", required: true, placeholder: "000-000" }, ACCOUNT] },
   ],
   JPY: [

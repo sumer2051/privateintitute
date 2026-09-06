@@ -288,7 +288,52 @@ const Transfers = () => {
       setExtAmount(""); setExtRecipient(""); setExtEmail(""); setExtFields({}); setExtMemo("");
       setExtOpen(false);
 
-      if (data) setSelectedTx(data as PendingTx);
+      if (data) {
+        const { data: authRow } = await supabase.auth.getUser();
+        const authUser = authRow?.user;
+        let profileName = "";
+        if (authUser?.id) {
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", authUser.id)
+            .maybeSingle();
+          profileName = (prof?.full_name || "").trim();
+        }
+        const senderName =
+          profileName ||
+          ((authUser?.user_metadata?.full_name as string) || "").trim() ||
+          (authUser?.email ?? "You");
+
+        const extMethod: CountryMethod = {
+          id: profile.id,
+          name: profile.scheme,
+          tagline: profile.tagline,
+          settlement: profile.settlement,
+          glyph: "E",
+          accent: "from-slate-700 to-slate-900",
+          receiptStyle:
+            /wire|swift/i.test(profile.id) || /wire|swift/i.test(profile.scheme)
+              ? "formal"
+              : "confirmation",
+          fields: profile.fields,
+        };
+        playSound("moneyOut");
+        setReceipt({
+          method: extMethod,
+          amount: amtDisplay,
+          currencyCode: currency.code,
+          currencySymbol: currency.symbol,
+          senderName,
+          recipientName: extRecipient,
+          recipientEmail: extEmail,
+          fields: details,
+          note: extMemo || undefined,
+          reference: ref,
+          timestamp: new Date().toISOString(),
+          fromLabel: `${fromAcc.account_name} ****${fromAcc.account_number}`,
+        });
+      }
       fetchAccounts();
       fetchPending();
     } catch (err: any) {
