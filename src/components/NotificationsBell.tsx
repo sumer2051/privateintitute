@@ -241,14 +241,12 @@ export const NotificationsBell = () => {
             </Button>
           </div>
           <div
-            ref={(el) => {
-              listRef.current = el;
-              // Restore the position the user was at before opening a transaction.
-              if (el && scrollPosRef.current > 0) {
-                requestAnimationFrame(() => { el.scrollTop = scrollPosRef.current; });
-              }
+            ref={(el) => { listRef.current = el; }}
+            onScroll={(e) => {
+              // Ignore the browser's reset-to-top while we are re-opening the list.
+              if (restoringRef.current) return;
+              scrollPosRef.current = (e.target as HTMLDivElement).scrollTop;
             }}
-            onScroll={(e) => { scrollPosRef.current = (e.target as HTMLDivElement).scrollTop; }}
             className="max-h-[min(70vh,26rem)] overflow-y-auto overscroll-contain"
           >
             {items.length === 0 ? (
