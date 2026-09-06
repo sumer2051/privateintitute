@@ -215,6 +215,73 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     );
   }
 
+  const isWire = /wire|swift|uaefts/i.test(method.id) || /wire|swift/i.test(method.name);
+  if (isWire) {
+    const fee = readFeeFromForm(fields, note, reference);
+    const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
+    const memo =
+      fields["Reference"] || fields["Payment Reference"] || fields.reference || note || "";
+    const WRow = ({ label, children }: { label: string; children: ReactNode }) => (
+      <div className="border-b border-neutral-200 px-4 py-2">
+        <div className="text-[12px] font-bold text-neutral-900">{label}</div>
+        <div className="text-[13px] text-neutral-600">{children}</div>
+      </div>
+    );
+    return (
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent data-brand-skin className="max-w-[340px] p-0 overflow-hidden border-0 bg-white sm:rounded-md [&>button]:hidden">
+          <div className="flex max-h-[94dvh] flex-col overflow-y-auto border-2 border-[#00875a] bg-white">
+            <div className="bg-[#00875a] py-2 text-center text-[16px] font-bold text-white">
+              Wire Scheduled
+            </div>
+            <div className="border-b border-neutral-200 px-5 py-3 text-center">
+              <div className="mx-auto flex h-7 w-7 items-center justify-center rounded-full bg-[#00875a]">
+                <Check className="h-4 w-4 text-white" strokeWidth={3.5} />
+              </div>
+              <h1 className="mt-2 text-[15px] font-bold text-neutral-900">Wire successfully scheduled!</h1>
+              <p className="mt-1 text-[13px] leading-snug text-neutral-500">
+                We're processing your {amountStr} wire transfer now.
+              </p>
+            </div>
+            <WRow label="Reference #">{reference}</WRow>
+            <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2">
+              <div>
+                <div className="text-[12px] font-bold text-neutral-900">Amount</div>
+                <div className="text-[13px] text-neutral-600">{amountStr}</div>
+              </div>
+              {feeStr && (
+                <div className="text-[12px] font-bold text-neutral-900">+ {feeStr} Service Fee</div>
+              )}
+            </div>
+            <WRow label="Send To">{recipientName || displayTo}</WRow>
+            <WRow label="Send From">{fromLabel || senderName}</WRow>
+            <WRow label="Frequency">One Time</WRow>
+            <WRow label="Send By">
+              {new Date(timestamp).toDateString() === new Date().toDateString()
+                ? "Today"
+                : new Date(timestamp).toLocaleDateString()}
+            </WRow>
+            {memo && <WRow label="Memo">{memo}</WRow>}
+            <p className="px-4 py-2.5 text-[9px] font-semibold leading-snug text-neutral-700">
+              I certify that I am authorized to initiate this transaction and authorize the bank to
+              process this transaction in reliance on the above instructions I provided. I understand
+              this transaction is subject to the above fee, must comply with applicable laws and
+              regulations, and is subject to my account and Digital Banking Terms and Conditions.
+            </p>
+            <div className="px-3 pb-3">
+              <button
+                onClick={onClose}
+                className="w-full bg-[#e8740c] py-2.5 text-[15px] font-bold text-white hover:bg-[#d16a0a] transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   if (style === "confirmation") {
     const fee = readFeeFromForm(fields, note, reference);
     const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
