@@ -155,7 +155,8 @@ export const NotificationsBell = () => {
     setUnread(0);
   };
 
-  const fmt = (n: number) => format(n);
+  /** Show each transaction in the currency it was actually made in. */
+  const fmtTx = (n: Notif) => (n.currency ? formatIn(n.currency, n.amount) : format(n.amount));
 
   const timeAgo = (iso: string | null) => {
     if (!iso) return "";
