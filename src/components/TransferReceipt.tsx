@@ -1,10 +1,59 @@
-import type { ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, ShieldCheck, ArrowRight, Sparkles, X, Clock, Briefcase } from "lucide-react";
 import type { CountryMethod } from "@/lib/country-methods";
 import { readFeeFromForm, isFeeField } from "@/lib/fees";
+
+/**
+ * Keeps a receipt at its full, generous design size but shrinks it
+ * proportionally when it would be taller than the screen — so it always
+ * fits on one screen with no scrolling.
+ */
+const FitBox = ({ children }: { children: ReactNode }) => {
+  const boxRef = useRef<HTMLDivElement | null>(null);
+  const innerRef = useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = useState(1);
+
+  const measure = useCallback(() => {
+    const box = boxRef.current;
+    const inner = innerRef.current;
+    if (!box || !inner) return;
+    const availH = box.clientHeight;
+    const contentH = inner.scrollHeight;
+    if (!availH || !contentH) return;
+    const next = Math.min(1, availH / contentH);
+    setScale((prev) => (Math.abs(prev - next) > 0.005 ? next : prev));
+  }, []);
+
+  useLayoutEffect(() => {
+    measure();
+    const ro = new ResizeObserver(() => measure());
+    if (boxRef.current) ro.observe(boxRef.current);
+    if (innerRef.current) ro.observe(innerRef.current);
+    return () => ro.disconnect();
+  }, [measure]);
+
+  useEffect(() => {
+    const t = setTimeout(measure, 120);
+    window.addEventListener("resize", measure);
+    return () => { clearTimeout(t); window.removeEventListener("resize", measure); };
+  }, [measure]);
+
+  return (
+    <div ref={boxRef} className="flex h-full w-full min-w-0 items-start justify-center overflow-hidden">
+      <div
+        ref={innerRef}
+        style={{ transform: `scale(${scale})`, transformOrigin: "top center", width: "100%" }}
+        className="min-w-0"
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 
 export interface ReceiptData {
   method: CountryMethod;
@@ -230,30 +279,31 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const initials = vName.split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
     const bankName = findField(/\bbank\b|bank name/i) || fields.bank || "";
     const VRow = ({ label, children }: { label: string; children: ReactNode }) => (
-      <div className="mt-3">
-        <div className="text-[13px] text-neutral-900">{label}</div>
-        <div className="mt-0.5 break-words text-[16px] font-semibold leading-snug text-neutral-900">{children}</div>
+      <div className="mt-5">
+        <div className="text-[15px] text-neutral-900">{label}</div>
+        <div className="mt-1 break-words text-[18px] font-semibold leading-snug text-neutral-900">{children}</div>
       </div>
     );
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
-          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
+          <FitBox>
+          <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-white">
             {/* Header */}
-            <div className="relative flex items-center justify-center border-b border-neutral-100 px-4 py-2.5">
+            <div className="relative flex items-center justify-center border-b border-neutral-100 px-4 py-3.5">
               <button onClick={onClose} aria-label="Back" className="absolute left-3 flex h-8 w-8 items-center justify-center text-neutral-700 hover:text-black">
                 <ArrowRight className="h-5 w-5 rotate-180" strokeWidth={2} />
               </button>
-              <div className="text-[15px] font-medium text-neutral-900">Payment details</div>
+              <div className="text-[17px] font-medium text-neutral-900">Payment details</div>
             </div>
 
             {/* Recipient + amount */}
-            <div className="flex flex-col items-center px-4 pt-4 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-300 text-[20px] font-semibold text-neutral-700">
+            <div className="flex flex-col items-center px-4 pt-6 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-neutral-300 text-[26px] font-semibold text-neutral-700">
                 {initials || "•"}
               </div>
-              <h1 className="mt-2 break-words text-[22px] font-bold leading-tight text-neutral-900">{vName}</h1>
-              <div className="mt-1.5 text-[26px] font-bold text-[#d02a2e]">
+              <h1 className="mt-3 break-words text-[28px] font-bold leading-tight text-neutral-900">{vName}</h1>
+              <div className="mt-2 text-[34px] font-bold text-[#d02a2e]">
                 - {amountStr.replace(/^[−-]\s*/, "")}
               </div>
               {feeStr && (
@@ -265,7 +315,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
 
             {/* Social activity */}
             <div className="px-4 pt-3">
-              <div className="text-[15px] text-neutral-900">Social activity</div>
+              <div className="text-[16px] text-neutral-900">Social activity</div>
               <div className="mt-1.5 flex items-center gap-5 text-neutral-400">
                 <span className="flex items-center gap-1.5 text-[15px]">
                   <svg viewBox="0 0 24 24" className="h-4 w-4 fill-neutral-400"><path d="M12 21s-8-5.5-8-11a4.5 4.5 0 0 1 8-3 4.5 4.5 0 0 1 8 3c0 5.5-8 11-8 11z" /></svg>
@@ -310,6 +360,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               </VRow>
             </div>
           </div>
+          </FitBox>
         </DialogContent>
       </Dialog>
     );
@@ -334,7 +385,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
-          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
+          <FitBox>
+          <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-white">
             <div className="flex items-center justify-between border-b border-neutral-200 bg-[#f6f6f6] px-4 py-2.5">
               <button onClick={onClose} aria-label="Close"><X className="h-4 w-4 text-neutral-900" strokeWidth={2.5} /></button>
               <div className="text-[15px] font-bold text-neutral-900">Receipt</div>
@@ -388,6 +440,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               </button>
             </div>
           </div>
+          </FitBox>
         </DialogContent>
       </Dialog>
     );
@@ -408,7 +461,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden sm:rounded-md`}>
-          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain border-2 border-[#00875a] bg-white">
+          <FitBox>
+          <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden border-2 border-[#00875a] bg-white">
             <div className="bg-[#00875a] py-2 text-center text-[16px] font-bold text-white">
               Wire Scheduled
             </div>
@@ -440,7 +494,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 : new Date(timestamp).toLocaleDateString()}
             </WRow>
             {memo && <WRow label="Memo">{memo}</WRow>}
-            <p className="px-4 py-2.5 text-[9px] font-semibold leading-snug text-neutral-700">
+            <p className="px-4 py-2.5 text-[11px] font-semibold leading-snug text-neutral-700">
               I certify that I am authorized to initiate this transaction and authorize the bank to
               process this transaction in reliance on the above instructions I provided. I understand
               this transaction is subject to the above fee, must comply with applicable laws and
@@ -455,6 +509,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               </button>
             </div>
           </div>
+          </FitBox>
         </DialogContent>
       </Dialog>
     );
@@ -480,7 +535,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
-          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
+          <FitBox>
+          <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-white">
             <div className="border-b border-neutral-200 py-2.5 text-center text-[15px] font-bold text-neutral-900">
               {method.id === "ach" ? "Confirm" : "Confirmation"}
             </div>
@@ -572,6 +628,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               </button>
             </div>
           </div>
+          </FitBox>
         </DialogContent>
       </Dialog>
     );
