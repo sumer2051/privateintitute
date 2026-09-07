@@ -279,6 +279,8 @@ function venmoTemplate(c: Ctx) {
       ${label("Destination")}
       ${value(destination)}
 
+      ${c.memo ? `${label("Note")}${value(escapeHtml(c.memo))}` : ""}
+
       ${label("Transaction ID")}
       ${value(txId)}
 
