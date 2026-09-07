@@ -287,7 +287,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
-          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
+          <FitBox>
+          <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-white">
             {/* Header */}
             <div className="relative flex items-center justify-center border-b border-neutral-100 px-4 py-2.5">
               <button onClick={onClose} aria-label="Back" className="absolute left-3 flex h-8 w-8 items-center justify-center text-neutral-700 hover:text-black">
@@ -359,6 +360,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               </VRow>
             </div>
           </div>
+          </FitBox>
         </DialogContent>
       </Dialog>
     );
@@ -383,7 +385,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
-          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
+          <FitBox>
+          <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-white">
             <div className="flex items-center justify-between border-b border-neutral-200 bg-[#f6f6f6] px-4 py-2.5">
               <button onClick={onClose} aria-label="Close"><X className="h-4 w-4 text-neutral-900" strokeWidth={2.5} /></button>
               <div className="text-[15px] font-bold text-neutral-900">Receipt</div>
@@ -437,6 +440,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               </button>
             </div>
           </div>
+          </FitBox>
         </DialogContent>
       </Dialog>
     );
@@ -457,7 +461,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden sm:rounded-md`}>
-          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain border-2 border-[#00875a] bg-white">
+          <FitBox>
+          <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden border-2 border-[#00875a] bg-white">
             <div className="bg-[#00875a] py-2 text-center text-[16px] font-bold text-white">
               Wire Scheduled
             </div>
@@ -504,6 +509,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               </button>
             </div>
           </div>
+          </FitBox>
         </DialogContent>
       </Dialog>
     );
@@ -529,7 +535,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     return (
       <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
-          <div className="flex h-full min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-white">
+          <FitBox>
+          <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-white">
             <div className="border-b border-neutral-200 py-2.5 text-center text-[15px] font-bold text-neutral-900">
               {method.id === "ach" ? "Confirm" : "Confirmation"}
             </div>
@@ -621,6 +628,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               </button>
             </div>
           </div>
+          </FitBox>
         </DialogContent>
       </Dialog>
     );
