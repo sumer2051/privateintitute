@@ -1,10 +1,59 @@
-import type { ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, ShieldCheck, ArrowRight, Sparkles, X, Clock, Briefcase } from "lucide-react";
 import type { CountryMethod } from "@/lib/country-methods";
 import { readFeeFromForm, isFeeField } from "@/lib/fees";
+
+/**
+ * Keeps a receipt at its full, generous design size but shrinks it
+ * proportionally when it would be taller than the screen — so it always
+ * fits on one screen with no scrolling.
+ */
+const FitBox = ({ children }: { children: ReactNode }) => {
+  const boxRef = useRef<HTMLDivElement | null>(null);
+  const innerRef = useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = useState(1);
+
+  const measure = useCallback(() => {
+    const box = boxRef.current;
+    const inner = innerRef.current;
+    if (!box || !inner) return;
+    const availH = box.clientHeight;
+    const contentH = inner.scrollHeight;
+    if (!availH || !contentH) return;
+    const next = Math.min(1, availH / contentH);
+    setScale((prev) => (Math.abs(prev - next) > 0.005 ? next : prev));
+  }, []);
+
+  useLayoutEffect(() => {
+    measure();
+    const ro = new ResizeObserver(() => measure());
+    if (boxRef.current) ro.observe(boxRef.current);
+    if (innerRef.current) ro.observe(innerRef.current);
+    return () => ro.disconnect();
+  }, [measure]);
+
+  useEffect(() => {
+    const t = setTimeout(measure, 120);
+    window.addEventListener("resize", measure);
+    return () => { clearTimeout(t); window.removeEventListener("resize", measure); };
+  }, [measure]);
+
+  return (
+    <div ref={boxRef} className="flex h-full w-full min-w-0 items-start justify-center overflow-hidden">
+      <div
+        ref={innerRef}
+        style={{ transform: `scale(${scale})`, transformOrigin: "top center", width: "100%" }}
+        className="min-w-0"
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 
 export interface ReceiptData {
   method: CountryMethod;
