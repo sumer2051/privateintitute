@@ -378,9 +378,9 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
       .join(" ");
     const ref = fields["Reference"] || fields.reference || "";
     const ORow = ({ label, children }: { label: string; children: ReactNode }) => (
-      <div className="mt-2.5">
-        <div className="text-[13px] font-bold text-neutral-900">{label}</div>
-        <div className="text-[13px] text-neutral-800 break-words">{children}</div>
+      <div className="mt-3">
+        <div className="text-[14px] font-bold text-neutral-900">{label}</div>
+        <div className="text-[15px] text-neutral-800 break-words">{children}</div>
       </div>
     );
     return (
@@ -388,24 +388,24 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
           <FitBox>
           <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-white">
-            <div className="flex items-center justify-between border-b border-neutral-200 bg-[#f6f6f6] px-4 py-2.5">
-              <button onClick={onClose} aria-label="Close"><X className="h-4 w-4 text-neutral-900" strokeWidth={2.5} /></button>
-              <div className="text-[15px] font-bold text-neutral-900">Receipt</div>
-              <span className="text-[13px] text-neutral-500">Share</span>
+            <div className="flex items-center justify-between border-b border-neutral-200 bg-[#f6f6f6] px-4 py-3">
+              <button onClick={onClose} aria-label="Close"><X className="h-5 w-5 text-neutral-900" strokeWidth={2.5} /></button>
+              <div className="text-[17px] font-bold text-neutral-900">Receipt</div>
+              <span className="text-[14px] text-neutral-500">Share</span>
             </div>
 
-            <div className="px-4 pb-4 pt-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3aab3a]">
-                <Check className="h-5 w-5 text-white" strokeWidth={3.5} />
+            <div className="px-4 pb-5 pt-5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3aab3a]">
+                <Check className="h-6 w-6 text-white" strokeWidth={3.5} />
               </div>
-              <h1 className="mt-2.5 break-words text-[19px] font-bold leading-tight text-neutral-900">
+              <h1 className="mt-3 break-words text-[23px] font-bold leading-tight text-neutral-900">
                 Paid {amountStr}
                 <br />to {recipientName || displayTo}
               </h1>
-              {idBits && <div className="break-all text-[13px] text-neutral-800">{idBits}</div>}
-              <div className="mt-1.5 break-all text-[13px] text-neutral-500">Receipt no: {reference}</div>
+              {idBits && <div className="break-all text-[15px] text-neutral-800">{idBits}</div>}
+              <div className="mt-2 break-all text-[14px] text-neutral-500">Receipt no: {reference}</div>
 
-              <div className="my-3 h-px bg-neutral-200" />
+              <div className="my-3.5 h-px bg-neutral-200" />
 
               <ORow label="From">
                 {senderName}
@@ -422,10 +422,10 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 {new Date(timestamp).toLocaleString("en-AU", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} (Syd/Melb time)
               </ORow>
 
-              <p className="mt-3 text-[13px] text-neutral-800">This payment should be received instantly.</p>
-              <div className="mt-2 flex items-center gap-2 text-[13px] text-neutral-500">
+              <p className="mt-3.5 text-[14px] text-neutral-800">This payment should be received instantly.</p>
+              <div className="mt-2.5 flex items-center gap-2 text-[14px] text-neutral-500">
                 Sent through
-                <span className="flex items-center gap-1 text-[14px] font-bold text-neutral-900">
+                <span className="flex items-center gap-1 text-[15px] font-bold text-neutral-900">
                   Osko
                   <span className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-neutral-900">
                     <span className="h-1.5 w-1.5 rounded-full bg-neutral-900" />
@@ -435,7 +435,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
 
               <button
                 onClick={onClose}
-                className="mt-4 w-full rounded-full bg-[#f5c518] py-2.5 text-[15px] font-bold text-neutral-900 hover:bg-[#e5b716] transition-colors"
+                className="mt-5 w-full rounded-full bg-[#f5c518] py-3 text-[16px] font-bold text-neutral-900 hover:bg-[#e5b716] transition-colors"
               >
                 Done
               </button>
@@ -454,9 +454,9 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const memo =
       fields["Reference"] || fields["Payment Reference"] || fields.reference || note || "";
     const WRow = ({ label, children }: { label: string; children: ReactNode }) => (
-      <div className="border-b border-neutral-200 px-4 py-2">
-        <div className="text-[12px] font-bold text-neutral-900">{label}</div>
-        <div className="break-words text-[13px] text-neutral-600">{children}</div>
+      <div className="border-b border-neutral-200 px-4 py-2.5">
+        <div className="text-[13px] font-bold text-neutral-900">{label}</div>
+        <div className="break-words text-[14.5px] text-neutral-600">{children}</div>
       </div>
     );
     return (
@@ -464,26 +464,26 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden sm:rounded-md`}>
           <FitBox>
           <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden border-2 border-[#00875a] bg-white">
-            <div className="bg-[#00875a] py-2 text-center text-[16px] font-bold text-white">
+            <div className="bg-[#00875a] py-2.5 text-center text-[17px] font-bold text-white">
               Wire Scheduled
             </div>
-            <div className="border-b border-neutral-200 px-5 py-3 text-center">
-              <div className="mx-auto flex h-7 w-7 items-center justify-center rounded-full bg-[#00875a]">
-                <Check className="h-4 w-4 text-white" strokeWidth={3.5} />
+            <div className="border-b border-neutral-200 px-5 py-3.5 text-center">
+              <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[#00875a]">
+                <Check className="h-5 w-5 text-white" strokeWidth={3.5} />
               </div>
-              <h1 className="mt-2 text-[15px] font-bold text-neutral-900">Wire successfully scheduled!</h1>
-              <p className="mt-1 text-[13px] leading-snug text-neutral-500">
+              <h1 className="mt-2 text-[17px] font-bold text-neutral-900">Wire successfully scheduled!</h1>
+              <p className="mt-1 text-[14px] leading-snug text-neutral-500">
                 We're processing your {amountStr} wire transfer now.
               </p>
             </div>
             <WRow label="Reference #">{reference}</WRow>
-            <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2">
+            <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-4 py-2.5">
               <div className="min-w-0">
-                <div className="text-[12px] font-bold text-neutral-900">Amount</div>
-                <div className="break-all text-[13px] text-neutral-600">{amountStr}</div>
+                <div className="text-[13px] font-bold text-neutral-900">Amount</div>
+                <div className="break-all text-[14.5px] text-neutral-600">{amountStr}</div>
               </div>
               {feeStr && (
-                <div className="min-w-0 break-words text-right text-[12px] font-bold text-neutral-900">+ {feeStr} Service Fee</div>
+                <div className="min-w-0 break-words text-right text-[13px] font-bold text-neutral-900">+ {feeStr} Service Fee</div>
               )}
             </div>
             <WRow label="Send To">{recipientName || displayTo}</WRow>
