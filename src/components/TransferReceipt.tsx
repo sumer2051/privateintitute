@@ -495,7 +495,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 : new Date(timestamp).toLocaleDateString()}
             </WRow>
             {memo && <WRow label="Memo">{memo}</WRow>}
-            <p className="px-4 py-2.5 text-[11px] font-semibold leading-snug text-neutral-700">
+            <p className="px-4 py-2.5 text-[9px] font-semibold leading-snug text-neutral-700">
               I certify that I am authorized to initiate this transaction and authorize the bank to
               process this transaction in reliance on the above instructions I provided. I understand
               this transaction is subject to the above fee, must comply with applicable laws and
