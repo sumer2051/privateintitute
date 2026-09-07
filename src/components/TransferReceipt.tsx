@@ -495,16 +495,16 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 : new Date(timestamp).toLocaleDateString()}
             </WRow>
             {memo && <WRow label="Memo">{memo}</WRow>}
-            <p className="px-4 py-2.5 text-[9px] font-semibold leading-snug text-neutral-700">
+            <p className="px-4 py-2.5 text-[10px] font-semibold leading-snug text-neutral-700">
               I certify that I am authorized to initiate this transaction and authorize the bank to
               process this transaction in reliance on the above instructions I provided. I understand
               this transaction is subject to the above fee, must comply with applicable laws and
               regulations, and is subject to my account and Digital Banking Terms and Conditions.
             </p>
-            <div className="px-3 pb-3">
+            <div className="px-3 pb-3.5">
               <button
                 onClick={onClose}
-                className="w-full bg-[#e8740c] py-2.5 text-[15px] font-bold text-white hover:bg-[#d16a0a] transition-colors"
+                className="w-full bg-[#e8740c] py-3 text-[16px] font-bold text-white hover:bg-[#d16a0a] transition-colors"
               >
                 Done
               </button>
@@ -527,9 +527,9 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const bankLine = accountBits[0] || "";
 
     const Row = ({ label, value, strong }: { label: string; value: ReactNode; strong?: boolean }) => (
-      <div className="flex items-start justify-between gap-4 border-b border-neutral-200 px-5 py-2.5 last:border-b-0">
-        <div className="text-[13px] text-neutral-800">{label}</div>
-        <div className={`min-w-0 max-w-[68%] break-words text-right text-[13px] leading-tight ${strong ? "font-semibold text-neutral-900" : "text-neutral-900"}`}>{value}</div>
+      <div className="flex items-start justify-between gap-4 border-b border-neutral-200 px-5 py-3 last:border-b-0">
+        <div className="text-[14px] text-neutral-800">{label}</div>
+        <div className={`min-w-0 max-w-[68%] break-words text-right text-[14px] leading-tight ${strong ? "font-semibold text-neutral-900" : "text-neutral-900"}`}>{value}</div>
       </div>
     );
 
@@ -538,7 +538,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
         <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-white [&>button]:hidden`}>
           <FitBox>
           <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-white">
-            <div className="border-b border-neutral-200 py-2.5 text-center text-[15px] font-bold text-neutral-900">
+            <div className="border-b border-neutral-200 py-3 text-center text-[17px] font-bold text-neutral-900">
               {method.id === "ach" ? "Confirm" : "Confirmation"}
             </div>
 
