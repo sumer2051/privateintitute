@@ -279,9 +279,9 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const initials = vName.split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
     const bankName = findField(/\bbank\b|bank name/i) || fields.bank || "";
     const VRow = ({ label, children }: { label: string; children: ReactNode }) => (
-      <div className="mt-5">
-        <div className="text-[15px] text-neutral-900">{label}</div>
-        <div className="mt-1 break-words text-[18px] font-semibold leading-snug text-neutral-900">{children}</div>
+      <div className="mt-3">
+        <div className="text-[13px] text-neutral-900">{label}</div>
+        <div className="mt-0.5 break-words text-[16px] font-semibold leading-snug text-neutral-900">{children}</div>
       </div>
     );
     return (
@@ -290,20 +290,20 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
           <FitBox>
           <div className="flex min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-white">
             {/* Header */}
-            <div className="relative flex items-center justify-center border-b border-neutral-100 px-4 py-3.5">
+            <div className="relative flex items-center justify-center border-b border-neutral-100 px-4 py-2.5">
               <button onClick={onClose} aria-label="Back" className="absolute left-3 flex h-8 w-8 items-center justify-center text-neutral-700 hover:text-black">
                 <ArrowRight className="h-5 w-5 rotate-180" strokeWidth={2} />
               </button>
-              <div className="text-[17px] font-medium text-neutral-900">Payment details</div>
+              <div className="text-[15px] font-medium text-neutral-900">Payment details</div>
             </div>
 
             {/* Recipient + amount */}
-            <div className="flex flex-col items-center px-4 pt-6 text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-neutral-300 text-[26px] font-semibold text-neutral-700">
+            <div className="flex flex-col items-center px-4 pt-4 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-300 text-[20px] font-semibold text-neutral-700">
                 {initials || "•"}
               </div>
-              <h1 className="mt-3 break-words text-[28px] font-bold leading-tight text-neutral-900">{vName}</h1>
-              <div className="mt-2 text-[34px] font-bold text-[#d02a2e]">
+              <h1 className="mt-2 break-words text-[22px] font-bold leading-tight text-neutral-900">{vName}</h1>
+              <div className="mt-1.5 text-[26px] font-bold text-[#d02a2e]">
                 - {amountStr.replace(/^[−-]\s*/, "")}
               </div>
               {feeStr && (
@@ -315,7 +315,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
 
             {/* Social activity */}
             <div className="px-4 pt-3">
-              <div className="text-[16px] text-neutral-900">Social activity</div>
+              <div className="text-[15px] text-neutral-900">Social activity</div>
+
               <div className="mt-1.5 flex items-center gap-5 text-neutral-400">
                 <span className="flex items-center gap-1.5 text-[15px]">
                   <svg viewBox="0 0 24 24" className="h-4 w-4 fill-neutral-400"><path d="M12 21s-8-5.5-8-11a4.5 4.5 0 0 1 8-3 4.5 4.5 0 0 1 8 3c0 5.5-8 11-8 11z" /></svg>
@@ -494,7 +495,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 : new Date(timestamp).toLocaleDateString()}
             </WRow>
             {memo && <WRow label="Memo">{memo}</WRow>}
-            <p className="px-4 py-2.5 text-[11px] font-semibold leading-snug text-neutral-700">
+            <p className="px-4 py-2.5 text-[9px] font-semibold leading-snug text-neutral-700">
               I certify that I am authorized to initiate this transaction and authorize the bank to
               process this transaction in reliance on the above instructions I provided. I understand
               this transaction is subject to the above fee, must comply with applicable laws and
