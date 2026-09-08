@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, ShieldCheck, ArrowRight, Sparkles, X, Clock, Briefcase } from "lucide-react";
+import { Check, ShieldCheck, ArrowRight, Sparkles, X, Clock, Briefcase, MoreHorizontal, CalendarDays, Download, LockKeyhole } from "lucide-react";
 import type { CountryMethod } from "@/lib/country-methods";
 import { readFeeFromForm, isFeeField } from "@/lib/fees";
 
@@ -92,6 +92,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   const isCashApp = method.id === "cashapp";
   const isPayPal = method.id === "paypal" || method.id === "paypal_uk" || method.id === "paypal_eu";
   const isZelle = method.id === "zelle";
+  const isSepa = /sepa/i.test(method.id) || /sepa/i.test(method.name);
   const displayTo = recipientName || fields.handle || fields.recipient_name || fields.email || fields.wallet_id || fields.upi_id || fields.pix_key || fields.payid || recipientEmail || "recipient";
   const fittedReceiptShell = "ios-safe-sheet top-0 left-0 right-0 bottom-0 translate-x-0 translate-y-0 h-[100dvh] w-screen max-w-none rounded-none p-0 overflow-hidden sm:top-1/2 sm:left-1/2 sm:right-auto sm:bottom-auto sm:-translate-x-1/2 sm:-translate-y-1/2 sm:h-auto sm:max-h-[calc(100dvh-1rem)] sm:w-full sm:max-w-[380px] sm:rounded-2xl";
 
@@ -441,6 +442,124 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
               </button>
             </div>
           </div>
+          </FitBox>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (isSepa) {
+    const fee = readFeeFromForm(fields, note, reference);
+    const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
+    const totalStr = fee !== null ? fmt(amount + fee, currencyCode) : null;
+    const sepaField = (pattern: RegExp) =>
+      Object.entries(fields).find(([key, value]) => value && pattern.test(key))?.[1] || "";
+    const bankName = sepaField(/bank.?name|^bank$/i) || "Recipient's bank";
+    const iban = sepaField(/^iban$/i);
+    const bic = sepaField(/^bic|swift/i);
+    const formNote = note || sepaField(/^note|_note|memo/i);
+    const initials = (recipientName || displayTo)
+      .split(/\s+/)
+      .map((part) => part[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+    const date = new Date(timestamp);
+    const timeLabel = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const SCard = ({ children, className = "" }: { children: ReactNode; className?: string }) => (
+      <div className={`rounded-xl bg-neutral-900 px-4 py-3 ${className}`}>{children}</div>
+    );
+
+    return (
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent data-brand-skin className={`${fittedReceiptShell} border-0 bg-black text-white [&>button]:hidden sm:rounded-3xl`}>
+          <FitBox>
+            <div className="flex min-w-0 flex-col overflow-hidden bg-black px-4 pb-4 pt-3 text-white">
+              <div className="flex items-center justify-between">
+                <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close receipt" className="h-9 w-9 rounded-full text-white hover:bg-white/10 hover:text-white">
+                  <X className="h-6 w-6" strokeWidth={2.4} />
+                </Button>
+                <Button variant="ghost" size="icon" aria-label="More options" className="h-9 w-9 rounded-full text-white hover:bg-white/10 hover:text-white">
+                  <MoreHorizontal className="h-6 w-6" />
+                </Button>
+              </div>
+
+              <div className="flex flex-col items-center pb-3 pt-1 text-center">
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500 text-[24px] font-medium">
+                  {initials || "SE"}
+                  <span className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-black bg-white text-black">
+                    <ArrowRight className="h-3 w-3" strokeWidth={3} />
+                  </span>
+                </div>
+                <div className="mt-2 text-[15px] font-medium text-neutral-200">Moments ago</div>
+                <h1 className="mt-0.5 break-words text-[34px] font-semibold leading-tight text-white">-{amountStr.replace(/^[−-]\s*/, "")}</h1>
+                <div className="mt-0.5 max-w-full break-words text-[14px] text-neutral-300">{recipientName || displayTo}</div>
+                {feeStr && <div className="mt-1 text-[13px] text-neutral-400">Fee {feeStr} · Total {totalStr}</div>}
+              </div>
+
+              <div className="mb-3 grid grid-cols-3 gap-2">
+                <Button variant="secondary" className="h-10 min-w-0 rounded-full bg-white px-2 text-[13px] font-semibold text-black hover:bg-neutral-200">
+                  <ArrowRight className="mr-1.5 h-4 w-4" /> Send again
+                </Button>
+                <Button variant="secondary" className="h-10 min-w-0 rounded-full bg-neutral-800 px-2 text-[13px] font-semibold text-white hover:bg-neutral-700">
+                  <CalendarDays className="mr-1.5 h-4 w-4" /> Schedule
+                </Button>
+                <Button variant="secondary" className="h-10 min-w-0 rounded-full bg-neutral-800 px-2 text-[13px] font-semibold text-white hover:bg-neutral-700">
+                  <ArrowRight className="mr-1.5 h-4 w-4" /> Share
+                </Button>
+              </div>
+
+              <div className="space-y-2.5">
+                <SCard>
+                  <div className="text-[12px] text-neutral-400">Reference</div>
+                  <div className="mt-1 break-words text-[14px] text-neutral-100">{reference}</div>
+                </SCard>
+
+                <SCard>
+                  <div className="mb-2 text-[13px] text-neutral-400">Transfer completed</div>
+                  {[
+                    ["Verified by BoA private institute", `Today, ${timeLabel}`],
+                    ["Sent to recipient's bank", `Today, ${timeLabel}`],
+                    ["Received by recipient's bank", `Today, ${timeLabel} · It may take additional time to credit recipient's account.`],
+                  ].map(([title, sub], index) => (
+                    <div key={title} className="flex gap-3">
+                      <div className="flex w-5 shrink-0 flex-col items-center">
+                        <span className={`mt-1 flex h-3 w-3 items-center justify-center rounded-full bg-emerald-400 ${index === 2 ? "h-5 w-5" : ""}`}>
+                          {index === 2 && <Check className="h-3 w-3 text-black" strokeWidth={3.5} />}
+                        </span>
+                        {index < 2 && <span className="my-1 h-6 w-0.5 rounded-full bg-emerald-400" />}
+                      </div>
+                      <div className={index < 2 ? "pb-1.5" : ""}>
+                        <div className="text-[13px] font-medium leading-tight text-white">{title}</div>
+                        <div className="mt-0.5 text-[11px] leading-tight text-neutral-400">{sub}</div>
+                      </div>
+                    </div>
+                  ))}
+                </SCard>
+
+                {formNote && (
+                  <SCard>
+                    <div className="text-[12px] text-neutral-400">Note</div>
+                    <div className="mt-1 break-words text-[14px] leading-snug text-white">{formNote}</div>
+                  </SCard>
+                )}
+
+                <SCard>
+                  <div className="flex items-center justify-between border-b border-neutral-700 pb-2">
+                    <span className="text-[13px] text-neutral-300">Confirmation</span>
+                    <span className="flex items-center gap-1.5 text-[12px] text-indigo-300"><Download className="h-4 w-4" /> Download</span>
+                  </div>
+                  <div className="mt-2 grid grid-cols-[72px_1fr] gap-y-1.5 text-[12px]">
+                    <span className="text-neutral-400">From</span><span className="break-words text-right text-neutral-100">{fromLabel || senderName} · EUR</span>
+                    <span className="text-neutral-400">Bank name</span><span className="break-words text-right text-neutral-100">{bankName}</span>
+                    {iban && <><span className="text-neutral-400">IBAN</span><span className="break-all text-right text-neutral-100">{iban}</span></>}
+                    {bic && <><span className="text-neutral-400">BIC</span><span className="break-all text-right text-neutral-100">{bic}</span></>}
+                    <span className="text-neutral-400">Type</span><span className="flex items-center justify-end gap-1 text-right text-neutral-100"><LockKeyhole className="h-3 w-3" /> {method.name}</span>
+                  </div>
+                </SCard>
+              </div>
+            </div>
           </FitBox>
         </DialogContent>
       </Dialog>
