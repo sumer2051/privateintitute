@@ -58,12 +58,19 @@ const findMethod = (categoryOrName?: string | null): CountryMethod | null => {
   );
 };
 
+const schemeFromTransaction = (description?: string | null): string => {
+  const match = /^\s*\[([^\]]+)\]/.exec(description || "");
+  return match?.[1]?.trim() || "";
+};
+
 const parseDetails = (desc?: string | null): Record<string, string> => {
   if (!desc) return {};
   // Strip leading "[Method] To Name — "
   const cleaned = desc.replace(/^\[[^\]]+\]\s*To\s*[^—]+—\s*/i, "");
   const out: Record<string, string> = {};
-  cleaned.split(" · ").forEach((pair) => {
+  const noteSplit = cleaned.match(/\s+—\s+(.+)$/);
+  const detailText = noteSplit ? cleaned.slice(0, noteSplit.index).trim() : cleaned;
+  detailText.split(" · ").forEach((pair) => {
     const idx = pair.indexOf(":");
     if (idx > 0) {
       const k = pair.slice(0, idx).trim().toLowerCase().replace(/\s+/g, "_");
@@ -73,6 +80,7 @@ const parseDetails = (desc?: string | null): Record<string, string> => {
       if (k && v) out[k] = v;
     }
   });
+  if (noteSplit?.[1]?.trim()) out.note = noteSplit[1].trim();
   return out;
 };
 
@@ -193,7 +201,10 @@ export const NotificationsBell = () => {
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
-  const selectedMethod = useMemo(() => findMethod(selected?.category), [selected]);
+  const selectedMethod = useMemo(
+    () => findMethod(selected?.category) || findMethod(schemeFromTransaction(selected?.description)),
+    [selected],
+  );
 
   /** Every other transfer that went to the same recipient name. */
   const related = useMemo(() => {
