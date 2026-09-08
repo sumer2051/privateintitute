@@ -452,10 +452,12 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
     const fee = readFeeFromForm(fields, note, reference);
     const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
     const totalStr = fee !== null ? fmt(amount + fee, currencyCode) : null;
-    const bankName = fields["Bank Name"] || fields.bank_name || fields.bank || "Recipient's bank";
-    const iban = fields.IBAN || fields.iban || "";
-    const bic = fields["BIC / SWIFT"] || fields.bic_/_swift || fields.bic || "";
-    const formNote = note || fields.Note || fields.note || fields.memo || "";
+    const sepaField = (pattern: RegExp) =>
+      Object.entries(fields).find(([key, value]) => value && pattern.test(key))?.[1] || "";
+    const bankName = sepaField(/bank.?name|^bank$/i) || "Recipient's bank";
+    const iban = sepaField(/^iban$/i);
+    const bic = sepaField(/^bic|swift/i);
+    const formNote = note || sepaField(/^note|_note|memo/i);
     const initials = (recipientName || displayTo)
       .split(/\s+/)
       .map((part) => part[0])
