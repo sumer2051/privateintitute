@@ -39,6 +39,8 @@ export const ZellePayDialog = ({
     if (open && !fromAccount && accounts[0]) setFromAccount(accounts[0].id);
   }, [open, accounts, fromAccount, setFromAccount]);
 
+  const [amountFocused, setAmountFocused] = useState(false);
+
   const selected = accounts.find((a) => a.id === fromAccount);
 
   const displayAmount = amount && parseFloat(amount) > 0
