@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Check } from "lucide-react";
@@ -38,6 +38,8 @@ export const ZellePayDialog = ({
   useEffect(() => {
     if (open && !fromAccount && accounts[0]) setFromAccount(accounts[0].id);
   }, [open, accounts, fromAccount, setFromAccount]);
+
+  const [amountFocused, setAmountFocused] = useState(false);
 
   const selected = accounts.find((a) => a.id === fromAccount);
 
@@ -124,7 +126,9 @@ export const ZellePayDialog = ({
                 data-gramm="false"
                 type="text"
                 inputMode="decimal"
-                value={displayAmount}
+                value={amountFocused ? amount : displayAmount}
+                onFocus={() => setAmountFocused(true)}
+                onBlur={() => setAmountFocused(false)}
                 onChange={(e) => {
                   const v = e.target.value.replace(/[^0-9.]/g, "");
                   const parts = v.split(".");
