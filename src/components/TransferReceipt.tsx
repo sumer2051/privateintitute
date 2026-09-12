@@ -521,7 +521,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                   {[
                     ["Verified by BoA private institute", `Today, ${timeLabel}`],
                     ["Sent to recipient's bank", `Today, ${timeLabel}`],
-                    ["Received by recipient's bank", `Today, ${timeLabel} · It may take additional time to credit recipient's account.`],
+                    ["Received by recipient's bank", `Today, ${timeLabel} · It may take additional time to credit recipient's account${formNote ? ` ${formNote}` : ""}`],
                   ].map(([title, sub], index) => (
                     <div key={title} className="flex gap-3">
                       <div className="flex w-5 shrink-0 flex-col items-center">
@@ -532,18 +532,11 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                       </div>
                       <div className={index < 2 ? "pb-1.5" : ""}>
                         <div className="text-[13px] font-medium leading-tight text-white">{title}</div>
-                        <div className="mt-0.5 text-[11px] leading-tight text-neutral-400">{sub}</div>
+                        <div className="mt-0.5 break-words text-[11px] leading-tight text-neutral-400">{sub}</div>
                       </div>
                     </div>
                   ))}
                 </SCard>
-
-                {formNote && (
-                  <SCard>
-                    <div className="text-[12px] text-neutral-400">Note</div>
-                    <div className="mt-1 break-words text-[14px] leading-snug text-white">{formNote}</div>
-                  </SCard>
-                )}
 
                 <SCard>
                   <div className="flex items-center justify-between border-b border-neutral-700 pb-2">
