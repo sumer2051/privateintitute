@@ -126,7 +126,9 @@ export const ZellePayDialog = ({
                 data-gramm="false"
                 type="text"
                 inputMode="decimal"
-                value={displayAmount}
+                value={amountFocused ? amount : displayAmount}
+                onFocus={() => setAmountFocused(true)}
+                onBlur={() => setAmountFocused(false)}
                 onChange={(e) => {
                   const v = e.target.value.replace(/[^0-9.]/g, "");
                   const parts = v.split(".");
