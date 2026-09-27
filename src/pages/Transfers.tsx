@@ -266,8 +266,8 @@ const Transfers = () => {
       const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
       const details = Object.fromEntries(detailPairs);
 
-      const newBal = fromAcc.balance - amt;
-      await supabase.rpc("adjust_account_balance", { p_account: extFrom, p_delta: -amt });
+      const newBal = fromAcc.balance + debitDelta(fromAcc, amt);
+      await supabase.rpc("adjust_account_balance", { p_account: extFrom, p_delta: debitDelta(fromAcc, amt) });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
