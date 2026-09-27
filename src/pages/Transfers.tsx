@@ -33,6 +33,8 @@ interface Account {
   account_number: string;
   account_type: string;
   balance: number;
+  available_balance?: number | null;
+  credit_limit?: number | null;
 }
 
 interface PendingTx {
