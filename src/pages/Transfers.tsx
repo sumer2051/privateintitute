@@ -533,8 +533,8 @@ const Transfers = () => {
       const ref = genRef("ZEL");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
-      const newBal = fromAcc.balance - amt;
-      await supabase.rpc("adjust_account_balance", { p_account: zFrom, p_delta: -amt });
+      const newBal = fromAcc.balance + debitDelta(fromAcc, amt);
+      await supabase.rpc("adjust_account_balance", { p_account: zFrom, p_delta: debitDelta(fromAcc, amt) });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
