@@ -3,6 +3,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Sparkles, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { spendableOf } from "@/lib/spendable";
 
 
 interface PayPalPayDialogProps {
@@ -18,7 +19,7 @@ interface PayPalPayDialogProps {
   setRecipient: (v: string) => void;
   fromAccount: string;
   setFromAccount: (v: string) => void;
-  accounts: { id: string; account_name: string; account_number: string; account_type: string; balance: number }[];
+  accounts: { id: string; account_name: string; account_number: string; account_type: string; balance: number; available_balance?: number | null; credit_limit?: number | null }[];
   formatCurrency: (usdAmount: number) => string;
   paymentType: string;
   setPaymentType: (v: string) => void;
@@ -197,7 +198,7 @@ export const PayPalPayDialog = ({
                       <div className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold" style={{ background: PAYPAL_BLUE }}>
                         {getInitials(acc.account_name)}
                       </div>
-                      <span>{acc.account_name} — {formatCurrency(acc.balance)}</span>
+                      <span>{acc.account_name} — {formatCurrency(spendableOf(acc))}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -217,7 +218,7 @@ export const PayPalPayDialog = ({
                   <span className="text-[12px] font-medium text-gray-700">Available balance</span>
                 </div>
                 <span className="text-sm font-bold" style={{ color: PAYPAL_BLUE }}>
-                  {formatCurrency(selectedAccount.balance)}
+                  {formatCurrency(spendableOf(selectedAccount))}
                 </span>
               </div>
             )}
@@ -263,9 +264,9 @@ export const PayPalPayDialog = ({
                 <span>After this transfer</span>
                 <span className={cn(
                   "font-semibold",
-                  selectedAccount.balance - parseFloat(amount || "0") < 0 ? "text-red-600" : "text-gray-800"
+                  spendableOf(selectedAccount) - parseFloat(amount || "0") < 0 ? "text-red-600" : "text-gray-800"
                 )}>
-                  {formatCurrency(Math.max(0, selectedAccount.balance - parseFloat(amount || "0")))}
+                  {formatCurrency(Math.max(0, spendableOf(selectedAccount) - parseFloat(amount || "0")))}
                 </span>
               </div>
             )}

@@ -3,6 +3,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { spendableOf } from "@/lib/spendable";
 
 
 interface VenmoPayDialogProps {
@@ -20,7 +21,7 @@ interface VenmoPayDialogProps {
   setHandle: (v: string) => void;
   fromAccount: string;
   setFromAccount: (v: string) => void;
-  accounts: { id: string; account_name: string; account_number: string; account_type: string; balance: number }[];
+  accounts: { id: string; account_name: string; account_number: string; account_type: string; balance: number; available_balance?: number | null; credit_limit?: number | null }[];
   formatCurrency: (usdAmount: number) => string;
   loading: boolean;
   onSubmit: () => void;
@@ -215,7 +216,7 @@ export const VenmoPayDialog = ({
               <SelectContent>
                 {accounts.map((acc) => (
                   <SelectItem key={acc.id} value={acc.id}>
-                    {acc.account_name} — {formatCurrency(acc.balance)}
+                    {acc.account_name} — {formatCurrency(spendableOf(acc))}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -234,7 +235,7 @@ export const VenmoPayDialog = ({
                     <span className="text-[12px] font-medium text-gray-700">Checking account balance</span>
                   </div>
                   <span className="text-sm font-bold" style={{ color: VENMO_BLUE }}>
-                    {formatCurrency(sel.balance)}
+                    {formatCurrency(spendableOf(sel))}
                   </span>
                 </div>
               );

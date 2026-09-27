@@ -2,11 +2,12 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, ArrowRightLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { spendableOf } from "@/lib/spendable";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  accounts: { id: string; account_name: string; account_number: string; account_type: string; balance: number }[];
+  accounts: { id: string; account_name: string; account_number: string; account_type: string; balance: number; available_balance?: number | null; credit_limit?: number | null }[];
   fromAccount: string;
   setFromAccount: (v: string) => void;
   toAccount: string;
@@ -70,7 +71,7 @@ export const InternalTransferDialog = ({
             {from && (
               <div className="mt-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-2 flex items-center justify-between">
                 <span className="text-[12px] font-medium text-white/90">{from.account_name}</span>
-                <span className="text-sm font-bold text-white">{formatCurrency(from.balance)}</span>
+                <span className="text-sm font-bold text-white">{formatCurrency(spendableOf(from))}</span>
               </div>
             )}
           </div>
@@ -85,7 +86,7 @@ export const InternalTransferDialog = ({
                 <SelectContent>
                   {accounts.map((acc) => (
                     <SelectItem key={acc.id} value={acc.id}>
-                      {acc.account_name} — {formatCurrency(acc.balance)}
+                      {acc.account_name} — {formatCurrency(spendableOf(acc))}
                     </SelectItem>
                   ))}
                 </SelectContent>
