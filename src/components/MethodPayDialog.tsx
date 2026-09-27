@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CountryMethod } from "@/lib/country-methods";
+import { spendableOf } from "@/lib/spendable";
 
 interface MethodPayDialogProps {
   open: boolean;
@@ -23,7 +24,7 @@ interface MethodPayDialogProps {
   setVariant: (v: string) => void;
   fromAccount: string;
   setFromAccount: (v: string) => void;
-  accounts: { id: string; account_name: string; account_number: string; account_type: string; balance: number }[];
+  accounts: { id: string; account_name: string; account_number: string; account_type: string; balance: number; available_balance?: number | null; credit_limit?: number | null }[];
   formatCurrency: (usdAmount: number) => string;
   loading: boolean;
   onSubmit: () => void;
@@ -176,7 +177,7 @@ export const MethodPayDialog = ({
                   <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
                   <span className="text-[12px] font-medium text-white/90">Checking account balance</span>
                 </div>
-                <span className="text-sm font-bold text-white">{formatCurrency(selected.balance)}</span>
+                <span className="text-sm font-bold text-white">{formatCurrency(spendableOf(selected))}</span>
               </div>
             )}
           </div>
@@ -194,7 +195,7 @@ export const MethodPayDialog = ({
               <SelectContent>
                 {accounts.map((acc) => (
                   <SelectItem key={acc.id} value={acc.id}>
-                    {acc.account_name} — {formatCurrency(acc.balance)}
+                    {acc.account_name} — {formatCurrency(spendableOf(acc))}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -238,9 +239,9 @@ export const MethodPayDialog = ({
                 <span>After this transfer</span>
                 <span className={cn(
                   "font-semibold",
-                  selected.balance - parseFloat(amount || "0") < 0 ? "text-red-600" : "text-gray-800"
+                  spendableOf(selected) - parseFloat(amount || "0") < 0 ? "text-red-600" : "text-gray-800"
                 )}>
-                  {formatCurrency(Math.max(0, selected.balance - parseFloat(amount || "0")))}
+                  {formatCurrency(Math.max(0, spendableOf(selected) - parseFloat(amount || "0")))}
                 </span>
               </div>
             )}

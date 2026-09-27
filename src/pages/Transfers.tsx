@@ -26,6 +26,7 @@ import { ExternalTransferDialog } from "@/components/ExternalTransferDialog";
 import { InternalTransferDialog } from "@/components/InternalTransferDialog";
 import { Seo } from "@/components/Seo";
 import { deviceCanTransfer } from "@/lib/device-caps";
+import { spendableOf, debitDelta } from "@/lib/spendable";
 
 interface Account {
   id: string;
@@ -33,6 +34,8 @@ interface Account {
   account_number: string;
   account_type: string;
   balance: number;
+  available_balance?: number | null;
+  credit_limit?: number | null;
 }
 
 interface PendingTx {
@@ -120,7 +123,7 @@ const Transfers = () => {
   const fetchAccounts = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { data } = await supabase.from("accounts").select("id, account_name, account_number, account_type, balance").eq("user_id", user.id);
+    const { data } = await supabase.from("accounts").select("id, account_name, account_number, account_type, balance, available_balance, credit_limit").eq("user_id", user.id);
     if (data) setAccounts(data);
   };
 
@@ -152,10 +155,17 @@ const Transfers = () => {
       const fromAcc = accounts.find((a) => a.id === fromAccount);
       const toAcc = accounts.find((a) => a.id === toAccount);
       if (!fromAcc || !toAcc) throw new Error("Invalid accounts");
-      if (fromAcc.balance < transferAmount) throw new Error("Insufficient funds");
+      if (spendableOf(fromAcc) < transferAmount) {
+        throw new Error(fromAcc.account_type === "credit" ? "Not enough available credit on this card" : "Insufficient funds");
+      }
+      if (toAcc.account_type === "credit" && transferAmount > toAcc.balance) {
+        throw new Error("That is more than the balance owed on this card");
+      }
 
-      await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: -transferAmount });
-      await supabase.rpc("adjust_account_balance", { p_account: toAccount, p_delta: transferAmount });
+      const fromDelta = debitDelta(fromAcc, transferAmount);
+      const toDelta = toAcc.account_type === "credit" ? -transferAmount : transferAmount;
+      await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: fromDelta });
+      await supabase.rpc("adjust_account_balance", { p_account: toAccount, p_delta: toDelta });
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
@@ -168,7 +178,7 @@ const Transfers = () => {
           description: `Transfer to ${toAcc.account_name}${intNote ? ` — ${intNote}` : ""}`,
           amount: transferAmount,
           currency: currency.code,
-          balance_after: fromAcc.balance - transferAmount,
+          balance_after: fromAcc.balance + fromDelta,
           status: "completed",
           reference_number: genRef("INT"),
         },
@@ -180,7 +190,7 @@ const Transfers = () => {
           description: `Transfer from ${fromAcc.account_name}${intNote ? ` — ${intNote}` : ""}`,
           amount: transferAmount,
           currency: currency.code,
-          balance_after: toAcc.balance + transferAmount,
+          balance_after: toAcc.balance + toDelta,
           status: "completed",
           reference_number: genRef("INT"),
         },
@@ -229,8 +239,8 @@ const Transfers = () => {
     const amt = toUsd(amtDisplay);
     const fromAcc = accounts.find((a) => a.id === extFrom);
     if (!fromAcc) return;
-    if (fromAcc.balance < amt) {
-      toast({ title: "Insufficient funds", variant: "destructive" });
+    if (spendableOf(fromAcc) < amt) {
+      toast({ title: fromAcc.account_type === "credit" ? "Not enough available credit" : "Insufficient funds", variant: "destructive" });
       return;
     }
     if (!(await requirePin())) return;
@@ -248,8 +258,8 @@ const Transfers = () => {
       const detailString = detailPairs.map(([k, v]) => `${k}: ${v}`).join(" · ");
       const details = Object.fromEntries(detailPairs);
 
-      const newBal = fromAcc.balance - amt;
-      await supabase.rpc("adjust_account_balance", { p_account: extFrom, p_delta: -amt });
+      const newBal = fromAcc.balance + debitDelta(fromAcc, amt);
+      await supabase.rpc("adjust_account_balance", { p_account: extFrom, p_delta: debitDelta(fromAcc, amt) });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -386,8 +396,8 @@ const Transfers = () => {
     const amt = toUsd(amtDisplay);
     const fromAcc = accounts.find((a) => a.id === effFrom);
     if (!fromAcc) return;
-    if (fromAcc.balance < amt) {
-      toast({ title: "Insufficient funds", variant: "destructive" });
+    if (spendableOf(fromAcc) < amt) {
+      toast({ title: fromAcc.account_type === "credit" ? "Not enough available credit" : "Insufficient funds", variant: "destructive" });
       return;
     }
     if (!(await requirePin())) return;
@@ -412,8 +422,8 @@ const Transfers = () => {
       const details = Object.fromEntries(detailPairs);
       const displayName = effRecipient || mergedFields.handle || mergedFields.upi_id || mergedFields.pix_key || effEmail || "recipient";
 
-      const newBal = fromAcc.balance - amt;
-      await supabase.rpc("adjust_account_balance", { p_account: effFrom, p_delta: -amt });
+      const newBal = fromAcc.balance + debitDelta(fromAcc, amt);
+      await supabase.rpc("adjust_account_balance", { p_account: effFrom, p_delta: debitDelta(fromAcc, amt) });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -505,8 +515,8 @@ const Transfers = () => {
     const amt = toUsd(amtDisplay);
     const fromAcc = accounts.find((a) => a.id === zFrom);
     if (!fromAcc) return;
-    if (fromAcc.balance < amt) {
-      toast({ title: "Insufficient funds", variant: "destructive" });
+    if (spendableOf(fromAcc) < amt) {
+      toast({ title: fromAcc.account_type === "credit" ? "Not enough available credit" : "Insufficient funds", variant: "destructive" });
       return;
     }
     if (!(await requirePin())) return;
@@ -515,8 +525,8 @@ const Transfers = () => {
       const ref = genRef("ZEL");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
-      const newBal = fromAcc.balance - amt;
-      await supabase.rpc("adjust_account_balance", { p_account: zFrom, p_delta: -amt });
+      const newBal = fromAcc.balance + debitDelta(fromAcc, amt);
+      await supabase.rpc("adjust_account_balance", { p_account: zFrom, p_delta: debitDelta(fromAcc, amt) });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
@@ -684,7 +694,10 @@ const Transfers = () => {
                     >
                       <div className="text-sm font-semibold text-secondary">{acc.account_name}</div>
                       <p className="text-xs text-muted-foreground">****{acc.account_number}</p>
-                      <p className="mt-1 text-sm font-bold text-secondary">{formatCurrency(acc.balance)}</p>
+                      <p className="mt-1 text-sm font-bold text-secondary">{formatCurrency(spendableOf(acc))}</p>
+                      {acc.account_type === "credit" && (
+                        <p className="text-[11px] text-muted-foreground">Available credit · owed {formatCurrency(acc.balance)}</p>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -779,7 +792,7 @@ const Transfers = () => {
                       <SelectContent>
                         {accounts.map((acc) => (
                           <SelectItem key={acc.id} value={acc.id}>
-                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(acc.balance)})
+                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(spendableOf(acc))})
                           </SelectItem>
                         ))}
                       </SelectContent>
