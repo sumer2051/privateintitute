@@ -430,8 +430,8 @@ const Transfers = () => {
       const details = Object.fromEntries(detailPairs);
       const displayName = effRecipient || mergedFields.handle || mergedFields.upi_id || mergedFields.pix_key || effEmail || "recipient";
 
-      const newBal = fromAcc.balance - amt;
-      await supabase.rpc("adjust_account_balance", { p_account: effFrom, p_delta: -amt });
+      const newBal = fromAcc.balance + debitDelta(fromAcc, amt);
+      await supabase.rpc("adjust_account_balance", { p_account: effFrom, p_delta: debitDelta(fromAcc, amt) });
       const { data, error } = await supabase
         .from("transactions")
         .insert({
