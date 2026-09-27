@@ -800,7 +800,7 @@ const Transfers = () => {
                       <SelectContent>
                         {accounts.map((acc) => (
                           <SelectItem key={acc.id} value={acc.id}>
-                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(acc.balance)})
+                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(spendableOf(acc))})
                           </SelectItem>
                         ))}
                       </SelectContent>
