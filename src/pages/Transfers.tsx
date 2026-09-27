@@ -51,6 +51,15 @@ interface PendingTx {
 const genRef = (prefix: string) =>
   `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
+/** Money available to spend: credit cards spend against their remaining credit line. */
+const spendableOf = (a?: Account | null) =>
+  !a ? 0 : a.account_type === "credit"
+    ? (a.available_balance ?? Math.max((a.credit_limit ?? 0) - a.balance, 0))
+    : a.balance;
+
+/** Signed delta for a debit: a credit card charge raises the amount owed. */
+const debitDelta = (a: Account, amt: number) => (a.account_type === "credit" ? amt : -amt);
+
 const Transfers = () => {
   const pinRef = useRef<PinGateHandle>(null);
   const requirePin = async () => (await pinRef.current?.ensure()) === true;
