@@ -702,7 +702,10 @@ const Transfers = () => {
                     >
                       <div className="text-sm font-semibold text-secondary">{acc.account_name}</div>
                       <p className="text-xs text-muted-foreground">****{acc.account_number}</p>
-                      <p className="mt-1 text-sm font-bold text-secondary">{formatCurrency(acc.balance)}</p>
+                      <p className="mt-1 text-sm font-bold text-secondary">{formatCurrency(spendableOf(acc))}</p>
+                      {acc.account_type === "credit" && (
+                        <p className="text-[11px] text-muted-foreground">Available credit · owed {formatCurrency(acc.balance)}</p>
+                      )}
                     </button>
                   ))}
                 </div>
