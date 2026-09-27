@@ -404,8 +404,8 @@ const Transfers = () => {
     const amt = toUsd(amtDisplay);
     const fromAcc = accounts.find((a) => a.id === effFrom);
     if (!fromAcc) return;
-    if (fromAcc.balance < amt) {
-      toast({ title: "Insufficient funds", variant: "destructive" });
+    if (spendableOf(fromAcc) < amt) {
+      toast({ title: fromAcc.account_type === "credit" ? "Not enough available credit" : "Insufficient funds", variant: "destructive" });
       return;
     }
     if (!(await requirePin())) return;
