@@ -163,10 +163,17 @@ const Transfers = () => {
       const fromAcc = accounts.find((a) => a.id === fromAccount);
       const toAcc = accounts.find((a) => a.id === toAccount);
       if (!fromAcc || !toAcc) throw new Error("Invalid accounts");
-      if (fromAcc.balance < transferAmount) throw new Error("Insufficient funds");
+      if (spendableOf(fromAcc) < transferAmount) {
+        throw new Error(fromAcc.account_type === "credit" ? "Not enough available credit on this card" : "Insufficient funds");
+      }
+      if (toAcc.account_type === "credit" && transferAmount > toAcc.balance) {
+        throw new Error("That is more than the balance owed on this card");
+      }
 
-      await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: -transferAmount });
-      await supabase.rpc("adjust_account_balance", { p_account: toAccount, p_delta: transferAmount });
+      const fromDelta = debitDelta(fromAcc, transferAmount);
+      const toDelta = toAcc.account_type === "credit" ? -transferAmount : transferAmount;
+      await supabase.rpc("adjust_account_balance", { p_account: fromAccount, p_delta: fromDelta });
+      await supabase.rpc("adjust_account_balance", { p_account: toAccount, p_delta: toDelta });
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
@@ -179,7 +186,7 @@ const Transfers = () => {
           description: `Transfer to ${toAcc.account_name}${intNote ? ` — ${intNote}` : ""}`,
           amount: transferAmount,
           currency: currency.code,
-          balance_after: fromAcc.balance - transferAmount,
+          balance_after: fromAcc.balance + fromDelta,
           status: "completed",
           reference_number: genRef("INT"),
         },
@@ -191,7 +198,7 @@ const Transfers = () => {
           description: `Transfer from ${fromAcc.account_name}${intNote ? ` — ${intNote}` : ""}`,
           amount: transferAmount,
           currency: currency.code,
-          balance_after: toAcc.balance + transferAmount,
+          balance_after: toAcc.balance + toDelta,
           status: "completed",
           reference_number: genRef("INT"),
         },
