@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Check, ShieldCheck, ArrowRight, Sparkles, X, Clock, Briefcase, MoreHorizontal, CalendarDays, Download, LockKeyhole } from "lucide-react";
 import type { CountryMethod } from "@/lib/country-methods";
 import { readFeeFromForm, isFeeField } from "@/lib/fees";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, CircleHelp, FileText, MousePointer2 } from "lucide-react";
 
 /**
  * Keeps a receipt at its full, generous design size but shrinks it
@@ -85,6 +87,7 @@ const fmt = (n: number, code: string) => {
 };
 
 export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
+  const navigate = useNavigate();
   if (!receipt) return null;
   const { method, amount, currencyCode, senderName, recipientName, recipientEmail, fields, note, variant, reference, timestamp, fromLabel } = receipt;
   const style = method.receiptStyle;
@@ -96,6 +99,68 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
   const displayTo = recipientName || fields.handle || fields.recipient_name || fields.email || fields.wallet_id || fields.upi_id || fields.pix_key || fields.payid || recipientEmail || "recipient";
   const fittedReceiptShell = "ios-safe-sheet top-0 left-0 right-0 bottom-0 translate-x-0 translate-y-0 h-[100dvh] w-screen max-w-none rounded-none p-0 overflow-hidden sm:top-1/2 sm:left-1/2 sm:right-auto sm:bottom-auto sm:-translate-x-1/2 sm:-translate-y-1/2 sm:h-auto sm:max-h-[calc(100dvh-1rem)] sm:w-full sm:max-w-[380px] sm:rounded-2xl";
 
+
+  if (["faster_payments", "chaps", "bacs"].includes(method.id)) {
+    const fee = readFeeFromForm(fields, note, reference);
+    const formNote = note || Object.entries(fields).find(([key, value]) => value && /^(note|memo)|_note/i.test(key))?.[1];
+    const dateLabel = new Date(timestamp).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const bank = Object.entries(fields).find(([key, value]) => value && /bank.?name|^bank$/i.test(key))?.[1];
+    const account = Object.entries(fields).find(([key, value]) => value && /account.?number|^account$/i.test(key))?.[1];
+    const sortCode = Object.entries(fields).find(([key, value]) => value && /sort.?code/i.test(key))?.[1];
+    const paymentReference = Object.entries(fields).find(([key, value]) => value && /^(payment_)?reference$/i.test(key))?.[1];
+    return (
+      <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
+        <DialogContent data-brand-skin className={`${fittedReceiptShell} uk-receipt border-0 [&>button]:hidden`}>
+          <FitBox>
+            <div className="uk-receipt-page min-w-0 px-4 pb-5 pt-4">
+              <div className="relative flex h-10 items-center justify-center">
+                <Button variant="ghost" size="icon" onClick={onClose} aria-label="Back to transfers" className="absolute left-0 h-10 w-10 uk-receipt-back">
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+                <h1 className="text-[17px] font-semibold">Transaction</h1>
+              </div>
+
+              <div className="uk-receipt-card mt-5 flex flex-col items-center px-4 py-6 text-center">
+                <div className="uk-receipt-icon flex h-20 w-20 items-center justify-center rounded-full">
+                  <MousePointer2 className="h-9 w-9 fill-current" strokeWidth={2} />
+                </div>
+                <div className="mt-5 break-all text-[34px] font-semibold leading-tight">-{amountStr.replace(/^[−-]\s*/, "")}</div>
+                <div className="mt-1 break-words text-[16px] font-medium uppercase">{recipientName || displayTo}</div>
+                <div className="uk-receipt-muted mt-1 text-[14px]">{dateLabel}</div>
+                <div className="uk-receipt-muted mt-1 text-[12px]">{method.name}</div>
+              </div>
+
+              <div className="mt-4 space-y-2">
+                <Button variant="ghost" onClick={() => window.print()} className="uk-receipt-card uk-receipt-action flex h-14 w-full items-center justify-between px-4 text-left text-[15px] font-medium">
+                  <span className="flex items-center gap-3"><FileText className="uk-receipt-accent h-5 w-5" /> Create PDF</span>
+                  <ArrowRight className="uk-receipt-accent h-5 w-5" />
+                </Button>
+                <Button variant="ghost" onClick={() => { onClose(); navigate("/support"); }} className="uk-receipt-card uk-receipt-action flex h-14 w-full items-center justify-between px-4 text-left text-[15px] font-medium">
+                  <span className="flex items-center gap-3"><CircleHelp className="uk-receipt-accent h-5 w-5" /> Get help with this transaction</span>
+                  <ArrowRight className="uk-receipt-accent h-5 w-5" />
+                </Button>
+              </div>
+
+              <div className="uk-receipt-card mt-4 space-y-3 px-5 py-5">
+                <h2 className="text-[16px] font-medium">Transaction details</h2>
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-x-4 gap-y-3 text-[13px] leading-snug">
+                  <span className="uk-receipt-muted">Date posted</span><span className="break-words text-right">{dateLabel}</span>
+                  <span className="uk-receipt-muted">Transaction type</span><span className="break-words text-right">{method.name}</span>
+                  <span className="uk-receipt-muted">From</span><span className="break-words text-right">{fromLabel || senderName}</span>
+                  {bank && <><span className="uk-receipt-muted">Recipient bank</span><span className="break-words text-right">{bank}</span></>}
+                  {sortCode && <><span className="uk-receipt-muted">Sort code</span><span className="break-words text-right">{sortCode}</span></>}
+                  {account && <><span className="uk-receipt-muted">Account number</span><span className="break-all text-right">{account}</span></>}
+                  {paymentReference && <><span className="uk-receipt-muted">Payment reference</span><span className="break-words text-right">{paymentReference}</span></>}
+                  {formNote && <><span className="uk-receipt-muted">Note</span><span className="break-words text-right">{formNote}</span></>}
+                  {fee !== null && <><span className="uk-receipt-muted">Fee</span><span className="text-right">{fmt(fee, currencyCode)}</span><span className="uk-receipt-muted">Total</span><span className="text-right font-semibold">{fmt(amount + fee, currencyCode)}</span></>}
+                </div>
+              </div>
+            </div>
+          </FitBox>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   if (isZelle) {
     const nameUpper = (recipientName || fields.recipient_name || displayTo).toUpperCase();
