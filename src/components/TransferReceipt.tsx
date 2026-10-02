@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Check, ShieldCheck, ArrowRight, Sparkles, X, Clock, Briefcase, MoreHorizontal, CalendarDays, Download, LockKeyhole } from "lucide-react";
 import type { CountryMethod } from "@/lib/country-methods";
 import { readFeeFromForm, isFeeField } from "@/lib/fees";
-import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CircleHelp, FileText, MousePointer2 } from "lucide-react";
 
 /**
@@ -87,7 +86,6 @@ const fmt = (n: number, code: string) => {
 };
 
 export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
-  const navigate = useNavigate();
   if (!receipt) return null;
   const { method, amount, currencyCode, senderName, recipientName, recipientEmail, fields, note, variant, reference, timestamp, fromLabel } = receipt;
   const style = method.receiptStyle;
@@ -135,7 +133,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                   <span className="flex items-center gap-3"><FileText className="uk-receipt-accent h-5 w-5" /> Create PDF</span>
                   <ArrowRight className="uk-receipt-accent h-5 w-5" />
                 </Button>
-                <Button variant="ghost" onClick={() => { onClose(); navigate("/support"); }} className="uk-receipt-card uk-receipt-action flex h-14 w-full items-center justify-between px-4 text-left text-[15px] font-medium">
+                <Button variant="ghost" onClick={() => { onClose(); window.location.assign(`${import.meta.env.BASE_URL}support`); }} className="uk-receipt-card uk-receipt-action flex h-14 w-full items-center justify-between px-4 text-left text-[15px] font-medium">
                   <span className="flex items-center gap-3"><CircleHelp className="uk-receipt-accent h-5 w-5" /> Get help with this transaction</span>
                   <ArrowRight className="uk-receipt-accent h-5 w-5" />
                 </Button>
