@@ -1335,8 +1335,12 @@ html [data-brand-skin] .text-2xl {
 .uk-receipt-muted { color: hsl(var(--uk-muted)); }
 .uk-receipt-accent { color: hsl(var(--uk-accent)); }
 .uk-receipt .uk-receipt-action:hover { background: hsl(var(--uk-panel)); color: hsl(var(--uk-text)); filter: brightness(1.15); }
+.uk-receipt .uk-receipt-action { border-radius: 6px; }
 .uk-receipt .uk-receipt-back { color: hsl(var(--uk-muted)); }
 .uk-receipt .uk-receipt-back:hover { color: hsl(var(--uk-text)); background: hsl(var(--uk-panel)); }
+@media (max-width: 639px) {
+  html.theme-chime [role="dialog"].uk-receipt { border-radius: 0; }
+}
 
 @media print {
   body:has(.uk-receipt) * { visibility: hidden !important; }
