@@ -1318,3 +1318,37 @@ html [data-brand-skin] .text-2xl {
   letter-spacing: inherit;
   font-weight: inherit;
 }
+
+/* UK transfer detail, kept independent of the user's selected app theme. */
+.uk-receipt {
+  --uk-page: 0 0% 9%;
+  --uk-panel: 0 0% 14%;
+  --uk-text: 0 0% 96%;
+  --uk-muted: 0 0% 70%;
+  --uk-accent: 280 82% 51%;
+  background: hsl(var(--uk-page));
+  color: hsl(var(--uk-text));
+}
+.uk-receipt-page { background: hsl(var(--uk-page)); color: hsl(var(--uk-text)); }
+.uk-receipt-card { background: hsl(var(--uk-panel)); color: hsl(var(--uk-text)); border-radius: 6px; }
+.uk-receipt-icon { background: hsl(var(--uk-accent)); color: hsl(var(--uk-text)); }
+.uk-receipt-muted { color: hsl(var(--uk-muted)); }
+.uk-receipt-accent { color: hsl(var(--uk-accent)); }
+.uk-receipt .uk-receipt-action:hover { background: hsl(var(--uk-panel)); color: hsl(var(--uk-text)); filter: brightness(1.15); }
+.uk-receipt .uk-receipt-action { border-radius: 6px; }
+.uk-receipt .uk-receipt-back { color: hsl(var(--uk-muted)); }
+.uk-receipt .uk-receipt-back:hover { color: hsl(var(--uk-text)); background: hsl(var(--uk-panel)); }
+@media (max-width: 639px) {
+  html.theme-chime [role="dialog"].uk-receipt { border-radius: 0; }
+}
+
+@media print {
+  body:has(.uk-receipt) * { visibility: hidden !important; }
+  body:has(.uk-receipt) .uk-receipt,
+  body:has(.uk-receipt) .uk-receipt * { visibility: visible !important; }
+  body:has(.uk-receipt) .uk-receipt { position: fixed !important; inset: 0 !important; width: 100% !important; height: auto !important; max-height: none !important; transform: none !important; }
+  body:has(.uk-receipt) .uk-receipt > div,
+  body:has(.uk-receipt) .uk-receipt > div > div { height: auto !important; overflow: visible !important; transform: none !important; }
+  body:has(.uk-receipt) .uk-receipt button { display: none !important; }
+  body:has(.uk-receipt) .uk-receipt-page { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
