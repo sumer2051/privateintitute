@@ -1,0 +1,1 @@
+- Keep receipt-specific visual themes scoped to their receipt surface and defined as semantic CSS tokens, so global theme changes cannot recolor branded confirmations.
