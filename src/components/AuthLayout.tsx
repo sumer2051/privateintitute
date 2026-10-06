@@ -16,6 +16,7 @@ import { BankSoundListener } from "@/components/BankSoundListener";
 import { Lock as LockIcon } from "lucide-react";
 import { useUiTheme } from "@/contexts/UiThemeContext";
 import { LuxeIcon, type LuxeIconName } from "@/components/LuxeIcon";
+import { InvestmentSwitch } from "@/components/InvestmentSwitch";
 
 import {
   Dialog,
@@ -264,7 +265,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
               ) : darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
-
+            {currentPage === "accounts" && <InvestmentSwitch />}
             <NotificationsBell />
 
             {hasStaffAccess && !staffOnlyAccount && (

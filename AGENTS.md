@@ -1,1 +1,3 @@
 - Keep receipt-specific visual themes scoped to their receipt surface and defined as semantic CSS tokens, so global theme changes cannot recolor branded confirmations.
+- Keep the investment workspace on an admin-only protected route, verifying switches through the server's has_role function; never persist authorization in browser storage.
+- Use the shared InvestmentSwitch control on both home surfaces so access checks and switching messages stay consistent.

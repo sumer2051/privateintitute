@@ -20,6 +20,7 @@ import AdminAnnouncements from "./pages/AdminAnnouncements";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminResendPin from "./pages/AdminResendPin";
 import Locations from "./pages/Locations";
+import Investment from "./pages/Investment";
 
 import NotFound from "./pages/NotFound";
 
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/" element={<Navigate to="/accounts" replace />} />
             <Route path="/overview" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/accounts" element={<ProtectedRoute><Accounts /></ProtectedRoute>} />
+            <Route path="/investment" element={<ProtectedRoute adminOnly><Investment /></ProtectedRoute>} />
             <Route path="/transfers" element={<ProtectedRoute><Transfers /></ProtectedRoute>} />
             <Route path="/billpay" element={<ProtectedRoute><BillPay /></ProtectedRoute>} />
             <Route path="/cards" element={<ProtectedRoute><Cards /></ProtectedRoute>} />

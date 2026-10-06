@@ -14,6 +14,7 @@ import { ZelleModal } from "@/components/ZelleModal";
 import { DevToolsModal } from "@/components/DevToolsModal";
 import { NotificationToast } from "@/components/NotificationToast";
 import { CurrencySelector } from "@/components/CurrencySelector";
+import { InvestmentSwitch } from "@/components/InvestmentSwitch";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import {
@@ -207,6 +208,7 @@ const Index = () => {
             >
               {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
+            <InvestmentSwitch />
 
             <Button
               variant="ghost"
