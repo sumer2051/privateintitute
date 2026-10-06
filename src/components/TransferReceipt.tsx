@@ -100,6 +100,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
 
   if (["faster_payments", "chaps", "bacs"].includes(method.id)) {
     const fee = readFeeFromForm(fields, note, reference);
+    const feeStr = fee !== null ? fmt(fee, currencyCode) : null;
+    const totalStr = fee !== null ? fmt(amount + fee, currencyCode) : null;
     const formNote = note || Object.entries(fields).find(([key, value]) => value && /^(note|memo)|_note/i.test(key))?.[1];
     const dateLabel = new Date(timestamp).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
     const bank = Object.entries(fields).find(([key, value]) => value && /bank.?name|^bank$/i.test(key))?.[1];
@@ -124,6 +126,7 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                 </div>
                 <div className="mt-5 break-all text-[34px] font-semibold leading-tight">-{amountStr.replace(/^[−-]\s*/, "")}</div>
                 <div className="mt-1 break-words text-[16px] font-medium uppercase">{recipientName || displayTo}</div>
+                {feeStr && <div className="uk-receipt-muted mt-1 break-words text-[13px]">Fee {feeStr} · Total {totalStr}</div>}
                 <div className="uk-receipt-muted mt-1 text-[14px]">{dateLabel}</div>
                 <div className="uk-receipt-muted mt-1 text-[12px]">{method.name}</div>
               </div>
@@ -149,9 +152,8 @@ export const TransferReceipt = ({ open, onClose, receipt }: Props) => {
                   {sortCode && <><span className="uk-receipt-muted">Sort code</span><span className="break-words text-right">{sortCode}</span></>}
                   {account && <><span className="uk-receipt-muted">Account number</span><span className="break-all text-right">{account}</span></>}
                   {paymentReference && <><span className="uk-receipt-muted">Payment reference</span><span className="break-words text-right">{paymentReference}</span></>}
-                  {formNote && <><span className="uk-receipt-muted">Note</span><span className="break-words text-right">{formNote}</span></>}
-                  {fee !== null && <><span className="uk-receipt-muted">Fee</span><span className="text-right">{fmt(fee, currencyCode)}</span><span className="uk-receipt-muted">Total</span><span className="text-right font-semibold">{fmt(amount + fee, currencyCode)}</span></>}
                 </div>
+                {formNote && <div className="uk-receipt-muted mt-3 break-words text-[11px] leading-tight">{formNote}</div>}
               </div>
             </div>
           </FitBox>
