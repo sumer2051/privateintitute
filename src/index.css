@@ -1320,6 +1320,15 @@ html [data-brand-skin] .text-2xl {
 }
 
 /* UK transfer detail, kept independent of the user's selected app theme. */
+.investment-fox {
+  --investment-fox-main: 25 91% 53%;
+  --investment-fox-light: 34 100% 72%;
+  --investment-fox-dark: 20 28% 19%;
+}
+.investment-fox-main { color: hsl(var(--investment-fox-main)); }
+.investment-fox-light { color: hsl(var(--investment-fox-light)); }
+.investment-fox-dark { color: hsl(var(--investment-fox-dark)); }
+
 .uk-receipt {
   --uk-page: 0 0% 9%;
   --uk-panel: 0 0% 14%;
