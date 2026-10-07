@@ -1329,6 +1329,64 @@ html [data-brand-skin] .text-2xl {
 .investment-fox-light { color: hsl(var(--investment-fox-light)); }
 .investment-fox-dark { color: hsl(var(--investment-fox-dark)); }
 
+/* A scoped wallet palette: banking themes must not recolor this surface. */
+html .investment-workspace {
+  --background: 0 0% 100%;
+  --foreground: 220 12% 14%;
+  --primary: 215 91% 48%;
+  --primary-foreground: 0 0% 100%;
+  --muted: 216 24% 96%;
+  --muted-foreground: 218 9% 43%;
+  --border: 216 16% 88%;
+  --destructive: 0 70% 43%;
+  --wallet-status: 151 62% 35%;
+  --wallet-asset: 25 100% 94%;
+  --wallet-asset-foreground: 24 80% 40%;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-radius: 8px;
+  font-family: system-ui, -apple-system, sans-serif;
+  letter-spacing: 0;
+}
+html.dark .investment-workspace {
+  --background: 220 8% 11%;
+  --foreground: 216 20% 96%;
+  --primary: 213 95% 65%;
+  --primary-foreground: 220 18% 10%;
+  --muted: 220 8% 17%;
+  --muted-foreground: 218 12% 68%;
+  --border: 220 8% 24%;
+  --destructive: 0 85% 72%;
+  --wallet-status: 151 60% 58%;
+  --wallet-asset: 25 24% 18%;
+  --wallet-asset-foreground: 28 90% 68%;
+}
+html .investment-workspace h1,
+html .investment-workspace h2,
+html .investment-workspace h3 { color: hsl(var(--foreground)); font-family: inherit !important; letter-spacing: 0; font-weight: 600; }
+html .investment-workspace .text-3xl,
+html .investment-workspace .text-4xl,
+html .investment-workspace .text-2xl { letter-spacing: 0; }
+html .investment-workspace .border-border { border-color: hsl(var(--border)); }
+html .investment-workspace button { border-radius: 6px; letter-spacing: 0; box-shadow: none; }
+html .investment-workspace .investment-connect {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html .investment-workspace .investment-connect:hover { filter: brightness(0.95); }
+html .investment-workspace .investment-control { color: hsl(var(--foreground)); border-color: hsl(var(--border)); background: transparent; }
+html .investment-workspace .investment-control:hover { background: hsl(var(--muted)); color: hsl(var(--foreground)); }
+.investment-link { color: hsl(var(--primary)); }
+.investment-link:hover { text-decoration: underline; }
+.investment-asset-icon { background: hsl(var(--wallet-asset)); color: hsl(var(--wallet-asset-foreground)); }
+.investment-status { width: 8px; height: 8px; border-radius: 50%; background: hsl(var(--muted-foreground)); }
+.investment-status.is-connected { background: hsl(var(--wallet-status)); }
+@media (prefers-reduced-motion: reduce) {
+  .investment-workspace .animate-spin { animation: none; }
+}
+
 .uk-receipt {
   --uk-page: 0 0% 9%;
   --uk-panel: 0 0% 14%;

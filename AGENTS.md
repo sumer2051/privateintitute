@@ -1,3 +1,5 @@
 - Keep receipt-specific visual themes scoped to their receipt surface and defined as semantic CSS tokens, so global theme changes cannot recolor branded confirmations.
 - Keep the investment workspace on an admin-only protected route, verifying switches through the server's has_role function; never persist authorization in browser storage.
 - Use the shared InvestmentSwitch control on both home surfaces so access checks and switching messages stay consistent.
+- Keep investment wallet reads in a dedicated hook using EIP-6963 MetaMask discovery and EIP-1193 requests; check has_role before connection and keep wallet state in memory to separate read-only wallet data from banking balances and authorization.
+- Scope investment colors and control styling to the investment surface using semantic CSS tokens so banking themes cannot override its wallet identity.
