@@ -113,5 +113,25 @@ export function useInvestmentWallet() {
     };
   }, [provider, readWallet, disconnect]);
 
+  // Live balance: quietly re-read the chain every 12s while connected and the tab is visible.
+  const address = wallet?.address;
+  const chainId = wallet?.chainId;
+  useEffect(() => {
+    if (!provider || !address || !chainId) return;
+    let stopped = false;
+    const tick = async () => {
+      if (document.visibilityState !== "visible") return;
+      try {
+        const amount: unknown = await provider.request({ method: "eth_getBalance", params: [address, "latest"] });
+        if (stopped || typeof amount !== "string" || !/^0x[0-9a-f]+$/i.test(amount)) return;
+        const balance = formatEther(BigInt(amount));
+        setWallet((current) => current && current.address === address && current.chainId === chainId && current.balance !== balance ? { ...current, balance } : current);
+      } catch { /* next tick retries */ }
+    };
+    const timer = window.setInterval(tick, 12000);
+    document.addEventListener("visibilitychange", tick);
+    return () => { stopped = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", tick); };
+  }, [provider, address, chainId]);
+
   return { wallet, busy, error, available: Boolean(provider), connect: () => readWallet(true), refresh: () => readWallet(), disconnect };
 }
