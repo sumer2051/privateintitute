@@ -8,15 +8,38 @@ type WalletProvider = Eip1193Provider & {
   on?: (event: string, listener: (...args: unknown[]) => void) => void;
   removeListener?: (event: string, listener: (...args: unknown[]) => void) => void;
 };
-type Wallet = { address: string; chainId: string; balance: string };
-export const walletNetworks: Record<string, { name: string; symbol: string; explorer: string }> = {
-  "0x1": { name: "Ethereum", symbol: "ETH", explorer: "https://etherscan.io" },
-  "0x89": { name: "Polygon", symbol: "POL", explorer: "https://polygonscan.com" },
-  "0xa4b1": { name: "Arbitrum One", symbol: "ETH", explorer: "https://arbiscan.io" },
-  "0xa": { name: "Optimism", symbol: "ETH", explorer: "https://optimistic.etherscan.io" },
-  "0x2105": { name: "Base", symbol: "ETH", explorer: "https://basescan.org" },
-  "0x38": { name: "BNB Smart Chain", symbol: "BNB", explorer: "https://bscscan.com" },
-  "0xaa36a7": { name: "Sepolia · test network", symbol: "ETH", explorer: "https://sepolia.etherscan.io" },
+type Wallet = { address: string; chainId: string; balance: string; source: "metamask" | "address" };
+
+/** Reads a native balance straight from a public blockchain node — real chain data, no wallet app needed. */
+async function readChainBalance(chainId: string, address: string): Promise<string> {
+  const network = walletNetworks[chainId];
+  if (!network) throw new Error("Unsupported network");
+  const response = await fetch(network.rpc, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_getBalance", params: [address, "latest"] }),
+  });
+  if (!response.ok) throw new Error(`Network request failed (${response.status})`);
+  const body: unknown = await response.json();
+  const result = typeof body === "object" && body !== null && "result" in body ? body.result : undefined;
+  if (typeof result !== "string" || !/^0x[0-9a-f]+$/i.test(result)) throw new Error("Invalid balance");
+  return formatEther(BigInt(result));
+}
+
+async function isAdmin(): Promise<boolean> {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) return false;
+  const { data, error: roleError } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+  return !roleError && data === true;
+}
+export const walletNetworks: Record<string, { name: string; symbol: string; explorer: string; rpc: string }> = {
+  "0x1": { name: "Ethereum", symbol: "ETH", explorer: "https://etherscan.io", rpc: "https://ethereum-rpc.publicnode.com" },
+  "0x89": { name: "Polygon", symbol: "POL", explorer: "https://polygonscan.com", rpc: "https://polygon-bor-rpc.publicnode.com" },
+  "0xa4b1": { name: "Arbitrum One", symbol: "ETH", explorer: "https://arbiscan.io", rpc: "https://arbitrum-one-rpc.publicnode.com" },
+  "0xa": { name: "Optimism", symbol: "ETH", explorer: "https://optimistic.etherscan.io", rpc: "https://optimism-rpc.publicnode.com" },
+  "0x2105": { name: "Base", symbol: "ETH", explorer: "https://basescan.org", rpc: "https://base-rpc.publicnode.com" },
+  "0x38": { name: "BNB Smart Chain", symbol: "BNB", explorer: "https://bscscan.com", rpc: "https://bsc-rpc.publicnode.com" },
+  "0xaa36a7": { name: "Sepolia · test network", symbol: "ETH", explorer: "https://sepolia.etherscan.io", rpc: "https://ethereum-sepolia-rpc.publicnode.com" },
 };
 
 function messageFor(error: unknown): string {
@@ -64,10 +87,7 @@ export function useInvestmentWallet() {
     setWallet(null);
     try {
       if (requestAccess) {
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError || !user) throw new Error("Authentication required");
-        const { data, error: roleError } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
-        if (roleError || data !== true) { if (isCurrent()) setError("Investment accounts are available to administrators only."); return; }
+        if (!(await isAdmin())) { if (isCurrent()) setError("Investment accounts are available to administrators only."); return; }
         if (!isCurrent()) return;
       }
       const accounts: unknown = await provider.request({ method: requestAccess ? "eth_requestAccounts" : "eth_accounts" });
@@ -82,7 +102,7 @@ export function useInvestmentWallet() {
       if (typeof amount !== "string" || !/^0x[0-9a-f]+$/i.test(amount)) throw new Error("Invalid balance");
       if (isCurrent()) {
         connected.current = true;
-        setWallet({ address, chainId: `0x${BigInt(chain).toString(16)}`, balance: formatEther(BigInt(amount)) });
+        setWallet({ address, chainId: `0x${BigInt(chain).toString(16)}`, balance: formatEther(BigInt(amount)), source: "metamask" });
       }
     } catch (failure) {
       if (isCurrent()) setError(messageFor(failure));
@@ -90,6 +110,28 @@ export function useInvestmentWallet() {
       if (isCurrent()) setBusy(false);
     }
   }, [provider]);
+
+  const watchAddress = useCallback(async (input: string, chainId: string) => {
+    const attempt = ++sequence.current;
+    const isCurrent = () => mounted.current && attempt === sequence.current;
+    connected.current = false;
+    setBusy(true);
+    setError("");
+    setWallet(null);
+    try {
+      let address: string;
+      try { address = getAddress(input.trim()); } catch { if (isCurrent()) setError("That doesn't look like a valid wallet address (it starts with 0x and has 42 characters)."); return; }
+      if (!walletNetworks[chainId]) { if (isCurrent()) setError("Choose a supported network."); return; }
+      if (!(await isAdmin())) { if (isCurrent()) setError("Investment accounts are available to administrators only."); return; }
+      if (!isCurrent()) return;
+      const balance = await readChainBalance(chainId, address);
+      if (isCurrent()) setWallet({ address, chainId, balance, source: "address" });
+    } catch {
+      if (isCurrent()) setError("Couldn't reach the blockchain right now. Please try again.");
+    } finally {
+      if (isCurrent()) setBusy(false);
+    }
+  }, []);
 
   const disconnect = useCallback(() => {
     sequence.current += 1;
@@ -116,22 +158,28 @@ export function useInvestmentWallet() {
   // Live balance: quietly re-read the chain every 12s while connected and the tab is visible.
   const address = wallet?.address;
   const chainId = wallet?.chainId;
+  const source = wallet?.source;
   useEffect(() => {
-    if (!provider || !address || !chainId) return;
+    if (!address || !chainId || !source || (source === "metamask" && !provider)) return;
     let stopped = false;
     const tick = async () => {
       if (document.visibilityState !== "visible") return;
       try {
-        const amount: unknown = await provider.request({ method: "eth_getBalance", params: [address, "latest"] });
-        if (stopped || typeof amount !== "string" || !/^0x[0-9a-f]+$/i.test(amount)) return;
-        const balance = formatEther(BigInt(amount));
+        let balance: string;
+        if (source === "address" || !provider) balance = await readChainBalance(chainId, address);
+        else {
+          const amount: unknown = await provider.request({ method: "eth_getBalance", params: [address, "latest"] });
+          if (typeof amount !== "string" || !/^0x[0-9a-f]+$/i.test(amount)) return;
+          balance = formatEther(BigInt(amount));
+        }
+        if (stopped) return;
         setWallet((current) => current && current.address === address && current.chainId === chainId && current.balance !== balance ? { ...current, balance } : current);
       } catch { /* next tick retries */ }
     };
     const timer = window.setInterval(tick, 12000);
     document.addEventListener("visibilitychange", tick);
     return () => { stopped = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", tick); };
-  }, [provider, address, chainId]);
+  }, [provider, address, chainId, source]);
 
-  return { wallet, busy, error, available: Boolean(provider), connect: () => readWallet(true), refresh: () => readWallet(), disconnect };
+  return { wallet, busy, error, available: Boolean(provider), connect: () => readWallet(true), refresh: () => (wallet?.source === "address" ? watchAddress(wallet.address, wallet.chainId) : readWallet()), watchAddress, disconnect };
 }
