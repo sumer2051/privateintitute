@@ -10,6 +10,8 @@ import { useInvestmentWallet, walletNetworks } from "@/hooks/useInvestmentWallet
 export default function Investment() {
   const navigate = useNavigate();
   const { wallet, busy, error, available, connect, refresh, disconnect } = useInvestmentWallet();
+  const inFrame = (() => { try { return window.self !== window.top; } catch { return true; } })();
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
   const network = wallet ? walletNetworks[wallet.chainId] : undefined;
@@ -44,7 +46,18 @@ export default function Investment() {
           </div>
           <p className="mb-6 text-sm text-muted-foreground">{wallet ? "Native asset · live wallet balance" : "MetaMask"}</p>
           {wallet ? <Button variant="outline" className="investment-control" onClick={() => { setCopied(false); void refresh(); }} disabled={busy}><RefreshCw className="mr-2 h-4 w-4" />Refresh balance</Button> : <Button className="investment-connect" onClick={() => void connect()} disabled={busy}><Wallet className="mr-2 h-4 w-4" />{busy ? "Connecting…" : "Connect MetaMask"}</Button>}
-          {!wallet && !available && <p className="mt-4 text-sm text-muted-foreground">MetaMask not detected. <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer" className="investment-link inline-flex items-center gap-1">Get MetaMask<ArrowUpRight className="h-3 w-3" /></a></p>}
+          {!wallet && !available && (
+            <div className="mx-auto mt-4 max-w-md space-y-3 text-sm text-muted-foreground">
+              {inFrame ? (
+                <p>MetaMask can't connect inside this preview window. <a href={window.location.href} target="_blank" rel="noopener noreferrer" className="investment-link inline-flex items-center gap-1">Open in a new tab<ArrowUpRight className="h-3 w-3" /></a></p>
+              ) : isMobile ? (
+                <p>On your phone, open this page inside the MetaMask app. <a href={`https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`} className="investment-link inline-flex items-center gap-1">Open in MetaMask app<ArrowUpRight className="h-3 w-3" /></a></p>
+              ) : (
+                <p>MetaMask not detected in this browser. <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer" className="investment-link inline-flex items-center gap-1">Get MetaMask<ArrowUpRight className="h-3 w-3" /></a></p>
+              )}
+            </div>
+          )}
+          {wallet && <p className="mt-3 text-xs text-muted-foreground">Balance updates automatically</p>}
           {(error || copyError) && <p role="alert" className="mx-auto mt-4 max-w-md text-sm text-destructive">{error || copyError}</p>}
         </section>
         <section className="py-7" aria-label="Wallet assets">
