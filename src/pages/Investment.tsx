@@ -9,7 +9,9 @@ import { useInvestmentWallet, walletNetworks } from "@/hooks/useInvestmentWallet
 
 export default function Investment() {
   const navigate = useNavigate();
-  const { wallet, busy, error, available, connect, refresh, disconnect } = useInvestmentWallet();
+  const { wallet, busy, error, available, connect, refresh, watchAddress, disconnect } = useInvestmentWallet();
+  const [addressInput, setAddressInput] = useState("");
+  const [watchChain, setWatchChain] = useState("0x1");
   const inFrame = (() => { try { return window.self !== window.top; } catch { return true; } })();
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const [copied, setCopied] = useState(false);
@@ -44,24 +46,43 @@ export default function Investment() {
           <div className="my-5 flex min-h-20 items-center justify-center">
             {busy ? <Loader2 className="h-10 w-10 animate-spin text-primary" /> : wallet ? <h1 className="break-all text-3xl font-semibold tabular-nums sm:text-4xl">{wallet.balance}<span className="ml-2 text-lg text-muted-foreground">{network?.symbol ?? "Native coin"}</span></h1> : <InvestmentIcon className="h-20 w-20" />}
           </div>
-          <p className="mb-6 text-sm text-muted-foreground">{wallet ? "Native asset · live wallet balance" : "MetaMask"}</p>
+          <p className="mb-6 text-sm text-muted-foreground">{wallet ? "Native asset · live blockchain balance" : "MetaMask"}</p>
           {wallet ? <Button variant="outline" className="investment-control" onClick={() => { setCopied(false); void refresh(); }} disabled={busy}><RefreshCw className="mr-2 h-4 w-4" />Refresh balance</Button> : <Button className="investment-connect" onClick={() => void connect()} disabled={busy}><Wallet className="mr-2 h-4 w-4" />{busy ? "Connecting…" : "Connect MetaMask"}</Button>}
-          {!wallet && !available && (
-            <div className="mx-auto mt-4 max-w-md space-y-3 text-sm text-muted-foreground">
-              {inFrame ? (
-                <p>MetaMask can't connect inside this preview window. <a href={window.location.href} target="_blank" rel="noopener noreferrer" className="investment-link inline-flex items-center gap-1">Open in a new tab<ArrowUpRight className="h-3 w-3" /></a></p>
-              ) : isMobile ? (
-                <p>On your phone, open this page inside the MetaMask app. <a href={`https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`} className="investment-link inline-flex items-center gap-1">Open in MetaMask app<ArrowUpRight className="h-3 w-3" /></a></p>
-              ) : (
-                <p>MetaMask not detected in this browser. <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer" className="investment-link inline-flex items-center gap-1">Get MetaMask<ArrowUpRight className="h-3 w-3" /></a></p>
+          {!wallet && (
+            <form
+              className="mx-auto mt-6 max-w-md space-y-3 border-t border-border pt-6 text-left"
+              onSubmit={(event) => { event.preventDefault(); void watchAddress(addressInput, watchChain); }}
+            >
+              <p className="text-center text-sm text-muted-foreground">{available ? "Or view any wallet by its address" : "View your wallet by its address — no app needed"}</p>
+              <label className="block text-xs text-muted-foreground" htmlFor="wallet-address">Wallet address</label>
+              <input
+                id="wallet-address"
+                value={addressInput}
+                onChange={(event) => setAddressInput(event.target.value)}
+                placeholder="0x…"
+                autoComplete="off"
+                spellCheck={false}
+                maxLength={42}
+                className="investment-input w-full font-mono text-sm"
+              />
+              <label className="block text-xs text-muted-foreground" htmlFor="wallet-network">Network</label>
+              <select id="wallet-network" value={watchChain} onChange={(event) => setWatchChain(event.target.value)} className="investment-input w-full text-sm">
+                {Object.entries(walletNetworks).map(([id, net]) => <option key={id} value={id}>{net.name}</option>)}
+              </select>
+              <Button type="submit" variant="outline" className="investment-control w-full" disabled={busy || !addressInput.trim()}>Show balance</Button>
+              {!available && isMobile && !inFrame && (
+                <p className="text-center text-xs text-muted-foreground">Have the MetaMask app? <a href={`https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`} className="investment-link inline-flex items-center gap-1">Open there to connect<ArrowUpRight className="h-3 w-3" /></a></p>
               )}
-            </div>
+              {!available && inFrame && (
+                <p className="text-center text-xs text-muted-foreground">To connect MetaMask, <a href={window.location.href} target="_blank" rel="noopener noreferrer" className="investment-link inline-flex items-center gap-1">open in a new tab<ArrowUpRight className="h-3 w-3" /></a></p>
+              )}
+            </form>
           )}
           {wallet && <p className="mt-3 text-xs text-muted-foreground">Balance updates automatically</p>}
           {(error || copyError) && <p role="alert" className="mx-auto mt-4 max-w-md text-sm text-destructive">{error || copyError}</p>}
         </section>
         <section className="py-7" aria-label="Wallet assets">
-          <div className="mb-6 flex items-center justify-between"><h3 className="text-base font-semibold">Assets</h3><span className="text-xs text-muted-foreground">{wallet ? "Connected wallet" : "Not connected"}</span></div>
+          <div className="mb-6 flex items-center justify-between"><h3 className="text-base font-semibold">Assets</h3><span className="text-xs text-muted-foreground">{wallet ? (wallet.source === "address" ? "Viewed by address" : "Connected wallet") : "Not connected"}</span></div>
           {wallet ? <div className="flex items-center justify-between gap-4 border-b border-border pb-6"><div className="flex items-center gap-3"><div className="investment-asset-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-full"><Wallet className="h-5 w-5" /></div><div><p className="font-medium">{network?.symbol ?? "Native coin"}</p><p className="text-xs text-muted-foreground">{network?.name ?? "Connected network"}</p></div></div><p className="min-w-0 break-all text-right font-mono text-sm tabular-nums">{wallet.balance}</p></div> : <div className="flex flex-col items-center gap-3 py-7 text-muted-foreground"><Wallet className="h-7 w-7" /><p className="text-sm">No wallet connected</p></div>}
           {wallet && <div className="mt-6"><p className="mb-2 text-xs text-muted-foreground">Wallet address</p><p className="break-all font-mono text-sm">{wallet.address}</p>{network && <a href={`${network.explorer}/address/${wallet.address}`} target="_blank" rel="noopener noreferrer" className="investment-link mt-3 inline-flex items-center gap-2 text-sm">View on explorer<ExternalLink className="h-3 w-3" /></a>}</div>}
         </section>
