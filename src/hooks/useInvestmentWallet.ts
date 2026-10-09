@@ -78,7 +78,14 @@ export function useInvestmentWallet() {
   }, []);
 
   const readWallet = useCallback(async (requestAccess = false) => {
-    if (!provider) { setError("MetaMask wasn't detected. Install or open MetaMask, then reload this page."); return; }
+    if (!provider) {
+      if (requestAccess && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        window.location.assign(`https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`);
+        return;
+      }
+      if (requestAccess) setError("MetaMask isn't available here. Enter your wallet address below to see its live balance.");
+      return;
+    }
     const attempt = ++sequence.current;
     const isCurrent = () => mounted.current && attempt === sequence.current;
     setBusy(true);
