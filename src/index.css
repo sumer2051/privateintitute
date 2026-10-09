@@ -1331,39 +1331,26 @@ html [data-brand-skin] .text-2xl {
 
 /* A scoped wallet palette: banking themes must not recolor this surface. */
 html .investment-workspace {
-  --background: 0 0% 100%;
-  --foreground: 220 12% 14%;
-  --primary: 215 91% 48%;
-  --primary-foreground: 0 0% 100%;
-  --muted: 216 24% 96%;
-  --muted-foreground: 218 9% 43%;
-  --border: 216 16% 88%;
-  --destructive: 0 70% 43%;
-  --wallet-status: 151 62% 35%;
-  --wallet-asset: 25 100% 94%;
-  --wallet-asset-foreground: 24 80% 40%;
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  border-radius: 8px;
-  font-family: system-ui, -apple-system, sans-serif;
-  letter-spacing: 0;
-}
-html.dark .investment-workspace {
-  --background: 220 8% 11%;
-  --foreground: 216 20% 96%;
-  --primary: 213 95% 65%;
-  --primary-foreground: 220 18% 10%;
-  --muted: 220 8% 17%;
-  --muted-foreground: 218 12% 68%;
-  --border: 220 8% 24%;
+  --background: 220 11% 11%;
+  --foreground: 220 18% 97%;
+  --primary: 29 92% 54%;
+  --primary-foreground: 220 11% 11%;
+  --muted: 220 10% 16%;
+  --muted-foreground: 220 12% 60%;
+  --border: 220 10% 23%;
   --destructive: 0 85% 72%;
   --wallet-status: 151 60% 58%;
-  --wallet-asset: 25 24% 18%;
-  --wallet-asset-foreground: 28 90% 68%;
+  --wallet-asset: 29 20% 18%;
+  --wallet-asset-foreground: 29 92% 54%;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-radius: 0;
+  font-family: Figtree, system-ui, sans-serif;
+  letter-spacing: 0;
 }
 html .investment-workspace h1,
 html .investment-workspace h2,
-html .investment-workspace h3 { color: hsl(var(--foreground)); font-family: inherit !important; letter-spacing: 0; font-weight: 600; }
+html .investment-workspace h3 { color: hsl(var(--foreground)); font-family: Outfit, system-ui, sans-serif !important; letter-spacing: 0; font-weight: 600; }
 html .investment-workspace .text-3xl,
 html .investment-workspace .text-4xl,
 html .investment-workspace .text-2xl { letter-spacing: 0; }
@@ -1428,3 +1415,8 @@ html .investment-workspace .investment-input {
   box-shadow: none !important;
 }
 html .investment-workspace .investment-input:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 1px; }
+
+html .investment-workspace .investment-round { width: 48px; height: 48px; border-radius: 50%; background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); box-shadow: none; }
+html .investment-workspace .investment-tabs { background: transparent !important; border-radius: 0 !important; padding: 0 !important; border: 0 !important; border-bottom: 1px solid hsl(var(--border)) !important; }
+html .investment-workspace .investment-tab { background: transparent !important; color: hsl(var(--muted-foreground)) !important; border-radius: 0 !important; border-bottom: 2px solid transparent; box-shadow: none !important; }
+html .investment-workspace .investment-tab.is-active { color: hsl(var(--primary)) !important; border-bottom-color: hsl(var(--primary)); }
