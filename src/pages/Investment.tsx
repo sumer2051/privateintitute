@@ -1,18 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowDownLeft, Check, Copy, ExternalLink, Loader2, RefreshCw, ShieldCheck, Wallet, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUpRight, Check, ChevronRight, Copy, ExternalLink, History, Layers3, Loader2, Plus, RefreshCw, Search, ShieldCheck, Sparkles, Wallet, X } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { useInvestmentWallet, walletNetworks } from "@/hooks/useInvestmentWallet";
+
+type View = "tokens" | "earn" | "activity";
+type Action = "send" | "receive" | "swap" | "buy" | null;
+const earnOptions = [
+  { asset: "ETH", rate: "3.1%", name: "Liquid staking" },
+  { asset: "POL", rate: "4.8%", name: "Network staking" },
+  { asset: "USDC", rate: "5.2%", name: "Lending pool" },
+];
 
 export default function Investment() {
   const navigate = useNavigate();
   const { wallet, busy, error, refresh, watchAddress, disconnect } = useInvestmentWallet();
   const [addressInput, setAddressInput] = useState("");
   const [watchChain, setWatchChain] = useState("0x1");
-  const [tab, setTab] = useState<"assets" | "activity">("assets");
-  const [receive, setReceive] = useState(false);
+  const [view, setView] = useState<View>("tokens");
+  const [action, setAction] = useState<Action>(null);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
   const network = walletNetworks[wallet?.chainId ?? watchChain];
@@ -21,37 +29,65 @@ export default function Investment() {
     try { await navigator.clipboard.writeText(wallet.address); setCopied(true); setCopyError(""); }
     catch { setCopyError("Unable to copy. Your address is shown below."); }
   };
+  const chooseNetwork = (chainId: string) => {
+    setWatchChain(chainId);
+    setAction(null);
+    if (wallet) void watchAddress(wallet.address, chainId);
+  };
   return (
     <AuthLayout currentPage="investment">
       <Seo title="Investment wallet | BoA private institute" description="Business of Associations investment wallet with live blockchain balances." path="/investment" noindex />
       <div className="investment-workspace min-w-0 px-4 py-5 sm:px-8 sm:py-7">
-        <div className="mx-auto max-w-lg">
-          <div className="flex items-center justify-between gap-3 border-b border-border pb-5">
-            <div className="flex items-center gap-3"><div className="investment-asset-icon flex h-10 w-10 items-center justify-center rounded-full"><Wallet className="h-5 w-5" /></div><div><p className="text-xs text-muted-foreground">BoA private institute</p><h2 className="text-lg font-semibold">Investment wallet</h2></div></div>
-            <Button variant="ghost" size="icon" className="investment-control" onClick={() => navigate("/accounts")} aria-label="Back to banking" title="Back to banking"><ArrowLeft className="h-5 w-5" /></Button>
-          </div>
-          <div className="flex items-center justify-between gap-4 py-5">
-            <div><p className="text-sm font-medium">{wallet ? "My wallet" : "Wallet overview"}</p><p className="mt-1 text-xs text-muted-foreground">{wallet ? "Live blockchain balance" : "View-only account"}</p></div>
-            <label className="flex min-w-0 items-center gap-2 text-sm"><span className="investment-status is-connected shrink-0" /><span className="sr-only">Network</span><select aria-label="Network" value={wallet?.chainId ?? watchChain} className="investment-input max-w-44 text-sm" disabled={busy} onChange={(e) => { setWatchChain(e.target.value); setReceive(false); if (wallet) void watchAddress(wallet.address, e.target.value); }}>{Object.entries(walletNetworks).map(([id, net]) => <option key={id} value={id}>{net.name}</option>)}</select></label>
-          </div>
-          <section aria-label="Wallet balance" className="py-5 text-center">
-            <p className="text-sm text-muted-foreground">Total balance</p>
-            <div className="flex min-h-24 items-center justify-center py-4">{busy ? <Loader2 className="h-8 w-8 animate-spin text-primary" /> : <h1 className="break-all text-4xl font-semibold tabular-nums">{wallet?.balance ?? "—"}<span className="ml-2 text-lg text-muted-foreground">{network?.symbol}</span></h1>}</div>
-            {wallet ? <Button variant="ghost" className="investment-control font-mono text-xs" onClick={copyAddress} title="Copy wallet address">{wallet.address.slice(0, 8)}…{wallet.address.slice(-6)}{copied ? <Check className="ml-2 h-3 w-3" /> : <Copy className="ml-2 h-3 w-3" />}</Button> : <p className="text-xs text-muted-foreground">No wallet address selected</p>}
-            <div className="mx-auto mt-6 grid max-w-64 grid-cols-3 gap-5">
-              <div className="flex flex-col items-center gap-2"><Button size="icon" className="investment-round" disabled={!wallet || busy} onClick={() => setReceive(!receive)} title="Receive" aria-label="Receive"><ArrowDownLeft className="h-5 w-5" /></Button><span className="text-xs">Receive</span></div>
-              <div className="flex flex-col items-center gap-2"><Button size="icon" className="investment-round" disabled={!wallet || busy} onClick={() => void refresh()} title="Refresh balance" aria-label="Refresh balance"><RefreshCw className="h-5 w-5" /></Button><span className="text-xs">Refresh</span></div>
-              <div className="flex flex-col items-center gap-2"><Button size="icon" className="investment-round" disabled={!wallet || busy} onClick={() => { disconnect(); setReceive(false); setCopied(false); }} title="Change wallet" aria-label="Change wallet"><Wallet className="h-5 w-5" /></Button><span className="text-xs">Wallet</span></div>
-            </div>
-          </section>
-          {!wallet && <form className="space-y-3 border-y border-border py-5" onSubmit={(e) => { e.preventDefault(); void watchAddress(addressInput, watchChain); }}><label htmlFor="wallet-address" className="text-xs text-muted-foreground">Public wallet address</label><input id="wallet-address" className="investment-input w-full font-mono text-sm" value={addressInput} onChange={(e) => setAddressInput(e.target.value)} placeholder="0x…" autoComplete="off" spellCheck={false} maxLength={42} /><Button type="submit" className="investment-connect w-full" disabled={busy || !addressInput.trim()}>{busy ? "Reading blockchain…" : "Open wallet overview"}</Button></form>}
-          {receive && wallet && <section className="border-y border-border py-5" aria-label="Receive cryptocurrency"><div className="flex items-center justify-between"><h3 className="font-semibold">Receive {network?.symbol}</h3><Button size="icon" variant="ghost" className="investment-control" aria-label="Close receive" onClick={() => setReceive(false)}><X className="h-4 w-4" /></Button></div><p className="mb-3 text-xs text-muted-foreground">Send only on {network?.name}.</p><p className="break-all font-mono text-sm">{wallet.address}</p><Button variant="outline" className="investment-control mt-3" onClick={copyAddress}><Copy className="mr-2 h-4 w-4" />{copied ? "Copied" : "Copy address"}</Button></section>}
-          {(error || copyError) && <p role="alert" className="py-4 text-sm text-destructive">{error || copyError}</p>}
-          <div role="tablist" aria-label="Wallet views" className="investment-tabs mt-5 grid grid-cols-2 border-b border-border">{(["assets", "activity"] as const).map((value) => <Button key={value} role="tab" aria-selected={tab === value} className={`investment-tab ${tab === value ? "is-active" : ""}`} variant="ghost" onClick={() => setTab(value)}>{value === "assets" ? "Assets" : "Activity"}</Button>)}</div>
-          <section role="tabpanel" className="min-h-36 py-6">
-            {tab === "assets" ? wallet ? <div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3"><div className="investment-asset-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-full"><Wallet className="h-5 w-5" /></div><div><p className="font-medium">{network?.symbol}</p><p className="text-xs text-muted-foreground">{network?.name}</p></div></div><p className="min-w-0 break-all text-right font-mono text-sm">{wallet.balance}</p></div> : <div className="py-5 text-center text-sm text-muted-foreground">No assets to display</div> : <div className="space-y-4 py-4 text-center"><p className="text-sm text-muted-foreground">Transaction history is available on the blockchain explorer.</p>{wallet && network && <a className="investment-link inline-flex items-center gap-2 text-sm" href={`${network.explorer}/address/${wallet.address}`} target="_blank" rel="noopener noreferrer">View activity<ExternalLink className="h-4 w-4" /></a>}</div>}
-          </section>
-          <div className="flex items-center justify-center gap-2 border-t border-border pt-4 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4" /><span>View-only · Separate from your bank balance</span></div>
+        <div className="mx-auto max-w-2xl">
+          <header className="flex items-center justify-between gap-3">
+            <Button variant="ghost" className="investment-account-pill min-w-0" onClick={() => { setAction(null); if (wallet) disconnect(); }}>
+              <span className="investment-logo"><Wallet className="h-4 w-4" /></span><span className="truncate">{wallet ? `${wallet.address.slice(0, 7)}…${wallet.address.slice(-4)}` : "Investment wallet"}</span><ChevronRight className="h-4 w-4 shrink-0" />
+            </Button>
+            <div className="flex gap-2"><Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => setView("activity")} aria-label="Activity"><History className="h-5 w-5" /></Button><Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => navigate("/accounts")} aria-label="Back to banking"><ArrowLeft className="h-5 w-5" /></Button></div>
+          </header>
+
+          {!wallet ? (
+            <section className="investment-onboard mx-auto mt-16 max-w-md text-center">
+              <div className="investment-hero-mark mx-auto"><Layers3 className="h-8 w-8" /></div>
+              <h1 className="mt-5 text-3xl font-semibold">Open your DeFi view</h1>
+              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Enter a public wallet address to see its live balance, tokens and blockchain activity.</p>
+              <form className="mt-8 space-y-3 text-left" onSubmit={(event) => { event.preventDefault(); void watchAddress(addressInput, watchChain); }}>
+                <label htmlFor="wallet-address" className="text-xs text-muted-foreground">Public wallet address</label>
+                <input id="wallet-address" className="investment-input w-full font-mono text-sm" value={addressInput} onChange={(event) => setAddressInput(event.target.value)} placeholder="0x…" autoComplete="off" spellCheck={false} maxLength={42} />
+                <label htmlFor="wallet-network" className="text-xs text-muted-foreground">Network</label>
+                <select id="wallet-network" value={watchChain} onChange={(event) => setWatchChain(event.target.value)} className="investment-input w-full text-sm">{Object.entries(walletNetworks).map(([id, item]) => <option value={id} key={id}>{item.name}</option>)}</select>
+                <Button type="submit" className="investment-primary w-full" disabled={busy || !addressInput.trim()}>{busy ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Reading blockchain…</> : "View wallet"}</Button>
+              </form>
+            </section>
+          ) : (
+            <>
+              <section className="mt-5">
+                <div className="investment-notice flex items-center gap-3"><span className="investment-notice-icon"><Sparkles className="h-5 w-5" /></span><div className="min-w-0"><p className="text-sm font-semibold">Explore DeFi safely</p><p className="text-xs text-muted-foreground">Live balances with no signing or transfer access</p></div></div>
+                <label className="mt-5 inline-flex items-center gap-2"><span className="investment-status is-connected" /><span className="sr-only">Network</span><select aria-label="Network" value={wallet.chainId} onChange={(event) => chooseNetwork(event.target.value)} className="investment-network" disabled={busy}>{Object.entries(walletNetworks).map(([id, item]) => <option value={id} key={id}>{item.name}</option>)}</select></label>
+                <div className="mt-5 min-h-24">{busy ? <Loader2 className="h-9 w-9 animate-spin text-primary" /> : <><p className="text-xs text-muted-foreground">Total native balance</p><h1 className="mt-1 break-all text-4xl font-semibold tabular-nums sm:text-5xl">{wallet.balance}<span className="ml-2 text-xl text-muted-foreground">{network?.symbol}</span></h1></>}</div>
+                <div className="mt-7 grid grid-cols-4 gap-3">
+                  {[
+                    { id: "send" as const, label: "Send", icon: ArrowUpRight },
+                    { id: "receive" as const, label: "Receive", icon: ArrowDown },
+                    { id: "swap" as const, label: "Swap", icon: RefreshCw },
+                    { id: "buy" as const, label: "Buy", icon: Plus },
+                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => setAction(id)} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
+                </div>
+              </section>
+
+              {action && <section className="investment-action-sheet mt-6" aria-live="polite"><div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold capitalize">{action}</h2><p className="mt-1 text-xs text-muted-foreground">{action === "receive" ? `Use this address to receive ${network?.symbol} on ${network?.name}.` : "This wallet is view-only. Connect through a trusted wallet app to approve this action."}</p></div><Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => setAction(null)} aria-label="Close"><X className="h-4 w-4" /></Button></div>{action === "receive" ? <><p className="mt-4 break-all font-mono text-sm">{wallet.address}</p><Button className="investment-primary mt-4" onClick={copyAddress}>{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}{copied ? "Copied" : "Copy address"}</Button></> : <Button variant="outline" className="investment-secondary mt-4" onClick={() => setAction(null)}>Got it</Button>}</section>}
+
+              {(error || copyError) && <p role="alert" className="mt-4 text-sm text-destructive">{error || copyError}</p>}
+              <nav className="investment-nav mt-8 grid grid-cols-3" aria-label="Investment views">{([{ id: "tokens", label: "Tokens", icon: Wallet }, { id: "earn", label: "Earn", icon: Layers3 }, { id: "activity", label: "Activity", icon: History }] as const).map(({ id, label, icon: Icon }) => <Button key={id} variant="ghost" className={`investment-nav-item ${view === id ? "is-active" : ""}`} onClick={() => setView(id)}><Icon className="h-4 w-4" />{label}</Button>)}</nav>
+              <section className="min-h-64 py-6">
+                {view === "tokens" && <><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">Tokens</h2><Button size="icon" variant="ghost" className="investment-icon-button" aria-label="Search tokens"><Search className="h-4 w-4" /></Button></div><div className="investment-token-row mt-3 flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="investment-token-icon">{network?.symbol?.slice(0, 1)}</span><div><p className="font-semibold">{network?.symbol}</p><p className="text-xs text-muted-foreground">{network?.name}</p></div></div><div className="text-right"><p className="font-mono text-sm">{wallet.balance}</p><p className="text-xs text-muted-foreground">Live on-chain</p></div></div></>}
+                {view === "earn" && <><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">Earn opportunities</h2><span className="text-xs text-muted-foreground">Indicative rates</span></div><div className="mt-4 grid gap-3 sm:grid-cols-3">{earnOptions.map((item) => <button key={item.asset} className="investment-earn text-left" onClick={() => setAction("buy")}><span className="investment-token-icon">{item.asset[0]}</span><strong className="mt-4 block text-xl">{item.rate} APY</strong><span className="mt-1 block text-xs text-muted-foreground">{item.name} · {item.asset}</span></button>)}</div></>}
+                {view === "activity" && <div className="py-8 text-center"><History className="mx-auto h-8 w-8 text-muted-foreground" /><p className="mt-3 text-sm text-muted-foreground">Review this wallet’s verified activity on the explorer.</p>{network && <a className="investment-link mt-4 inline-flex items-center gap-2 text-sm" href={`${network.explorer}/address/${wallet.address}`} target="_blank" rel="noopener noreferrer">Open blockchain explorer<ExternalLink className="h-4 w-4" /></a>}</div>}
+              </section>
+            </>
+          )}
+          {error && !wallet && <p role="alert" className="mx-auto mt-4 max-w-md text-sm text-destructive">{error}</p>}
+          <footer className="mt-8 flex items-center justify-center gap-2 border-t border-border pt-4 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4" /><span>View-only · Separate from your bank balance</span></footer>
         </div>
       </div>
     </AuthLayout>
