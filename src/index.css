@@ -1331,48 +1331,43 @@ html [data-brand-skin] .text-2xl {
 
 /* A scoped wallet palette: banking themes must not recolor this surface. */
 html .investment-workspace {
-  --background: 220 11% 11%;
-  --foreground: 220 18% 97%;
-  --primary: 29 92% 54%;
-  --primary-foreground: 220 11% 11%;
-  --muted: 220 10% 16%;
-  --muted-foreground: 220 12% 60%;
-  --border: 220 10% 23%;
-  --destructive: 0 85% 72%;
-  --wallet-status: 151 60% 58%;
-  --wallet-asset: 29 20% 18%;
-  --wallet-asset-foreground: 29 92% 54%;
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  border-radius: 0;
-  font-family: Figtree, system-ui, sans-serif;
-  letter-spacing: 0;
+  --background: 232 27% 10%; --foreground: 210 30% 98%; --primary: 169 77% 48%;
+  --primary-foreground: 232 27% 8%; --muted: 231 19% 16%; --muted-foreground: 220 12% 66%;
+  --border: 231 16% 23%; --destructive: 2 83% 68%; --wallet-status: 169 77% 48%;
+  --wallet-asset: 231 20% 19%; --wallet-asset-foreground: 169 77% 56%; --wallet-accent: 340 82% 62%;
+  background: hsl(var(--background)); color: hsl(var(--foreground)); border-radius: 0;
+  font-family: Figtree, system-ui, sans-serif; letter-spacing: 0; min-height: 100%;
 }
-html .investment-workspace h1,
-html .investment-workspace h2,
-html .investment-workspace h3 { color: hsl(var(--foreground)); font-family: Outfit, system-ui, sans-serif !important; letter-spacing: 0; font-weight: 600; }
-html .investment-workspace .text-3xl,
-html .investment-workspace .text-4xl,
-html .investment-workspace .text-2xl { letter-spacing: 0; }
+html .investment-workspace h1, html .investment-workspace h2, html .investment-workspace h3 { color: hsl(var(--foreground)); font-family: Outfit, system-ui, sans-serif !important; letter-spacing: 0; font-weight: 600; }
 html .investment-workspace .border-border { border-color: hsl(var(--border)); }
-html .investment-workspace button { border-radius: 6px; letter-spacing: 0; box-shadow: none; }
-html .investment-workspace .investment-connect {
-  background: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground)) !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-html .investment-workspace .investment-connect:hover { filter: brightness(0.95); }
-html .investment-workspace .investment-control { color: hsl(var(--foreground)); border-color: hsl(var(--border)); background: transparent; }
-html .investment-workspace .investment-control:hover { background: hsl(var(--muted)); color: hsl(var(--foreground)); }
+html .investment-workspace button { letter-spacing: 0; box-shadow: none; }
+html .investment-workspace .investment-account-pill { max-width: 230px; height: 44px; padding: 5px 12px 5px 6px; border-radius: 22px; background: hsl(var(--muted)); color: hsl(var(--foreground)); }
+.investment-logo, .investment-notice-icon, .investment-hero-mark { display: inline-flex; align-items: center; justify-content: center; background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.investment-logo { width: 34px; height: 34px; border-radius: 50%; flex: none; }
+.investment-hero-mark { width: 64px; height: 64px; border-radius: 18px; }
+html .investment-workspace .investment-icon-button { border-radius: 50%; color: hsl(var(--foreground)); background: hsl(var(--muted)); }
+html .investment-workspace .investment-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border: 0; border-radius: 8px; }
+html .investment-workspace .investment-secondary { border-color: hsl(var(--border)); color: hsl(var(--foreground)); background: transparent; border-radius: 8px; }
+html .investment-workspace .investment-input { background: hsl(var(--muted)) !important; color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)) !important; border-radius: 8px !important; padding: .75rem; box-shadow: none !important; }
+html .investment-workspace .investment-input:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 1px; }
+.investment-notice { border: 1px solid hsl(var(--border)); background: hsl(var(--muted)); border-radius: 8px; padding: 14px; }
+.investment-notice-icon { width: 38px; height: 38px; border-radius: 8px; flex: none; }
+.investment-network { background: transparent; color: hsl(var(--foreground)); font-weight: 600; border: 0; }
+.investment-network option { background: hsl(var(--background)); color: hsl(var(--foreground)); }
+html .investment-workspace .investment-action { width: 58px; height: 58px; border-radius: 8px; background: hsl(var(--muted)); color: hsl(var(--foreground)); }
+html .investment-workspace .investment-action.is-featured { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.investment-action-sheet, .investment-token-row, .investment-earn { border: 1px solid hsl(var(--border)); background: hsl(var(--muted)); border-radius: 8px; padding: 16px; }
+.investment-nav { border-bottom: 1px solid hsl(var(--border)); }
+html .investment-workspace .investment-nav-item { gap: 6px; border-radius: 0; border-bottom: 2px solid transparent; color: hsl(var(--muted-foreground)); background: transparent; }
+html .investment-workspace .investment-nav-item.is-active { color: hsl(var(--primary)); border-bottom-color: hsl(var(--primary)); }
+.investment-token-icon { display: inline-flex; width: 44px; height: 44px; border-radius: 50%; align-items: center; justify-content: center; background: hsl(var(--wallet-accent)); color: hsl(var(--foreground)); font-weight: 700; }
+.investment-earn { color: hsl(var(--foreground)); }
+.investment-earn:hover { border-color: hsl(var(--primary)); }
 .investment-link { color: hsl(var(--primary)); }
 .investment-link:hover { text-decoration: underline; }
-.investment-asset-icon { background: hsl(var(--wallet-asset)); color: hsl(var(--wallet-asset-foreground)); }
-.investment-status { width: 8px; height: 8px; border-radius: 50%; background: hsl(var(--muted-foreground)); }
+.investment-status { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: hsl(var(--muted-foreground)); }
 .investment-status.is-connected { background: hsl(var(--wallet-status)); }
-@media (prefers-reduced-motion: reduce) {
-  .investment-workspace .animate-spin { animation: none; }
-}
+@media (prefers-reduced-motion: reduce) { .investment-workspace .animate-spin { animation: none; } }
 
 .uk-receipt {
   --uk-page: 0 0% 9%;
