@@ -45,7 +45,7 @@ export function CoinSendFlow({ balance, fromName, recents, onClose, onSend }: {
       <span className="h-10 w-10" />
     </div>
   );
-  const Token = ({ size = "h-11 w-11" }: { size?: string }) => <span className={`investment-token-icon ${size} shrink-0`}><Coins className="h-5 w-5" /></span>;
+  const Token = ({ size = "h-11 w-11" }: { size?: string }) => <span className={`investment-token-icon ${size} shrink-0`}><span className="text-lg font-extrabold leading-none">B</span></span>;
 
   return (
     <div className="investment-workspace coin-send fixed inset-0 z-50 flex flex-col bg-background" role="dialog" aria-modal="true" aria-label="Send BoA Coin">
