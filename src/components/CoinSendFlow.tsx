@@ -64,7 +64,7 @@ export function CoinSendFlow({ balances, fromName, recents, onClose, onSend }: {
               <Token s={c.symbol} /><div className="min-w-0 flex-1"><p className="font-semibold">{c.symbol}</p><p className="text-xs text-muted-foreground">{c.name}</p></div>
               <p className="text-right font-semibold tabular-nums">{fmt(balances[c.symbol] ?? 0)}<span className="block text-xs font-normal text-muted-foreground">{c.symbol}</span></p>
             </button></li>))}</ul>
-          ) : <p className="mt-6 text-center text-sm text-muted-foreground">No tokens found</p>}
+          : <p className="mt-6 text-center text-sm text-muted-foreground">No tokens found</p>}
         </>}
 
         {step === "to" && <>
