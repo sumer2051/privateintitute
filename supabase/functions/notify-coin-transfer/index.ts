@@ -35,7 +35,6 @@ Deno.serve(async (req) => {
       const html = `<!doctype html><html><body style="margin:0;padding:0;background:#ffffff">
 <div style="background:#f2f2f7;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">
 <div style="max-width:520px;margin:0 auto">
-<div style="font-size:13px;font-weight:700;color:#111;margin:0 0 18px 4px">BoA private institute</div>
 <div style="background:#ffffff;border-radius:22px;padding:36px 28px">
 <h1 style="margin:0 0 26px;font-size:34px;line-height:40px;font-weight:400;color:#111">You bought ${esc(sym)}</h1>
 <p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#111">A total of ${esc(units.toFixed(8))} ${esc(sym)} was added to your account balance.</p>
@@ -47,7 +46,7 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
 <p style="margin:26px 0 22px;font-size:16px;line-height:26px;color:#111">Transactions may not be cancelled once initiated. All purchases are final and non-refundable. If you have any questions or concerns please visit our <a href="${site}/support" style="${link}">FAQ</a>, <a href="${site}/support" style="${link}">support center</a> or <a href="${site}/support" style="${link}">call us</a>.</p>
 <p style="margin:0;font-size:16px;line-height:26px;color:#111">This transaction, along with all others you make, can be viewed in the Activity tab of your investment account.</p>
 </div>
-<p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">BoA private institute · Business of Associations bank. If you did not make this purchase, contact support immediately.</p>
+<p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">If you did not make this purchase, contact support immediately.</p>
 </div></div></body></html>`;
       await sendEmail(me.email, `You bought ${sym}`, html);
       return json({ ok: true, results: { buyer: "sent" } });
@@ -102,7 +101,6 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
       const html = `<!doctype html><html><body style="margin:0;padding:0;background:#0a0a0a">
 <div style="background:#0a0a0a;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">
 <div style="max-width:520px;margin:0 auto">
-<div style="font-size:13px;font-weight:700;color:#ffffff;margin:0 0 18px 4px">BoA private institute</div>
 <div style="background:#0052ff;border-radius:22px;padding:64px 14px 14px">
 <div style="background:#000000;border-radius:18px;padding:48px 28px 36px;text-align:center">
 <div style="width:88px;height:88px;margin:0 auto 28px;border:3px solid #0052ff;border-radius:999px;line-height:82px;font-size:44px;color:#0052ff">&#10003;</div>
@@ -114,7 +112,7 @@ ${t.note ? `<p style="margin:0 0 22px;font-size:15px;line-height:24px;color:#9ca
 <a href="${site}/investment" style="display:block;background:#0052ff;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;padding:14px 0;border-radius:999px">View your balance</a>
 </div>
 </div>
-<p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">BoA private institute · Business of Associations bank. If you don't recognise this transfer, contact support.</p>
+<p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">If you don't recognise this transfer, contact support.</p>
 </div></div></body></html>`;
       await sendEmail(recipient.email, `You just received ${amtShort}`, html);
       results.recipient = "sent";
