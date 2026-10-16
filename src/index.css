@@ -1416,8 +1416,9 @@ html .investment-workspace .investment-tabs { background: transparent !important
 html .investment-workspace .investment-tab { background: transparent !important; color: hsl(var(--muted-foreground)) !important; border-radius: 0 !important; border-bottom: 2px solid transparent; box-shadow: none !important; }
 html .investment-workspace .investment-tab.is-active { color: hsl(var(--primary)) !important; border-bottom-color: hsl(var(--primary)); }
 
-/* Send flow palette, scoped to the coin send screens */
-html .investment-workspace.coin-send {
+/* Send flow palette, shared with the investment home surface */
+html .investment-workspace.coin-send,
+html .investment-workspace.coin-palette {
   --background: 240 20% 99%;
   --foreground: 240 10% 8%;
   --muted: 240 9% 94%;
@@ -1427,9 +1428,9 @@ html .investment-workspace.coin-send {
   --primary-foreground: 0 0% 100%;
   --coin-send-token: 33 93% 54%;
 }
-html .coin-send .investment-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border: 0; }
-html .coin-send .investment-primary:hover { background: hsl(var(--primary) / .9); }
-html .coin-send .investment-primary:disabled { background: hsl(var(--primary) / .4); }
-html .coin-send .investment-token-icon { display:inline-flex; align-items:center; justify-content:center; border-radius:9999px; background: hsl(var(--coin-send-token)); color: hsl(0 0% 100%); }
+html .coin-send .investment-primary, html .coin-palette .investment-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border: 0; }
+html .coin-send .investment-primary:hover, html .coin-palette .investment-primary:hover { background: hsl(var(--primary) / .9); }
+html .coin-send .investment-primary:disabled, html .coin-palette .investment-primary:disabled { background: hsl(var(--primary) / .4); }
+html .coin-send .investment-token-icon, html .coin-palette .investment-token-icon { display:inline-flex; align-items:center; justify-content:center; border-radius:9999px; background: hsl(var(--coin-send-token)); color: hsl(0 0% 100%); }
 html .coin-send .investment-icon-button { border-radius:9999px; background: hsl(var(--muted)); color: hsl(var(--foreground)); }
 html .coin-send .investment-input { border-radius:9999px; border:0; background: hsl(var(--muted)); padding: .75rem 1rem; color: hsl(var(--foreground)); }
