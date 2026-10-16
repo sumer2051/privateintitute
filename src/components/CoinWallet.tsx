@@ -91,7 +91,7 @@ export function CoinWallet() {
                 <p className="truncate font-medium">{a.direction === "out" ? `To ${a.counterparty}` : `From ${a.counterparty}`}</p>
                 <p className="truncate text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString()}{a.note ? ` · ${a.note}` : ""}</p>
               </div>
-              <span className={`shrink-0 font-mono ${a.direction === "out" ? "text-destructive" : "text-wallet-status"}`}>{a.direction === "out" ? "-" : "+"}{fmt(Number(a.amount))}</span>
+              <span className={`shrink-0 font-mono ${a.direction === "out" ? "text-destructive" : "text-[hsl(var(--wallet-status))]"}`}>{a.direction === "out" ? "-" : "+"}{fmt(Number(a.amount))}</span>
             </li>
           ))}
         </ul>
