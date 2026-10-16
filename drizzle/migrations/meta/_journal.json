@@ -43,6 +43,13 @@
       "when": 1792186720517,
       "tag": "0005_add_coin_swap_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792187817698,
+      "tag": "0006_swap_more_coins",
+      "breakpoints": true
     }
   ]
 }
