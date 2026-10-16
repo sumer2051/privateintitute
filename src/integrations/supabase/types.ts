@@ -107,6 +107,54 @@ export type Database = {
         }
         Relationships: []
       }
+      coin_balances: {
+        Row: {
+          balance: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      coin_transfers: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          recipient_id: string
+          sender_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          recipient_id: string
+          sender_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          recipient_id?: string
+          sender_id?: string | null
+        }
+        Relationships: []
+      }
       device_login_events: {
         Row: {
           created_at: string
@@ -751,6 +799,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      admin_issue_coins: { Args: { p_amount: number }; Returns: number }
       admin_post_pending_deposit: {
         Args: { p_account: string; p_amount: number; p_reason: string }
         Returns: string
@@ -799,6 +848,18 @@ export type Database = {
         Args: { p_account: string; p_delta: number }
         Returns: number
       }
+      coin_activity: {
+        Args: never
+        Returns: {
+          amount: number
+          counterparty: string
+          created_at: string
+          direction: string
+          id: string
+          kind: string
+          note: string
+        }[]
+      }
       generate_ticket_number: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -824,6 +885,10 @@ export type Database = {
         Returns: number
       }
       process_my_overdue_credit_payments: { Args: never; Returns: number }
+      send_coins: {
+        Args: { p_amount: number; p_note?: string; p_recipient_email: string }
+        Returns: number
+      }
       set_staff_pin: { Args: { _pin: string }; Returns: boolean }
       set_transfer_pin: { Args: { _pin: string }; Returns: boolean }
       staff_claim_ticket: {
