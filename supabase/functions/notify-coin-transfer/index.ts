@@ -94,8 +94,8 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
       const site = "https://privateintitute.lovable.app";
       let usdVal = "";
       try {
-        const { data: rate } = await admin.from("coin_rates").select("usd_price").eq("symbol", sym).maybeSingle();
-        const price = Number(rate?.usd_price ?? (sym === "BOA" ? 1 : 0));
+        const { data: rate } = await admin.from("coin_rates").select("usd").eq("symbol", sym).maybeSingle();
+        const price = Number(rate?.usd ?? (sym === "BOA" ? 1 : 0));
         if (price > 0) usdVal = ` ($${(units * price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD)`;
       } catch { /* rate lookup optional */ }
       const amtShort = `${units.toFixed(8)} ${sym}`;
