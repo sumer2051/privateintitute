@@ -66,7 +66,7 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
     const when = new Date(t.created_at).toUTCString();
     const row = (k: string, v: string) => `<tr><td style="padding:6px 0;color:#6b7280">${k}</td><td style="padding:6px 0;text-align:right;font-family:monospace;word-break:break-all">${esc(v)}</td></tr>`;
     const details = (extra: string) => `<table style="width:100%;font-size:13px;border-collapse:collapse">${extra}${row("Amount", `${amt} ${sym}`)}${t.note ? row("Note", t.note) : ""}${row("Date", when)}${row("Transfer ID", t.id)}</table>`;
-    const footer = "BoA Coin is a digital balance held and settled by BoA private institute between member accounts. If you did not authorise this transfer, contact support immediately.";
+    const footer = "BoA Coin is a digital balance held and settled between member accounts. If you did not authorise this transfer, contact support immediately.";
 
     const card = (label: string, sign: string, color: string, who: string, partyLabel: string, partyAddr: string, balLabel: string, bal: number) => `
       <p style="margin:0 0 18px">Hello,</p>
