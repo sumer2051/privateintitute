@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Coins, Delete, Loader2, Search, ShieldCheck, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Coins, Delete, Loader2, Search, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { COINS, coinOf, type CoinSymbol } from "@/lib/coins";
+import { COINS, coinOf, rateOf, type CoinSymbol } from "@/lib/coins";
 
-type Step = "token" | "to" | "amount" | "review";
+type Step = "token" | "to" | "amount" | "review" | "sent";
 const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 });
 
-export function CoinSendFlow({ balances, fromName, recents, onClose, onSend }: {
+export function CoinSendFlow({ balances, rates, fromName, recents, onClose, onSend }: {
   balances: Record<string, number>;
+  rates: Record<string, number> | null;
   fromName: string;
   recents: string[];
   onClose: () => void;
