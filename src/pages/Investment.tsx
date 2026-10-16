@@ -5,6 +5,7 @@ import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { useInvestmentWallet, walletNetworks } from "@/hooks/useInvestmentWallet";
+import { CoinWallet } from "@/components/CoinWallet";
 
 type View = "tokens" | "earn" | "activity";
 type Action = "send" | "receive" | "swap" | "buy" | "track" | null;
@@ -92,6 +93,9 @@ export default function Investment() {
                   ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => setAction(!wallet && id === "receive" ? "track" : id)} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
                 </div>
               </section>
+
+              <CoinWallet />
+
 
               {action && <section className="investment-action-sheet mt-6" aria-live="polite">
                 <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold capitalize">{action === "track" ? "Add a wallet address" : action}</h2><p className="mt-1 text-xs text-muted-foreground">{action === "track" ? "Paste a public address to show its live balance." : action === "receive" ? `Use this address to receive ${network?.symbol} on ${network?.name}.` : "This wallet is view-only. Use a trusted wallet app to approve this action."}</p></div><Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => setAction(null)} aria-label="Close"><X className="h-4 w-4" /></Button></div>
