@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoinSendFlow } from "@/components/CoinSendFlow";
-import { useTokenBalances } from "@/hooks/useCoinRates";
-import { COINS, type CoinSymbol } from "@/lib/coins";
+import { useCoinRates, useTokenBalances } from "@/hooks/useCoinRates";
+import { COINS, rateOf, type CoinSymbol } from "@/lib/coins";
 
 type Activity = { id: string; amount: number; symbol?: string; note: string | null; kind: string; created_at: string; direction: string; counterparty: string };
 export type Panel = "send" | "receive" | "issue" | null;
@@ -15,6 +15,7 @@ const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 
 
 export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; onPanelChange?: (p: Panel) => void } = {}) {
   const { toast } = useToast();
+  const { rates } = useCoinRates();
   const [balance, setBalance] = useState<number | null>(null);
   const { balances: tokens, reload: reloadTokens } = useTokenBalances();
   const [email, setEmail] = useState("");
@@ -97,6 +98,7 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
       {panel === "send" && (
         <CoinSendFlow
           balances={{ ...tokens, BOA: balance ?? 0 }}
+          rates={rates}
           fromName={email}
           recents={[...new Set(activity.filter((a) => a.direction === "out").map((a) => a.counterparty))].slice(0, 5)}
           onClose={() => setPanel(null)}
@@ -106,8 +108,7 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
             const { data: latest } = await supabase.rpc("coin_activity_all");
             const t = (latest as Activity[] | null)?.find((x) => x.direction === "out" && x.kind === "transfer");
             if (t) supabase.functions.invoke("notify-coin-transfer", { body: { transfer_id: t.id } }).then(({ error }) => { if (error) toast({ title: "Coins sent, but the email didn't go out", variant: "destructive" }); });
-            toast({ title: "Coins sent", description: `${fmt(n)} ${sym} · email receipts on the way` });
-            setPanel(null); void load(); void reloadTokens();
+            void load(); void reloadTokens();
             return null;
           }}
         />

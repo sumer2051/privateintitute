@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Coins, Delete, Loader2, Search, ShieldCheck, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Coins, Delete, Loader2, Search, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { COINS, coinOf, type CoinSymbol } from "@/lib/coins";
+import { COINS, coinOf, rateOf, type CoinSymbol } from "@/lib/coins";
 
-type Step = "token" | "to" | "amount" | "review";
+type Step = "token" | "to" | "amount" | "review" | "sent";
 const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 });
 
-export function CoinSendFlow({ balances, fromName, recents, onClose, onSend }: {
+export function CoinSendFlow({ balances, rates, fromName, recents, onClose, onSend }: {
   balances: Record<string, number>;
+  rates: Record<string, number> | null;
   fromName: string;
   recents: string[];
   onClose: () => void;
@@ -39,8 +40,31 @@ export function CoinSendFlow({ balances, fromName, recents, onClose, onSend }: {
     setBusy(true); setErr("");
     const e = await onSend(sym, to.trim(), n, note.trim());
     setBusy(false);
-    if (e) setErr(e);
+    if (e) return setErr(e);
+    setStep("sent");
   };
+
+  if (step === "sent") {
+    const rate = sym === "BOA" ? 1 : rateOf(sym, rates);
+    const usd = rate != null ? n * rate : null;
+    const viewTx = () => { onClose(); setTimeout(() => document.getElementById("boa-coin")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60); };
+    return (
+      <div className="coin-send-receipt fixed inset-0 z-50 flex flex-col" role="dialog" aria-modal="true" aria-label="Send receipt">
+        <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-4 pt-4 pb-6">
+          <div className="flex-1" />
+          <div className="coin-receipt-check"><Check className="h-11 w-11" strokeWidth={3} /></div>
+          <h2 className="mt-8 text-center text-[26px] font-bold leading-tight">Successfully sent</h2>
+          <p className="coin-receipt-usd mt-5 text-center text-[40px] font-semibold leading-none tabular-nums">{usd != null ? `$${usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—"}</p>
+          <p className="mt-2 text-center text-lg text-receipt-muted tabular-nums">{fmt(n)} {sym}</p>
+          <p className="mt-6 max-w-[280px] text-center text-[17px] leading-6 text-receipt-muted">This transaction usually takes about 30 minutes</p>
+          <div className="flex-1" />
+          <Button className="coin-receipt-done h-14 w-full text-lg" onClick={onClose}>Done</Button>
+          <Button className="coin-receipt-view mt-3 h-14 w-full text-lg" onClick={viewTx}>View transaction</Button>
+        </div>
+      </div>
+    );
+  }
+
 
   const Header = ({ title, close }: { title: string; close?: boolean }) => (
     <div className="flex items-center justify-between gap-3 pb-4">
