@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+const fmtCoin = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 8 });
 import { useNavigate } from "react-router-dom";
 import { ArrowDown, ArrowLeft, ArrowUpRight, Check, ChevronRight, Copy, ExternalLink, History, Layers3, Loader2, Plus, RefreshCw, Search, ShieldCheck, Sparkles, Wallet, X } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
@@ -33,6 +35,19 @@ export default function Investment() {
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
   const network = walletNetworks[wallet?.chainId ?? watchChain];
+  const [coinBalance, setCoinBalance] = useState<number | null>(null);
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      const { data } = await supabase.from("coin_balances").select("units, balance").eq("user_id", u.user.id).maybeSingle();
+      if (alive) setCoinBalance(Number(data?.units ?? data?.balance ?? 0));
+    };
+    void load();
+    const t = setInterval(load, 15000);
+    return () => { alive = false; clearInterval(t); };
+  }, [coinPanel]);
 
   const signUp = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,8 +99,7 @@ export default function Investment() {
 
               <section className="mt-5">
                 <div className="investment-notice flex items-center gap-3"><span className="investment-notice-icon"><Sparkles className="h-5 w-5" /></span><div className="min-w-0"><p className="text-sm font-semibold">Welcome, {profile.name}</p><p className="text-xs text-muted-foreground">Live balances with no signing or transfer access</p></div></div>
-                <label className="mt-5 inline-flex items-center gap-2"><span className="investment-status is-connected" /><span className="sr-only">Network</span><select aria-label="Network" value={wallet?.chainId ?? watchChain} onChange={(e) => chooseNetwork(e.target.value)} className="investment-network" disabled={busy}>{Object.entries(walletNetworks).map(([id, item]) => <option value={id} key={id}>{item.name}</option>)}</select></label>
-                <div className="mt-5 min-h-24">{busy ? <Loader2 className="h-9 w-9 animate-spin text-primary" /> : <><p className="text-xs text-muted-foreground">Total native balance</p><h1 className="mt-1 break-all text-4xl font-semibold tabular-nums sm:text-5xl">{wallet?.balance ?? "0.00"}<span className="ml-2 text-xl text-muted-foreground">{network?.symbol}</span></h1></>}</div>
+                <div className="mt-5 min-h-24"><p className="text-xs text-muted-foreground">BoA Coin balance</p><h1 className="mt-1 break-all text-4xl font-semibold tabular-nums sm:text-5xl">{coinBalance === null ? <Loader2 className="h-9 w-9 animate-spin text-primary" /> : fmtCoin(coinBalance)}<span className="ml-2 text-xl text-muted-foreground">BOA</span></h1></div>
                 <div className="mt-7 grid grid-cols-4 gap-3">
                   {[
                     { id: "send" as const, label: "Send", icon: ArrowUpRight },
