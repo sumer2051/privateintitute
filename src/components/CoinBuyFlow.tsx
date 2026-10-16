@@ -18,8 +18,9 @@ export function CoinBuyFlow({ rates, onClose, onDone }: { rates: Record<string, 
   const [mailNote, setMailNote] = useState("");
 
   useEffect(() => {
-    void supabase.from("accounts").select("id, account_name, account_number, account_type, available_balance").eq("is_active", true).eq("is_frozen", false).then(({ data }) => {
-      const list = (data ?? []) as Account[];
+    void supabase.from("accounts").select("id, account_name, account_number, account_type, available_balance, is_active, is_frozen").then(({ data, error }) => {
+      if (error) setErr(error.message);
+      const list = ((data ?? []) as (Account & { is_active?: boolean | null; is_frozen?: boolean })[]).filter((a) => a.is_active !== false && !a.is_frozen);
       setAccounts(list);
       if (list[0]) setAcct(list[0].id);
     });
@@ -67,6 +68,8 @@ export function CoinBuyFlow({ rates, onClose, onDone }: { rates: Record<string, 
         </label>
         <p className="text-sm">{price ? <>You get ≈ <strong className="font-mono">{fmtUnits(quote)} {sym}</strong> <span className="text-xs text-muted-foreground">· 1 {sym} = {fmtUsd(price)}</span></> : "Loading price…"}</p>
         {account && amount > Number(account.available_balance) && <p className="text-xs text-destructive">Not enough available in this account.</p>}
+        {accounts.length === 0 && <p className="text-xs text-destructive">No bank account available to pay from.</p>}
+        {err && <p role="alert" className="text-xs text-destructive">{err}</p>}
         <Button className="investment-primary w-full" disabled={!valid} onClick={() => setStep("review")}>Review purchase</Button>
       </div>}
 
