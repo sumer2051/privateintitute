@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 // Routes that regular users can access (non-staff pages).
 const USER_ROUTES = ["/accounts", "/cards", "/transfers", "/billpay", "/support", "/overview", "/settings"];
 
-export const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) => {
+export const ProtectedRoute = ({ children, adminOnly = false, investmentOnly = false }: { children: React.ReactNode; adminOnly?: boolean; investmentOnly?: boolean }) => {
   const { user, isReady } = useAuthReady();
   const location = useLocation();
   useDeviceGuard(user?.id);
@@ -38,7 +38,9 @@ export const ProtectedRoute = ({ children, adminOnly = false }: { children: Reac
   if (!user) return <Navigate to="/auth" replace />;
 
   const isAdmin = roles?.includes("admin");
+  const canInvest = isAdmin || roles?.includes("investor");
   if (adminOnly && !isAdmin) return <Navigate to="/accounts" replace />;
+  if (investmentOnly && !canInvest) return <Navigate to="/accounts" replace />;
   const isSupport = roles?.includes("support");
   const isTxSupport = roles?.includes("tx_support");
   const staffOnly = !isAdmin && (isSupport || isTxSupport);

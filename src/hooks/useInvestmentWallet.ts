@@ -29,7 +29,7 @@ async function readChainBalance(chainId: string, address: string): Promise<strin
 async function isAdmin(): Promise<boolean> {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return false;
-  const { data, error: roleError } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+  const { data, error: roleError } = await supabase.rpc("has_investment_access");
   return !roleError && data === true;
 }
 export const walletNetworks: Record<string, { name: string; symbol: string; explorer: string; rpc: string }> = {

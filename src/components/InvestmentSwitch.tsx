@@ -32,7 +32,7 @@ export const InvestmentSwitch = () => {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) throw new Error("Authentication required");
-      const { data, error } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      const { data, error } = await supabase.rpc("has_investment_access");
       if (error) throw error;
       if (active.current) setState(data === true ? "switching" : "soon");
     } catch {
