@@ -91,29 +91,32 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
     }
     if (recipient?.email) {
       const units = Number(t.units ?? t.amount);
-      const txid = String(t.id).replace(/-/g, "").slice(0, 8).toUpperCase();
-      const date = new Date(t.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric", timeZone: "UTC" });
-      const line = (pre: string, val: string) => `<div style="font-size:16px;line-height:26px;color:#111;word-break:break-all">${pre}<strong>${esc(val)}</strong></div>`;
       const site = "https://privateintitute.lovable.app";
-      const lk = "color:#111;text-decoration:underline";
-      const bal = balOf(t.recipient_id, Number(a(t.recipient_id)?.units ?? 0));
-      const html = `<!doctype html><html><body style="margin:0;padding:0;background:#ffffff">
-<div style="background:#f2f2f7;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">
+      let usdVal = "";
+      try {
+        const { data: rate } = await admin.from("coin_rates").select("usd").eq("symbol", sym).maybeSingle();
+        const price = Number(rate?.usd ?? (sym === "BOA" ? 1 : 0));
+        if (price > 0) usdVal = ` ($${(units * price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD)`;
+      } catch { /* rate lookup optional */ }
+      const amtShort = `${units.toFixed(8)} ${sym}`;
+      const html = `<!doctype html><html><body style="margin:0;padding:0;background:#0a0a0a">
+<div style="background:#0a0a0a;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">
 <div style="max-width:520px;margin:0 auto">
-<div style="font-size:13px;font-weight:700;color:#111;margin:0 0 18px 4px">BoA private institute</div>
-<div style="background:#ffffff;border-radius:22px;padding:36px 28px">
-<h1 style="margin:0 0 26px;font-size:34px;line-height:40px;font-weight:400;color:#111">You received ${esc(sym)}</h1>
-<p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#111">A total of ${esc(units.toFixed(8))} ${esc(sym)} was added to your account balance from <strong>${esc(sName)}</strong>.</p>
-<p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#111">Here are the details:</p>
-<div style="background:#f2f2f7;border-radius:18px;padding:24px 28px;margin:0 0 26px">
-${line("From: ", sName)}${line("From address: ", a(t.sender_id)?.address ?? "—")}${line("Amount: ", `${units.toFixed(8)} ${sym}`)}${t.note ? line("Note: ", t.note) : ""}${line("Transaction ID: ", txid)}${line("Date: ", date)}${line("New balance: ", `${bal.toFixed(8)} ${sym}`)}${line("Fees: ", "$0.00")}
+<div style="font-size:13px;font-weight:700;color:#ffffff;margin:0 0 18px 4px">BoA private institute</div>
+<div style="background:#0052ff;border-radius:22px;padding:64px 14px 14px">
+<div style="background:#000000;border-radius:18px;padding:48px 28px 36px;text-align:center">
+<div style="width:88px;height:88px;margin:0 auto 28px;border:3px solid #0052ff;border-radius:999px;line-height:82px;font-size:44px;color:#0052ff">&#10003;</div>
+<div style="font-size:30px;line-height:38px;font-weight:400;color:#ffffff">You just received</div>
+<div style="margin:8px 0 30px;font-size:17px;line-height:24px;color:#9ca3af">${esc(amtShort)}${esc(usdVal)}</div>
+<div style="border-top:1px solid #1f2937;margin:0 0 26px"></div>
+<p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#e5e7eb">You just received ${esc(amtShort)}${esc(usdVal)} from <strong style="color:#ffffff">${esc(sName)}</strong>. The amount has been added to your ${esc(sym)} balance and is available right away.</p>
+${t.note ? `<p style="margin:0 0 22px;font-size:15px;line-height:24px;color:#9ca3af">Note: ${esc(t.note)}</p>` : ""}
+<a href="${site}/investment" style="display:block;background:#0052ff;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;padding:14px 0;border-radius:999px">View your balance</a>
 </div>
-<p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#111">If you have any questions or concerns please visit our <a href="${site}/support" style="${lk}">FAQ</a>, <a href="${site}/support" style="${lk}">support center</a> or <a href="${site}/support" style="${lk}">call us</a>.</p>
-<p style="margin:0;font-size:16px;line-height:26px;color:#111">This transaction, along with all others, can be viewed in the Activity tab of your investment account.</p>
 </div>
 <p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">BoA private institute · Business of Associations bank. If you don't recognise this transfer, contact support.</p>
 </div></div></body></html>`;
-      await sendEmail(recipient.email, `You received ${sym}`, html);
+      await sendEmail(recipient.email, `You just received ${amtShort}`, html);
       results.recipient = "sent";
     }
     return json({ ok: true, results });
