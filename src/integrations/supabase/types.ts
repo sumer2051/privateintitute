@@ -131,6 +131,57 @@ export type Database = {
         }
         Relationships: []
       }
+      coin_rates: {
+        Row: {
+          symbol: string
+          updated_at: string
+          usd: number
+        }
+        Insert: {
+          symbol: string
+          updated_at?: string
+          usd: number
+        }
+        Update: {
+          symbol?: string
+          updated_at?: string
+          usd?: number
+        }
+        Relationships: []
+      }
+      coin_swaps: {
+        Row: {
+          created_at: string
+          from_symbol: string
+          from_units: number
+          id: string
+          rate: number
+          to_symbol: string
+          to_units: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_symbol: string
+          from_units: number
+          id?: string
+          rate: number
+          to_symbol: string
+          to_units: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_symbol?: string
+          from_units?: number
+          id?: string
+          rate?: number
+          to_symbol?: string
+          to_units?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       coin_transfers: {
         Row: {
           amount: number
@@ -591,6 +642,27 @@ export type Database = {
           },
         ]
       }
+      token_balances: {
+        Row: {
+          symbol: string
+          units: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          symbol: string
+          units?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          symbol?: string
+          units?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           account_id: string
@@ -909,6 +981,15 @@ export type Database = {
           newly_generated: boolean
           pin: string
         }[]
+      }
+      swap_coins: {
+        Args: {
+          p_amount: number
+          p_from: string
+          p_min_out?: number
+          p_to: string
+        }
+        Returns: number
       }
       verify_staff_pin: { Args: { _pin: string }; Returns: boolean }
       verify_ticket_pin: {

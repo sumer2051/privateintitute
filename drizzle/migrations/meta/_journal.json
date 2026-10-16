@@ -36,6 +36,13 @@
       "when": 1792180113855,
       "tag": "0004_coin_8_decimals",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792186720517,
+      "tag": "0005_add_coin_swap_tables",
+      "breakpoints": true
     }
   ]
 }
