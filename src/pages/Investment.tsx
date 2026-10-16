@@ -58,7 +58,7 @@ export default function Investment() {
   return (
     <AuthLayout currentPage="investment">
       <Seo title="Investment wallet | BoA private institute" description="Business of Associations investment wallet with live blockchain balances." path="/investment" noindex />
-      <div className="investment-workspace min-w-0 px-4 py-5 sm:px-8 sm:py-7">
+      <div className="investment-workspace coin-palette min-w-0 px-4 py-5 sm:px-8 sm:py-7">
         <div className="mx-auto max-w-2xl">
           {!profile ? (
             <section className="mx-auto mt-10 max-w-md text-center">
