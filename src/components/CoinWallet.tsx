@@ -15,6 +15,8 @@ const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 
 
 export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; onPanelChange?: (p: Panel) => void } = {}) {
   const { toast } = useToast();
+  const { balance: _b } = { balance: 0 };
+  const { rates } = useCoinRates();
   const [balance, setBalance] = useState<number | null>(null);
   const { balances: tokens, reload: reloadTokens } = useTokenBalances();
   const [email, setEmail] = useState("");
