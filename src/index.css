@@ -1415,3 +1415,21 @@ html .investment-workspace .investment-round { width: 48px; height: 48px; border
 html .investment-workspace .investment-tabs { background: transparent !important; border-radius: 0 !important; padding: 0 !important; border: 0 !important; border-bottom: 1px solid hsl(var(--border)) !important; }
 html .investment-workspace .investment-tab { background: transparent !important; color: hsl(var(--muted-foreground)) !important; border-radius: 0 !important; border-bottom: 2px solid transparent; box-shadow: none !important; }
 html .investment-workspace .investment-tab.is-active { color: hsl(var(--primary)) !important; border-bottom-color: hsl(var(--primary)); }
+
+/* Send flow palette, scoped to the coin send screens */
+html .investment-workspace.coin-send {
+  --background: 240 20% 99%;
+  --foreground: 240 10% 8%;
+  --muted: 240 9% 94%;
+  --muted-foreground: 232 7% 57%;
+  --border: 240 8% 91%;
+  --primary: 244 91% 57%;
+  --primary-foreground: 0 0% 100%;
+  --coin-send-token: 33 93% 54%;
+}
+html .coin-send .investment-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border: 0; }
+html .coin-send .investment-primary:hover { background: hsl(var(--primary) / .9); }
+html .coin-send .investment-primary:disabled { background: hsl(var(--primary) / .4); }
+html .coin-send .investment-token-icon { display:inline-flex; align-items:center; justify-content:center; border-radius:9999px; background: hsl(var(--coin-send-token)); color: hsl(0 0% 100%); }
+html .coin-send .investment-icon-button { border-radius:9999px; background: hsl(var(--muted)); color: hsl(var(--foreground)); }
+html .coin-send .investment-input { border-radius:9999px; border:0; background: hsl(var(--muted)); padding: .75rem 1rem; color: hsl(var(--foreground)); }
