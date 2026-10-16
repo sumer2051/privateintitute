@@ -191,6 +191,7 @@ export type Database = {
           note: string | null
           recipient_id: string
           sender_id: string | null
+          symbol: string
           units: number | null
         }
         Insert: {
@@ -201,6 +202,7 @@ export type Database = {
           note?: string | null
           recipient_id: string
           sender_id?: string | null
+          symbol?: string
           units?: number | null
         }
         Update: {
@@ -211,6 +213,7 @@ export type Database = {
           note?: string | null
           recipient_id?: string
           sender_id?: string | null
+          symbol?: string
           units?: number | null
         }
         Relationships: []
@@ -941,6 +944,19 @@ export type Database = {
           note: string
         }[]
       }
+      coin_activity_all: {
+        Args: never
+        Returns: {
+          amount: number
+          counterparty: string
+          created_at: string
+          direction: string
+          id: string
+          kind: string
+          note: string
+          symbol: string
+        }[]
+      }
       generate_ticket_number: { Args: never; Returns: string }
       has_investment_access: { Args: never; Returns: boolean }
       has_role: {
@@ -970,6 +986,15 @@ export type Database = {
       process_my_overdue_credit_payments: { Args: never; Returns: number }
       send_coins: {
         Args: { p_amount: number; p_note?: string; p_recipient_email: string }
+        Returns: number
+      }
+      send_tokens: {
+        Args: {
+          p_amount: number
+          p_note?: string
+          p_recipient: string
+          p_symbol: string
+        }
         Returns: number
       }
       set_staff_pin: { Args: { _pin: string }; Returns: boolean }
