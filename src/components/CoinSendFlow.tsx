@@ -48,7 +48,7 @@ export function CoinSendFlow({ balance, fromName, recents, onClose, onSend }: {
   const Token = ({ size = "h-11 w-11" }: { size?: string }) => <span className={`investment-token-icon ${size} shrink-0`}><Coins className="h-5 w-5" /></span>;
 
   return (
-    <div className="investment-workspace fixed inset-0 z-50 flex flex-col bg-background" role="dialog" aria-modal="true" aria-label="Send BoA Coin">
+    <div className="investment-workspace coin-send fixed inset-0 z-50 flex flex-col bg-background" role="dialog" aria-modal="true" aria-label="Send BoA Coin">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col overflow-y-auto px-4 pt-4 pb-4">
         {step === "token" && <>
           <Header title="Select token" close />
@@ -66,13 +66,13 @@ export function CoinSendFlow({ balance, fromName, recents, onClose, onSend }: {
           <div className="rounded-2xl border border-border p-4">
             <textarea className="w-full resize-none bg-transparent font-mono text-sm outline-none" rows={2} value={to} onChange={(e) => setTo(e.target.value)} placeholder="Address (boa1…) or email" maxLength={255} spellCheck={false} autoComplete="off" />
             <div className="mt-2 flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm"><Coins className="h-4 w-4 text-primary" />BoA Coin</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm"><Coins className="h-4 w-4 text-[hsl(var(--coin-send-token))]" />BoA Coin</span>
               <Button className="investment-primary rounded-full px-5" onClick={paste}>Paste</Button>
             </div>
           </div>
           {recents.length > 0 && <>
             <p className="mt-6 flex items-center gap-1 font-semibold">Recent recipients<ChevronRight className="h-4 w-4 text-muted-foreground" /></p>
-            <ul className="mt-2">{recents.map((r) => <li key={r}><button className="flex w-full items-center gap-3 rounded-xl py-3 text-left hover:bg-muted" onClick={() => setTo(r)}><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-primary"><ShieldCheck className="h-5 w-5" /></span><span className="min-w-0 truncate text-sm">{r}</span></button></li>)}</ul>
+            <ul className="mt-2">{recents.map((r) => <li key={r}><button className="flex w-full items-center gap-3 rounded-xl py-3 text-left hover:bg-muted" onClick={() => setTo(r)}><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-[hsl(var(--coin-send-token))]"><ShieldCheck className="h-5 w-5" /></span><span className="min-w-0 truncate text-sm">{r}</span></button></li>)}</ul>
           </>}
           <div className="flex-1" />
           <Button className="investment-primary mt-6 h-12 w-full rounded-full" disabled={to.trim().length < 3} onClick={() => setStep("amount")}>Continue</Button>
@@ -99,7 +99,7 @@ export function CoinSendFlow({ balance, fromName, recents, onClose, onSend }: {
           <div className="mt-2 space-y-4 rounded-2xl bg-muted p-4">
             <div><p className="text-xs text-muted-foreground">From</p><p className="font-medium">{fromName}</p></div>
             <div><p className="text-xs text-muted-foreground">To</p><p className="break-all font-medium">{to}</p></div>
-            <div><p className="text-xs text-muted-foreground">Network</p><p className="flex items-center gap-1.5 font-medium"><Coins className="h-4 w-4 text-primary" />BoA Coin</p></div>
+            <div><p className="text-xs text-muted-foreground">Network</p><p className="flex items-center gap-1.5 font-medium"><Coins className="h-4 w-4 text-[hsl(var(--coin-send-token))]" />BoA Coin</p></div>
           </div>
           <p className="mt-5 text-sm text-muted-foreground">Network fee</p>
           <div className="mt-2 flex items-center justify-between rounded-2xl bg-muted p-4"><span className="flex items-center gap-2 font-medium"><Token size="h-8 w-8" />BOA</span><span className="text-right font-semibold">Free<span className="block text-xs font-normal text-muted-foreground">0.00 BOA</span></span></div>
