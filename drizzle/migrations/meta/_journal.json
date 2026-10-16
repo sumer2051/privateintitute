@@ -85,6 +85,13 @@
       "when": 1792190450462,
       "tag": "0011_buy_coins_from_bank",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792190708760,
+      "tag": "0012_fix_buy_coins_small_amount",
+      "breakpoints": true
     }
   ]
 }
