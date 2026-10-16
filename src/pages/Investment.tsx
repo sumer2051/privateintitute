@@ -5,7 +5,7 @@ import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { useInvestmentWallet, walletNetworks } from "@/hooks/useInvestmentWallet";
-import { CoinWallet } from "@/components/CoinWallet";
+import { CoinWallet, type Panel } from "@/components/CoinWallet";
 import { MarketPrices } from "@/components/MarketPrices";
 
 type View = "tokens" | "earn" | "activity";
@@ -29,6 +29,7 @@ export default function Investment() {
   const [watchChain, setWatchChain] = useState("0x1");
   const [view, setView] = useState<View>("tokens");
   const [action, setAction] = useState<Action>(null);
+  const [coinPanel, setCoinPanel] = useState<Panel>(null);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
   const network = walletNetworks[wallet?.chainId ?? watchChain];
@@ -91,15 +92,15 @@ export default function Investment() {
                     { id: "receive" as const, label: "Receive", icon: ArrowDown },
                     { id: "swap" as const, label: "Swap", icon: RefreshCw },
                     { id: "buy" as const, label: "Buy", icon: Plus },
-                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => setAction(!wallet && id === "receive" ? "track" : id)} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
+                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => { if (id === "send" || id === "receive") { setAction(null); setCoinPanel(id); setTimeout(() => document.getElementById("boa-coin")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } else setAction(id); }} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
                 </div>
               </section>
 
-              <CoinWallet />
+              <CoinWallet panel={coinPanel} onPanelChange={setCoinPanel} />
 
 
               {action && <section className="investment-action-sheet mt-6" aria-live="polite">
-                <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold capitalize">{action === "track" ? "Add a wallet address" : action}</h2><p className="mt-1 text-xs text-muted-foreground">{action === "track" ? "Paste a public address to show its live balance." : action === "receive" ? `Use this address to receive ${network?.symbol} on ${network?.name}.` : "This wallet is view-only. Use a trusted wallet app to approve this action."}</p></div><Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => setAction(null)} aria-label="Close"><X className="h-4 w-4" /></Button></div>
+                <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold capitalize">{action === "track" ? "Add a wallet address" : action}</h2><p className="mt-1 text-xs text-muted-foreground">{action === "track" ? "Paste a public address to show its live balance." : action === "receive" ? `Use this address to receive ${network?.symbol} on ${network?.name}.` : action === "swap" ? "Swapping between coins is coming soon. You can send and receive BoA Coin now." : action === "buy" ? "Buying coins is coming soon. Ask a BoA administrator to add BoA Coin to your balance." : ""}</p></div><Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => setAction(null)} aria-label="Close"><X className="h-4 w-4" /></Button></div>
                 {action === "track" ? <form className="mt-4 space-y-3" onSubmit={track}><input className="investment-input w-full font-mono text-sm" value={addressInput} onChange={(e) => setAddressInput(e.target.value)} placeholder="0x…" autoComplete="off" spellCheck={false} maxLength={42} aria-label="Public wallet address" /><Button type="submit" className="investment-primary w-full" disabled={busy || !addressInput.trim()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Show balance"}</Button></form>
                   : action === "receive" && wallet ? <><p className="mt-4 break-all font-mono text-sm">{wallet.address}</p><Button className="investment-primary mt-4" onClick={copyAddress}>{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}{copied ? "Copied" : "Copy address"}</Button></>
                   : <Button variant="outline" className="investment-secondary mt-4" onClick={() => setAction(null)}>Got it</Button>}
