@@ -111,18 +111,21 @@ export type Database = {
         Row: {
           address: string | null
           balance: number
+          units: number
           updated_at: string
           user_id: string
         }
         Insert: {
           address?: string | null
           balance?: number
+          units?: number
           updated_at?: string
           user_id: string
         }
         Update: {
           address?: string | null
           balance?: number
+          units?: number
           updated_at?: string
           user_id?: string
         }
@@ -137,6 +140,7 @@ export type Database = {
           note: string | null
           recipient_id: string
           sender_id: string | null
+          units: number | null
         }
         Insert: {
           amount: number
@@ -146,6 +150,7 @@ export type Database = {
           note?: string | null
           recipient_id: string
           sender_id?: string | null
+          units?: number | null
         }
         Update: {
           amount?: number
@@ -155,6 +160,7 @@ export type Database = {
           note?: string | null
           recipient_id?: string
           sender_id?: string | null
+          units?: number | null
         }
         Relationships: []
       }
