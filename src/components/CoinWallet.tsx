@@ -6,18 +6,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 type Activity = { id: string; amount: number; note: string | null; kind: string; created_at: string; direction: string; counterparty: string };
-type Panel = "send" | "receive" | "issue" | null;
+export type Panel = "send" | "receive" | "issue" | null;
 
 const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 });
 
-export function CoinWallet() {
+export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; onPanelChange?: (p: Panel) => void } = {}) {
   const { toast } = useToast();
   const [balance, setBalance] = useState<number | null>(null);
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [copied, setCopied] = useState(false);
   const [activity, setActivity] = useState<Activity[]>([]);
-  const [panel, setPanel] = useState<Panel>(null);
+  const [ownPanel, setOwnPanel] = useState<Panel>(null);
+  const panel = extPanel !== undefined ? extPanel : ownPanel;
+  const setPanel = (p: Panel) => { setOwnPanel(p); onPanelChange?.(p); };
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
@@ -67,7 +69,7 @@ export function CoinWallet() {
   };
 
   return (
-    <section className="investment-notice mt-6 block" aria-label="BoA Coin">
+    <section id="boa-coin" className="investment-notice mt-6 block" aria-label="BoA Coin">
       <div className="flex items-center gap-3">
         <span className="investment-notice-icon"><Coins className="h-5 w-5" /></span>
         <div className="min-w-0 flex-1">
