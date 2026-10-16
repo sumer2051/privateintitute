@@ -109,7 +109,6 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
 <div style="border-top:1px solid #1f2937;margin:0 0 26px"></div>
 <p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#e5e7eb">You just received ${esc(amtShort)}${esc(usdVal)} from <strong style="color:#ffffff">${esc(sName)}</strong>. The amount has been added to your ${esc(sym)} balance and is available right away.</p>
 ${t.note ? `<p style="margin:0 0 22px;font-size:15px;line-height:24px;color:#9ca3af">Note: ${esc(t.note)}</p>` : ""}
-<a href="${site}/investment" style="display:block;background:#0052ff;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;padding:14px 0;border-radius:999px">View your balance</a>
 </div>
 </div>
 <p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">If you don't recognise this transfer, contact support.</p>
