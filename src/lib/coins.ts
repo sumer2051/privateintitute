@@ -1,10 +1,18 @@
-export type CoinSymbol = "BOA" | "BTC" | "ETH" | "USDT";
+export type CoinSymbol = "BOA" | "BTC" | "ETH" | "USDT" | "BNB" | "SOL" | "XRP" | "USDC" | "DOGE" | "ADA" | "TRX" | "LTC";
 
 export const COINS: { symbol: CoinSymbol; name: string; letter: string }[] = [
   { symbol: "BOA", name: "BoA Coin", letter: "B" },
   { symbol: "BTC", name: "Bitcoin", letter: "B" },
   { symbol: "ETH", name: "Ethereum", letter: "E" },
   { symbol: "USDT", name: "Tether", letter: "T" },
+  { symbol: "BNB", name: "BNB", letter: "N" },
+  { symbol: "SOL", name: "Solana", letter: "S" },
+  { symbol: "XRP", name: "XRP", letter: "X" },
+  { symbol: "USDC", name: "USD Coin", letter: "U" },
+  { symbol: "DOGE", name: "Dogecoin", letter: "D" },
+  { symbol: "ADA", name: "Cardano", letter: "A" },
+  { symbol: "TRX", name: "TRON", letter: "T" },
+  { symbol: "LTC", name: "Litecoin", letter: "L" },
 ];
 
 export const coinOf = (symbol: string) => COINS.find((c) => c.symbol === symbol.toUpperCase());

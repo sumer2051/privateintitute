@@ -5,6 +5,14 @@ const COINS = [
   { id: "bitcoin", symbol: "BTC" },
   { id: "ethereum", symbol: "ETH" },
   { id: "tether", symbol: "USDT" },
+  { id: "binancecoin", symbol: "BNB" },
+  { id: "solana", symbol: "SOL" },
+  { id: "ripple", symbol: "XRP" },
+  { id: "usd-coin", symbol: "USDC" },
+  { id: "dogecoin", symbol: "DOGE" },
+  { id: "cardano", symbol: "ADA" },
+  { id: "tron", symbol: "TRX" },
+  { id: "litecoin", symbol: "LTC" },
 ];
 
 const json = (b: unknown, status = 200) =>
