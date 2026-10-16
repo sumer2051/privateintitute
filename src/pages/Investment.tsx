@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 const fmtCoin = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 8 });
 import { useNavigate } from "react-router-dom";
@@ -8,10 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { useInvestmentWallet, walletNetworks } from "@/hooks/useInvestmentWallet";
 import { CoinWallet, type Panel } from "@/components/CoinWallet";
+import { CoinSwapFlow } from "@/components/CoinSwapFlow";
+import { useCoinRates, useTokenBalances } from "@/hooks/useCoinRates";
+import { COINS, fmtRate, fmtUnits, fmtUsd, rateOf, type CoinSymbol } from "@/lib/coins";
 import { MarketPrices } from "@/components/MarketPrices";
 
 type View = "tokens" | "earn" | "activity";
 type Action = "send" | "receive" | "swap" | "buy" | "track" | null;
+type Swap = { id: string; from_symbol: string; to_symbol: string; from_units: number; to_units: number; rate: number; created_at: string };
 const earnOptions = [
   { asset: "ETH", rate: "3.1%", name: "Liquid staking" },
   { asset: "POL", rate: "4.8%", name: "Network staking" },
@@ -32,6 +36,11 @@ export default function Investment() {
   const [view, setView] = useState<View>("tokens");
   const [action, setAction] = useState<Action>(null);
   const [coinPanel, setCoinPanel] = useState<Panel>(null);
+  const [swapOpen, setSwapOpen] = useState(false);
+  const [coinTick, setCoinTick] = useState(0);
+  const [swaps, setSwaps] = useState<Swap[]>([]);
+  const { rates, updatedAt, refreshing, refresh } = useCoinRates();
+  const { balances: tokenBalances, reload: reloadTokens } = useTokenBalances();
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
   const network = walletNetworks[wallet?.chainId ?? watchChain];
