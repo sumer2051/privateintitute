@@ -1,17 +1,21 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 const fmtCoin = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 8 });
 import { useNavigate } from "react-router-dom";
-import { ArrowDown, ArrowLeft, ArrowUpRight, Check, ChevronRight, Copy, ExternalLink, History, Layers3, Loader2, Plus, RefreshCw, Search, ShieldCheck, Sparkles, Wallet, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUpRight, Check, ChevronRight, Copy, ExternalLink, History, Layers3, Loader2, Plus, RefreshCw, ShieldCheck, Sparkles, Wallet, X } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { useInvestmentWallet, walletNetworks } from "@/hooks/useInvestmentWallet";
 import { CoinWallet, type Panel } from "@/components/CoinWallet";
+import { CoinSwapFlow } from "@/components/CoinSwapFlow";
+import { useCoinRates, useTokenBalances } from "@/hooks/useCoinRates";
+import { COINS, fmtRate, fmtUnits, fmtUsd, rateOf, type CoinSymbol } from "@/lib/coins";
 import { MarketPrices } from "@/components/MarketPrices";
 
 type View = "tokens" | "earn" | "activity";
 type Action = "send" | "receive" | "swap" | "buy" | "track" | null;
+type Swap = { id: string; from_symbol: string; to_symbol: string; from_units: number; to_units: number; rate: number; created_at: string };
 const earnOptions = [
   { asset: "ETH", rate: "3.1%", name: "Liquid staking" },
   { asset: "POL", rate: "4.8%", name: "Network staking" },
@@ -32,6 +36,11 @@ export default function Investment() {
   const [view, setView] = useState<View>("tokens");
   const [action, setAction] = useState<Action>(null);
   const [coinPanel, setCoinPanel] = useState<Panel>(null);
+  const [swapOpen, setSwapOpen] = useState(false);
+  const [coinTick, setCoinTick] = useState(0);
+  const [swaps, setSwaps] = useState<Swap[]>([]);
+  const { rates, updatedAt, refreshing, refresh } = useCoinRates();
+  const { balances: tokenBalances, reload: reloadTokens } = useTokenBalances();
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
   const network = walletNetworks[wallet?.chainId ?? watchChain];
@@ -47,7 +56,24 @@ export default function Investment() {
     void load();
     const t = setInterval(load, 15000);
     return () => { alive = false; clearInterval(t); };
-  }, [coinPanel]);
+  }, [coinPanel, coinTick]);
+
+  const loadSwaps = useCallback(async () => {
+    const { data } = await supabase.from("coin_swaps").select("id, from_symbol, to_symbol, from_units, to_units, rate, created_at").order("created_at", { ascending: false }).limit(20);
+    setSwaps((data ?? []) as Swap[]);
+  }, []);
+
+  useEffect(() => { void loadSwaps(); }, [loadSwaps]);
+
+  const doSwap = async (from: CoinSymbol, to: CoinSymbol, amount: number, minOut: number) => {
+    const { error } = await supabase.rpc("swap_coins", { p_from: from, p_to: to, p_amount: amount, p_min_out: minOut });
+    if (error) return { error: error.message };
+    const { data: latest } = await supabase.from("coin_swaps").select("id").order("created_at", { ascending: false }).limit(1).maybeSingle();
+    setCoinTick((t) => t + 1);
+    void loadSwaps();
+    void reloadTokens();
+    return { error: null, id: (latest as { id: string } | null)?.id ?? null };
+  };
 
   const signUp = (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,15 +132,16 @@ export default function Investment() {
                     { id: "receive" as const, label: "Receive", icon: ArrowDown },
                     { id: "swap" as const, label: "Swap", icon: RefreshCw },
                     { id: "buy" as const, label: "Buy", icon: Plus },
-                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => { if (id === "send" || id === "receive") { setAction(null); setCoinPanel(id); setTimeout(() => document.getElementById("boa-coin")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } else setAction(id); }} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
+                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => { if (id === "swap") { setAction(null); setSwapOpen(true); return; } if (id === "send" || id === "receive") { setAction(null); setCoinPanel(id); setTimeout(() => document.getElementById("boa-coin")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } else setAction(id); }} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
                 </div>
               </section>
 
               <CoinWallet panel={coinPanel} onPanelChange={setCoinPanel} />
+              {swapOpen && <CoinSwapFlow rates={rates} balances={{ BOA: coinBalance ?? 0, ...tokenBalances }} onClose={() => setSwapOpen(false)} onSwap={doSwap} />}
 
 
               {action && <section className="investment-action-sheet mt-6" aria-live="polite">
-                <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold capitalize">{action === "track" ? "Add a wallet address" : action}</h2><p className="mt-1 text-xs text-muted-foreground">{action === "track" ? "Paste a public address to show its live balance." : action === "receive" ? `Use this address to receive ${network?.symbol} on ${network?.name}.` : action === "swap" ? "Swapping between coins is coming soon. You can send and receive BoA Coin now." : action === "buy" ? "Buying coins is coming soon. Ask a BoA administrator to add BoA Coin to your balance." : ""}</p></div><Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => setAction(null)} aria-label="Close"><X className="h-4 w-4" /></Button></div>
+                <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold capitalize">{action === "track" ? "Add a wallet address" : action}</h2><p className="mt-1 text-xs text-muted-foreground">{action === "track" ? "Paste a public address to show its live balance." : action === "receive" ? `Use this address to receive ${network?.symbol} on ${network?.name}.` : action === "buy" ? "Buying coins is coming soon. Ask a BoA administrator to add BoA Coin to your balance." : ""}</p></div><Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => setAction(null)} aria-label="Close"><X className="h-4 w-4" /></Button></div>
                 {action === "track" ? <form className="mt-4 space-y-3" onSubmit={track}><input className="investment-input w-full font-mono text-sm" value={addressInput} onChange={(e) => setAddressInput(e.target.value)} placeholder="0x…" autoComplete="off" spellCheck={false} maxLength={42} aria-label="Public wallet address" /><Button type="submit" className="investment-primary w-full" disabled={busy || !addressInput.trim()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Show balance"}</Button></form>
                   : action === "receive" && wallet ? <><p className="mt-4 break-all font-mono text-sm">{wallet.address}</p><Button className="investment-primary mt-4" onClick={copyAddress}>{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}{copied ? "Copied" : "Copy address"}</Button></>
                   : <Button variant="outline" className="investment-secondary mt-4" onClick={() => setAction(null)}>Got it</Button>}
@@ -123,9 +150,9 @@ export default function Investment() {
               {(error || copyError) && <p role="alert" className="mt-4 text-sm text-destructive">{error || copyError}</p>}
               <nav className="investment-nav mt-8 grid grid-cols-3" aria-label="Investment views">{([{ id: "tokens", label: "Tokens", icon: Wallet }, { id: "earn", label: "Earn", icon: Layers3 }, { id: "activity", label: "Activity", icon: History }] as const).map(({ id, label, icon: Icon }) => <Button key={id} variant="ghost" className={`investment-nav-item ${view === id ? "is-active" : ""}`} onClick={() => setView(id)}><Icon className="h-4 w-4" />{label}</Button>)}</nav>
               <section className="min-h-64 py-6">
-                {view === "tokens" && <><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">Tokens</h2><Button size="icon" variant="ghost" className="investment-icon-button" aria-label="Search tokens"><Search className="h-4 w-4" /></Button></div><div className="investment-token-row mt-3 flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="investment-token-icon">{network?.symbol?.slice(0, 1)}</span><div><p className="font-semibold">{network?.symbol}</p><p className="text-xs text-muted-foreground">{network?.name}</p></div></div><div className="text-right"><p className="font-mono text-sm">{wallet?.balance ?? "0.00"}</p><p className="text-xs text-muted-foreground">{wallet ? "Live on-chain" : "No wallet added"}</p></div></div><MarketPrices /></>}
+                {view === "tokens" && <><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">Your coins</h2><div className="flex items-center gap-2">{updatedAt && <span className="text-xs text-muted-foreground">{refreshing ? "Updating prices…" : `Prices ${new Date(updatedAt).toLocaleTimeString()}`}</span>}<Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => void refresh()} aria-label="Refresh prices"><RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} /></Button></div></div><ul className="mt-3 space-y-2">{COINS.map((c) => { const units = c.symbol === "BOA" ? (coinBalance ?? 0) : (tokenBalances[c.symbol] ?? 0); const price = rateOf(c.symbol, rates); return <li key={c.symbol} className="investment-token-row flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="investment-token-icon">{c.letter}</span><div><p className="font-semibold">{c.name}</p><p className="text-xs text-muted-foreground">{c.symbol}</p></div></div><div className="text-right"><p className="font-mono text-sm">{fmtUnits(units)}</p><p className="text-xs text-muted-foreground">{price ? fmtUsd(units * price) : "—"}</p></div></li>; })}</ul><Button variant="outline" className="investment-secondary mt-4 w-full" onClick={() => setSwapOpen(true)}><RefreshCw className="mr-2 h-4 w-4" />Swap between coins</Button><MarketPrices /></>}
                 {view === "earn" && <><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">Earn opportunities</h2><span className="text-xs text-muted-foreground">Indicative rates</span></div><div className="mt-4 grid gap-3 sm:grid-cols-3">{earnOptions.map((item) => <button key={item.asset} className="investment-earn text-left" onClick={() => setAction("buy")}><span className="investment-token-icon">{item.asset[0]}</span><strong className="mt-4 block text-xl">{item.rate} APY</strong><span className="mt-1 block text-xs text-muted-foreground">{item.name} · {item.asset}</span></button>)}</div></>}
-                {view === "activity" && <div className="py-8 text-center"><History className="mx-auto h-8 w-8 text-muted-foreground" /><p className="mt-3 text-sm text-muted-foreground">{wallet ? "Review this wallet’s verified activity on the explorer." : "No activity yet."}</p>{network && wallet && <a className="investment-link mt-4 inline-flex items-center gap-2 text-sm" href={`${network.explorer}/address/${wallet.address}`} target="_blank" rel="noopener noreferrer">Open blockchain explorer<ExternalLink className="h-4 w-4" /></a>}</div>}
+                {view === "activity" && <div><h2 className="text-lg font-semibold">Swap history</h2>{swaps.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">No swaps yet. Tap Swap to trade BoA Coin for Bitcoin, Ethereum or Tether units.</p> : <ul className="mt-3 divide-y divide-border">{swaps.map((s) => <li key={s.id} className="flex items-center justify-between gap-3 py-2 text-sm"><div className="min-w-0"><p className="truncate font-medium">{fmtUnits(Number(s.from_units))} {s.from_symbol} → {fmtUnits(Number(s.to_units))} {s.to_symbol}</p><p className="truncate text-xs text-muted-foreground">{new Date(s.created_at).toLocaleString()}</p></div><span className="shrink-0 font-mono text-xs text-muted-foreground">1 {s.from_symbol} = {fmtRate(Number(s.rate))} {s.to_symbol}</span></li>)}</ul>}{network && wallet && <a className="investment-link mt-6 inline-flex items-center gap-2 text-sm" href={`${network.explorer}/address/${wallet.address}`} target="_blank" rel="noopener noreferrer">Open blockchain explorer<ExternalLink className="h-4 w-4" /></a>}</div>}
               </section>
             </>
           )}
