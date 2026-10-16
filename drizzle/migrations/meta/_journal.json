@@ -92,6 +92,13 @@
       "when": 1792190708760,
       "tag": "0012_fix_buy_coins_small_amount",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792191191175,
+      "tag": "0013_coin_activity_buy_label",
+      "breakpoints": true
     }
   ]
 }
