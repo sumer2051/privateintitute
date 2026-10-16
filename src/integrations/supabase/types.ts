@@ -911,7 +911,7 @@ export type Database = {
       verify_transfer_pin: { Args: { _pin: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "support" | "user" | "tx_support"
+      app_role: "admin" | "support" | "user" | "tx_support" | "investor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1039,7 +1039,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "support", "user", "tx_support"],
+      app_role: ["admin", "support", "user", "tx_support", "investor"],
     },
   },
 } as const
