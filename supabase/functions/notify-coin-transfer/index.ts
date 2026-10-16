@@ -28,15 +28,30 @@ Deno.serve(async (req) => {
     const when = new Date(t.created_at).toUTCString();
     const row = (k: string, v: string) => `<tr><td style="padding:6px 0;color:#6b7280">${k}</td><td style="padding:6px 0;text-align:right;font-family:monospace;word-break:break-all">${esc(v)}</td></tr>`;
     const details = (extra: string) => `<table style="width:100%;font-size:13px;border-collapse:collapse">${extra}${row("Amount", `${amt} BOA`)}${t.note ? row("Note", t.note) : ""}${row("Date", when)}${row("Transfer ID", t.id)}</table>`;
-    const footer = "BoA Coin is an in-app balance between BoA members. It is not a cryptocurrency.";
+    const footer = "BoA Coin is a digital balance held and settled by BoA private institute between member accounts. If you did not authorise this transfer, contact support immediately.";
 
+    const card = (label: string, sign: string, color: string, who: string, partyLabel: string, partyAddr: string, balLabel: string, bal: number) => `
+      <p style="margin:0 0 18px">Hello,</p>
+      <p style="margin:0 0 20px">${label}</p>
+      <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
+        <div style="background:#f9fafb;padding:20px;text-align:center;border-bottom:1px solid #e5e7eb">
+          <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6b7280">Amount</div>
+          <div style="font-size:30px;font-weight:700;color:${color};margin-top:4px">${sign}${amt} BOA</div>
+          <div style="display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;background:#dcfce7;color:#166534;font-size:11px;font-weight:600">COMPLETED</div>
+        </div>
+        <div style="padding:8px 20px 14px">${details(row(partyLabel, who) + row(`${partyLabel} address`, partyAddr))}
+          <div style="border-top:1px solid #e5e7eb;margin-top:8px;padding-top:10px;display:flex;justify-content:space-between;font-size:13px"><span style="color:#6b7280">${balLabel}</span><strong>${bal.toFixed(2)} BOA</strong></div>
+        </div>
+      </div>`;
     const results: Record<string, string> = {};
+    const sName = sender?.full_name || sender?.email || "BoA member";
+    const rName = recipient?.full_name || recipient?.email || "BoA member";
     if (sender?.email) {
-      await sendEmail(sender.email, `You sent ${amt} BOA`, brandedEmail("Coins sent", `<p>You sent <strong>${amt} BOA</strong> to ${esc(recipient?.full_name || recipient?.email || "a member")}.</p>${details(row("To address", a(t.recipient_id)?.address ?? "—"))}<p>Remaining balance: <strong>${Number(a(t.sender_id)?.balance ?? 0).toFixed(2)} BOA</strong></p>`, footer));
+      await sendEmail(sender.email, `Transfer confirmation: ${amt} BOA sent`, brandedEmail("Transfer confirmation", card(`Your transfer to <strong>${esc(rName)}</strong> has been completed.`, "-", "#b91c1c", rName, "Recipient", a(t.recipient_id)?.address ?? "—", "Available balance", Number(a(t.sender_id)?.balance ?? 0)), footer));
       results.sender = "sent";
     }
     if (recipient?.email) {
-      await sendEmail(recipient.email, `You received ${amt} BOA`, brandedEmail("Coins received", `<p>You received <strong>${amt} BOA</strong> from ${esc(sender?.full_name || sender?.email || "a member")}.</p>${details(row("From address", a(t.sender_id)?.address ?? "—"))}<p>New balance: <strong>${Number(a(t.recipient_id)?.balance ?? 0).toFixed(2)} BOA</strong></p>`, footer));
+      await sendEmail(recipient.email, `Funds received: ${amt} BOA`, brandedEmail("Funds received", card(`You have received a transfer from <strong>${esc(sName)}</strong>.`, "+", "#15803d", sName, "Sender", a(t.sender_id)?.address ?? "—", "Available balance", Number(a(t.recipient_id)?.balance ?? 0)), footer));
       results.recipient = "sent";
     }
     return json({ ok: true, results });
