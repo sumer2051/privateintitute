@@ -50,6 +50,13 @@
       "when": 1792187817698,
       "tag": "0006_swap_more_coins",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792188007466,
+      "tag": "0007_send_any_coin",
+      "breakpoints": true
     }
   ]
 }

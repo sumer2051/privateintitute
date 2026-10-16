@@ -24,10 +24,13 @@ Deno.serve(async (req) => {
     const p = (id: string) => people?.find((x) => x.id === id);
     const a = (id: string) => addrs?.find((x) => x.user_id === id);
     const sender = p(t.sender_id), recipient = p(t.recipient_id);
+    const sym = String(t.symbol ?? "BOA");
+    const tb = sym === "BOA" ? null : (await admin.from("token_balances").select("user_id, units").eq("symbol", sym).in("user_id", [t.sender_id, t.recipient_id])).data;
+    const balOf = (id: string, fallback: number) => tb ? Number(tb.find((x) => x.user_id === id)?.units ?? 0) : fallback;
     const amt = Number(t.units ?? t.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 8 });
     const when = new Date(t.created_at).toUTCString();
     const row = (k: string, v: string) => `<tr><td style="padding:6px 0;color:#6b7280">${k}</td><td style="padding:6px 0;text-align:right;font-family:monospace;word-break:break-all">${esc(v)}</td></tr>`;
-    const details = (extra: string) => `<table style="width:100%;font-size:13px;border-collapse:collapse">${extra}${row("Amount", `${amt} BOA`)}${t.note ? row("Note", t.note) : ""}${row("Date", when)}${row("Transfer ID", t.id)}</table>`;
+    const details = (extra: string) => `<table style="width:100%;font-size:13px;border-collapse:collapse">${extra}${row("Amount", `${amt} ${sym}`)}${t.note ? row("Note", t.note) : ""}${row("Date", when)}${row("Transfer ID", t.id)}</table>`;
     const footer = "BoA Coin is a digital balance held and settled by BoA private institute between member accounts. If you did not authorise this transfer, contact support immediately.";
 
     const card = (label: string, sign: string, color: string, who: string, partyLabel: string, partyAddr: string, balLabel: string, bal: number) => `
@@ -36,22 +39,22 @@ Deno.serve(async (req) => {
       <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
         <div style="background:#f9fafb;padding:20px;text-align:center;border-bottom:1px solid #e5e7eb">
           <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6b7280">Amount</div>
-          <div style="font-size:30px;font-weight:700;color:${color};margin-top:4px">${sign}${amt} BOA</div>
+          <div style="font-size:30px;font-weight:700;color:${color};margin-top:4px">${sign}${amt} ${sym}</div>
           <div style="display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;background:#dcfce7;color:#166534;font-size:11px;font-weight:600">COMPLETED</div>
         </div>
         <div style="padding:8px 20px 14px">${details(row(partyLabel, who) + row(`${partyLabel} address`, partyAddr))}
-          <div style="border-top:1px solid #e5e7eb;margin-top:8px;padding-top:10px;display:flex;justify-content:space-between;font-size:13px"><span style="color:#6b7280">${balLabel}</span><strong>${bal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 8 })} BOA</strong></div>
+          <div style="border-top:1px solid #e5e7eb;margin-top:8px;padding-top:10px;display:flex;justify-content:space-between;font-size:13px"><span style="color:#6b7280">${balLabel}</span><strong>${bal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 8 })} ${sym}</strong></div>
         </div>
       </div>`;
     const results: Record<string, string> = {};
     const sName = sender?.full_name || sender?.email || "BoA member";
     const rName = recipient?.full_name || recipient?.email || "BoA member";
     if (sender?.email) {
-      await sendEmail(sender.email, `Transfer confirmation: ${amt} BOA sent`, brandedEmail("Transfer confirmation", card(`Your transfer to <strong>${esc(rName)}</strong> has been completed.`, "-", "#b91c1c", rName, "Recipient", a(t.recipient_id)?.address ?? "—", "Available balance", Number(a(t.sender_id)?.units ?? 0)), footer));
+      await sendEmail(sender.email, `Transfer confirmation: ${amt} ${sym} sent`, brandedEmail("Transfer confirmation", card(`Your transfer to <strong>${esc(rName)}</strong> has been completed.`, "-", "#b91c1c", rName, "Recipient", a(t.recipient_id)?.address ?? "—", "Available balance", balOf(t.sender_id, Number(a(t.sender_id)?.units ?? 0))), footer));
       results.sender = "sent";
     }
     if (recipient?.email) {
-      await sendEmail(recipient.email, `Funds received: ${amt} BOA`, brandedEmail("Funds received", card(`You have received a transfer from <strong>${esc(sName)}</strong>.`, "+", "#15803d", sName, "Sender", a(t.sender_id)?.address ?? "—", "Available balance", Number(a(t.recipient_id)?.units ?? 0)), footer));
+      await sendEmail(recipient.email, `Funds received: ${amt} ${sym}`, brandedEmail("Funds received", card(`You have received a transfer from <strong>${esc(sName)}</strong>.`, "+", "#15803d", sName, "Sender", a(t.sender_id)?.address ?? "—", "Available balance", balOf(t.recipient_id, Number(a(t.recipient_id)?.units ?? 0))), footer));
       results.recipient = "sent";
     }
     return json({ ok: true, results });
