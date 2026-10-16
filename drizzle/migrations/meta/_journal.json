@@ -57,6 +57,13 @@
       "when": 1792188007466,
       "tag": "0007_send_any_coin",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792188398557,
+      "tag": "0008_per_coin_addresses",
+      "breakpoints": true
     }
   ]
 }

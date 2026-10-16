@@ -107,6 +107,27 @@ export type Database = {
         }
         Relationships: []
       }
+      coin_addresses: {
+        Row: {
+          address: string
+          created_at: string
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          symbol?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       coin_balances: {
         Row: {
           address: string | null
@@ -957,6 +978,10 @@ export type Database = {
           symbol: string
         }[]
       }
+      coin_address_for: {
+        Args: { p_symbol: string; p_user: string }
+        Returns: string
+      }
       generate_ticket_number: { Args: never; Returns: string }
       has_investment_access: { Args: never; Returns: boolean }
       has_role: {
@@ -979,6 +1004,13 @@ export type Database = {
         Returns: undefined
       }
       my_coin_address: { Args: never; Returns: string }
+      my_coin_addresses: {
+        Args: never
+        Returns: {
+          address: string
+          symbol: string
+        }[]
+      }
       pay_credit_card: {
         Args: { p_amount: number; p_credit: string; p_from: string }
         Returns: number
