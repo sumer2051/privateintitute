@@ -82,7 +82,6 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
       <div className="grid grid-cols-3 gap-2">
         <Button className="investment-primary" onClick={() => setPanel(panel === "send" ? null : "send")}><ArrowUpRight className="mr-1 h-4 w-4" />Send</Button>
         <Button variant="outline" className="investment-secondary" onClick={() => setPanel(panel === "receive" ? null : "receive")}><ArrowDownLeft className="mr-1 h-4 w-4" />Receive</Button>
-        <Button variant="outline" className="investment-secondary" onClick={() => setPanel(panel === "issue" ? null : "issue")}><Plus className="mr-1 h-4 w-4" />Add</Button>
       </div>
 
       {panel === "receive" && (
