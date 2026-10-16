@@ -25,14 +25,32 @@ Deno.serve(async (req) => {
       const amt = units.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 8 });
       const paid = /\$([0-9.]+)/.exec(String(t.note ?? ""))?.[1] ?? "";
       const from = /from (.+)$/.exec(String(t.note ?? ""))?.[1] ?? "Bank account";
-      const row = (k: string, v: string) => `<tr><td style="padding:6px 0;color:#6b7280">${k}</td><td style="padding:6px 0;text-align:right;font-family:monospace;word-break:break-all">${esc(v)}</td></tr>`;
-      const body = `<p style="margin:0 0 18px">Hello ${esc(me.full_name || "")},</p><p style="margin:0 0 20px">Your purchase has been completed and the coins are now in your investment account.</p>
-      <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden"><div style="background:#f9fafb;padding:20px;text-align:center;border-bottom:1px solid #e5e7eb">
-      <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6b7280">You bought</div>
-      <div style="font-size:30px;font-weight:700;color:#15803d;margin-top:4px">+${amt} ${sym}</div>
-      <div style="display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;background:#dcfce7;color:#166534;font-size:11px;font-weight:600">COMPLETED</div></div>
-      <div style="padding:8px 20px 14px"><table style="width:100%;font-size:13px;border-collapse:collapse">${row("Amount paid", paid ? `$${paid} USD` : "—")}${row("Paid from", from)}${paid && units ? row("Price", `1 ${sym} = $${(Number(paid) / units).toLocaleString("en-US", { maximumFractionDigits: 8 })}`) : ""}${row("Fee", "Free")}${row("Date", new Date(t.created_at).toUTCString())}${row("Order ID", t.id)}</table></div></div>`;
-      await sendEmail(me.email, `Purchase confirmation: ${amt} ${sym}`, brandedEmail("Purchase confirmation", body, "If you did not make this purchase, contact BoA private institute support immediately."));
+      const usd = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })}`;
+      const priceStr = paid && units ? `$${(Number(paid) / units).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—";
+      const txid = String(t.id).replace(/-/g, "").slice(0, 8).toUpperCase();
+      const date = new Date(t.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric", timeZone: "UTC" });
+      const line = (pre: string, val: string, post = "") => `<div style="font-size:16px;line-height:26px;color:#111">${pre}<strong>${esc(val)}</strong>${post}</div>`;
+      const link = "color:#111;text-decoration:underline";
+      const site = "https://privateintitute.lovable.app";
+      const html = `<!doctype html><html><body style="margin:0;padding:0;background:#ffffff">
+<div style="background:#f2f2f7;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">
+<div style="max-width:520px;margin:0 auto">
+<div style="font-size:13px;font-weight:700;color:#111;margin:0 0 18px 4px">BoA private institute</div>
+<div style="background:#ffffff;border-radius:22px;padding:36px 28px">
+<h1 style="margin:0 0 26px;font-size:34px;line-height:40px;font-weight:400;color:#111">You bought ${esc(sym)}</h1>
+<p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#111">A total of ${esc(units.toFixed(8))} ${esc(sym)} was added to your account balance.</p>
+<p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#111">Here are the details:</p>
+<div style="background:#f2f2f7;border-radius:18px;padding:24px 28px;margin:0 0 26px">
+<div style="font-size:16px;line-height:26px;color:#111">Paid <strong>${esc(paid ? usd(Number(paid)) : "—")}</strong> with <strong>${esc(from.toLowerCase())}</strong></div>
+${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} price: `, priceStr)}${line("Fees: ", "$0.00")}
+</div>
+<a href="${site}/investment" style="display:inline-block;background:#000;color:#fff;text-decoration:none;font-size:16px;padding:12px 22px;border-radius:999px">Check balance</a>
+<p style="margin:26px 0 22px;font-size:16px;line-height:26px;color:#111">Transactions may not be cancelled once initiated. All purchases are final and non-refundable. If you have any questions or concerns please visit our <a href="${site}/support" style="${link}">FAQ</a>, <a href="${site}/support" style="${link}">support center</a> or <a href="${site}/support" style="${link}">call us</a>.</p>
+<p style="margin:0;font-size:16px;line-height:26px;color:#111">This transaction, along with all others you make, can be viewed in the Activity tab of your investment account.</p>
+</div>
+<p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">BoA private institute · Business of Associations bank. If you did not make this purchase, contact support immediately.</p>
+</div></div></body></html>`;
+      await sendEmail(me.email, `You bought ${sym}`, html);
       return json({ ok: true, results: { buyer: "sent" } });
     }
     if (!t || t.sender_id !== u.user.id || t.kind !== "transfer") return json({ error: "Transfer not found" }, 404);
