@@ -114,8 +114,7 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
       {panel === "issue" && (
         <form className="mt-4 space-y-2" onSubmit={submit}>
           <input className="investment-input w-full text-sm" inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount (up to 8 decimals, e.g. 0.00012500)" />
-          {panel === "send" && <input className="investment-input w-full text-sm" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" maxLength={140} />}
-          <Button type="submit" className="investment-primary w-full" disabled={busy}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : panel === "issue" ? "Add coins" : "Send coins"}</Button>
+          <Button type="submit" className="investment-primary w-full" disabled={busy}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add coins"}</Button>
         </form>
       )}
       {err && <p role="alert" className="mt-2 text-sm text-destructive">{err}</p>}
