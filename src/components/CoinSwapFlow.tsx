@@ -65,7 +65,7 @@ export function CoinSwapFlow({ rates, balances, onClose, onSwap }: {
     const price = quoteSwap(symbol, "BOA", 1, rates);
     const bal = balances[symbol] ?? 0;
     return (
-      <button className="mt-1 flex w-full items-center gap-3 rounded-xl p-2 text-left hover:bg-muted" onClick={onPick} disabled={active} aria-current={active}>
+      <button className="mt-1 flex w-full items-center gap-3 rounded-xl p-2 text-left hover:bg-muted" onClick={onPick} aria-current={active}>
         <Token symbol={symbol} />
         <div className="min-w-0 flex-1"><p className="font-semibold">{symbol}</p><p className="text-xs text-muted-foreground">{coinOf(symbol)?.name}</p></div>
         <p className="text-right font-semibold tabular-nums">{fmtUnits(bal)}<span className="block text-xs font-normal text-muted-foreground">{price ? fmtUsd(bal * (price.payUsd / price.out)) : symbol}</span></p>
