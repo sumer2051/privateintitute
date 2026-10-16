@@ -47,7 +47,7 @@ export function CoinBuyFlow({ rates, onClose, onDone }: { rates: Record<string, 
   };
 
   return (
-    <section className="investment-action-sheet mt-6" aria-live="polite">
+    <section id="coin-buy" className="investment-action-sheet mt-6 scroll-mt-24" aria-live="polite">
       <div className="flex items-start justify-between gap-3">
         <div><h2 className="text-lg font-semibold">Buy coins</h2><p className="mt-1 text-xs text-muted-foreground">Pay from your bank account at the live price. No fee.</p></div>
         <Button size="icon" variant="ghost" className="investment-icon-button" onClick={onClose} aria-label="Close"><X className="h-4 w-4" /></Button>

@@ -133,15 +133,15 @@ export default function Investment() {
                     { id: "receive" as const, label: "Receive", icon: ArrowDown },
                     { id: "swap" as const, label: "Swap", icon: RefreshCw },
                     { id: "buy" as const, label: "Buy", icon: Plus },
-                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => { if (id === "swap") { setAction(null); setSwapOpen(true); return; } if (id === "send" || id === "receive") { setAction(null); setCoinPanel(id); setTimeout(() => document.getElementById("boa-coin")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } else setAction(id); }} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
+                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => { if (id === "swap") { setAction(null); setSwapOpen(true); return; } if (id === "send" || id === "receive") { setAction(null); setCoinPanel(id); setTimeout(() => document.getElementById("boa-coin")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } else { setAction(id); if (id === "buy") { setCoinPanel(null); setTimeout(() => document.getElementById("coin-buy")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } } }} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
                 </div>
               </section>
 
+              {action === "buy" && <CoinBuyFlow rates={rates} onClose={() => setAction(null)} onDone={() => { setCoinTick((t) => t + 1); void reloadTokens(); }} />}
               <CoinWallet panel={coinPanel} onPanelChange={setCoinPanel} />
               {swapOpen && <CoinSwapFlow rates={rates} balances={{ BOA: coinBalance ?? 0, ...tokenBalances }} onClose={() => setSwapOpen(false)} onSwap={doSwap} />}
 
 
-              {action === "buy" && <CoinBuyFlow rates={rates} onClose={() => setAction(null)} onDone={() => { setCoinTick((t) => t + 1); void reloadTokens(); }} />}
               {action && action !== "buy" && <section className="investment-action-sheet mt-6" aria-live="polite">
                 <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold capitalize">{action === "track" ? "Add a wallet address" : action}</h2><p className="mt-1 text-xs text-muted-foreground">{action === "track" ? "Paste a public address to show its live balance." : action === "receive" ? `Use this address to receive ${network?.symbol} on ${network?.name}.` : ""}</p></div><Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => setAction(null)} aria-label="Close"><X className="h-4 w-4" /></Button></div>
                 {action === "track" ? <form className="mt-4 space-y-3" onSubmit={track}><input className="investment-input w-full font-mono text-sm" value={addressInput} onChange={(e) => setAddressInput(e.target.value)} placeholder="0x…" autoComplete="off" spellCheck={false} maxLength={42} aria-label="Public wallet address" /><Button type="submit" className="investment-primary w-full" disabled={busy || !addressInput.trim()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Show balance"}</Button></form>
