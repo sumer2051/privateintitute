@@ -1447,6 +1447,7 @@ html .coin-send-receipt {
 }
 html .coin-send-receipt .coin-receipt-check { width: 92px; height: 92px; border-radius: 9999px; background: hsl(var(--receipt-accent)); box-shadow: 0 0 0 6px hsl(var(--receipt-ring) / .9); display: flex; align-items: center; justify-content: center; color: hsl(0 0% 100%); }
 html .coin-send-receipt .coin-receipt-usd { color: hsl(var(--receipt-accent)); }
+html .coin-send-receipt h2 { color: hsl(var(--receipt-fg)); font-family: Outfit, system-ui, sans-serif !important; }
 html .coin-send-receipt .text-receipt-muted { color: hsl(var(--receipt-muted)); }
 html .coin-send-receipt .coin-receipt-done { background: hsl(var(--receipt-accent)); color: hsl(232 60% 10%); border: 0; border-radius: 12px; font-weight: 700; }
 html .coin-send-receipt .coin-receipt-done:hover { background: hsl(var(--receipt-accent) / .92); }
