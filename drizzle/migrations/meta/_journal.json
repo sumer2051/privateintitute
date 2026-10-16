@@ -78,6 +78,13 @@
       "when": 1792189234832,
       "tag": "0010_fix_coin_address_gen",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792190450462,
+      "tag": "0011_buy_coins_from_bank",
+      "breakpoints": true
     }
   ]
 }
