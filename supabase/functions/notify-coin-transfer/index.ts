@@ -90,7 +90,30 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
       results.sender = "sent";
     }
     if (recipient?.email) {
-      await sendEmail(recipient.email, `Funds received: ${amt} ${sym}`, brandedEmail("Funds received", card(`You have received a transfer from <strong>${esc(sName)}</strong>.`, "+", "#15803d", sName, "Sender", a(t.sender_id)?.address ?? "—", "Available balance", balOf(t.recipient_id, Number(a(t.recipient_id)?.units ?? 0))), footer));
+      const units = Number(t.units ?? t.amount);
+      const txid = String(t.id).replace(/-/g, "").slice(0, 8).toUpperCase();
+      const date = new Date(t.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric", timeZone: "UTC" });
+      const line = (pre: string, val: string) => `<div style="font-size:16px;line-height:26px;color:#111;word-break:break-all">${pre}<strong>${esc(val)}</strong></div>`;
+      const site = "https://privateintitute.lovable.app";
+      const lk = "color:#111;text-decoration:underline";
+      const bal = balOf(t.recipient_id, Number(a(t.recipient_id)?.units ?? 0));
+      const html = `<!doctype html><html><body style="margin:0;padding:0;background:#ffffff">
+<div style="background:#f2f2f7;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">
+<div style="max-width:520px;margin:0 auto">
+<div style="font-size:13px;font-weight:700;color:#111;margin:0 0 18px 4px">BoA private institute</div>
+<div style="background:#ffffff;border-radius:22px;padding:36px 28px">
+<h1 style="margin:0 0 26px;font-size:34px;line-height:40px;font-weight:400;color:#111">You received ${esc(sym)}</h1>
+<p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#111">A total of ${esc(units.toFixed(8))} ${esc(sym)} was added to your account balance from <strong>${esc(sName)}</strong>.</p>
+<p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#111">Here are the details:</p>
+<div style="background:#f2f2f7;border-radius:18px;padding:24px 28px;margin:0 0 26px">
+${line("From: ", sName)}${line("From address: ", a(t.sender_id)?.address ?? "—")}${line("Amount: ", `${units.toFixed(8)} ${sym}`)}${t.note ? line("Note: ", t.note) : ""}${line("Transaction ID: ", txid)}${line("Date: ", date)}${line("New balance: ", `${bal.toFixed(8)} ${sym}`)}${line("Fees: ", "$0.00")}
+</div>
+<p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#111">If you have any questions or concerns please visit our <a href="${site}/support" style="${lk}">FAQ</a>, <a href="${site}/support" style="${lk}">support center</a> or <a href="${site}/support" style="${lk}">call us</a>.</p>
+<p style="margin:0;font-size:16px;line-height:26px;color:#111">This transaction, along with all others, can be viewed in the Activity tab of your investment account.</p>
+</div>
+<p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">BoA private institute · Business of Associations bank. If you don't recognise this transfer, contact support.</p>
+</div></div></body></html>`;
+      await sendEmail(recipient.email, `You received ${sym}`, html);
       results.recipient = "sent";
     }
     return json({ ok: true, results });
