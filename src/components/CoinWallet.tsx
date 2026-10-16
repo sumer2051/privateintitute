@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoinSendFlow } from "@/components/CoinSendFlow";
-import { useTokenBalances } from "@/hooks/useCoinRates";
-import { COINS, type CoinSymbol } from "@/lib/coins";
+import { useCoinRates, useTokenBalances } from "@/hooks/useCoinRates";
+import { COINS, rateOf, type CoinSymbol } from "@/lib/coins";
 
 type Activity = { id: string; amount: number; symbol?: string; note: string | null; kind: string; created_at: string; direction: string; counterparty: string };
 export type Panel = "send" | "receive" | "issue" | null;
