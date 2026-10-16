@@ -71,6 +71,13 @@
       "when": 1792189119287,
       "tag": "0009_coin_address_formats",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792189234832,
+      "tag": "0010_fix_coin_address_gen",
+      "breakpoints": true
     }
   ]
 }
