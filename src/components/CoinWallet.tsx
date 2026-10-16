@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoinSendFlow } from "@/components/CoinSendFlow";
+import { useTokenBalances } from "@/hooks/useCoinRates";
 
 type Activity = { id: string; amount: number; symbol?: string; note: string | null; kind: string; created_at: string; direction: string; counterparty: string };
 export type Panel = "send" | "receive" | "issue" | null;
@@ -14,6 +15,7 @@ const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 
 export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; onPanelChange?: (p: Panel) => void } = {}) {
   const { toast } = useToast();
   const [balance, setBalance] = useState<number | null>(null);
+  const { balances: tokens, reload: reloadTokens } = useTokenBalances();
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [copied, setCopied] = useState(false);
