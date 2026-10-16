@@ -85,7 +85,7 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
     const sName = sender?.full_name || sender?.email || "BoA member";
     const rName = recipient?.full_name || recipient?.email || "BoA member";
     if (sender?.email) {
-      await sendEmail(sender.email, `Transfer confirmation: ${amt} ${sym} sent`, brandedEmail("Transfer confirmation", card(`Your transfer to <strong>${esc(rName)}</strong> has been completed.`, "-", "#b91c1c", rName, "Recipient", a(t.recipient_id)?.address ?? "—", "Available balance", balOf(t.sender_id, Number(a(t.sender_id)?.units ?? 0))), footer));
+      await sendEmail(sender.email, `Transfer confirmation: ${amt} ${sym} sent`, `<!doctype html><html><body style="margin:0;padding:0;background:#f5f6f8;font-family:Inter,Arial,sans-serif;color:#111827"><div style="max-width:600px;margin:0 auto;padding:24px"><div style="background:#fff;padding:28px 24px;border:1px solid #e5e7eb;border-radius:12px"><h1 style="margin:0 0 12px;font-size:20px">Transfer confirmation</h1><div style="font-size:14px;line-height:1.6;color:#374151">${card(`Your transfer to <strong>${esc(rName)}</strong> has been completed.`, "-", "#b91c1c", rName, "Recipient", a(t.recipient_id)?.address ?? "—", "Available balance", balOf(t.sender_id, Number(a(t.sender_id)?.units ?? 0)))}</div><p style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280">${footer}</p></div></div></body></html>`);
       results.sender = "sent";
     }
     if (recipient?.email) {
