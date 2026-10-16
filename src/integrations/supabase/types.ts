@@ -109,16 +109,19 @@ export type Database = {
       }
       coin_balances: {
         Row: {
+          address: string | null
           balance: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          address?: string | null
           balance?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          address?: string | null
           balance?: number
           updated_at?: string
           user_id?: string
@@ -880,6 +883,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      my_coin_address: { Args: never; Returns: string }
       pay_credit_card: {
         Args: { p_amount: number; p_credit: string; p_from: string }
         Returns: number
