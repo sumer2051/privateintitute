@@ -18,12 +18,13 @@ export function CoinBuyFlow({ rates, onClose, onDone }: { rates: Record<string, 
   const [mailNote, setMailNote] = useState("");
 
   useEffect(() => {
-    void supabase.from("accounts").select("id, account_name, account_number, account_type, available_balance, is_active, is_frozen").then(({ data, error }) => {
+    void supabase.auth.getUser().then(({ data: u }) => supabase.from("accounts").select("id, account_name, account_number, account_type, available_balance, is_active, is_frozen").eq("user_id", u.user?.id ?? "").order("account_type").then(({ data, error }) => {
       if (error) setErr(error.message);
       const list = ((data ?? []) as (Account & { is_active?: boolean | null; is_frozen?: boolean })[]).filter((a) => a.is_active !== false && !a.is_frozen);
       setAccounts(list);
-      if (list[0]) setAcct(list[0].id);
-    });
+      const first = list.find((a) => a.account_type === "checking") ?? list[0];
+      if (first) setAcct(first.id);
+    }));
   }, []);
 
   const price = rateOf(sym, rates);
