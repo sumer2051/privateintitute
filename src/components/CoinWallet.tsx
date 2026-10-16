@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 type Activity = { id: string; amount: number; note: string | null; kind: string; created_at: string; direction: string; counterparty: string };
 type Panel = "send" | "receive" | "issue" | null;
 
-const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 });
 
 export function CoinWallet() {
   const { toast } = useToast();
@@ -31,10 +31,10 @@ export function CoinWallet() {
     const { data: addr } = await supabase.rpc("my_coin_address");
     if (addr) setAddress(addr as string);
     const [{ data: b }, { data: a }] = await Promise.all([
-      supabase.from("coin_balances").select("balance").eq("user_id", u.user.id).maybeSingle(),
+      supabase.from("coin_balances").select("units").eq("user_id", u.user.id).maybeSingle(),
       supabase.rpc("coin_activity"),
     ]);
-    setBalance(Number(b?.balance ?? 0));
+    setBalance(Number(b?.units ?? 0));
     setActivity((a as Activity[]) ?? []);
   }, []);
 
@@ -49,7 +49,7 @@ export function CoinWallet() {
     e.preventDefault();
     setErr("");
     const n = Number(amount);
-    if (!Number.isFinite(n) || n <= 0) return setErr("Enter a valid amount");
+    if (!/^\d+(\.\d{1,8})?$/.test(amount.trim()) || !Number.isFinite(n) || n < 0.00000001) return setErr("Enter an amount with up to 8 decimals");
     setBusy(true);
     const res = panel === "issue"
       ? await supabase.rpc("admin_issue_coins", { p_amount: n })
@@ -93,7 +93,7 @@ export function CoinWallet() {
       {(panel === "send" || panel === "issue") && (
         <form className="mt-4 space-y-2" onSubmit={submit}>
           {panel === "send" && <input className="investment-input w-full text-sm" required value={to} onChange={(e) => setTo(e.target.value)} placeholder="Address (boa1…) or email" maxLength={255} autoComplete="off" spellCheck={false} />}
-          <input className="investment-input w-full text-sm" inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" />
+          <input className="investment-input w-full text-sm" inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount (up to 8 decimals, e.g. 0.00012500)" />
           {panel === "send" && <input className="investment-input w-full text-sm" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" maxLength={140} />}
           <Button type="submit" className="investment-primary w-full" disabled={busy}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : panel === "issue" ? "Add coins" : "Send coins"}</Button>
         </form>
