@@ -125,7 +125,7 @@ export default function Investment() {
 
               <section className="mt-5">
                 <div className="investment-notice flex items-center gap-3"><span className="investment-notice-icon"><Sparkles className="h-5 w-5" /></span><div className="min-w-0"><p className="text-sm font-semibold">Welcome, {profile.name}</p><p className="text-xs text-muted-foreground">Live balances with no signing or transfer access</p></div></div>
-                <div className="mt-5 min-h-24"><p className="text-xs text-muted-foreground">BoA Coin balance</p><h1 className="mt-1 break-all text-4xl font-semibold tabular-nums sm:text-5xl">{coinBalance === null ? <Loader2 className="h-9 w-9 animate-spin text-primary" /> : fmtCoin(coinBalance)}<span className="ml-2 text-xl text-muted-foreground">BOA</span></h1></div>
+                <div className="mt-5 min-h-24"><p className="text-xs text-muted-foreground">Total balance</p><h1 className="mt-1 break-all text-4xl font-semibold tabular-nums sm:text-5xl">{coinBalance === null ? <Loader2 className="h-9 w-9 animate-spin text-primary" /> : fmtUsd(COINS.reduce((sum, c) => { const units = c.symbol === "BOA" ? coinBalance : (tokenBalances[c.symbol] ?? 0); return sum + units * (rateOf(c.symbol, rates) ?? 0); }, 0))}<span className="ml-2 text-xl text-muted-foreground">USD</span></h1><p className="mt-1 text-xs text-muted-foreground tabular-nums">{coinBalance !== null && `${fmtCoin(coinBalance)} BOA · all coins at live prices`}</p></div>
                 <div className="mt-7 grid grid-cols-4 gap-3">
                   {[
                     { id: "send" as const, label: "Send", icon: ArrowUpRight },

@@ -79,14 +79,7 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
 
   return (
     <section id="boa-coin" className="investment-notice mt-6 block" aria-label="BoA Coin">
-      <div className="flex items-center gap-3">
-        <span className="investment-notice-icon"><Coins className="h-5 w-5" /></span>
-        <div className="min-w-0 flex-1">
-          <p className="text-xs text-muted-foreground">BoA Coin balance</p>
-          <p className="text-2xl font-semibold tabular-nums">{balance === null ? "…" : fmt(balance)} <span className="text-sm text-muted-foreground">BOA</span></p>
-        </div>
-      </div>
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <Button className="investment-primary" onClick={() => setPanel(panel === "send" ? null : "send")}><ArrowUpRight className="mr-1 h-4 w-4" />Send</Button>
         <Button variant="outline" className="investment-secondary" onClick={() => setPanel(panel === "receive" ? null : "receive")}><ArrowDownLeft className="mr-1 h-4 w-4" />Receive</Button>
         <Button variant="outline" className="investment-secondary" onClick={() => setPanel(panel === "issue" ? null : "issue")}><Plus className="mr-1 h-4 w-4" />Add</Button>
