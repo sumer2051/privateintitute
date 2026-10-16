@@ -56,7 +56,12 @@ export function CoinWallet() {
       : await supabase.rpc("send_coins", { p_recipient_email: to.trim(), p_amount: n, p_note: note.trim() || null });
     setBusy(false);
     if (res.error) return setErr(res.error.message);
-    toast({ title: panel === "issue" ? "Coins added" : "Coins sent", description: `${fmt(n)} BoA Coin` });
+    if (panel === "send") {
+      const { data: latest } = await supabase.rpc("coin_activity");
+      const t = (latest as Activity[] | null)?.find((x) => x.direction === "out" && x.kind === "transfer");
+      if (t) supabase.functions.invoke("notify-coin-transfer", { body: { transfer_id: t.id } }).then(({ error }) => { if (error) toast({ title: "Coins sent, but the email didn't go out", variant: "destructive" }); });
+    }
+    toast({ title: panel === "issue" ? "Coins added" : "Coins sent", description: panel === "send" ? `${fmt(n)} BOA · email receipts on the way` : `${fmt(n)} BOA` });
     setTo(""); setAmount(""); setNote(""); setPanel(null);
     void load();
   };
