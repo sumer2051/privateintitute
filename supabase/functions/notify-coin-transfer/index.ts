@@ -1,6 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { brandedEmail, sendEmail } from "../_shared/gmail.ts";
+import { sendEmail } from "../_shared/gmail.ts";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -35,7 +35,6 @@ Deno.serve(async (req) => {
       const html = `<!doctype html><html><body style="margin:0;padding:0;background:#ffffff">
 <div style="background:#f2f2f7;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">
 <div style="max-width:520px;margin:0 auto">
-<div style="font-size:13px;font-weight:700;color:#111;margin:0 0 18px 4px">BoA private institute</div>
 <div style="background:#ffffff;border-radius:22px;padding:36px 28px">
 <h1 style="margin:0 0 26px;font-size:34px;line-height:40px;font-weight:400;color:#111">You bought ${esc(sym)}</h1>
 <p style="margin:0 0 22px;font-size:16px;line-height:26px;color:#111">A total of ${esc(units.toFixed(8))} ${esc(sym)} was added to your account balance.</p>
@@ -47,7 +46,7 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
 <p style="margin:26px 0 22px;font-size:16px;line-height:26px;color:#111">Transactions may not be cancelled once initiated. All purchases are final and non-refundable. If you have any questions or concerns please visit our <a href="${site}/support" style="${link}">FAQ</a>, <a href="${site}/support" style="${link}">support center</a> or <a href="${site}/support" style="${link}">call us</a>.</p>
 <p style="margin:0;font-size:16px;line-height:26px;color:#111">This transaction, along with all others you make, can be viewed in the Activity tab of your investment account.</p>
 </div>
-<p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">BoA private institute · Business of Associations bank. If you did not make this purchase, contact support immediately.</p>
+<p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">If you did not make this purchase, contact support immediately.</p>
 </div></div></body></html>`;
       await sendEmail(me.email, `You bought ${sym}`, html);
       return json({ ok: true, results: { buyer: "sent" } });
@@ -67,7 +66,7 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
     const when = new Date(t.created_at).toUTCString();
     const row = (k: string, v: string) => `<tr><td style="padding:6px 0;color:#6b7280">${k}</td><td style="padding:6px 0;text-align:right;font-family:monospace;word-break:break-all">${esc(v)}</td></tr>`;
     const details = (extra: string) => `<table style="width:100%;font-size:13px;border-collapse:collapse">${extra}${row("Amount", `${amt} ${sym}`)}${t.note ? row("Note", t.note) : ""}${row("Date", when)}${row("Transfer ID", t.id)}</table>`;
-    const footer = "BoA Coin is a digital balance held and settled by BoA private institute between member accounts. If you did not authorise this transfer, contact support immediately.";
+    const footer = "BoA Coin is a digital balance held and settled between member accounts. If you did not authorise this transfer, contact support immediately.";
 
     const card = (label: string, sign: string, color: string, who: string, partyLabel: string, partyAddr: string, balLabel: string, bal: number) => `
       <p style="margin:0 0 18px">Hello,</p>
@@ -86,7 +85,7 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
     const sName = sender?.full_name || sender?.email || "BoA member";
     const rName = recipient?.full_name || recipient?.email || "BoA member";
     if (sender?.email) {
-      await sendEmail(sender.email, `Transfer confirmation: ${amt} ${sym} sent`, brandedEmail("Transfer confirmation", card(`Your transfer to <strong>${esc(rName)}</strong> has been completed.`, "-", "#b91c1c", rName, "Recipient", a(t.recipient_id)?.address ?? "—", "Available balance", balOf(t.sender_id, Number(a(t.sender_id)?.units ?? 0))), footer));
+      await sendEmail(sender.email, `Transfer confirmation: ${amt} ${sym} sent`, `<!doctype html><html><body style="margin:0;padding:0;background:#f5f6f8;font-family:Inter,Arial,sans-serif;color:#111827"><div style="max-width:600px;margin:0 auto;padding:24px"><div style="background:#fff;padding:28px 24px;border:1px solid #e5e7eb;border-radius:12px"><h1 style="margin:0 0 12px;font-size:20px">Transfer confirmation</h1><div style="font-size:14px;line-height:1.6;color:#374151">${card(`Your transfer to <strong>${esc(rName)}</strong> has been completed.`, "-", "#b91c1c", rName, "Recipient", a(t.recipient_id)?.address ?? "—", "Available balance", balOf(t.sender_id, Number(a(t.sender_id)?.units ?? 0)))}</div><p style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280">${footer}</p></div></div></body></html>`);
       results.sender = "sent";
     }
     if (recipient?.email) {
@@ -102,7 +101,6 @@ ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} pric
       const html = `<!doctype html><html><body style="margin:0;padding:0;background:#0a0a0a">
 <div style="background:#0a0a0a;padding:24px 12px;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">
 <div style="max-width:520px;margin:0 auto">
-<div style="font-size:13px;font-weight:700;color:#ffffff;margin:0 0 18px 4px">BoA private institute</div>
 <div style="background:#0052ff;border-radius:22px;padding:64px 14px 14px">
 <div style="background:#000000;border-radius:18px;padding:48px 28px 36px;text-align:center">
 <div style="width:88px;height:88px;margin:0 auto 28px;border:3px solid #0052ff;border-radius:999px;line-height:82px;font-size:44px;color:#0052ff">&#10003;</div>
@@ -114,7 +112,7 @@ ${t.note ? `<p style="margin:0 0 22px;font-size:15px;line-height:24px;color:#9ca
 <a href="${site}/investment" style="display:block;background:#0052ff;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;padding:14px 0;border-radius:999px">View your balance</a>
 </div>
 </div>
-<p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">BoA private institute · Business of Associations bank. If you don't recognise this transfer, contact support.</p>
+<p style="margin:18px 4px 0;font-size:12px;line-height:18px;color:#6b7280">If you don't recognise this transfer, contact support.</p>
 </div></div></body></html>`;
       await sendEmail(recipient.email, `You just received ${amtShort}`, html);
       results.recipient = "sent";
