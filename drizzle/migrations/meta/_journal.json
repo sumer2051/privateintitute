@@ -64,6 +64,13 @@
       "when": 1792188398557,
       "tag": "0008_per_coin_addresses",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792189119287,
+      "tag": "0009_coin_address_formats",
+      "breakpoints": true
     }
   ]
 }
