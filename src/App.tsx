@@ -56,7 +56,7 @@ const App = () => (
             <Route path="/" element={<Navigate to="/accounts" replace />} />
             <Route path="/overview" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/accounts" element={<ProtectedRoute><Accounts /></ProtectedRoute>} />
-            <Route path="/investment" element={<ProtectedRoute adminOnly><Investment /></ProtectedRoute>} />
+            <Route path="/investment" element={<ProtectedRoute investmentOnly><Investment /></ProtectedRoute>} />
             <Route path="/transfers" element={<ProtectedRoute><Transfers /></ProtectedRoute>} />
             <Route path="/billpay" element={<ProtectedRoute><BillPay /></ProtectedRoute>} />
             <Route path="/cards" element={<ProtectedRoute><Cards /></ProtectedRoute>} />
