@@ -44,7 +44,6 @@ Deno.serve(async (req) => {
 <div style="font-size:16px;line-height:26px;color:#111">Paid <strong>${esc(paid ? usd(Number(paid)) : "—")}</strong> with <strong>${esc(from.toLowerCase())}</strong></div>
 ${line("Transaction ID: ", txid)}${line("Date: ", date)}${line(`${esc(sym)} price: `, priceStr)}${line("Fees: ", "$0.00")}
 </div>
-<a href="${site}/investment" style="display:inline-block;background:#000;color:#fff;text-decoration:none;font-size:16px;padding:12px 22px;border-radius:999px">Check balance</a>
 <p style="margin:26px 0 22px;font-size:16px;line-height:26px;color:#111">Transactions may not be cancelled once initiated. All purchases are final and non-refundable. If you have any questions or concerns please visit our <a href="${site}/support" style="${link}">FAQ</a>, <a href="${site}/support" style="${link}">support center</a> or <a href="${site}/support" style="${link}">call us</a>.</p>
 <p style="margin:0;font-size:16px;line-height:26px;color:#111">This transaction, along with all others you make, can be viewed in the Activity tab of your investment account.</p>
 </div>
