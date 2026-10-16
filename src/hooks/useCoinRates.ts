@@ -19,9 +19,9 @@ export function useCoinRates() {
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
-    const { error } = await supabase.functions.invoke("refresh-coin-rates");
+    const { data, error } = await supabase.functions.invoke("refresh-coin-rates");
     await read();
-    if (error) setFailed(true);
+    if (error || data?.ok === false) setFailed(true);
     setRefreshing(false);
   }, [read]);
 
