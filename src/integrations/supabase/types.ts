@@ -953,6 +953,15 @@ export type Database = {
         Args: { p_account: string; p_delta: number }
         Returns: number
       }
+      buy_coins: {
+        Args: {
+          p_account: string
+          p_min_out?: number
+          p_symbol: string
+          p_usd: number
+        }
+        Returns: number
+      }
       coin_activity: {
         Args: never
         Returns: {
