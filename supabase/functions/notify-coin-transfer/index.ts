@@ -22,9 +22,10 @@ Deno.serve(async (req) => {
     const { data: people } = await admin.from("profiles").select("id, full_name, email").in("id", [t.sender_id, t.recipient_id]);
     const { data: addrs } = await admin.from("coin_balances").select("user_id, address, units").in("user_id", [t.sender_id, t.recipient_id]);
     const p = (id: string) => people?.find((x) => x.id === id);
-    const a = (id: string) => addrs?.find((x) => x.user_id === id);
-    const sender = p(t.sender_id), recipient = p(t.recipient_id);
     const sym = String(t.symbol ?? "BOA");
+    const ca = sym === "BOA" ? null : (await admin.from("coin_addresses").select("user_id, address").eq("symbol", sym).in("user_id", [t.sender_id, t.recipient_id])).data;
+    const a = (id: string) => { const b = addrs?.find((x) => x.user_id === id); return ca ? { units: b?.units ?? 0, address: ca.find((x) => x.user_id === id)?.address ?? "—" } : b; };
+    const sender = p(t.sender_id), recipient = p(t.recipient_id);
     const tb = sym === "BOA" ? null : (await admin.from("token_balances").select("user_id, units").eq("symbol", sym).in("user_id", [t.sender_id, t.recipient_id])).data;
     const balOf = (id: string, fallback: number) => tb ? Number(tb.find((x) => x.user_id === id)?.units ?? 0) : fallback;
     const amt = Number(t.units ?? t.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 8 });

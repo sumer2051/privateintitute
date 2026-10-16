@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoinSendFlow } from "@/components/CoinSendFlow";
 import { useTokenBalances } from "@/hooks/useCoinRates";
+import { COINS, type CoinSymbol } from "@/lib/coins";
 
 type Activity = { id: string; amount: number; symbol?: string; note: string | null; kind: string; created_at: string; direction: string; counterparty: string };
 export type Panel = "send" | "receive" | "issue" | null;
@@ -19,6 +20,9 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [copied, setCopied] = useState(false);
+  const [addresses, setAddresses] = useState<Record<string, string>>({});
+  const [rxSym, setRxSym] = useState<CoinSymbol>("BOA");
+  const rxAddr = addresses[rxSym] ?? address;
   const [activity, setActivity] = useState<Activity[]>([]);
   const [ownPanel, setOwnPanel] = useState<Panel>(null);
   const panel = extPanel !== undefined ? extPanel : ownPanel;
@@ -33,8 +37,10 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
     setEmail(u.user.email ?? "");
-    const { data: addr } = await supabase.rpc("my_coin_address");
-    if (addr) setAddress(addr as string);
+    const { data: list } = await supabase.rpc("my_coin_addresses");
+    const map = Object.fromEntries(((list ?? []) as { symbol: string; address: string }[]).map((r) => [r.symbol, r.address]));
+    setAddresses(map);
+    if (map.BOA) setAddress(map.BOA);
     const [{ data: b }, { data: a }] = await Promise.all([
       supabase.from("coin_balances").select("units").eq("user_id", u.user.id).maybeSingle(),
       supabase.rpc("coin_activity_all"),
@@ -88,10 +94,11 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
 
       {panel === "receive" && (
         <div className="mt-4 flex flex-col items-center gap-3 text-center">
-          <div className="rounded-xl border border-border bg-background p-3">{address ? <QRCodeSVG value={address} size={168} fgColor="hsl(0 0% 10%)" bgColor="transparent" /> : <Loader2 className="h-6 w-6 animate-spin" />}</div>
-          <p className="text-xs text-muted-foreground">Your BoA Coin address</p>
-          <p className="break-all font-mono text-sm">{address}</p>
-          <Button variant="outline" className="investment-secondary" disabled={!address} onClick={async () => { try { await navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* address is visible */ } }}>{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}{copied ? "Copied" : "Copy address"}</Button>
+          <div className="flex max-w-full gap-1.5 overflow-x-auto pb-1">{COINS.map((c) => <button key={c.symbol} type="button" onClick={() => { setRxSym(c.symbol); setCopied(false); }} className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold ${rxSym === c.symbol ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>{c.symbol}</button>)}</div>
+          <div className="rounded-xl border border-border bg-background p-3">{rxAddr ? <QRCodeSVG value={rxAddr} size={168} fgColor="hsl(0 0% 10%)" bgColor="transparent" /> : <Loader2 className="h-6 w-6 animate-spin" />}</div>
+          <p className="text-xs text-muted-foreground">Your {COINS.find((c) => c.symbol === rxSym)?.name} address</p>
+          <p className="break-all font-mono text-sm">{rxAddr}</p>
+          <Button variant="outline" className="investment-secondary" disabled={!rxAddr} onClick={async () => { try { await navigator.clipboard.writeText(rxAddr); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* address is visible */ } }}>{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}{copied ? "Copied" : "Copy address"}</Button>
           <p className="text-xs text-muted-foreground">Members can also send to {email}</p>
         </div>
       )}

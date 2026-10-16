@@ -70,7 +70,7 @@ export function CoinSendFlow({ balances, fromName, recents, onClose, onSend }: {
         {step === "to" && <>
           <Header title="Send to" />
           <div className="rounded-2xl border border-border p-4">
-            <textarea className="w-full resize-none bg-transparent font-mono text-sm outline-none" rows={2} value={to} onChange={(e) => setTo(e.target.value)} placeholder="Address (boa1…) or email" maxLength={255} spellCheck={false} autoComplete="off" />
+            <textarea className="w-full resize-none bg-transparent font-mono text-sm outline-none" rows={2} value={to} onChange={(e) => setTo(e.target.value)} placeholder="Coin address (boa…) or email" maxLength={255} spellCheck={false} autoComplete="off" />
             <div className="mt-2 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm"><Coins className="h-4 w-4 text-[hsl(var(--coin-send-token))]" />BoA Coin</span>
               <Button className="investment-primary rounded-full px-5" onClick={paste}>Paste</Button>
