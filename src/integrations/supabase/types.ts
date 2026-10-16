@@ -864,6 +864,7 @@ export type Database = {
         }[]
       }
       generate_ticket_number: { Args: never; Returns: string }
+      has_investment_access: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
