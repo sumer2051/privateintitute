@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CoinSendFlow } from "@/components/CoinSendFlow";
 
-type Activity = { id: string; amount: number; note: string | null; kind: string; created_at: string; direction: string; counterparty: string };
+type Activity = { id: string; amount: number; symbol?: string; note: string | null; kind: string; created_at: string; direction: string; counterparty: string };
 export type Panel = "send" | "receive" | "issue" | null;
 
 const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 });
@@ -35,7 +35,7 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
     if (addr) setAddress(addr as string);
     const [{ data: b }, { data: a }] = await Promise.all([
       supabase.from("coin_balances").select("units").eq("user_id", u.user.id).maybeSingle(),
-      supabase.rpc("coin_activity"),
+      supabase.rpc("coin_activity_all"),
     ]);
     setBalance(Number(b?.units ?? 0));
     setActivity((a as Activity[]) ?? []);
@@ -60,7 +60,7 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
     setBusy(false);
     if (res.error) return setErr(res.error.message);
     if (panel === "send") {
-      const { data: latest } = await supabase.rpc("coin_activity");
+      const { data: latest } = await supabase.rpc("coin_activity_all");
       const t = (latest as Activity[] | null)?.find((x) => x.direction === "out" && x.kind === "transfer");
       if (t) supabase.functions.invoke("notify-coin-transfer", { body: { transfer_id: t.id } }).then(({ error }) => { if (error) toast({ title: "Coins sent, but the email didn't go out", variant: "destructive" }); });
     }
@@ -95,18 +95,18 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
       )}
       {panel === "send" && (
         <CoinSendFlow
-          balance={balance ?? 0}
+          balances={{ ...tokens, BOA: balance ?? 0 }}
           fromName={email}
           recents={[...new Set(activity.filter((a) => a.direction === "out").map((a) => a.counterparty))].slice(0, 5)}
           onClose={() => setPanel(null)}
-          onSend={async (rcpt, n, nt) => {
-            const res = await supabase.rpc("send_coins", { p_recipient_email: rcpt, p_amount: n, p_note: nt || null });
+          onSend={async (sym, rcpt, n, nt) => {
+            const res = await supabase.rpc("send_tokens", { p_symbol: sym, p_recipient: rcpt, p_amount: n, p_note: nt || null });
             if (res.error) return res.error.message;
-            const { data: latest } = await supabase.rpc("coin_activity");
+            const { data: latest } = await supabase.rpc("coin_activity_all");
             const t = (latest as Activity[] | null)?.find((x) => x.direction === "out" && x.kind === "transfer");
             if (t) supabase.functions.invoke("notify-coin-transfer", { body: { transfer_id: t.id } }).then(({ error }) => { if (error) toast({ title: "Coins sent, but the email didn't go out", variant: "destructive" }); });
-            toast({ title: "Coins sent", description: `${fmt(n)} BOA · email receipts on the way` });
-            setPanel(null); void load();
+            toast({ title: "Coins sent", description: `${fmt(n)} ${sym} · email receipts on the way` });
+            setPanel(null); void load(); void reloadTokens();
             return null;
           }}
         />
@@ -128,7 +128,7 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
                 <p className="truncate font-medium">{a.direction === "out" ? `To ${a.counterparty}` : `From ${a.counterparty}`}</p>
                 <p className="truncate text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString()}{a.note ? ` · ${a.note}` : ""}</p>
               </div>
-              <span className={`shrink-0 font-mono ${a.direction === "out" ? "text-destructive" : "text-[hsl(var(--wallet-status))]"}`}>{a.direction === "out" ? "-" : "+"}{fmt(Number(a.amount))}</span>
+              <span className={`shrink-0 font-mono ${a.direction === "out" ? "text-destructive" : "text-[hsl(var(--wallet-status))]"}`}>{a.direction === "out" ? "-" : "+"}{fmt(Number(a.amount))} {a.symbol ?? "BOA"}</span>
             </li>
           ))}
         </ul>
