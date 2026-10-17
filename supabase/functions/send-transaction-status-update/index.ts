@@ -662,7 +662,7 @@ Deno.serve(async (req) => {
 
     const baseCtx: Omit<Ctx, "audience"> = {
       senderName, recipientName, amount, memo, currencyCode, status,
-      reference, category, dateStr, adminNote, recipientBank, postingIsBank,
+      reference, category, dateStr, adminNote, customerNote, recipientBank, postingIsBank,
     };
 
     // Unique per notice: keeps every status update / resend as its own
