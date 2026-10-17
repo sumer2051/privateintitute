@@ -193,7 +193,7 @@ function cashappStatusEmail(c: Ctx) {
         <tr>
           <td width="36" valign="top" style="padding:6px 0;font-size:18px;color:#8a8a8a;">💬</td>
           <td style="padding:6px 0;">
-            <div style="font-size:17px;font-weight:800;">Note from support</div>
+            <div style="font-size:17px;font-weight:800;">Memo</div>
             <div style="font-size:14px;color:#555;margin-top:2px;line-height:1.5;">${esc(c.adminNote)}</div>
           </td>
         </tr>` : ""}
@@ -266,7 +266,7 @@ function venmoStatusEmail(c: Ctx) {
       ${label("Transaction ID")}
       ${value(txId)}
 
-      ${c.adminNote ? `${label("Note from support")}${value(esc(c.adminNote))}` : ""}
+      ${c.adminNote ? `${label("Memo")}${value(esc(c.adminNote))}` : ""}
 
       ${postingBox(c, { bg: "#f2f9ff", border: "#cfe7ff", color: "#2f3033", title: "What happens next", radius: "8px" })}
 
@@ -335,7 +335,7 @@ function paypalStatusEmail(c: Ctx) {
           <div style="font-size:16px;color:${meta.color};margin-top:4px;font-weight:700;">${esc(meta.label)} — ${esc(meta.sub)}</div>
         </td></tr>
         ${c.adminNote ? `<tr><td style="padding:16px 28px 8px;">
-          <div style="font-size:14px;font-weight:800;color:#000;">Note from support</div>
+          <div style="font-size:14px;font-weight:800;color:#000;">Memo</div>
           <div style="font-size:15px;color:#2c2e2f;margin-top:4px;line-height:1.5;">${esc(c.adminNote)}</div>
         </td></tr>` : ""}
         ${c.status === "posting" ? `<tr><td colspan="2" style="padding:8px 28px 0;">
@@ -395,7 +395,7 @@ function zelleStatusEmail(c: Ctx) {
           </table>
         </td></tr>
         ${c.adminNote ? `<tr><td style="padding:12px 26px 0;font-size:14px;color:#3a3a3a;line-height:1.55;">
-          <strong>Note from support:</strong> ${esc(c.adminNote)}
+          <strong>Memo:</strong> ${esc(c.adminNote)}
         </td></tr>` : ""}
         ${c.status === "posting" ? `<tr><td style="padding:12px 26px 0;">
           ${postingBox(c, { bg: "#f4f7ff", border: "#cdd9f5", color: "#1f2937", title: "What happens next", radius: "6px" })}
@@ -453,7 +453,7 @@ function bankStatusEmail(c: Ctx, scheme: string) {
           </table>
         </td></tr>
       </table>
-      ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Note from support:</strong> ${esc(c.adminNote)}</div>` : ""}
+      ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Memo:</strong> ${esc(c.adminNote)}</div>` : ""}
       ${c.customerNote && c.audience === "sender" ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;">${esc(c.customerNote)}</div>` : ""}
       ${postingBox(c, { bg: "#f0f6ff", border: "#d7e3f8", color: "#3a4660", title: "What happens next" })}
     </td></tr>
@@ -501,7 +501,7 @@ function depositEmail(c: Ctx) {
           </table>
         </td></tr>
       </table>
-      ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Note from support:</strong> ${esc(c.adminNote)}</div>` : ""}
+      ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Memo:</strong> ${esc(c.adminNote)}</div>` : ""}
       ${c.customerNote && c.audience === "sender" ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;">${esc(c.customerNote)}</div>` : ""}
       <p style="margin:20px 0 0;font-size:12px;color:#6a7590;line-height:1.55;">If you didn't expect this deposit, please contact support immediately.</p>
     </td></tr>
