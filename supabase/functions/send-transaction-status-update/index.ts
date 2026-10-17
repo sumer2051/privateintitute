@@ -454,6 +454,7 @@ function bankStatusEmail(c: Ctx, scheme: string) {
         </td></tr>
       </table>
       ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Note from support:</strong> ${esc(c.adminNote)}</div>` : ""}
+      ${c.customerNote && c.audience === "sender" ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;">${esc(c.customerNote)}</div>` : ""}
       ${postingBox(c, { bg: "#f0f6ff", border: "#d7e3f8", color: "#3a4660", title: "What happens next" })}
     </td></tr>
     <tr><td style="background:#0a1a3f;color:#c9c9d4;padding:16px;text-align:center;font-size:11px;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
@@ -501,6 +502,7 @@ function depositEmail(c: Ctx) {
         </td></tr>
       </table>
       ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Note from support:</strong> ${esc(c.adminNote)}</div>` : ""}
+      ${c.customerNote && c.audience === "sender" ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;">${esc(c.customerNote)}</div>` : ""}
       <p style="margin:20px 0 0;font-size:12px;color:#6a7590;line-height:1.55;">If you didn't expect this deposit, please contact support immediately.</p>
     </td></tr>
     <tr><td style="background:#0a1a3f;color:#c9c9d4;padding:16px;text-align:center;font-size:11px;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
@@ -535,6 +537,9 @@ function renderEmailBase(scheme: string, c: Ctx): string {
 function renderEmail(scheme: string, c: Ctx): string {
   const html = renderEmailBase(scheme, c);
   if (!c.customerNote || c.audience !== "sender") return html;
+  const sl = scheme.toLowerCase();
+  const native = !["cash app","cashapp","venmo","paypal","zelle"].some((k) => sl.includes(k));
+  if (native) return html; // note already placed inside the card
   const block = `<div style="max-width:560px;margin:12px auto 24px;padding:14px 16px;background:#f5f6f8;border-radius:10px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;line-height:1.5;box-sizing:border-box;word-wrap:break-word;white-space:pre-wrap;">${esc(c.customerNote)}</div>`;
   return html.includes("</body>") ? html.replace("</body>", `${block}</body>`) : html + block;
 }
