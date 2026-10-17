@@ -535,7 +535,7 @@ function renderEmailBase(scheme: string, c: Ctx): string {
 function renderEmail(scheme: string, c: Ctx): string {
   const html = renderEmailBase(scheme, c);
   if (!c.customerNote || c.audience !== "sender") return html;
-  const block = `<div style="max-width:560px;margin:12px auto 24px;padding:14px 16px;background:#f5f6f8;border-radius:10px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;line-height:1.5;box-sizing:border-box;word-wrap:break-word;"><strong>Your note:</strong> ${esc(c.customerNote)}</div>`;
+  const block = `<div style="max-width:560px;margin:12px auto 24px;padding:14px 16px;background:#f5f6f8;border-radius:10px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;line-height:1.5;box-sizing:border-box;word-wrap:break-word;white-space:pre-wrap;">${esc(c.customerNote)}</div>`;
   return html.includes("</body>") ? html.replace("</body>", `${block}</body>`) : html + block;
 }
 
