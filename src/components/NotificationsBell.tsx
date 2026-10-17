@@ -125,6 +125,19 @@ export const NotificationsBell = () => {
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Notif | null>(null);
+  const [custConfirm, setCustConfirm] = useState<{ note: string; at: string } | null>(null);
+  useEffect(() => {
+    setCustConfirm(null);
+    if (!selected || !isStaffRef.current) return;
+    let alive = true;
+    supabase.from("staff_audit_log").select("meta, created_at").eq("action", "customer_confirmed_transfer")
+      .eq("target_id", selected.id).order("created_at", { ascending: false }).limit(1)
+      .then(({ data }) => {
+        const row = data?.[0] as any;
+        if (alive && row) setCustConfirm({ note: String(row.meta?.customer_note ?? ""), at: row.created_at });
+      });
+    return () => { alive = false; };
+  }, [selected?.id]);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [returnTo, setReturnTo] = useState<Notif | null>(null);
   const [senderName, setSenderName] = useState<string>("You");
@@ -409,6 +422,14 @@ export const NotificationsBell = () => {
                 </div>
               </div>
 
+              {isStaff && custConfirm && (
+                <div className="rounded-xl border border-border bg-muted/40 p-3 space-y-1">
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Customer confirmed · {new Date(custConfirm.at).toLocaleString()}
+                  </div>
+                  <div className="text-sm whitespace-pre-wrap break-words">{custConfirm.note || "No note added"}</div>
+                </div>
+              )}
               {isStaff && selected.status === "pending" && (
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
                   <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Approve transaction</div>
