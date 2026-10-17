@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LuxeIcon } from "@/components/LuxeIcon";
 import { useUiTheme } from "@/contexts/UiThemeContext";
-
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import {
   Popover,
   PopoverContent,
@@ -129,6 +130,38 @@ export const NotificationsBell = () => {
   const [senderName, setSenderName] = useState<string>("You");
   const [limit, setLimit] = useState(40);
   const [hasMore, setHasMore] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
+  const [approveNote, setApproveNote] = useState("");
+  const [approving, setApproving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      const roles = ((data as any[]) || []).map((r) => r.role);
+      setIsStaff(roles.includes("admin") || roles.includes("tx_support"));
+    })();
+  }, []);
+
+  useEffect(() => { setApproveNote(""); }, [selected?.id]);
+
+  const approveSelected = async () => {
+    if (!selected) return;
+    setApproving(true);
+    const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: selected.id, p_status: "processing" });
+    if (error) { setApproving(false); toast.error(error.message); return; }
+    const { error: mailErr } = await supabase.functions.invoke("send-transaction-status-update", {
+      body: { transactionId: selected.id, status: "processing", note: approveNote.trim() || undefined },
+    });
+    setApproving(false);
+    const id = selected.id;
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, status: "processing" } : i)));
+    setSelected((s) => (s && s.id === id ? { ...s, status: "processing" } : s));
+    setApproveNote("");
+    if (mailErr) toast.warning("Approved, but the processing email could not be sent");
+    else toast.success("Approved · moved to processing and email sent");
+  };
   const limitRef = useRef(40);
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrollPosRef = useRef(0);
@@ -463,6 +496,23 @@ export const NotificationsBell = () => {
                       );
                     })}
                   </div>
+                </div>
+              )}
+
+              {isStaff && selected.status === "pending" && (
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Approve transaction</div>
+                  <Textarea
+                    rows={2}
+                    value={approveNote}
+                    onChange={(e) => setApproveNote(e.target.value)}
+                    placeholder="Optional note for the customer"
+                    className="text-sm"
+                  />
+                  <Button className="w-full gap-2" disabled={approving} onClick={approveSelected}>
+                    {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                    Approve · move to processing
+                  </Button>
                 </div>
               )}
 
