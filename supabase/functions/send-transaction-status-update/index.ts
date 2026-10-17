@@ -266,7 +266,7 @@ function venmoStatusEmail(c: Ctx) {
       ${label("Transaction ID")}
       ${value(txId)}
 
-      ${c.adminNote ? `${label("Note from support")}${value(esc(c.adminNote))}` : ""}
+      ${c.adminNote ? `${label("Memo")}${value(esc(c.adminNote))}` : ""}
 
       ${postingBox(c, { bg: "#f2f9ff", border: "#cfe7ff", color: "#2f3033", title: "What happens next", radius: "8px" })}
 
