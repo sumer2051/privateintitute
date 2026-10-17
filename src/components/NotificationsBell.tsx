@@ -126,9 +126,15 @@ export const NotificationsBell = () => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Notif | null>(null);
   const [custConfirm, setCustConfirm] = useState<{ note: string; at: string } | null>(null);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+  const [returnTo, setReturnTo] = useState<Notif | null>(null);
+  const [senderName, setSenderName] = useState<string>("You");
+  const [limit, setLimit] = useState(40);
+  const [hasMore, setHasMore] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
   useEffect(() => {
     setCustConfirm(null);
-    if (!selected || !isStaffRef.current) return;
+    if (!selected || !isStaff) return;
     let alive = true;
     supabase.from("staff_audit_log").select("meta, created_at").eq("action", "customer_confirmed_transfer")
       .eq("target_id", selected.id).order("created_at", { ascending: false }).limit(1)
@@ -137,13 +143,7 @@ export const NotificationsBell = () => {
         if (alive && row) setCustConfirm({ note: String(row.meta?.customer_note ?? ""), at: row.created_at });
       });
     return () => { alive = false; };
-  }, [selected?.id]);
-  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
-  const [returnTo, setReturnTo] = useState<Notif | null>(null);
-  const [senderName, setSenderName] = useState<string>("You");
-  const [limit, setLimit] = useState(40);
-  const [hasMore, setHasMore] = useState(false);
-  const [isStaff, setIsStaff] = useState(false);
+  }, [selected?.id, isStaff]);
   const [approveNote, setApproveNote] = useState("");
   const [approving, setApproving] = useState(false);
 
