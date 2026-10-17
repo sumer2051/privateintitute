@@ -575,6 +575,24 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (txErr || !tx) throw new Error(txErr?.message || "Transaction not found");
 
+    // Caller must be signed in: staff may send any status notice; a customer
+    // may only trigger the "processing" notice for their own confirmed transfer.
+    const jwt = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+    const { data: authData } = await supabase.auth.getUser(jwt);
+    const caller = authData?.user;
+    if (!caller) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", caller.id);
+    const roles = (roleRows || []).map((r: any) => r.role);
+    const staff = roles.includes("admin") || roles.includes("tx_support");
+    if (!staff) {
+      const { data: cur } = await supabase.from("transactions").select("status").eq("id", tx.id).maybeSingle();
+      if (tx.user_id !== caller.id || status !== "processing" || cur?.status !== "processing") {
+        return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("email, full_name, preferred_currency")
@@ -609,7 +627,7 @@ Deno.serve(async (req) => {
     });
     // The request note is the complete support note for this notice. Do not
     // recover or append memo/note text from the original transaction description.
-    const adminNote = typeof note === "string" ? note.trim().slice(0, 500) : "";
+    const adminNote = staff && typeof note === "string" ? note.trim().slice(0, 500) : "";
     // Name the receiving institution captured on the transfer form so the
     // "Successful · posting by <bank>" stage reads like a real settlement notice.
     const bankMatch = /(?:Beneficiary bank|Recipient(?:'s)? bank|Bank name|Bank)\s*:\s*([^·—\n]+)/i.exec(tx.description || "");
