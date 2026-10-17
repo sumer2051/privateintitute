@@ -684,6 +684,8 @@ Deno.serve(async (req) => {
     }
     const results = await Promise.allSettled(jobs);
     const failed = results.filter(r => r.status === "rejected").map(r => (r as PromiseRejectedResult).reason?.message || String((r as PromiseRejectedResult).reason));
+    console.log("status email", { tx: tx.id, status, sender: !!profile?.email, recipient: !!tx.recipient_email, sent: results.length - failed.length });
+    if (failed.length) console.error("status email failures", failed);
 
     return new Response(JSON.stringify({ ok: true, sent: results.length - failed.length, failed, scheme }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
