@@ -627,7 +627,7 @@ Deno.serve(async (req) => {
     });
     // The request note is the complete support note for this notice. Do not
     // recover or append memo/note text from the original transaction description.
-    const adminNote = typeof note === "string" ? note.trim().slice(0, 500) : "";
+    const adminNote = staff && typeof note === "string" ? note.trim().slice(0, 500) : "";
     // Name the receiving institution captured on the transfer form so the
     // "Successful · posting by <bank>" stage reads like a real settlement notice.
     const bankMatch = /(?:Beneficiary bank|Recipient(?:'s)? bank|Bank name|Bank)\s*:\s*([^·—\n]+)/i.exec(tx.description || "");
