@@ -97,6 +97,7 @@ type Ctx = {
   category: string;
   dateStr: string;
   adminNote?: string;
+  customerNote?: string;
   recipientBank?: string;
   postingIsBank?: boolean;
 };
@@ -520,7 +521,7 @@ function detectScheme(description: string | null, category: string | null): stri
   return "Bank Transfer";
 }
 
-function renderEmail(scheme: string, c: Ctx): string {
+function renderEmailBase(scheme: string, c: Ctx): string {
   const s = scheme.toLowerCase();
   if (s === "deposit" || s.includes("deposit")) return depositEmail(c);
   if (s.includes("cash app") || s === "cashapp") return cashappStatusEmail(c);
@@ -528,6 +529,14 @@ function renderEmail(scheme: string, c: Ctx): string {
   if (s.includes("paypal")) return paypalStatusEmail(c);
   if (s.includes("zelle")) return zelleStatusEmail(c);
   return bankStatusEmail(c, scheme);
+}
+
+// Customer's own confirmation note: shown only in their own copy, at the bottom.
+function renderEmail(scheme: string, c: Ctx): string {
+  const html = renderEmailBase(scheme, c);
+  if (!c.customerNote || c.audience !== "sender") return html;
+  const block = `<div style="max-width:560px;margin:12px auto 24px;padding:14px 16px;background:#f5f6f8;border-radius:10px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#333;line-height:1.5;box-sizing:border-box;word-wrap:break-word;"><strong>Your note:</strong> ${esc(c.customerNote)}</div>`;
+  return html.includes("</body>") ? html.replace("</body>", `${block}</body>`) : html + block;
 }
 
 async function resendSend(to: string, subject: string, html: string, refId?: string) {
@@ -628,6 +637,7 @@ Deno.serve(async (req) => {
     // The request note is the complete support note for this notice. Do not
     // recover or append memo/note text from the original transaction description.
     const adminNote = staff && typeof note === "string" ? note.trim().slice(0, 500) : "";
+    const customerNote = !staff && typeof note === "string" ? note.trim().slice(0, 500) : "";
     // Name the receiving institution captured on the transfer form so the
     // "Successful · posting by <bank>" stage reads like a real settlement notice.
     const bankMatch = /(?:Beneficiary bank|Recipient(?:'s)? bank|Bank name|Bank)\s*:\s*([^·—\n]+)/i.exec(tx.description || "");
