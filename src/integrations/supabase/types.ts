@@ -992,6 +992,10 @@ export type Database = {
         Returns: string
       }
       confirm_my_transfer: { Args: { p_tx: string }; Returns: boolean }
+      confirm_my_transfer_with_note: {
+        Args: { p_note: string; p_tx: string }
+        Returns: boolean
+      }
       generate_ticket_number: { Args: never; Returns: string }
       has_investment_access: { Args: never; Returns: boolean }
       has_role: {

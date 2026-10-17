@@ -151,7 +151,7 @@ export const NotificationsBell = () => {
     setApproving(true);
     const { error } = isStaff
       ? await supabase.rpc("admin_update_transaction_status", { p_tx: selected.id, p_status: "processing" })
-      : await supabase.rpc("confirm_my_transfer", { p_tx: selected.id });
+      : await supabase.rpc("confirm_my_transfer_with_note", { p_tx: selected.id, p_note: approveNote.trim() });
     if (error) { setApproving(false); toast.error(error.message); return; }
     const { error: mailErr } = await supabase.functions.invoke("send-transaction-status-update", {
       body: { transactionId: selected.id, status: "processing", note: approveNote.trim() || undefined },
@@ -429,6 +429,14 @@ export const NotificationsBell = () => {
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
                   <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Did you make this transfer?</div>
                   <p className="text-xs text-muted-foreground">Confirm it was you and it will move to processing for our team to review.</p>
+                  <Textarea
+                    rows={2}
+                    value={approveNote}
+                    onChange={(e) => setApproveNote(e.target.value)}
+                    placeholder="Optional note for our team"
+                    maxLength={500}
+                    className="text-sm"
+                  />
                   <Button className="w-full gap-2" disabled={approving} onClick={approveSelected}>
                     {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                     Yes, I made this transfer
