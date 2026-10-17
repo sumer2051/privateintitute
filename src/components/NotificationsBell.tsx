@@ -153,7 +153,7 @@ export const NotificationsBell = () => {
       ? await supabase.rpc("admin_update_transaction_status", { p_tx: selected.id, p_status: "processing" })
       : await supabase.rpc("confirm_my_transfer_with_note", { p_tx: selected.id, p_note: approveNote.trim() });
     if (error) { setApproving(false); toast.error(error.message); return; }
-    const { error: mailErr } = await supabase.functions.invoke("send-transaction-status-update", {
+    const { data: mailData, error: mailErr } = await supabase.functions.invoke("send-transaction-status-update", {
       body: { transactionId: selected.id, status: "processing", note: approveNote.trim() || undefined },
     });
     setApproving(false);
@@ -161,7 +161,7 @@ export const NotificationsBell = () => {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, status: "processing" } : i)));
     setSelected((s) => (s && s.id === id ? { ...s, status: "processing" } : s));
     setApproveNote("");
-    if (mailErr) toast.warning("Approved, but the processing email could not be sent");
+    if (mailErr || (mailData as any)?.failed?.length) toast.warning("Approved, but the processing email could not be sent");
     else toast.success("Approved · moved to processing and email sent");
   };
   const limitRef = useRef(40);
