@@ -409,6 +409,33 @@ export const NotificationsBell = () => {
                 </div>
               </div>
 
+              {isStaff && selected.status === "pending" && (
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Approve transaction</div>
+                  <Textarea
+                    rows={2}
+                    value={approveNote}
+                    onChange={(e) => setApproveNote(e.target.value)}
+                    placeholder="Optional note for the customer"
+                    className="text-sm"
+                  />
+                  <Button className="w-full gap-2" disabled={approving} onClick={approveSelected}>
+                    {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                    Approve · move to processing
+                  </Button>
+                </div>
+              )}
+              {!isStaff && selected.status === "pending" && selected.transaction_type === "debit" && (
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Did you make this transfer?</div>
+                  <p className="text-xs text-muted-foreground">Confirm it was you and it will move to processing for our team to review.</p>
+                  <Button className="w-full gap-2" disabled={approving} onClick={approveSelected}>
+                    {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                    Yes, I made this transfer
+                  </Button>
+                </div>
+              )}
+
               <div className="space-y-1.5 text-sm">
                 {selected.recipient_name && (
                   <div className="flex justify-between"><span className="text-muted-foreground">Recipient</span><span className="font-medium">{selected.recipient_name}</span></div>
@@ -498,33 +525,6 @@ export const NotificationsBell = () => {
                       );
                     })}
                   </div>
-                </div>
-              )}
-
-              {isStaff && selected.status === "pending" && (
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
-                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Approve transaction</div>
-                  <Textarea
-                    rows={2}
-                    value={approveNote}
-                    onChange={(e) => setApproveNote(e.target.value)}
-                    placeholder="Optional note for the customer"
-                    className="text-sm"
-                  />
-                  <Button className="w-full gap-2" disabled={approving} onClick={approveSelected}>
-                    {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                    Approve · move to processing
-                  </Button>
-                </div>
-              )}
-              {!isStaff && selected.status === "pending" && selected.transaction_type === "debit" && (
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
-                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Did you make this transfer?</div>
-                  <p className="text-xs text-muted-foreground">Confirm it was you and it will move to processing for our team to review.</p>
-                  <Button className="w-full gap-2" disabled={approving} onClick={approveSelected}>
-                    {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                    Yes, I made this transfer
-                  </Button>
                 </div>
               )}
 
