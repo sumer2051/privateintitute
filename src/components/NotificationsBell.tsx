@@ -149,7 +149,9 @@ export const NotificationsBell = () => {
   const approveSelected = async () => {
     if (!selected) return;
     setApproving(true);
-    const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: selected.id, p_status: "processing" });
+    const { error } = isStaff
+      ? await supabase.rpc("admin_update_transaction_status", { p_tx: selected.id, p_status: "processing" })
+      : await supabase.rpc("confirm_my_transfer", { p_tx: selected.id });
     if (error) { setApproving(false); toast.error(error.message); return; }
     const { error: mailErr } = await supabase.functions.invoke("send-transaction-status-update", {
       body: { transactionId: selected.id, status: "processing", note: approveNote.trim() || undefined },
@@ -512,6 +514,16 @@ export const NotificationsBell = () => {
                   <Button className="w-full gap-2" disabled={approving} onClick={approveSelected}>
                     {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                     Approve · move to processing
+                  </Button>
+                </div>
+              )}
+              {!isStaff && selected.status === "pending" && selected.transaction_type === "debit" && (
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Did you make this transfer?</div>
+                  <p className="text-xs text-muted-foreground">Confirm it was you and it will move to processing for our team to review.</p>
+                  <Button className="w-full gap-2" disabled={approving} onClick={approveSelected}>
+                    {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                    Yes, I made this transfer
                   </Button>
                 </div>
               )}
