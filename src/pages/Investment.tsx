@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 const fmtCoin = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 8 });
 import { useNavigate } from "react-router-dom";
-import { ArrowDown, ArrowLeft, ArrowUpRight, Check, ChevronRight, Copy, ExternalLink, History, Layers3, Loader2, Plus, RefreshCw, ShieldCheck, Sparkles, Wallet, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUpRight, Banknote, Check, ChevronRight, Copy, ExternalLink, History, Layers3, Loader2, Plus, RefreshCw, ShieldCheck, Sparkles, Wallet, X } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
@@ -10,12 +10,13 @@ import { useInvestmentWallet, walletNetworks } from "@/hooks/useInvestmentWallet
 import { CoinWallet, type Panel } from "@/components/CoinWallet";
 import { CoinSwapFlow } from "@/components/CoinSwapFlow";
 import { CoinBuyFlow } from "@/components/CoinBuyFlow";
+import { CoinSellFlow } from "@/components/CoinSellFlow";
 import { useCoinRates, useTokenBalances } from "@/hooks/useCoinRates";
 import { COINS, fmtRate, fmtUnits, fmtUsd, rateOf, type CoinSymbol } from "@/lib/coins";
 import { MarketPrices } from "@/components/MarketPrices";
 
 type View = "tokens" | "earn" | "activity";
-type Action = "send" | "receive" | "swap" | "buy" | "track" | null;
+type Action = "send" | "receive" | "swap" | "buy" | "sell" | "track" | null;
 type Swap = { id: string; from_symbol: string; to_symbol: string; from_units: number; to_units: number; rate: number; created_at: string };
 const earnOptions = [
   { asset: "ETH", rate: "3.1%", name: "Liquid staking" },
@@ -127,22 +128,24 @@ export default function Investment() {
               <section className="mt-5">
                 <div className="investment-notice flex items-center gap-3"><span className="investment-notice-icon"><Sparkles className="h-5 w-5" /></span><div className="min-w-0"><p className="text-sm font-semibold">Welcome, {profile.name}</p><p className="text-xs text-muted-foreground">Live balances with no signing or transfer access</p></div></div>
                 <div className="mt-5 min-h-24"><p className="text-xs text-muted-foreground">Total balance</p><h1 className="mt-1 break-all text-4xl font-semibold tabular-nums sm:text-5xl">{coinBalance === null ? <Loader2 className="h-9 w-9 animate-spin text-primary" /> : fmtUsd(COINS.reduce((sum, c) => { const units = c.symbol === "BOA" ? coinBalance : (tokenBalances[c.symbol] ?? 0); return sum + units * (rateOf(c.symbol, rates) ?? 0); }, 0))}<span className="ml-2 text-xl text-muted-foreground">USD</span></h1><p className="mt-1 text-xs text-muted-foreground tabular-nums">{coinBalance !== null && `${fmtCoin(coinBalance)} BOA · all coins at live prices`}</p></div>
-                <div className="mt-7 grid grid-cols-4 gap-3">
+                <div className="mt-7 grid grid-cols-5 gap-2">
                   {[
                     { id: "send" as const, label: "Send", icon: ArrowUpRight },
                     { id: "receive" as const, label: "Receive", icon: ArrowDown },
                     { id: "swap" as const, label: "Swap", icon: RefreshCw },
                     { id: "buy" as const, label: "Buy", icon: Plus },
-                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => { if (id === "swap") { setAction(null); setSwapOpen(true); return; } if (id === "send" || id === "receive") { setAction(null); setCoinPanel(id); setTimeout(() => document.getElementById("boa-coin")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } else { setAction(id); if (id === "buy") { setCoinPanel(null); setTimeout(() => document.getElementById("coin-buy")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } } }} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
+                    { id: "sell" as const, label: "Sell", icon: Banknote },
+                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => { if (id === "swap") { setAction(null); setSwapOpen(true); return; } if (id === "send" || id === "receive") { setAction(null); setCoinPanel(id); setTimeout(() => document.getElementById("boa-coin")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } else { setAction(id); if (id === "buy" || id === "sell") { setCoinPanel(null); setTimeout(() => document.getElementById(`coin-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } } }} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
                 </div>
               </section>
 
               {action === "buy" && <CoinBuyFlow rates={rates} onClose={() => setAction(null)} onDone={() => { setCoinTick((t) => t + 1); void reloadTokens(); }} />}
+              {action === "sell" && <CoinSellFlow rates={rates} balances={{ BOA: coinBalance ?? 0, ...tokenBalances }} onClose={() => setAction(null)} onDone={() => { setCoinTick((t) => t + 1); void reloadTokens(); }} />}
               <CoinWallet panel={coinPanel} onPanelChange={setCoinPanel} />
               {swapOpen && <CoinSwapFlow rates={rates} balances={{ BOA: coinBalance ?? 0, ...tokenBalances }} onClose={() => setSwapOpen(false)} onSwap={doSwap} />}
 
 
-              {action && action !== "buy" && <section className="investment-action-sheet mt-6" aria-live="polite">
+              {action && action !== "buy" && action !== "sell" && <section className="investment-action-sheet mt-6" aria-live="polite">
                 <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold capitalize">{action === "track" ? "Add a wallet address" : action}</h2><p className="mt-1 text-xs text-muted-foreground">{action === "track" ? "Paste a public address to show its live balance." : action === "receive" ? `Use this address to receive ${network?.symbol} on ${network?.name}.` : ""}</p></div><Button size="icon" variant="ghost" className="investment-icon-button" onClick={() => setAction(null)} aria-label="Close"><X className="h-4 w-4" /></Button></div>
                 {action === "track" ? <form className="mt-4 space-y-3" onSubmit={track}><input className="investment-input w-full font-mono text-sm" value={addressInput} onChange={(e) => setAddressInput(e.target.value)} placeholder="0x…" autoComplete="off" spellCheck={false} maxLength={42} aria-label="Public wallet address" /><Button type="submit" className="investment-primary w-full" disabled={busy || !addressInput.trim()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Show balance"}</Button></form>
                   : action === "receive" && wallet ? <><p className="mt-4 break-all font-mono text-sm">{wallet.address}</p><Button className="investment-primary mt-4" onClick={copyAddress}>{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}{copied ? "Copied" : "Copy address"}</Button></>

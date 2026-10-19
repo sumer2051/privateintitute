@@ -38,7 +38,7 @@ export const ProtectedRoute = ({ children, adminOnly = false, investmentOnly = f
   if (!user) return <Navigate to="/auth" replace />;
 
   const isAdmin = roles?.includes("admin");
-  const canInvest = isAdmin || roles?.includes("investor");
+  const canInvest = true; // investment is open to every signed-in member
   if (adminOnly && !isAdmin) return <Navigate to="/accounts" replace />;
   if (investmentOnly && !canInvest) return <Navigate to="/accounts" replace />;
   const isSupport = roles?.includes("support");
