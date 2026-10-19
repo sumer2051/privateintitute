@@ -1030,6 +1030,15 @@ export type Database = {
         Returns: number
       }
       process_my_overdue_credit_payments: { Args: never; Returns: number }
+      sell_coins: {
+        Args: {
+          p_account: string
+          p_min_usd?: number
+          p_symbol: string
+          p_units: number
+        }
+        Returns: number
+      }
       send_coins: {
         Args: { p_amount: number; p_note?: string; p_recipient_email: string }
         Returns: number

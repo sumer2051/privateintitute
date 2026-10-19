@@ -113,6 +113,13 @@
       "when": 1792229781771,
       "tag": "0015_confirm_my_transfer_with_note",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792424655147,
+      "tag": "0016_sell_coins_and_open_investment",
+      "breakpoints": true
     }
   ]
 }
