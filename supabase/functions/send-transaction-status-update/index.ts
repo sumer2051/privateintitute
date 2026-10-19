@@ -418,6 +418,16 @@ function zelleStatusEmail(c: Ctx) {
 }
 
 // ---------- Generic bank status email ----------
+function noteRows(c: Ctx) {
+  const memo = c.adminNote
+    ? `<tr><td style="color:#6a7590;font-size:13px;padding:5px 0;vertical-align:top;">Memo</td><td style="padding:5px 0;font-weight:600;font-size:13px;color:#0a1a3f;white-space:pre-wrap;word-wrap:break-word;">${esc(c.adminNote)}</td></tr>`
+    : "";
+  const own = c.customerNote && c.audience === "sender"
+    ? `<tr><td colspan="2" style="padding:8px 0 4px;"><div style="padding:12px 14px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;">${esc(c.customerNote)}</div></td></tr>`
+    : "";
+  return memo + own;
+}
+
 function bankStatusEmail(c: Ctx, scheme: string) {
   const meta = STATUS_META[c.status];
   const amountStr = fmtMoney(c.amount, c.currencyCode);
@@ -446,6 +456,7 @@ function bankStatusEmail(c: Ctx, scheme: string) {
         <tr><td style="padding:16px 18px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;width:42%;">Amount</td><td style="font-weight:800;font-size:20px;color:#0a1a3f;padding:5px 0;">${amountStr}</td></tr>
+            ${noteRows(c)}
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Scheme</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(scheme)}</td></tr>
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">${c.audience === "sender" ? "Recipient" : "Sender"}</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.audience === "sender" ? c.recipientName : c.senderName)}</td></tr>
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Updated on</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.dateStr)}</td></tr>
@@ -453,8 +464,6 @@ function bankStatusEmail(c: Ctx, scheme: string) {
           </table>
         </td></tr>
       </table>
-      ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Memo:</strong> ${esc(c.adminNote)}</div>` : ""}
-      ${c.customerNote && c.audience === "sender" ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;">${esc(c.customerNote)}</div>` : ""}
       ${postingBox(c, { bg: "#f0f6ff", border: "#d7e3f8", color: "#3a4660", title: "What happens next" })}
     </td></tr>
     <tr><td style="background:#0a1a3f;color:#c9c9d4;padding:16px;text-align:center;font-size:11px;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
@@ -494,6 +503,7 @@ function depositEmail(c: Ctx) {
         <tr><td style="padding:16px 18px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;width:42%;">Amount</td><td style="font-weight:800;font-size:22px;color:#00a63e;padding:5px 0;">+${amountStr}</td></tr>
+            ${noteRows(c)}
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Deposited to</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.category || "Account")}</td></tr>
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Status</td><td style="padding:5px 0;font-weight:700;font-size:13px;color:${credited ? "#00a63e" : meta.color};">${esc(meta.label)} — ${credited ? "Funds available" : esc(meta.sub)}</td></tr>
             <tr><td style="color:#6a7590;font-size:13px;padding:5px 0;">Updated on</td><td style="padding:5px 0;font-weight:600;font-size:13px;">${esc(c.dateStr)}</td></tr>
@@ -501,8 +511,6 @@ function depositEmail(c: Ctx) {
           </table>
         </td></tr>
       </table>
-      ${c.adminNote ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;"><strong>Memo:</strong> ${esc(c.adminNote)}</div>` : ""}
-      ${c.customerNote && c.audience === "sender" ? `<div style="margin-top:16px;padding:14px 16px;background:#f7f9fc;border-radius:8px;font-size:14px;color:#3a4660;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;">${esc(c.customerNote)}</div>` : ""}
       <p style="margin:20px 0 0;font-size:12px;color:#6a7590;line-height:1.55;">If you didn't expect this deposit, please contact support immediately.</p>
     </td></tr>
     <tr><td style="background:#0a1a3f;color:#c9c9d4;padding:16px;text-align:center;font-size:11px;">© ${new Date().getFullYear()} ${BRAND}</td></tr>
