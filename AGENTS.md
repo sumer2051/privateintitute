@@ -1,6 +1,7 @@
 - Keep receipt-specific visual themes scoped to their receipt surface and defined as semantic CSS tokens, so global theme changes cannot recolor branded confirmations.
-- Keep the investment workspace on a protected route for members whose server-side role check passes (admin or investor); verify access through the database role functions on every switch and read, never from browser storage.
+- Keep the investment workspace behind sign-in and validate access with the database investment-access function on every switch and protected entry; never trust browser storage for permissions.
 - Use the shared InvestmentSwitch control on both home surfaces so access checks and switching messages stay consistent.
 - Keep coin and token balances in internal ledgers that only security-definer database functions may change; never generate, display, import or store wallet recovery phrases or private keys, and never sign or broadcast on-chain transactions from this app.
 - Serve market prices from rates stored in the database and refreshed by a server function; quote and settle swaps from those stored rates only, so a client can never set its own price, and reject quotes older than the freshness window.
 - Scope investment colors and control styling to the investment surface using semantic CSS tokens so banking themes cannot override its wallet identity.
+- Settle coin sales atomically through the sell_coins database function into the caller's active, unfrozen non-credit account at fresh stored rates; this keeps internal ledger conversions distinct from external crypto withdrawals.
