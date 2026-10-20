@@ -5,5 +5,5 @@
 - [x] Add a MetaMask-inspired investment surface with real, read-only wallet connection.
 - [x] Verify connection, balance refresh, account/network changes, and disconnection with a simulated wallet without moving funds.
 - [ ] External crypto withdrawals — blocked until a real custody/settlement provider is connected; internal units cannot be delivered to blockchain addresses.
-- [ ] Verify Sell and signed-in member investment access.
+- [x] Verify Sell and signed-in member investment access.
 - [x] Redesign the investment page from the supplied wallet reference with original colors and working view-only DeFi controls.
