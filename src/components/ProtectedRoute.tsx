@@ -13,6 +13,17 @@ export const ProtectedRoute = ({ children, adminOnly = false, investmentOnly = f
   useDeviceGuard(user?.id);
 
   const [roles, setRoles] = useState<string[] | null>(null);
+  const [investmentAccess, setInvestmentAccess] = useState<{ userId: string; allowed: boolean } | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setInvestmentAccess(null);
+    if (!investmentOnly || !user) return;
+    void supabase.rpc("has_investment_access").then(({ data, error }) => {
+      if (active) setInvestmentAccess({ userId: user.id, allowed: !error && data === true });
+    });
+    return () => { active = false; };
+  }, [investmentOnly, user?.id, location.pathname]);
 
   useEffect(() => {
     let mounted = true;
@@ -27,7 +38,7 @@ export const ProtectedRoute = ({ children, adminOnly = false, investmentOnly = f
     return () => { mounted = false; };
   }, [user?.id]);
 
-  if (!isReady || (user && roles === null)) {
+  if (!isReady || (user && roles === null) || (user && investmentOnly && investmentAccess?.userId !== user.id)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -38,7 +49,7 @@ export const ProtectedRoute = ({ children, adminOnly = false, investmentOnly = f
   if (!user) return <Navigate to="/auth" replace />;
 
   const isAdmin = roles?.includes("admin");
-  const canInvest = true; // investment is open to every signed-in member
+  const canInvest = investmentAccess?.allowed === true;
   if (adminOnly && !isAdmin) return <Navigate to="/accounts" replace />;
   if (investmentOnly && !canInvest) return <Navigate to="/accounts" replace />;
   const isSupport = roles?.includes("support");
