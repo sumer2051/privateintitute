@@ -1,4 +1,5 @@
 BEGIN;
+SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub', '', true);
 DO $$ BEGIN
   IF public.has_investment_access() THEN RAISE EXCEPTION 'Anonymous investment access must be denied'; END IF;
