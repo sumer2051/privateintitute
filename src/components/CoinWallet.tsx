@@ -13,7 +13,7 @@ export type Panel = "send" | "receive" | "issue" | null;
 
 const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 });
 
-export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; onPanelChange?: (p: Panel) => void } = {}) {
+export function CoinWallet({ panel: extPanel, onPanelChange, refreshKey = 0 }: { panel?: Panel; onPanelChange?: (p: Panel) => void; refreshKey?: number } = {}) {
   const { toast } = useToast();
   const { rates } = useCoinRates();
   const [balance, setBalance] = useState<number | null>(null);
@@ -55,7 +55,7 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
     const ch = supabase.channel("coin-transfers").on("postgres_changes", { event: "INSERT", schema: "public", table: "coin_transfers" }, () => void load()).subscribe();
     const t = setInterval(load, 15000);
     return () => { clearInterval(t); void supabase.removeChannel(ch); };
-  }, [load]);
+  }, [load, refreshKey]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,7 +127,7 @@ export function CoinWallet({ panel: extPanel, onPanelChange }: { panel?: Panel; 
           {activity.map((a) => (
             <li key={a.id} className="flex items-center justify-between gap-3 py-2 text-sm">
               <div className="min-w-0">
-                <p className="truncate font-medium">{a.direction === "out" ? `To ${a.counterparty}` : `From ${a.counterparty}`}</p>
+                <p className="truncate font-medium">{a.kind === "sell" ? `Sold ${a.symbol ?? "BOA"}` : a.kind === "buy" ? `Bought ${a.symbol ?? "BOA"}` : a.direction === "out" ? `To ${a.counterparty}` : `From ${a.counterparty}`}</p>
                 <p className="truncate text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString()}{a.note ? ` · ${a.note}` : ""}</p>
               </div>
               <span className={`shrink-0 font-mono ${a.direction === "out" ? "text-destructive" : "text-[hsl(var(--wallet-status))]"}`}>{a.direction === "out" ? "-" : "+"}{fmt(Number(a.amount))} {a.symbol ?? "BOA"}</span>
