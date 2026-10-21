@@ -212,10 +212,24 @@ export default function AdminUsers() {
 
   const [txPending, setTxPending] = useState<{ tx: Tx; status: string } | null>(null);
   const [txNote, setTxNote] = useState("");
+  const [txAmount, setTxAmount] = useState("");
+  useEffect(() => { if (txPending) setTxAmount(Math.abs(Number(txPending.tx.amount)).toFixed(2)); }, [txPending]);
 
   const confirmTxStatus = async () => {
     if (!txPending) return;
-    const { tx, status } = txPending;
+    let { tx } = txPending;
+    const { status } = txPending;
+    const amt = Math.round(parseFloat(txAmount) * 100) / 100;
+    if (!amt || amt <= 0) { toast.error("Enter a valid amount"); return; }
+    if (amt !== Math.abs(Number(tx.amount))) {
+      setTxBusy(tx.id);
+      const { data, error } = await supabase.rpc("admin_update_transaction_amount" as any, { p_tx: tx.id, p_amount: amt, p_reason: txNote.trim() || null } as any);
+      setTxBusy(null);
+      if (error) { toast.error(error.message); return; }
+      tx = { ...tx, amount: Number(data) };
+      setUserTx(prev => prev.map(t => t.id === tx.id ? { ...t, amount: tx.amount } : t));
+      load();
+    }
     await updateTxStatus(tx, status, txNote);
     setTxPending(null);
     setTxNote("");
@@ -962,6 +976,11 @@ export default function AdminUsers() {
               <DialogTitle>Move to “{txPending ? (STATUS_LABEL[txPending.status] || txPending.status) : ""}”</DialogTitle>
               <DialogDescription>Optional note for the customer — included in the email notification.</DialogDescription>
             </DialogHeader>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">Amount</label>
+              <Input type="number" inputMode="decimal" min="0.01" step="0.01" value={txAmount} onChange={e => setTxAmount(e.target.value)} />
+              <p className="text-[11px] text-muted-foreground">Change it to correct the payment; the account balance updates by the difference.</p>
+            </div>
             <Input placeholder="Optional note to the customer" value={txNote} onChange={e => setTxNote(e.target.value)} />
             <DialogFooter>
               <Button variant="outline" onClick={() => { setTxPending(null); setTxNote(""); }} disabled={!!txBusy}>Cancel</Button>

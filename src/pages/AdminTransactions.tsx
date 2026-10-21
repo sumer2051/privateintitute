@@ -97,11 +97,20 @@ export default function AdminTransactions() {
 
   const [pending, setPending] = useState<{ tx: Tx; status: string } | null>(null);
   const [note, setNote] = useState("");
+  const [amount, setAmount] = useState("");
+  useEffect(() => { if (pending) setAmount(Math.abs(Number(pending.tx.amount)).toFixed(2)); }, [pending]);
 
   const confirmUpdate = async () => {
     if (!pending) return;
     const { tx, status } = pending;
+    const amt = Math.round(parseFloat(amount) * 100) / 100;
+    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
     setBusy(tx.id);
+    if (amt !== Math.abs(Number(tx.amount))) {
+      const { data, error: aErr } = await supabase.rpc("admin_update_transaction_amount" as any, { p_tx: tx.id, p_amount: amt, p_reason: note.trim() || null } as any);
+      if (aErr) { setBusy(null); return toast.error(aErr.message); }
+      setTxs(prev => prev.map(t => t.id === tx.id ? { ...t, amount: Number(data) } : t));
+    }
     const { error } = await supabase.rpc("admin_update_transaction_status", { p_tx: tx.id, p_status: status });
     if (error) { setBusy(null); return toast.error(error.message); }
     supabase.functions.invoke("send-transaction-status-update", {
