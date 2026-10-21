@@ -120,6 +120,13 @@
       "when": 1792424655147,
       "tag": "0016_sell_coins_and_open_investment",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792545328691,
+      "tag": "0017_admin_update_transaction_amount",
+      "breakpoints": true
     }
   ]
 }

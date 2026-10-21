@@ -945,6 +945,10 @@ export type Database = {
         Args: { p_theme: string; p_user: string }
         Returns: boolean
       }
+      admin_update_transaction_amount: {
+        Args: { p_amount: number; p_reason?: string; p_tx: string }
+        Returns: number
+      }
       admin_update_transaction_status: {
         Args: { p_status: string; p_tx: string }
         Returns: boolean
