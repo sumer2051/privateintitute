@@ -11,12 +11,13 @@ import { CoinWallet, type Panel } from "@/components/CoinWallet";
 import { CoinSwapFlow } from "@/components/CoinSwapFlow";
 import { CoinBuyFlow } from "@/components/CoinBuyFlow";
 import { CoinSellFlow } from "@/components/CoinSellFlow";
+import { WithdrawNotice } from "@/components/WithdrawNotice";
 import { useCoinRates, useTokenBalances } from "@/hooks/useCoinRates";
 import { COINS, fmtRate, fmtUnits, fmtUsd, rateOf, type CoinSymbol } from "@/lib/coins";
 import { MarketPrices } from "@/components/MarketPrices";
 
 type View = "tokens" | "earn" | "activity";
-type Action = "send" | "receive" | "swap" | "buy" | "sell" | "track" | null;
+type Action = "send" | "receive" | "swap" | "buy" | "sell" | "withdraw" | "track" | null;
 type Swap = { id: string; from_symbol: string; to_symbol: string; from_units: number; to_units: number; rate: number; created_at: string };
 const earnOptions = [
   { asset: "ETH", rate: "3.1%", name: "Liquid staking" },
@@ -128,19 +129,21 @@ export default function Investment() {
               <section className="mt-5">
                 <div className="investment-notice flex items-center gap-3"><span className="investment-notice-icon"><Sparkles className="h-5 w-5" /></span><div className="min-w-0"><p className="text-sm font-semibold">Welcome, {profile.name}</p><p className="text-xs text-muted-foreground">Live balances with no signing or transfer access</p></div></div>
                 <div className="mt-5 min-h-24"><p className="text-xs text-muted-foreground">Total balance</p><h1 className="mt-1 break-all text-4xl font-semibold tabular-nums sm:text-5xl">{coinBalance === null ? <Loader2 className="h-9 w-9 animate-spin text-primary" /> : fmtUsd(COINS.reduce((sum, c) => { const units = c.symbol === "BOA" ? coinBalance : (tokenBalances[c.symbol] ?? 0); return sum + units * (rateOf(c.symbol, rates) ?? 0); }, 0))}<span className="ml-2 text-xl text-muted-foreground">USD</span></h1><p className="mt-1 text-xs text-muted-foreground tabular-nums">{coinBalance !== null && `${fmtCoin(coinBalance)} BOA · all coins at live prices`}</p></div>
-                <div className="mt-7 grid grid-cols-5 gap-2">
+                <div className="mt-7 grid grid-cols-6 gap-1.5">
                   {[
                     { id: "send" as const, label: "Send", icon: ArrowUpRight },
                     { id: "receive" as const, label: "Receive", icon: ArrowDown },
                     { id: "swap" as const, label: "Swap", icon: RefreshCw },
                     { id: "buy" as const, label: "Buy", icon: Plus },
                     { id: "sell" as const, label: "Sell", icon: Banknote },
-                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => { if (id === "swap") { setAction(null); setSwapOpen(true); return; } if (id === "send" || id === "receive") { setAction(null); setCoinPanel(id); setTimeout(() => document.getElementById("boa-coin")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } else { setAction(id); if (id === "buy" || id === "sell") { setCoinPanel(null); setTimeout(() => document.getElementById(`coin-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } } }} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="text-xs sm:text-sm">{label}</span></div>)}
+                    { id: "withdraw" as const, label: "Withdraw", icon: ExternalLink },
+                  ].map(({ id, label, icon: Icon }) => <div key={id} className="flex min-w-0 flex-col items-center gap-2"><Button size="icon" className={`investment-action ${id === "swap" ? "is-featured" : ""}`} onClick={() => { if (id === "swap") { setAction(null); setSwapOpen(true); return; } if (id === "send" || id === "receive") { setAction(null); setCoinPanel(id); setTimeout(() => document.getElementById("boa-coin")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } else { setAction(id); setCoinPanel(null); setTimeout(() => document.getElementById(`coin-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } }} aria-label={label}><Icon className="h-6 w-6" /></Button><span className="truncate text-[11px] sm:text-sm">{label}</span></div>)}
                 </div>
               </section>
 
               {action === "buy" && <CoinBuyFlow rates={rates} onClose={() => setAction(null)} onDone={() => { setCoinTick((t) => t + 1); void reloadTokens(); }} />}
               {action === "sell" && <CoinSellFlow rates={rates} balances={{ BOA: coinBalance ?? 0, ...tokenBalances }} onClose={() => setAction(null)} onDone={() => { setCoinTick((t) => t + 1); void reloadTokens(); }} />}
+              {action === "withdraw" && <WithdrawNotice onClose={() => setAction(null)} />}
               <CoinWallet panel={coinPanel} onPanelChange={setCoinPanel} refreshKey={coinTick} />
               {swapOpen && <CoinSwapFlow rates={rates} balances={{ BOA: coinBalance ?? 0, ...tokenBalances }} onClose={() => setSwapOpen(false)} onSwap={doSwap} />}
 
