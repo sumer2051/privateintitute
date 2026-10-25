@@ -10,6 +10,7 @@ const Body = z.object({
   amount: z.number().positive().max(1e12),
   address: z.string().min(10).max(120).regex(/^[A-Za-z0-9:]+$/),
   email: z.string().email().max(120),
+  note: z.string().max(500).optional(),
 });
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));

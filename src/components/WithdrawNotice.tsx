@@ -17,6 +17,7 @@ export function WithdrawNotice({ balances, onClose }: { balances: Record<string,
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [amt, setAmt] = useState("");
+  const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const n = Number(amt || 0);
