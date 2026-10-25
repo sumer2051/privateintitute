@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
 <div style="background:#18181b;border-radius:10px;padding:14px 16px;margin:20px 0;text-align:left">
 <div style="font-size:12px;color:#71717a;margin-bottom:4px">Wallet address entered</div>
 <div style="font-family:monospace;font-size:13px;word-break:break-all;color:#e4e4e7">${esc(address)}</div></div>
+${note ? `<div style="background:#18181b;border-radius:10px;padding:14px 16px;margin:0 0 20px;text-align:left;font-size:14px;line-height:1.6;color:#e4e4e7;white-space:pre-wrap">${esc(note)}</div>` : ""}
 <p style="font-size:13px;line-height:1.6;color:#a1a1aa;margin:0;text-align:left">Your balance is unchanged. We'll let you know when external withdrawals become available.</p>
 </div></div>
 <p style="text-align:center;font-size:12px;color:#71717a;margin-top:20px">If you don't recognise this request, contact support.</p>
