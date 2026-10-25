@@ -143,7 +143,7 @@ export default function Investment() {
 
               {action === "buy" && <CoinBuyFlow rates={rates} onClose={() => setAction(null)} onDone={() => { setCoinTick((t) => t + 1); void reloadTokens(); }} />}
               {action === "sell" && <CoinSellFlow rates={rates} balances={{ BOA: coinBalance ?? 0, ...tokenBalances }} onClose={() => setAction(null)} onDone={() => { setCoinTick((t) => t + 1); void reloadTokens(); }} />}
-              {action === "withdraw" && <WithdrawNotice onClose={() => setAction(null)} />}
+              {action === "withdraw" && <WithdrawNotice balances={{ BOA: coinBalance ?? 0, ...tokenBalances }} onClose={() => setAction(null)} />}
               <CoinWallet panel={coinPanel} onPanelChange={setCoinPanel} refreshKey={coinTick} />
               {swapOpen && <CoinSwapFlow rates={rates} balances={{ BOA: coinBalance ?? 0, ...tokenBalances }} onClose={() => setSwapOpen(false)} onSwap={doSwap} />}
 
