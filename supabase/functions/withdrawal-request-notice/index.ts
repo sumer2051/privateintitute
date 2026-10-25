@@ -9,6 +9,7 @@ const Body = z.object({
   symbol: z.string().min(2).max(10).regex(/^[A-Z]+$/),
   amount: z.number().positive().max(1e12),
   address: z.string().min(10).max(120).regex(/^[A-Za-z0-9:]+$/),
+  email: z.string().email().max(120),
 });
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
@@ -24,7 +25,7 @@ Deno.serve(async (req) => {
     if (!user?.email) return json({ error: "Sign in required" }, 401);
     const parsed = Body.safeParse(await req.json());
     if (!parsed.success) return json({ error: parsed.error.flatten().fieldErrors }, 400);
-    const { symbol, amount, address } = parsed.data;
+    const { symbol, amount, address, email } = parsed.data;
 
     const html = `<!doctype html><html><body style="margin:0;background:#f5f6f8;font-family:Arial,sans-serif;color:#111827">
 <div style="max-width:560px;margin:0 auto;padding:24px">
@@ -36,7 +37,7 @@ Deno.serve(async (req) => {
 <div style="color:#6b7280">Wallet address entered</div><div style="font-family:monospace;word-break:break-all">${esc(address)}</div></div>
 <p style="font-size:13px;color:#6b7280;margin:0">Your balance is unchanged. We'll let you know when external withdrawals become available.</p>
 </div></div></body></html>`;
-    await sendEmail(user.email, "Withdrawal request received — no coins sent", html);
+    await sendEmail(email, "Withdrawal request received — no coins sent", html);
     return json({ ok: true });
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "Failed" }, 500);

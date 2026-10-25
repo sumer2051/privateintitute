@@ -9,6 +9,7 @@ import { toast } from "sonner";
 export function WithdrawNotice({ onClose }: { onClose: () => void }) {
   const [symbol, setSymbol] = useState("BTC");
   const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -18,7 +19,7 @@ export function WithdrawNotice({ onClose }: { onClose: () => void }) {
     const amt = Number(amount);
     if (!amt || amt <= 0) return toast.error("Enter a valid amount");
     setBusy(true);
-    const { error } = await supabase.functions.invoke("withdrawal-request-notice", { body: { symbol, amount: amt, address: address.trim() } });
+    const { error } = await supabase.functions.invoke("withdrawal-request-notice", { body: { symbol, amount: amt, address: address.trim(), email: email.trim() } });
     setBusy(false);
     if (error) return toast.error("Could not send the notice email");
     setDone(true);
@@ -42,7 +43,8 @@ export function WithdrawNotice({ onClose }: { onClose: () => void }) {
           </select>
           <input className="investment-input w-full font-mono text-sm" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="External wallet address" maxLength={120} aria-label="Wallet address" />
           <input className="investment-input w-full text-sm" type="number" step="any" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" aria-label="Amount" />
-          <Button type="submit" className="investment-primary w-full" disabled={busy || address.trim().length < 10 || !amount}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit request"}</Button>
+          <input className="investment-input w-full text-sm" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email for the confirmation" maxLength={120} aria-label="Email" />
+          <Button type="submit" className="investment-primary w-full" disabled={busy || address.trim().length < 10 || !amount || !email.trim()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit request"}</Button>
         </form>
       )}
     </section>
