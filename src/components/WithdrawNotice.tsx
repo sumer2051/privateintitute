@@ -17,6 +17,7 @@ export function WithdrawNotice({ balances, onClose }: { balances: Record<string,
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [amt, setAmt] = useState("");
+  const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const n = Number(amt || 0);
@@ -36,7 +37,7 @@ export function WithdrawNotice({ balances, onClose }: { balances: Record<string,
   const submit = async () => {
     setBusy(true); setErr("");
     const { error } = await supabase.functions.invoke("withdrawal-request-notice", {
-      body: { symbol: sym, amount: n, address: address.trim(), email: email.trim() },
+      body: { symbol: sym, amount: n, address: address.trim(), email: email.trim(), note: note.trim() || undefined },
     });
     setBusy(false);
     if (error) return setErr("Could not send the notice email. Try again.");
@@ -129,6 +130,7 @@ export function WithdrawNotice({ balances, onClose }: { balances: Record<string,
             <div><p className="text-xs text-muted-foreground">Email</p><p className="break-all font-medium">{email}</p></div>
             <div><p className="text-xs text-muted-foreground">Status</p><p className="font-medium">Not processed — no coins sent</p></div>
           </div>
+          <input className="investment-input mt-4 w-full text-sm" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional) — shown in your email" maxLength={500} />
           {err && <p role="alert" className="mt-2 text-sm text-destructive">{err}</p>}
           <div className="flex-1" />
           <Button className="investment-primary mt-6 h-12 w-full rounded-full" disabled={busy} onClick={submit}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit request"}</Button>
