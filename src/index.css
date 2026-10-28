@@ -1454,3 +1454,22 @@ html .coin-send-receipt .coin-receipt-done:hover { background: hsl(var(--receipt
 html .coin-send-receipt .coin-receipt-done:disabled { background: hsl(var(--receipt-accent) / .5); }
 html .coin-send-receipt .coin-receipt-view { background: hsl(var(--receipt-fg) / .05); color: hsl(var(--receipt-fg)); border: 1px solid hsl(var(--receipt-fg) / .16); border-radius: 12px; font-weight: 700; }
 html .coin-send-receipt .coin-receipt-view:hover { background: hsl(var(--receipt-fg) / .1); }
+
+/* Gold Wallet palette for the investment surface (from uploaded design) */
+html .investment-workspace,
+html .investment-workspace.coin-send,
+html .investment-workspace.coin-palette {
+  --background: 0 0% 6%; --foreground: 60 14% 97%; --card: 0 0% 10%;
+  --muted: 0 0% 13%; --muted-foreground: 60 4% 63%; --border: 60 3% 18%;
+  --primary: 47 91% 56%; --primary-foreground: 0 0% 7%; --destructive: 0 100% 78%;
+  --wallet-status: 142 54% 68%; --wallet-asset: 52 30% 12%; --wallet-asset-foreground: 47 91% 56%;
+  --wallet-accent: 47 91% 56%; --coin-send-token: 47 91% 56%;
+  background: hsl(var(--background)); color: hsl(var(--foreground));
+}
+html .investment-workspace .investment-token-icon { color: hsl(var(--primary-foreground)); }
+html .investment-workspace .investment-action-sheet,
+html .investment-workspace .investment-token-row,
+html .investment-workspace .investment-earn,
+html .investment-workspace .investment-notice { background: hsl(var(--card)); border-radius: 16px; }
+html .investment-workspace .investment-primary { border-radius: 12px; font-weight: 800; }
+html .investment-workspace .investment-action { border-radius: 14px; }
