@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ShieldAlert, ListChecks, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatAbsIn, currencyInfo } from "@/lib/fx";
+import { transactionAmountInput, transactionAmountToUsd } from "@/lib/transaction-amount";
 import { postingLabel } from "@/lib/tx-status";
 
 
@@ -98,13 +99,13 @@ export default function AdminTransactions() {
   const [pending, setPending] = useState<{ tx: Tx; status: string } | null>(null);
   const [note, setNote] = useState("");
   const [amount, setAmount] = useState("");
-  useEffect(() => { if (pending) setAmount(Math.abs(Number(pending.tx.amount)).toFixed(2)); }, [pending]);
+  useEffect(() => { if (pending) setAmount(transactionAmountInput(Number(pending.tx.amount), currencyInfo(pending.tx.currency).rate)); }, [pending]);
 
   const confirmUpdate = async () => {
     if (!pending) return;
     const { tx, status } = pending;
-    const amt = Math.round(parseFloat(amount) * 100) / 100;
-    if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+    const amt = transactionAmountToUsd(amount, Number(tx.amount), currencyInfo(tx.currency).rate);
+    if (!Number.isFinite(amt) || amt <= 0) return toast.error("Enter a valid amount");
     setBusy(tx.id);
     if (amt !== Math.abs(Number(tx.amount))) {
       const { data, error: aErr } = await supabase.rpc("admin_update_transaction_amount" as any, { p_tx: tx.id, p_amount: amt, p_reason: note.trim() || null } as any);
@@ -250,8 +251,8 @@ export default function AdminTransactions() {
               <DialogDescription>Add an optional note for the customer. This is included in the email notification.</DialogDescription>
             </DialogHeader>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">Amount</label>
-              <Input type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              <label htmlFor="transaction-amount" className="text-xs font-medium text-muted-foreground">Amount ({currencyInfo(pending?.tx.currency).code})</label>
+              <Input id="transaction-amount" type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
               <p className="text-[11px] text-muted-foreground">Admins can change it to correct the payment; the account balance updates by the difference.</p>
             </div>
             <Textarea rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional note to the customer" />

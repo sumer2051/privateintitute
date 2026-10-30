@@ -5,3 +5,4 @@
 - Serve market prices from rates stored in the database and refreshed by a server function; quote and settle swaps from those stored rates only, so a client can never set its own price, and reject quotes older than the freshness window.
 - Scope investment colors and control styling to the investment surface using semantic CSS tokens so banking themes cannot override its wallet identity.
 - Settle coin sales atomically through the sell_coins database function into the caller's active, unfrozen non-credit account at fresh stored rates; this keeps internal ledger conversions distinct from external crypto withdrawals.
+- Use shared transaction amount conversion helpers for admin status dialogs: edit in the transaction currency, convert back to the USD ledger, and preserve unchanged amounts to avoid rounding-only debits.
