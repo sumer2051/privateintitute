@@ -14,6 +14,7 @@ import { AdminDeviceDetailDialog, type AdminDevice } from "@/components/AdminDev
 import { formatIn, formatAbsIn, currencyInfo } from "@/lib/fx";
 import { transactionAmountInput, transactionAmountToUsd } from "@/lib/transaction-amount";
 import { postingLabel } from "@/lib/tx-status";
+import { AdminAiReview } from "@/components/AdminAiReview";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null; preferred_currency?: string | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
@@ -533,6 +534,7 @@ export default function AdminUsers() {
                 {selected ? ` · figures in ${currencyInfo(curOf(selected.id)).flag} ${currencyInfo(curOf(selected.id)).code}` : ""}
               </DialogDescription>
             </DialogHeader>
+            {selected && <AdminAiReview key={selected.id} userId={selected.id} />}
             <div className="space-y-2">
               {selected && accountsFor(selected.id).map(acc => {
                 const Icon = iconFor(acc.account_type);

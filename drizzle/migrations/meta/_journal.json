@@ -127,6 +127,13 @@
       "when": 1792545328691,
       "tag": "0017_admin_update_transaction_amount",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793485559516,
+      "tag": "0018_admin_ai_access_blocks",
+      "breakpoints": true
     }
   ]
 }

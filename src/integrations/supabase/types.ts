@@ -71,6 +71,27 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_ai_access_blocks: {
+        Row: {
+          blocked_at: string
+          message: string
+          model: string
+          status: number
+        }
+        Insert: {
+          blocked_at?: string
+          message: string
+          model: string
+          status: number
+        }
+        Update: {
+          blocked_at?: string
+          message?: string
+          model?: string
+          status?: number
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           active: boolean
