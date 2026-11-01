@@ -22,7 +22,7 @@ export function AdminAiReview({ userId }: { userId: string }) {
         throw new Error(message);
       }
       if (!data?.text) throw new Error("Claude returned no review.");
-      setResult(data.text); setReviewedAt(data.reviewedAt);
+      setResult(String(data.text).replace(/^#{1,6}\s*/gm, "").replace(/\*\*/g, "").replace(/`/g, "")); setReviewedAt(data.reviewedAt);
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to complete the review."); }
     finally { setBusy(false); }
   };
