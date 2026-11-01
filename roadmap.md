@@ -1,5 +1,5 @@
 # Current tasks
-- [ ] Add and verify a read-only Claude admin account review through Lovable AI.
+- [x] Add and verify a read-only Claude admin account review through Lovable AI.
 - [x] Add investment button beside home dark mode with fox-style icon.
 - [x] Gate switching and investment destination to administrators; show coming soon to other users.
 - [x] Verify switching and return to banking without adding investment functionality.
