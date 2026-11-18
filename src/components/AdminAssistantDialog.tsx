@@ -37,7 +37,7 @@ export function AdminAssistantDialog({ open, onOpenChange }: { open: boolean; on
   const selected = members.find(member => member.id === selectedId);
 
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="w-[calc(100vw-1rem)] max-w-2xl max-h-[90dvh] overflow-y-auto p-4 sm:p-6">
+    <DialogContent className="w-[calc(100vw-1rem)] max-w-2xl max-h-[90dvh] overflow-y-auto p-4 sm:p-6 [&>*]:min-w-0">
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2 pr-6"><ShieldCheck className="h-5 w-5 shrink-0 text-primary" />Claude admin assistant</DialogTitle>
         <DialogDescription>Read-only account reviews. Credits, debits and transaction decisions require your manual action.</DialogDescription>

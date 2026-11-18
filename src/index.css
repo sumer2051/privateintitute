@@ -884,7 +884,7 @@ html.theme-luxe .luxe-greet h2 {
 
 /* Let the layered marble backdrop show through the app shell + page gutters
    (the app wrapper is opaque `bg-background`, which flattened these areas). */
-html.theme-luxe body > div,
+html.theme-luxe body > div:not([role="dialog"]):not([data-state]),
 html.theme-luxe .min-h-screen.bg-background {
   background-color: transparent !important;
 }
