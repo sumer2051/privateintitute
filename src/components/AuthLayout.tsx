@@ -17,6 +17,7 @@ import { Lock as LockIcon } from "lucide-react";
 import { useUiTheme } from "@/contexts/UiThemeContext";
 import { LuxeIcon, type LuxeIconName } from "@/components/LuxeIcon";
 import { InvestmentSwitch } from "@/components/InvestmentSwitch";
+import { AdminAssistantDialog } from "@/components/AdminAssistantDialog";
 
 import {
   Dialog,
@@ -43,6 +44,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
   const [signingOut, setSigningOut] = useState(false);
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [adminAssistantOpen, setAdminAssistantOpen] = useState(false);
   const [roles, setRoles] = useState<string[]>([]);
   const [staffMode, setStaffMode] = useState<boolean>(() => {
     // Never persist staff mode across reloads — always require the PIN again.
@@ -268,6 +270,12 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
             {currentPage === "accounts" && <InvestmentSwitch />}
             <NotificationsBell />
 
+            {isAdmin && (
+              <Button variant="outline" size="icon" className="h-9 w-9 md:h-10 md:w-10" aria-label="Open Claude admin assistant" title="Claude admin assistant" onClick={() => setAdminAssistantOpen(true)}>
+                <Shield className="h-4 w-4" />
+              </Button>
+            )}
+
             {hasStaffAccess && !staffOnlyAccount && (
               <Button
                 variant={staffMode ? "default" : "outline"}
@@ -279,7 +287,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 }}
                 title={staffMode ? "Exit staff mode" : "Enter staff mode"}
               >
-                {staffMode ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                {isAdmin ? <Users className="h-4 w-4" /> : staffMode ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
                 {staffMode ? "Staff on" : "Staff mode"}
               </Button>
             )}
@@ -295,7 +303,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 }}
                 title={staffMode ? "Exit staff mode" : "Enter staff mode"}
               >
-                {staffMode ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                {isAdmin ? <Users className="h-4 w-4" /> : staffMode ? <ShieldCheck className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
               </Button>
             )}
 
@@ -448,6 +456,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
       )}
 
       <AiChatWidget open={chatOpen} onOpenChange={setChatOpen} />
+      {isAdmin && <AdminAssistantDialog open={adminAssistantOpen} onOpenChange={setAdminAssistantOpen} />}
       <StaffPinDialog open={pinOpen} onOpenChange={setPinOpen} onVerified={() => setStaffMode(true)} />
       <AchOneTimeDialog />
       <TicketReplyToaster />

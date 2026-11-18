@@ -1,5 +1,12 @@
 const LOVABLE_AIG_RUN_ID_HEADER = "X-Lovable-AIG-Run-ID";
 
+export function mergeReviewHeaders(base: HeadersInit, extra?: HeadersInit) {
+  const headers = new Headers(base);
+  new Headers(extra).forEach((value, name) => headers.set(name, value));
+  headers.set("Content-Type", "application/json");
+  return headers;
+}
+
 export function createLovableAiGatewayRunIdFetch(initialRunId?: string) {
   let runId = initialRunId?.trim() || undefined;
   let resolveRunId: (value: string | undefined) => void = () => {};

@@ -7,3 +7,4 @@
 - Settle coin sales atomically through the sell_coins database function into the caller's active, unfrozen non-credit account at fresh stored rates; this keeps internal ledger conversions distinct from external crypto withdrawals.
 - Use shared transaction amount conversion helpers for admin status dialogs: edit in the transaction currency, convert back to the USD ledger, and preserve unchanged amounts to avoid rounding-only debits.
 - Run admin AI reviews in an authenticated, server-role-checked Edge Function with read-only ledger queries and minimized customer data; use the native Anthropic AI SDK endpoint and persist provider access denials in a server-only table so reloads cannot bypass them.
+- Reuse AdminAiReview in the header shield dialog; keep financial mutations in existing manual admin screens so AI cannot execute ledger changes.

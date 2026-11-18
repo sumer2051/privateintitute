@@ -3,14 +3,14 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createAnthropic } from "npm:@ai-sdk/anthropic@4.0.94";
 import { streamText } from "npm:ai@7.0.159";
 import { z } from "npm:zod@4";
-import { createLovableAiGatewayRunIdFetch, getLovableAiGatewayResponseHeaders } from "./run-id.ts";
+import { createLovableAiGatewayRunIdFetch, getLovableAiGatewayResponseHeaders, mergeReviewHeaders } from "./run-id.ts";
 import { canReview, REVIEW_MODEL, reviewContext } from "./policy.ts";
 
 const bodySchema = z.object({ userId: z.uuid(), mode: z.enum(["summary", "review"]) }).strict();
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  const json = (data: unknown, status = 200, extra?: HeadersInit) => new Response(JSON.stringify(data), { status, headers: { ...corsHeaders, ...Object.fromEntries(new Headers(extra)), "Content-Type": "application/json" } });
+  const json = (data: unknown, status = 200, extra?: HeadersInit) => new Response(JSON.stringify(data), { status, headers: mergeReviewHeaders(corsHeaders, extra) });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   try {
     const authorization = req.headers.get("Authorization");

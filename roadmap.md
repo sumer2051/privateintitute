@@ -1,4 +1,5 @@
 # Current tasks
+- [x] Connect the admin shield to Claude reviews and existing manual money controls; verify signed-in use.
 - [x] Add and verify a read-only Claude admin account review through Lovable AI.
 - [x] Add investment button beside home dark mode with fox-style icon.
 - [x] Gate switching and investment destination to administrators; show coming soon to other users.

@@ -1,8 +1,14 @@
 import { describe, it } from "node:test";
 import { strict as assert } from "node:assert";
 import { canReview, reviewContext } from "../../supabase/functions/admin-ai-review/policy";
+import { mergeReviewHeaders } from "../../supabase/functions/admin-ai-review/run-id";
 
 describe("admin assistant access", () => {
+  it("returns one CORS origin when gateway headers use lowercase names", () => {
+    const headers = mergeReviewHeaders({ "Access-Control-Allow-Origin": "*" }, new Headers({ "access-control-allow-origin": "*", "x-lovable-aig-run-id": "server-run" }));
+    assert.equal(headers.get("access-control-allow-origin"), "*");
+    assert.equal(headers.get("x-lovable-aig-run-id"), "server-run");
+  });
   it("only permits an authenticated administrator with a successful role check", () => {
     assert.equal(canReview("admin-id", true, null), true);
     assert.equal(canReview(undefined, true, null), false);
