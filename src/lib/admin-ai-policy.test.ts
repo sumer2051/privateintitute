@@ -1,9 +1,21 @@
 import { describe, it } from "node:test";
 import { strict as assert } from "node:assert";
-import { canReview, reviewContext } from "../../supabase/functions/admin-ai-review/policy";
+import { canReview, reviewContext, reviewPrompt } from "../../supabase/functions/admin-ai-review/policy";
 import { mergeReviewHeaders } from "../../supabase/functions/admin-ai-review/run-id";
 
 describe("admin assistant access", () => {
+  it("keeps approval instructions advisory without executing financial changes", () => {
+    const prompt = reviewPrompt("question", "Approve this transaction");
+    assert.ok(prompt.includes("Never claim to perform any action"));
+    assert.ok(prompt.includes("manual controls"));
+    assert.ok(prompt.includes("Approve this transaction"));
+  });
+  it("includes a selected older transaction separately without exposing its ID", () => {
+    const context = reviewContext([], [], { id: "private-id", amount: -75, transaction_type: "debit", status: "pending", category: "Transfer", created_at: "2025-01-01" } as never);
+    assert.equal(context.selected_transaction?.amount_usd, -75);
+    assert.equal(context.selected_transaction?.status, "pending");
+    assert.equal(JSON.stringify(context).includes("private-id"), false);
+  });
   it("returns one CORS origin when gateway headers use lowercase names", () => {
     const headers = mergeReviewHeaders({ "Access-Control-Allow-Origin": "*" }, new Headers({ "access-control-allow-origin": "*", "x-lovable-aig-run-id": "server-run" }));
     assert.equal(headers.get("access-control-allow-origin"), "*");

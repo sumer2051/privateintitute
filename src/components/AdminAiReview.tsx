@@ -2,17 +2,19 @@ import { useState } from "react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { ClipboardCheck, FileText, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 
-export function AdminAiReview({ userId }: { userId: string }) {
+export function AdminAiReview({ userId, transactionId }: { userId: string; transactionId?: string }) {
+  const [question, setQuestion] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
   const [reviewedAt, setReviewedAt] = useState("");
-  const review = async (mode: "summary" | "review") => {
+  const review = async (mode: "summary" | "review" | "question") => {
     setBusy(true); setError(""); setResult("");
     try {
-      const { data, error: failure } = await supabase.functions.invoke("admin-ai-review", { body: { userId, mode } });
+      const { data, error: failure } = await supabase.functions.invoke("admin-ai-review", { body: { userId, mode, ...(transactionId ? { transactionId } : {}), ...(mode === "question" ? { question: question.trim() } : {}) } });
       if (failure) {
         let message = failure.message;
         if (failure instanceof FunctionsHttpError) {
@@ -35,7 +37,11 @@ export function AdminAiReview({ userId }: { userId: string }) {
       </div>
     </div>
     <p className="text-xs text-muted-foreground">Read-only · Lovable AI credits · Review required, not a fraud determination</p>
-    <p className="text-xs text-muted-foreground">Selected account figures and up to 50 recent transactions are shared with Claude. Names, contact details and account numbers are excluded.</p>
+    <p className="text-xs text-muted-foreground">Claude receives account figures, up to 50 recent transactions{transactionId ? " and the selected transaction" : ""}, plus your question. Record names, contact details and account numbers are excluded; keep personal details out of your question.</p>
+    <form className="space-y-2" onSubmit={event => { event.preventDefault(); void review("question"); }}>
+      <Textarea aria-label="Ask Claude about this account" placeholder="Ask about this account or selected transaction…" maxLength={1500} value={question} onChange={event => setQuestion(event.target.value)} />
+      <Button type="submit" variant="outline" size="sm" disabled={busy || !question.trim()}><ShieldCheck className="mr-2 h-4 w-4" />Ask Claude</Button>
+    </form>
     {busy && <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Reviewing account activity…</p>}
     {error && <p role="alert" className="text-sm text-destructive break-words">{error}</p>}
     {result && <><div className="text-sm leading-relaxed whitespace-pre-wrap break-words" aria-live="polite">{result}</div><p className="text-xs text-muted-foreground">Reviewed {new Date(reviewedAt).toLocaleString()} · Ledger amounts in USD</p></>}

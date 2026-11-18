@@ -271,7 +271,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
             <NotificationsBell />
 
             {isAdmin && (
-              <Button variant="outline" size="icon" className="h-9 w-9 md:h-10 md:w-10" aria-label="Open Claude admin assistant" title="Claude admin assistant" onClick={() => setAdminAssistantOpen(true)}>
+              <Button variant="outline" size="icon" className="h-9 w-9 md:h-10 md:w-10" aria-label="Open admin center" title="Admin center" onClick={() => setAdminAssistantOpen(true)}>
                 <Shield className="h-4 w-4" />
               </Button>
             )}

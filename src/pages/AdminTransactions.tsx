@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 import { ShieldAlert, ListChecks, Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { formatAbsIn, currencyInfo } from "@/lib/fx";
 import { transactionAmountInput, transactionAmountToUsd } from "@/lib/transaction-amount";
 import { postingLabel } from "@/lib/tx-status";
@@ -60,10 +60,13 @@ const STATUS_COLOR: Record<string, string> = {
 
 export default function AdminTransactions() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [txs, setTxs] = useState<Tx[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(searchParams.get("transaction") || "");
+  const memberId = searchParams.get("member");
+  const transactionId = searchParams.get("transaction");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -78,11 +81,15 @@ export default function AdminTransactions() {
   }, [navigate]);
 
   const load = async () => {
-    const { data: t } = await supabase
+    let query = supabase
       .from("transactions")
       .select("id,user_id,account_id,description,category,amount,status,created_at,reference_number,currency")
       .order("created_at", { ascending: false })
       .limit(500);
+    if (transactionId) query = query.eq("id", transactionId);
+    else if (memberId) query = query.eq("user_id", memberId);
+    const { data: t, error } = await query;
+    if (error) { toast.error("Unable to load transactions."); return; }
     const list = (t as Tx[]) || [];
     setTxs(list);
     const uids = Array.from(new Set(list.map(x => x.user_id)));
@@ -94,7 +101,8 @@ export default function AdminTransactions() {
     }
   };
 
-  useEffect(() => { if (allowed) load(); }, [allowed]);
+  useEffect(() => { if (allowed) load(); }, [allowed, memberId, transactionId]);
+  useEffect(() => { setQ(transactionId || ""); }, [transactionId]);
 
   const [pending, setPending] = useState<{ tx: Tx; status: string } | null>(null);
   const [note, setNote] = useState("");
@@ -133,6 +141,7 @@ export default function AdminTransactions() {
       if (!term) return true;
       const p = profiles[tx.user_id];
       return (
+        tx.id.toLowerCase().includes(term) ||
         (tx.description || "").toLowerCase().includes(term) ||
         (tx.reference_number || "").toLowerCase().includes(term) ||
         (p?.email || "").toLowerCase().includes(term) ||
@@ -178,7 +187,7 @@ export default function AdminTransactions() {
               <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                 <div className="relative flex-1 md:w-72">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input className="pl-9" placeholder="Search customer, description, ref" value={q} onChange={e => setQ(e.target.value)} />
+                  <Input className="pl-9" placeholder="Search customer, transaction ID, ref" value={q} onChange={e => setQ(e.target.value)} />
                 </div>
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
                   <SelectTrigger className="w-full sm:w-40"><SelectValue /></SelectTrigger>
@@ -187,6 +196,7 @@ export default function AdminTransactions() {
                     {TX_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                {(transactionId || memberId) && <Button variant="outline" onClick={() => navigate("/admin/transactions")}>All transactions</Button>}
               </div>
             </div>
           </CardHeader>
@@ -212,6 +222,7 @@ export default function AdminTransactions() {
                           {p?.full_name || p?.email || "Customer"} · {new Date(tx.created_at).toLocaleString()}
                           {tx.reference_number ? ` · ${tx.reference_number}` : ""}
                         </p>
+                        <p className="text-xs text-muted-foreground break-all">ID: {tx.id}</p>
                       </div>
                       <div className={`text-sm font-semibold whitespace-nowrap ${Number(tx.amount) < 0 ? "text-destructive" : "text-emerald-600"}`}>
                         {Number(tx.amount) < 0 ? "-" : "+"}{formatAbsIn(cur.code, Number(tx.amount))}

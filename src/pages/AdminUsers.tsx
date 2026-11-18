@@ -9,12 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { ShieldAlert, Users, Search, DollarSign, ShieldCheck, ShieldOff, Wallet, CreditCard, PiggyBank, Monitor, Smartphone, Lock, Unlock, LogOut, MapPin, Palette } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AdminDeviceDetailDialog, type AdminDevice } from "@/components/AdminDeviceDetailDialog";
 import { formatIn, formatAbsIn, currencyInfo } from "@/lib/fx";
 import { transactionAmountInput, transactionAmountToUsd } from "@/lib/transaction-amount";
 import { postingLabel } from "@/lib/tx-status";
 import { AdminAiReview } from "@/components/AdminAiReview";
+import { AdminAssistantLookup } from "@/components/AdminAssistantLookup";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null; preferred_currency?: string | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
@@ -52,6 +53,7 @@ const STATUS_COLOR: Record<string,string> = {
 
 export default function AdminUsers() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -120,6 +122,17 @@ export default function AdminUsers() {
   };
 
   useEffect(() => { if (allowed) load(); }, [allowed]);
+
+  useEffect(() => {
+    const memberId = searchParams.get("member");
+    if (!allowed || !memberId || !profiles.length) return;
+    const member = profiles.find(profile => profile.id === memberId);
+    if (member) setSelected(member);
+    else toast.error("Member not found.");
+    const next = new URLSearchParams(searchParams);
+    next.delete("member");
+    setSearchParams(next, { replace: true });
+  }, [allowed, profiles, searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!selected) { setUserTx([]); setUserDevices([]); setPastDevices([]); return; }
@@ -424,6 +437,8 @@ export default function AdminUsers() {
           <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Deposits held</p><p className="text-lg md:text-2xl font-bold text-emerald-600 truncate">${totalDeposits.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</p></CardContent></Card>
           <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Staff</p><p className="text-lg md:text-2xl font-bold text-secondary">{roles.filter(r=>r.role!=="user").length}</p></CardContent></Card>
         </div>
+
+        <div className="border-y py-4"><AdminAssistantLookup /></div>
 
         <Card>
           <CardHeader>
