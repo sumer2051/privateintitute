@@ -1,4 +1,6 @@
 # Current tasks
+- [x] Add the admin reserve display with the confirmed $10 billion internal allocation, explicitly separate from real cash backing.
+- [x] Activate reserve-funded admin credits, completed deposits and credit amount increases; verify ten server funding/access tests and the signed-in reserve display.
 - [x] Restore the shield admin menu and add shared name/email/transaction lookup with Claude questions and manual action links.
 - [x] Connect the admin shield to Claude reviews and existing manual money controls; verify signed-in use.
 - [x] Add and verify a read-only Claude admin account review through Lovable AI.

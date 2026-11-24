@@ -141,6 +141,20 @@
       "when": 1795558290447,
       "tag": "0019_restrict_coin_rates_read",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1795559299210,
+      "tag": "0020_admin_internal_reserve",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1795559334057,
+      "tag": "0021_reserve_deposit_status_completion",
+      "breakpoints": true
     }
   ]
 }

@@ -16,6 +16,7 @@ import { transactionAmountInput, transactionAmountToUsd } from "@/lib/transactio
 import { postingLabel } from "@/lib/tx-status";
 import { AdminAiReview } from "@/components/AdminAiReview";
 import { AdminAssistantLookup } from "@/components/AdminAssistantLookup";
+import { AdminReserveSummary } from "@/components/AdminReserveSummary";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null; preferred_currency?: string | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
@@ -81,6 +82,7 @@ export default function AdminUsers() {
   const [quickDepositUserId, setQuickDepositUserId] = useState<string>("");
   const [quickDepositAccountId, setQuickDepositAccountId] = useState<string>("");
   const [themeBusy, setThemeBusy] = useState(false);
+  const [reserveRefreshKey, setReserveRefreshKey] = useState(0);
 
   const setAllTheme = async (theme: "luxe" | "classic" | "chime") => {
     setThemeBusy(true);
@@ -119,6 +121,7 @@ export default function AdminUsers() {
     setProfiles((p as Profile[]) || []);
     setAccounts((a as Account[]) || []);
     setRoles((r as Role[]) || []);
+    setReserveRefreshKey(previous => previous + 1);
   };
 
   useEffect(() => { if (allowed) load(); }, [allowed]);
@@ -437,6 +440,8 @@ export default function AdminUsers() {
           <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Deposits held</p><p className="text-lg md:text-2xl font-bold text-emerald-600 truncate">${totalDeposits.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</p></CardContent></Card>
           <Card><CardContent className="p-3 md:p-4"><p className="text-[10px] md:text-xs uppercase text-muted-foreground">Staff</p><p className="text-lg md:text-2xl font-bold text-secondary">{roles.filter(r=>r.role!=="user").length}</p></CardContent></Card>
         </div>
+
+        <AdminReserveSummary refreshKey={reserveRefreshKey} />
 
         <div className="border-y py-4"><AdminAssistantLookup /></div>
 
@@ -844,7 +849,7 @@ export default function AdminUsers() {
             <DialogHeader>
               <DialogTitle>Post deposit to any user</DialogTitle>
               <DialogDescription>
-                Choose a customer and one of their deposit accounts. It appears as a pending deposit and only credits the balance when you mark it complete.
+                Choose a customer and a deposit account. Completing the deposit transfers its amount from the internal reserve to the customer balance; pending deposits do not deduct funds yet.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
@@ -944,7 +949,7 @@ export default function AdminUsers() {
             <DialogHeader>
               <DialogTitle>Post pending deposit</DialogTitle>
               <DialogDescription>
-                {depositAccount?.account_name} ••••{depositAccount?.account_number.slice(-4)}. The user will see a pending notification and receive an email. Balance is credited only when you mark it complete.
+                {depositAccount?.account_name} ••••{depositAccount?.account_number.slice(-4)}. The user receives a pending notification. Completing this deposit deducts its amount from the internal reserve and credits the account.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3">

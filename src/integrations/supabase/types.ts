@@ -92,6 +92,57 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_reserve: {
+        Row: {
+          available_balance: number
+          id: number
+          total_allocation: number
+          updated_at: string
+        }
+        Insert: {
+          available_balance?: number
+          id?: number
+          total_allocation?: number
+          updated_at?: string
+        }
+        Update: {
+          available_balance?: number
+          id?: number
+          total_allocation?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_reserve_movements: {
+        Row: {
+          account_id: string
+          actor_id: string
+          amount: number
+          created_at: string
+          id: string
+          reserve_after: number
+          transaction_id: string | null
+        }
+        Insert: {
+          account_id: string
+          actor_id: string
+          amount: number
+          created_at?: string
+          id?: string
+          reserve_after: number
+          transaction_id?: string | null
+        }
+        Update: {
+          account_id?: string
+          actor_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          reserve_after?: number
+          transaction_id?: string | null
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           active: boolean
@@ -1020,6 +1071,10 @@ export type Database = {
       confirm_my_transfer_with_note: {
         Args: { p_note: string; p_tx: string }
         Returns: boolean
+      }
+      fund_admin_credit_from_reserve: {
+        Args: { p_account: string; p_amount: number; p_tx?: string }
+        Returns: undefined
       }
       generate_ticket_number: { Args: never; Returns: string }
       has_investment_access: { Args: never; Returns: boolean }

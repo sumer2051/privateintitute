@@ -129,7 +129,7 @@ export default function AdminTransactions() {
     setPending(null);
     setNote("");
     toast.success(`Marked ${status === "posting" ? postingLabel(tx.description) : STATUS_LABEL[status]} · notifications sent`);
-    setTxs(prev => prev.map(t => t.id === tx.id ? { ...t, status } : t));
+    void load();
   };
 
 
