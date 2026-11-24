@@ -134,6 +134,13 @@
       "when": 1793485559516,
       "tag": "0018_admin_ai_access_blocks",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1795558290447,
+      "tag": "0019_restrict_coin_rates_read",
+      "breakpoints": true
     }
   ]
 }
