@@ -16,6 +16,7 @@ import { transactionAmountInput, transactionAmountToUsd } from "@/lib/transactio
 import { postingLabel } from "@/lib/tx-status";
 import { AdminAiReview } from "@/components/AdminAiReview";
 import { AdminDecisionPanel } from "@/components/AdminDecisionPanel";
+import { AdminMemberPhonePreview } from "@/components/AdminMemberPhonePreview";
 import { AdminAssistantLookup } from "@/components/AdminAssistantLookup";
 import { AdminReserveSummary } from "@/components/AdminReserveSummary";
 
@@ -526,6 +527,7 @@ export default function AdminUsers() {
                         </div>
                         <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2">
                           <Button size="sm" variant="outline" className="w-full md:w-auto" onClick={() => setSelected(p)}>Manage</Button>
+                          <AdminMemberPhonePreview member={p} />
                           <Button size="sm" variant={ur.includes("tx_support") ? "ghost" : "outline"} className="w-full md:w-auto" onClick={() => toggleRole(p.id, "tx_support", !ur.includes("tx_support"))}>
                             {ur.includes("tx_support") ? "Remove tx" : "Make tx"}
                           </Button>
