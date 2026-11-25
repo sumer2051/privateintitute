@@ -1,3 +1,4 @@
+import { viewAs } from "@/lib/view-as";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -39,6 +40,11 @@ type Phase = "splash" | "setup" | "confirm" | "locked" | "ready";
 const PUBLIC_PATHS = ["/auth", "/.lovable/oauth/consent"];
 
 export const AppLock = ({ children }: { children: React.ReactNode }) => {
+  if (viewAs) return <>{children}</>;
+  return <AppLockInner>{children}</AppLockInner>;
+};
+
+const AppLockInner = ({ children }: { children: React.ReactNode }) => {
   const isPublic =
     typeof window !== "undefined" &&
     PUBLIC_PATHS.some((p) => window.location.pathname.startsWith(p));

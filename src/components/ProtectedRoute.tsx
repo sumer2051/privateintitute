@@ -1,3 +1,4 @@
+import { viewAs } from "@/lib/view-as";
 import { Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuthReady } from "@/hooks/useAuthReady";
@@ -10,7 +11,7 @@ const USER_ROUTES = ["/accounts", "/cards", "/transfers", "/billpay", "/support"
 export const ProtectedRoute = ({ children, adminOnly = false, investmentOnly = false }: { children: React.ReactNode; adminOnly?: boolean; investmentOnly?: boolean }) => {
   const { user, isReady } = useAuthReady();
   const location = useLocation();
-  useDeviceGuard(user?.id);
+  useDeviceGuard(viewAs ? undefined : user?.id);
 
   const [roles, setRoles] = useState<string[] | null>(null);
   const [investmentAccess, setInvestmentAccess] = useState<{ userId: string; allowed: boolean } | null>(null);

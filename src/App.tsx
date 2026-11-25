@@ -30,6 +30,11 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { UiThemeProvider } from "./contexts/UiThemeContext";
 import { AppLock } from "./components/AppLock";
+import { supabase } from "@/integrations/supabase/client";
+import { patchAuthForViewAs } from "./lib/view-as";
+import { ViewAsBanner } from "./components/ViewAsBanner";
+
+patchAuthForViewAs(supabase.auth);
 import { DeviceFrame } from "./components/DeviceFrame";
 import { DeviceBlockedNotice } from "./components/DeviceBlockedNotice";
 
@@ -49,6 +54,7 @@ const App = () => (
         <DeviceBlockedNotice />
 
         <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <ViewAsBanner />
           <AppLock>
           <Routes>
             <Route path="/auth" element={<Auth />} />
