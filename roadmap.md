@@ -1,14 +1,5 @@
-# Current tasks
-- [x] Add the admin reserve display with the confirmed $10 billion internal allocation, explicitly separate from real cash backing.
-- [x] Activate reserve-funded admin credits, completed deposits and credit amount increases; verify ten server funding/access tests and the signed-in reserve display.
-- [x] Restore the shield admin menu and add shared name/email/transaction lookup with Claude questions and manual action links.
-- [x] Connect the admin shield to Claude reviews and existing manual money controls; verify signed-in use.
-- [x] Add and verify a read-only Claude admin account review through Lovable AI.
-- [x] Add investment button beside home dark mode with fox-style icon.
-- [x] Gate switching and investment destination to administrators; show coming soon to other users.
-- [x] Verify switching and return to banking without adding investment functionality.
-- [x] Add a MetaMask-inspired investment surface with real, read-only wallet connection.
-- [x] Verify connection, balance refresh, account/network changes, and disconnection with a simulated wallet without moving funds.
-- [ ] External crypto withdrawals — blocked until a real custody/settlement provider is connected; internal units cannot be delivered to blockchain addresses.
-- [x] Verify Sell and signed-in member investment access.
-- [x] Redesign the investment page from the supplied wallet reference with original colors and working view-only DeFi controls.
+# Roadmap
+
+- [x] TikTok follow strip on home page (handle, followers, Follow button)
+- [x] TikTok AI promoter in Admin Users: reads the connected account's videos, Claude drafts promotion
+- [x] Comments: TikTok's comment list is Research-API only (approved researchers), so this app cannot read viewer comments

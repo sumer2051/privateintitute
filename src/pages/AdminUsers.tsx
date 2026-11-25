@@ -20,6 +20,7 @@ import { AdminMemberPhonePreview } from "@/components/AdminMemberPhonePreview";
 import { AdminAllTransferNotesDialog } from "@/components/AdminAllTransferNotesDialog";
 import { AdminAssistantLookup } from "@/components/AdminAssistantLookup";
 import { AdminReserveSummary } from "@/components/AdminReserveSummary";
+import { AdminTikTokPromoter } from "@/components/AdminTikTokPromoter";
 
 type Profile = { id: string; email: string; full_name: string | null; phone: string | null; created_at: string; device_limit?: number | null; ui_theme?: string | null; preferred_currency?: string | null };
 type Account = { id: string; user_id: string; account_type: string; account_name: string; account_number: string; balance: number; available_balance: number; credit_limit: number | null; is_frozen?: boolean };
@@ -446,6 +447,8 @@ export default function AdminUsers() {
         </div>
 
         <AdminReserveSummary refreshKey={reserveRefreshKey} />
+
+        <AdminTikTokPromoter />
 
         <div className="border-y py-4"><AdminAssistantLookup /></div>
 
