@@ -9,7 +9,11 @@ const DEVICE_KEY = "boa.device.id";
 const GEO_KEY = "boa.device.geo";
 
 /** Best-effort approximate sign-in location; resolves to null when unavailable or denied. */
+// Location collection is paused: the bank must not pick up member locations.
+const LOCATION_COLLECTION_PAUSED = true;
+
 async function getApproxLocation(): Promise<{ lat: number; lng: number; location_label: string | null } | null> {
+  if (LOCATION_COLLECTION_PAUSED) { try { sessionStorage.removeItem(GEO_KEY); } catch (_) { /* ignore */ } return null; }
   try {
     const cached = sessionStorage.getItem(GEO_KEY);
     if (cached) return JSON.parse(cached);
