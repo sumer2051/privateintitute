@@ -558,7 +558,7 @@ export const NotificationsBell = () => {
               )}
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setSelected(null)}>Close</Button>
+                <Button variant="outline" onClick={() => { setSelected(null); window.setTimeout(() => setOpen(true), 50); }}>Close</Button>
                 <Button onClick={openReceipt} className="gap-2">
                   <Receipt className="h-4 w-4" /> View receipt
                 </Button>
