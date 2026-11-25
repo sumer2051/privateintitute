@@ -19,6 +19,7 @@ import AdminTransactions from "./pages/AdminTransactions";
 import AdminAnnouncements from "./pages/AdminAnnouncements";
 import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminAllocation from "./pages/AdminAllocation";
+import AdminTikTok from "./pages/AdminTikTok";
 import AdminResendPin from "./pages/AdminResendPin";
 import Locations from "./pages/Locations";
 import Investment from "./pages/Investment";
@@ -76,6 +77,7 @@ const App = () => (
             <Route path="/admin/transactions" element={<ProtectedRoute><AdminTransactions /></ProtectedRoute>} />
             <Route path="/admin/announcements" element={<ProtectedRoute><AdminAnnouncements /></ProtectedRoute>} />
             <Route path="/admin/allocation" element={<ProtectedRoute><AdminAllocation /></ProtectedRoute>} />
+            <Route path="/admin/tiktok" element={<ProtectedRoute><AdminTikTok /></ProtectedRoute>} />
             <Route path="/admin/audit" element={<ProtectedRoute><AdminAuditLog /></ProtectedRoute>} />
             <Route path="/admin/resend-pin" element={<ProtectedRoute><AdminResendPin /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
