@@ -7,6 +7,7 @@ import { AuthLayout } from "@/components/AuthLayout";
 import { AdminTikTokPromoter } from "@/components/AdminTikTokPromoter";
 import { TikTokProfileKit } from "@/components/TikTokProfileKit";
 import { TikTokCommentReplies } from "@/components/TikTokCommentReplies";
+import { TikTokVideoComposer } from "@/components/TikTokVideoComposer";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +28,7 @@ type Profile = {
 export default function AdminTikTok() {
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab");
-  const tab = requestedTab && ["profile", "drafts", "replies", "account"].includes(requestedTab) ? requestedTab : "profile";
+  const tab = requestedTab && ["profile", "drafts", "replies", "video", "account"].includes(requestedTab) ? requestedTab : "profile";
   const [allowed, setAllowed] = useState<boolean | null>(null);
   useEffect(() => {
     let active = true;
@@ -93,7 +94,8 @@ export default function AdminTikTok() {
       </section>}
 
       <Tabs value={tab} onValueChange={value => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set("tab", value); return next; }, { replace: true })} className="min-w-0">
-        <TabsList className="h-auto flex flex-wrap justify-start gap-1"><TabsTrigger value="profile">Public profile</TabsTrigger><TabsTrigger value="drafts"><Sparkles className="mr-2 h-4 w-4" />Claude drafts</TabsTrigger><TabsTrigger value="replies">Comment replies</TabsTrigger><TabsTrigger value="account">Account</TabsTrigger></TabsList>
+        <TabsList className="h-auto flex flex-wrap justify-start gap-1"><TabsTrigger value="profile">Public profile</TabsTrigger><TabsTrigger value="video">Video & caption</TabsTrigger><TabsTrigger value="drafts"><Sparkles className="mr-2 h-4 w-4" />Claude drafts</TabsTrigger><TabsTrigger value="replies">Comment replies</TabsTrigger><TabsTrigger value="account">Account</TabsTrigger></TabsList>
+        <TabsContent value="video"><TikTokVideoComposer /></TabsContent>
         <TabsContent value="replies"><TikTokCommentReplies profileUrl={account?.profile_url} /></TabsContent>
         <TabsContent value="profile"><TikTokProfileKit /></TabsContent>
         <TabsContent value="drafts" className="pt-6"><AdminTikTokPromoter embedded /></TabsContent>

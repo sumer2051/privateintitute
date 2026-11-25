@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Add admin TikTok video selection, playback preview, caption copy and manual upload link
+- [x] Verify file selection, caption copy, downloads and mobile layout
+
 - [x] Direct comment reply entry from Admin Users and fresh paste/draft/copy verification
 
 - [x] Add manual TikTok comment reply workspace with editable Claude drafts and copy controls
