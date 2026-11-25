@@ -143,6 +143,50 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_review_decisions: {
+        Row: {
+          actor_id: string
+          created_at: string
+          decision: string
+          id: string
+          note: string | null
+          status_after: string | null
+          status_before: string | null
+          transaction_id: string
+          user_id: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          decision: string
+          id?: string
+          note?: string | null
+          status_after?: string | null
+          status_before?: string | null
+          transaction_id: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          decision?: string
+          id?: string
+          note?: string | null
+          status_after?: string | null
+          status_before?: string | null
+          transaction_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_review_decisions_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       allocation_requests: {
         Row: {
           account_id: string
@@ -1020,6 +1064,10 @@ export type Database = {
           p_subject: string
           p_user: string
         }
+        Returns: string
+      }
+      admin_decide_transaction: {
+        Args: { p_decision: string; p_note?: string; p_tx: string }
         Returns: string
       }
       admin_grant_role: {

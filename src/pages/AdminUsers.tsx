@@ -15,6 +15,7 @@ import { formatIn, formatAbsIn, currencyInfo } from "@/lib/fx";
 import { transactionAmountInput, transactionAmountToUsd } from "@/lib/transaction-amount";
 import { postingLabel } from "@/lib/tx-status";
 import { AdminAiReview } from "@/components/AdminAiReview";
+import { AdminDecisionPanel } from "@/components/AdminDecisionPanel";
 import { AdminAssistantLookup } from "@/components/AdminAssistantLookup";
 import { AdminReserveSummary } from "@/components/AdminReserveSummary";
 
@@ -555,6 +556,7 @@ export default function AdminUsers() {
               </DialogDescription>
             </DialogHeader>
             {selected && <AdminAiReview key={selected.id} userId={selected.id} />}
+            {selected && <AdminDecisionPanel key={`d-${selected.id}`} userId={selected.id} />}
             <div className="space-y-2">
               {selected && accountsFor(selected.id).map(acc => {
                 const Icon = iconFor(acc.account_type);

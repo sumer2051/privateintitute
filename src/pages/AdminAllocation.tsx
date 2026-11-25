@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 type Account = { id: string; user_id: string; account_name: string; account_number: string; account_type: string; balance: number };
 type Profile = { id: string; email: string | null; full_name: string | null };
-type Req = { id: string; account_id: string; user_id: string; amount: number; note: string | null; status: string; created_at: string; reviewed_at: string | null };
+type Req = { requested_by: string; reviewed_by: string | null; id: string; account_id: string; user_id: string; amount: number; note: string | null; status: string; created_at: string; reviewed_at: string | null };
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
 export default function AdminAllocation() {
@@ -29,10 +29,12 @@ export default function AdminAllocation() {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [me, setMe] = useState("");
 
   useEffect(() => { (async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { navigate("/auth"); return; }
+    setMe(user.id);
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
     setAllowed((data || []).some(r => r.role === "admin"));
   })(); }, [navigate]);
@@ -41,7 +43,7 @@ export default function AdminAllocation() {
     const [a, p, r] = await Promise.all([
       supabase.from("accounts").select("id,user_id,account_name,account_number,account_type,balance").neq("account_type", "credit").eq("is_active", true),
       supabase.from("profiles").select("id,email,full_name"),
-      supabase.from("allocation_requests").select("id,account_id,user_id,amount,note,status,created_at,reviewed_at").order("created_at", { ascending: false }).limit(200),
+      supabase.from("allocation_requests").select("id,account_id,user_id,amount,note,status,created_at,reviewed_at,requested_by,reviewed_by").order("created_at", { ascending: false }).limit(200),
     ]);
     setAccounts((a.data as Account[]) || []);
     const map: Record<string, Profile> = {}; ((p.data as Profile[]) || []).forEach(x => { map[x.id] = x; }); setProfiles(map);
@@ -67,7 +69,7 @@ export default function AdminAllocation() {
     const { error } = await supabase.rpc("admin_request_allocation", { p_account: accountId, p_amount: Math.round(value * 100) / 100, p_note: note });
     setBusy(null);
     if (error) { toast.error(error.message); return; }
-    toast.success("Request added — waiting for approval");
+    toast.success("Request added — a second admin must approve");
     setAmount(""); setNote(""); void load();
   };
   const review = async (id: string, approve: boolean) => {
@@ -87,7 +89,7 @@ export default function AdminAllocation() {
     <div className="max-w-5xl mx-auto space-y-6 min-w-0">
       <div>
         <h1 className="font-display text-2xl md:text-3xl font-bold text-secondary flex items-center gap-2"><HandCoins className="h-6 w-6 text-primary" />Internal allocation</h1>
-        <p className="text-sm text-muted-foreground">Request funds for a member, then approve to send them from the internal reserve.</p>
+        <p className="text-sm text-muted-foreground">Request funds for a member, a second admin must approve before funds leave the internal reserve.</p>
       </div>
       <AdminReserveSummary refreshKey={refreshKey} />
       <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -115,11 +117,11 @@ export default function AdminAllocation() {
             <div className="min-w-0 flex-1">
               <p className="font-semibold tabular-nums">{usd.format(Number(r.amount))} <Badge variant={statusVariant(r.status)} className="ml-2 capitalize">{r.status}</Badge></p>
               <p className="text-sm text-muted-foreground break-words">{accountLabel(accounts.find(a => a.id === r.account_id)) === "Account" ? member(r.user_id) : accountLabel(accounts.find(a => a.id === r.account_id))}{r.note ? ` · ${r.note}` : ""}</p>
-              <p className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()} · requested by {r.requested_by === me ? "you" : member(r.requested_by)}{r.reviewed_by ? ` · reviewed by ${r.reviewed_by === me ? "you" : member(r.reviewed_by)}` : ""}</p>
             </div>
             {r.status === "pending" && <div className="flex gap-2">
-              <Button size="sm" onClick={() => review(r.id, true)} disabled={busy === r.id}><Check className="mr-1 h-4 w-4" />Approve</Button>
-              <Button size="sm" variant="outline" onClick={() => review(r.id, false)} disabled={busy === r.id}><X className="mr-1 h-4 w-4" />Reject</Button>
+              {r.requested_by === me ? <span className="self-center text-xs text-muted-foreground">Needs a second admin</span> : <Button size="sm" onClick={() => review(r.id, true)} disabled={busy === r.id}><Check className="mr-1 h-4 w-4" />Approve</Button>}
+              <Button size="sm" variant="outline" onClick={() => review(r.id, false)} disabled={busy === r.id}><X className="mr-1 h-4 w-4" />{r.requested_by === me ? "Cancel" : "Reject"}</Button>
             </div>}
           </div>)}
         </CardContent>
