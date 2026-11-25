@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MessageSquareWarning } from "lucide-react";
+import { MessageSquareWarning, Flag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,28 @@ export function AdminAllTransferNotesDialog() {
   const [loading, setLoading] = useState(false);
   const [picked, setPicked] = useState<string | undefined>();
   const [q, setQ] = useState("");
+  const [exempt, setExempt] = useState<Set<string>>(new Set());
+  const [flagOpen, setFlagOpen] = useState(false);
+  const [members, setMembers] = useState<{ id: string; name: string; email: string | null }[]>([]);
+  const [fq, setFq] = useState("");
+
+  const loadExempt = async () => {
+    const { data } = await (supabase as any).from("note_review_exemptions").select("user_id");
+    setExempt(new Set(((data as any[]) || []).map(r => r.user_id)));
+  };
+  const loadMembers = async () => {
+    const { data } = await supabase.from("profiles").select("id,full_name,email").order("full_name");
+    setMembers((data || []).map(p => ({ id: p.id, name: p.full_name || p.email || "member", email: p.email })));
+  };
+  const toggle = async (id: string) => {
+    if (exempt.has(id)) {
+      await (supabase as any).from("note_review_exemptions").delete().eq("user_id", id);
+    } else {
+      const { data: u } = await supabase.auth.getUser();
+      await (supabase as any).from("note_review_exemptions").insert({ user_id: id, set_by: u.user?.id });
+    }
+    await loadExempt();
+  };
 
   const load = async () => {
     setLoading(true);
@@ -65,22 +87,29 @@ export function AdminAllTransferNotesDialog() {
     }));
     setLoading(false);
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(); void loadExempt(); }, []);
+  useEffect(() => { if (flagOpen) { setFq(""); void loadMembers(); void loadExempt(); } }, [flagOpen]);
   useEffect(() => { if (open) { setPicked(undefined); setQ(""); void load(); } }, [open]);
 
   const needle = q.trim().toLowerCase();
+  const reviewRows = rows.filter(r => !exempt.has(r.userId));
   const shown = needle
-    ? rows.filter(r => r.member.toLowerCase().includes(needle) || r.note.toLowerCase().includes(needle) || (r.recipient || "").toLowerCase().includes(needle))
-    : rows;
+    ? reviewRows.filter(r => r.member.toLowerCase().includes(needle) || r.note.toLowerCase().includes(needle) || (r.recipient || "").toLowerCase().includes(needle))
+    : reviewRows;
+  const fneedle = fq.trim().toLowerCase();
+  const shownMembers = fneedle ? members.filter(m => m.name.toLowerCase().includes(fneedle) || (m.email || "").toLowerCase().includes(fneedle)) : members;
   const pickedRow = rows.find(r => r.txId === picked);
 
   return <>
     <Card>
       <CardContent className="p-3 md:p-4 space-y-2">
         <p className="text-[10px] md:text-xs uppercase text-muted-foreground">Transfer notes</p>
-        <p className="text-lg md:text-2xl font-bold text-secondary">{loading ? "…" : rows.length}</p>
+        <p className="text-lg md:text-2xl font-bold text-secondary">{loading ? "…" : reviewRows.length}</p>
         <Button size="sm" variant="outline" className="w-full" onClick={() => setOpen(true)}>
           <MessageSquareWarning className="h-4 w-4 mr-1" /> Review
+        </Button>
+        <Button size="sm" variant="ghost" className="w-full" onClick={() => setFlagOpen(true)}>
+          <Flag className="h-4 w-4 mr-1" /> Flag members
         </Button>
       </CardContent>
     </Card>
@@ -109,6 +138,27 @@ export function AdminAllTransferNotesDialog() {
             </li>;
           })}</ul>}
         {pickedRow && <AdminDecisionPanel userId={pickedRow.userId} transactionId={pickedRow.txId} onDecided={load} />}
+      </DialogContent>
+    </Dialog>
+    <Dialog open={flagOpen} onOpenChange={setFlagOpen}>
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto [&>*]:min-w-0">
+        <DialogHeader>
+          <DialogTitle>Flag members for note review</DialogTitle>
+          <DialogDescription>Flagged members' transfer notes show in Review. Unflagged members' notes no longer need review.</DialogDescription>
+        </DialogHeader>
+        <Input placeholder="Search member" value={fq} onChange={e => setFq(e.target.value)} />
+        <ul className="space-y-2">{shownMembers.map(m => {
+          const flagged = !exempt.has(m.id);
+          return <li key={m.id} className="flex items-center justify-between gap-2 rounded-lg border border-border p-2 min-w-0">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-secondary truncate">{m.name}</p>
+              {m.email && <p className="text-xs text-muted-foreground truncate">{m.email}</p>}
+            </div>
+            <Button size="sm" variant={flagged ? "destructive" : "outline"} onClick={() => toggle(m.id)}>
+              {flagged ? "Flagged · Unflag" : "Unflagged · Flag"}
+            </Button>
+          </li>;
+        })}</ul>
       </DialogContent>
     </Dialog>
   </>;

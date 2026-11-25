@@ -169,6 +169,13 @@
       "when": 1795588035450,
       "tag": "0023_admin_decisions_and_dual_allocation",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795615431387,
+      "tag": "0024_note_review_exemptions",
+      "breakpoints": true
     }
   ]
 }

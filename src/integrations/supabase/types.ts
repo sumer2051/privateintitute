@@ -504,6 +504,24 @@ export type Database = {
         }
         Relationships: []
       }
+      note_review_exemptions: {
+        Row: {
+          created_at: string
+          set_by: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          set_by?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          set_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       payees: {
         Row: {
           account_number: string | null
