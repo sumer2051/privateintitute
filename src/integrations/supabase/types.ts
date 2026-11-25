@@ -143,6 +143,59 @@ export type Database = {
         }
         Relationships: []
       }
+      allocation_requests: {
+        Row: {
+          account_id: string
+          amount: number
+          created_at: string
+          id: string
+          note: string | null
+          requested_by: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          requested_by: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          requested_by?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allocation_requests_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcements: {
         Row: {
           active: boolean
@@ -981,7 +1034,15 @@ export type Database = {
         Args: { p_account: string; p_amount: number; p_reason: string }
         Returns: string
       }
+      admin_request_allocation: {
+        Args: { p_account: string; p_amount: number; p_note?: string }
+        Returns: string
+      }
       admin_restore_device: { Args: { p_device: string }; Returns: boolean }
+      admin_review_allocation: {
+        Args: { p_approve: boolean; p_note?: string; p_request: string }
+        Returns: string
+      }
       admin_revoke_device: { Args: { p_device: string }; Returns: boolean }
       admin_revoke_role: {
         Args: {

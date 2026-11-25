@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeftRight, ScrollText, ShieldCheck, Users, LifeBuoy, Mail, Megaphone, KeyRound, Sparkles } from "lucide-react";
+import { ArrowLeftRight, ScrollText, Landmark, ShieldCheck, Users, LifeBuoy, Mail, Megaphone, KeyRound, Sparkles } from "lucide-react";
 import { AdminAssistantLookup } from "@/components/AdminAssistantLookup";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -27,6 +27,7 @@ export function AdminAssistantDialog({ open, onOpenChange }: { open: boolean; on
             { path: "/admin/support", label: "Support tickets", Icon: LifeBuoy },
             { path: "/admin/invitations", label: "Invitations", Icon: Mail },
             { path: "/admin/announcements", label: "Announcements", Icon: Megaphone },
+            { path: "/admin/allocation", label: "Internal allocation · send funds with approval", Icon: Landmark },
             { path: "/admin/audit", label: "Audit log", Icon: ScrollText },
             { path: "/admin/resend-pin", label: "Resend PIN", Icon: KeyRound },
           ].map(({ path, label, Icon }) => <Button key={path} variant="outline" className="w-full h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => go(path)}><Icon className="mr-3 h-4 w-4 shrink-0" />{label}</Button>)}
