@@ -506,16 +506,22 @@ export type Database = {
       }
       note_review_exemptions: {
         Row: {
+          active: boolean
+          changed_at: string
           created_at: string
           set_by: string | null
           user_id: string
         }
         Insert: {
+          active?: boolean
+          changed_at?: string
           created_at?: string
           set_by?: string | null
           user_id: string
         }
         Update: {
+          active?: boolean
+          changed_at?: string
           created_at?: string
           set_by?: string | null
           user_id?: string

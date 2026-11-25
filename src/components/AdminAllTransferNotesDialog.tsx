@@ -30,25 +30,27 @@ export function AdminAllTransferNotesDialog() {
   const [picked, setPicked] = useState<string | undefined>();
   const [q, setQ] = useState("");
   const [exempt, setExempt] = useState<Set<string>>(new Set());
+  const [since, setSince] = useState<Map<string, string>>(new Map());
   const [flagOpen, setFlagOpen] = useState(false);
   const [members, setMembers] = useState<{ id: string; name: string; email: string | null }[]>([]);
   const [fq, setFq] = useState("");
 
   const loadExempt = async () => {
-    const { data } = await (supabase as any).from("note_review_exemptions").select("user_id");
-    setExempt(new Set(((data as any[]) || []).map(r => r.user_id)));
+    const { data } = await (supabase as any).from("note_review_exemptions").select("user_id,active,changed_at");
+    const list = (data as any[]) || [];
+    setExempt(new Set(list.filter(r => r.active).map(r => r.user_id)));
+    // Flagged again: only notes written after re-flagging come back for review.
+    setSince(new Map(list.filter(r => !r.active).map(r => [r.user_id, r.changed_at])));
   };
   const loadMembers = async () => {
     const { data } = await supabase.from("profiles").select("id,full_name,email").order("full_name");
     setMembers((data || []).map(p => ({ id: p.id, name: p.full_name || p.email || "member", email: p.email })));
   };
   const toggle = async (id: string) => {
-    if (exempt.has(id)) {
-      await (supabase as any).from("note_review_exemptions").delete().eq("user_id", id);
-    } else {
-      const { data: u } = await supabase.auth.getUser();
-      await (supabase as any).from("note_review_exemptions").insert({ user_id: id, set_by: u.user?.id });
-    }
+    const { data: u } = await supabase.auth.getUser();
+    await (supabase as any).from("note_review_exemptions").upsert({
+      user_id: id, set_by: u.user?.id, active: !exempt.has(id), changed_at: new Date().toISOString(),
+    });
     await loadExempt();
   };
 
@@ -92,7 +94,7 @@ export function AdminAllTransferNotesDialog() {
   useEffect(() => { if (open) { setPicked(undefined); setQ(""); void load(); } }, [open]);
 
   const needle = q.trim().toLowerCase();
-  const reviewRows = rows.filter(r => !exempt.has(r.userId));
+  const reviewRows = rows.filter(r => !exempt.has(r.userId) && (!since.has(r.userId) || new Date(r.at).getTime() > new Date(since.get(r.userId)!).getTime()));
   const shown = needle
     ? reviewRows.filter(r => r.member.toLowerCase().includes(needle) || r.note.toLowerCase().includes(needle) || (r.recipient || "").toLowerCase().includes(needle))
     : reviewRows;

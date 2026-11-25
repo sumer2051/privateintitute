@@ -176,6 +176,13 @@
       "when": 1795615431387,
       "tag": "0024_note_review_exemptions",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795615633516,
+      "tag": "0025_note_review_exemption_history",
+      "breakpoints": true
     }
   ]
 }

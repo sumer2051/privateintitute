@@ -1,0 +1,3 @@
+ALTER TABLE public.note_review_exemptions ADD COLUMN active boolean NOT NULL DEFAULT true, ADD COLUMN changed_at timestamptz NOT NULL DEFAULT now();
+GRANT UPDATE ON public.note_review_exemptions TO authenticated;
+CREATE POLICY "Admins update exemptions" ON public.note_review_exemptions FOR UPDATE TO authenticated USING (public.has_role(auth.uid(),'admin')) WITH CHECK (public.has_role(auth.uid(),'admin'));
