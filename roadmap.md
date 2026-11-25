@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Direct comment reply entry from Admin Users and fresh paste/draft/copy verification
+
 - [x] Add manual TikTok comment reply workspace with editable Claude drafts and copy controls
 - [x] Verify real-comment draft flow and preserve manual-only posting
 

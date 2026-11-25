@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { ArrowLeft, ExternalLink, Heart, Loader2, Music2, RefreshCw, ShieldAlert, Sparkles, Users, Video } from "lucide-react";
@@ -25,6 +25,9 @@ type Profile = {
 };
 
 export default function AdminTikTok() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const tab = requestedTab && ["profile", "drafts", "replies", "account"].includes(requestedTab) ? requestedTab : "profile";
   const [allowed, setAllowed] = useState<boolean | null>(null);
   useEffect(() => {
     let active = true;
@@ -89,7 +92,7 @@ export default function AdminTikTok() {
         <p className="text-xs text-muted-foreground">Last refreshed {new Date(profile.dataUpdatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
       </section>}
 
-      <Tabs defaultValue="profile" className="min-w-0">
+      <Tabs value={tab} onValueChange={value => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set("tab", value); return next; }, { replace: true })} className="min-w-0">
         <TabsList className="h-auto flex flex-wrap justify-start gap-1"><TabsTrigger value="profile">Public profile</TabsTrigger><TabsTrigger value="drafts"><Sparkles className="mr-2 h-4 w-4" />Claude drafts</TabsTrigger><TabsTrigger value="replies">Comment replies</TabsTrigger><TabsTrigger value="account">Account</TabsTrigger></TabsList>
         <TabsContent value="replies"><TikTokCommentReplies profileUrl={account?.profile_url} /></TabsContent>
         <TabsContent value="profile"><TikTokProfileKit /></TabsContent>

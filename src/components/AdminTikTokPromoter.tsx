@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Sparkles, Megaphone, Lock, ArrowUpRight, Copy } from "lucide-react";
+import { Loader2, Sparkles, Megaphone, Lock, ArrowUpRight, Copy, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,7 @@ export const AdminTikTokPromoter = ({ embedded = false }: { embedded?: boolean }
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {!embedded && <Button asChild variant="outline"><Link to="/admin/tiktok?tab=replies"><MessageCircle className="mr-2 h-4 w-4" />Reply to a TikTok comment</Link></Button>}
         <div className="flex flex-col gap-3">
           <label htmlFor={embedded ? "tiktok-page-focus" : "tiktok-focus"} className="text-sm font-medium">Promotion focus</label>
           <Textarea
