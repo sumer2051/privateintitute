@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Add manual TikTok comment reply workspace with editable Claude drafts and copy controls
+- [x] Verify real-comment draft flow and preserve manual-only posting
+
 - [x] Prepare public TikTok profile bio, existing bank logo, and first post captions/scripts
 - [x] Explain which public TikTok changes must be made in TikTok with this read-only connection
 - [x] Dedicated TikTok admin page with connected profile, statistics, and Claude drafts

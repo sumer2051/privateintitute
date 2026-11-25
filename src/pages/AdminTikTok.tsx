@@ -6,6 +6,7 @@ import { ArrowLeft, ExternalLink, Heart, Loader2, Music2, RefreshCw, ShieldAlert
 import { AuthLayout } from "@/components/AuthLayout";
 import { AdminTikTokPromoter } from "@/components/AdminTikTokPromoter";
 import { TikTokProfileKit } from "@/components/TikTokProfileKit";
+import { TikTokCommentReplies } from "@/components/TikTokCommentReplies";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -89,7 +90,8 @@ export default function AdminTikTok() {
       </section>}
 
       <Tabs defaultValue="profile" className="min-w-0">
-        <TabsList className="h-auto flex flex-wrap justify-start gap-1"><TabsTrigger value="profile">Public profile</TabsTrigger><TabsTrigger value="drafts"><Sparkles className="mr-2 h-4 w-4" />Claude drafts</TabsTrigger><TabsTrigger value="account">Account</TabsTrigger></TabsList>
+        <TabsList className="h-auto flex flex-wrap justify-start gap-1"><TabsTrigger value="profile">Public profile</TabsTrigger><TabsTrigger value="drafts"><Sparkles className="mr-2 h-4 w-4" />Claude drafts</TabsTrigger><TabsTrigger value="replies">Comment replies</TabsTrigger><TabsTrigger value="account">Account</TabsTrigger></TabsList>
+        <TabsContent value="replies"><TikTokCommentReplies profileUrl={account?.profile_url} /></TabsContent>
         <TabsContent value="profile"><TikTokProfileKit /></TabsContent>
         <TabsContent value="drafts" className="pt-6"><AdminTikTokPromoter embedded /></TabsContent>
         <TabsContent value="account" className="space-y-6 pt-6">

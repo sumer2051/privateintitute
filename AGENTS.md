@@ -9,4 +9,5 @@
 - Run admin AI reviews in an authenticated, server-role-checked Edge Function with read-only ledger queries and minimized customer data; use the native Anthropic AI SDK endpoint and persist provider access denials in a server-only table so reloads cannot bypass them.
 - Reuse AdminAssistantLookup on Admin Users and the shield admin center, with AdminAiReview for questions and exact member/transaction links to existing manual screens; AI cannot execute ledger changes, and selected transactions must be checked against the member on the server.
 - Reuse AdminTikTokPromoter on Admin Users and the dedicated TikTok page so both use the same authenticated, read-only Claude drafting flow.
+- Draft manually pasted TikTok comments through the admin-checked promoter reply mode without comment API access or posting; keep unsent comment text in page state only.
 - Fund admin non-credit account adjustments, deposit completions, and credited amount increases through the private reserve helper in the same database transaction; lock deposits before completion to prevent double funding. Internal reserve balances are admin-read-only and separate from real cash backing.
