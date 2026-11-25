@@ -12,7 +12,6 @@ import { TransferModal } from "@/components/TransferModal";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Seo } from "@/components/Seo";
 import { HomeActivity } from "@/components/HomeActivity";
-import { TikTokFollowStrip } from "@/components/TikTokFollowStrip";
 import { LuxeIcon } from "@/components/LuxeIcon";
 
 
@@ -238,8 +237,6 @@ const Accounts = () => {
         </div>
       </div>
 
-
-      <TikTokFollowStrip />
 
       <div className="grid gap-4 md:gap-6 xl:grid-cols-2">
         {accounts

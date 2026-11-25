@@ -17,6 +17,7 @@ import { Lock as LockIcon } from "lucide-react";
 import { useUiTheme } from "@/contexts/UiThemeContext";
 import { LuxeIcon, type LuxeIconName } from "@/components/LuxeIcon";
 import { InvestmentSwitch } from "@/components/InvestmentSwitch";
+import { TikTokHeaderIcon } from "@/components/TikTokHeaderIcon";
 import { AdminAssistantDialog } from "@/components/AdminAssistantDialog";
 
 import {
@@ -266,6 +267,8 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
                 <LuxeIcon name="moon" className="h-6 w-6" />
               ) : darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
+
+            <TikTokHeaderIcon />
 
             {currentPage === "accounts" && <InvestmentSwitch />}
             <NotificationsBell />
