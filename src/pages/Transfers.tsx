@@ -20,6 +20,7 @@ import { playSound } from "@/lib/sounds";
 import { CashAppPayDialog } from "@/components/CashAppPayDialog";
 import { PayPalPayDialog } from "@/components/PayPalPayDialog";
 import { VenmoPayDialog } from "@/components/VenmoPayDialog";
+import { TransactionDetailsDialog } from "@/components/TransactionDetailsDialog";
 import { ZellePayDialog } from "@/components/ZellePayDialog";
 import { MethodPayDialog } from "@/components/MethodPayDialog";
 import { ExternalTransferDialog } from "@/components/ExternalTransferDialog";
@@ -47,6 +48,10 @@ interface PendingTx {
   status: string | null;
   reference_number: string | null;
   created_at: string | null;
+  transaction_type: string;
+  recipient_email: string | null;
+  recipient_name: string | null;
+  currency: string | null;
 }
 
 const genRef = (prefix: string) =>
@@ -132,7 +137,7 @@ const Transfers = () => {
     if (!user) return;
     const { data } = await supabase
       .from("transactions")
-      .select("id, account_id, category, description, amount, status, reference_number, created_at")
+      .select("id, account_id, category, description, amount, status, reference_number, created_at, transaction_type, recipient_email, recipient_name, currency")
       .eq("user_id", user.id)
       .eq("status", "pending")
       .order("created_at", { ascending: false })
@@ -595,11 +600,6 @@ const Transfers = () => {
               <span className="sm:hidden">External</span>
               <span className="hidden sm:inline">External</span>
             </TabsTrigger>
-            <TabsTrigger value="zelle" className="shrink-0 gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary">
-              <Send className="h-4 w-4 shrink-0" />
-              <span className="sm:hidden">Zelle</span>
-              <span className="hidden sm:inline">Zelle</span>
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="send">
@@ -774,55 +774,6 @@ const Transfers = () => {
           </TabsContent>
 
 
-          <TabsContent value="zelle">
-            <Card className="border-accent/30">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Send className="h-5 w-5 text-accent" />Send Money with Zelle</CardTitle>
-                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-success" />
-                  Zelle payments are held pending approval by a support specialist.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleZelleTransfer} className="space-y-4">
-                  <div>
-                    <Label>From Account</Label>
-                    <Select value={zFrom} onValueChange={setZFrom}>
-                      <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((acc) => (
-                          <SelectItem key={acc.id} value={acc.id}>
-                            {acc.account_name} - ****{acc.account_number} ({formatCurrency(spendableOf(acc))})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <Label>Recipient Name</Label>
-                      <Input value={zRecipient} onChange={(e) => setZRecipient(e.target.value)} placeholder="John Smith" />
-                    </div>
-                    <div>
-                      <Label>Email or Phone</Label>
-                      <Input value={zContact} onChange={(e) => setZContact(e.target.value)} placeholder="name@email.com or (555) 555‑5555" />
-                    </div>
-                    <div>
-                      <Label>Amount</Label>
-                      <Input type="number" step="0.01" placeholder="0.00" value={zAmount} onChange={(e) => setZAmount(e.target.value)} />
-                    </div>
-                    <div>
-                      <Label>Memo (optional)</Label>
-                      <Input value={zMemo} onChange={(e) => setZMemo(e.target.value)} placeholder="Dinner last night" />
-                    </div>
-                  </div>
-                  <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={zLoading}>
-                    {zLoading ? "Submitting..." : "Send with Zelle"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
 
         <Card>
@@ -858,46 +809,19 @@ const Transfers = () => {
         </Card>
       </div>
 
-      <Dialog open={!!selectedTx} onOpenChange={(o) => !o && setSelectedTx(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-warning" />
-              Transfer Pending Approval
-            </DialogTitle>
-            <DialogDescription>
-              Your transfer has been received and is awaiting review by our support team.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedTx && (
-            <div className="space-y-3 rounded-lg border bg-muted/40 p-4 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span className="font-medium">{selectedTx.category}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Amount</span><span className="font-semibold">{formatCurrency(Number(selectedTx.amount))}</span></div>
-              <div className="flex justify-between gap-3"><span className="text-muted-foreground">Details</span><span className="text-right">{selectedTx.description}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Reference</span><span className="font-mono text-xs">{selectedTx.reference_number}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Status</span>
-                <Badge variant="outline" className="border-warning/40 text-warning bg-warning/10">Pending Approval</Badge>
-              </div>
-            </div>
-          )}
-          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
-            <p className="font-semibold text-secondary flex items-center gap-2"><Mail className="h-4 w-4 text-primary" />Support will reach out</p>
-            <p className="text-muted-foreground mt-1">
-              A specialist will contact you shortly to confirm and approve this transfer. You'll receive an email
-              update once the review is complete — typically within 24 hours.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => { setSelectedTx(null); window.dispatchEvent(new Event("open-ai-chat")); }}
-            >
-              Chat with Support
-            </Button>
-            <Button onClick={() => setSelectedTx(null)}>Got it</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TransactionDetailsDialog
+        transaction={selectedTx}
+        transactions={pending}
+        onClose={() => setSelectedTx(null)}
+        onSelect={(t) => {
+          const existing = pending.find((p) => p.id === t.id);
+          if (existing) setSelectedTx({ ...existing, ...t });
+        }}
+        onChange={(u) => {
+          setPending((prev) => prev.map((p) => (p.id === u.id ? { ...p, ...u } : p)));
+          setSelectedTx((cur) => (cur?.id === u.id ? { ...cur, ...u } : cur));
+        }}
+      />
 
       <TransferReceipt open={!!receipt} onClose={() => setReceipt(null)} receipt={receipt} />
       <CashAppPayDialog
