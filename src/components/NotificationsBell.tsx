@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Bell, ArrowDownLeft, ArrowUpRight, Clock, CheckCircle2, Receipt, XCircle, AlertTriangle, Loader2, Ban } from "lucide-react";
 import { postingVia } from "@/lib/tx-status";
+import { TransferTracker } from "@/components/TransferTracker";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -421,6 +422,10 @@ export const NotificationsBell = () => {
                   })()}
                 </div>
               </div>
+
+              {selected.transaction_type === "debit" && (
+                <TransferTracker status={selected.status} createdAt={selected.created_at} />
+              )}
 
               {isStaff && custConfirm && (
                 <div className="rounded-xl border border-border bg-muted/40 p-3 space-y-1">
