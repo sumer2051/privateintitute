@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Download, TrendingUp, Sparkles, Camera, Loader2 } from "lucide-react";
+import { ArrowUpDown, Download, TrendingDown, TrendingUp, Sparkles, Camera, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,12 @@ import { CurrencySelector } from "@/components/CurrencySelector";
 import { Seo } from "@/components/Seo";
 import { HomeActivity } from "@/components/HomeActivity";
 import { LuxeIcon } from "@/components/LuxeIcon";
+import {
+  buildStatement,
+  netChange,
+  statementFileName,
+  type StatementTx,
+} from "@/lib/statement";
 
 
 interface Account {
@@ -26,6 +32,7 @@ interface Account {
 
 const Accounts = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [txs, setTxs] = useState<StatementTx[]>([]);
   const [loading, setLoading] = useState(true);
   const [displayName, setDisplayName] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string>("");
@@ -133,6 +140,18 @@ const Accounts = () => {
 
       if (error) throw error;
       setAccounts(data || []);
+
+      // Pull the member's own payments so the balance change and the statement
+      // are built from real activity instead of typed-in numbers.
+      const { data: txData } = await supabase
+        .from("transactions")
+        .select(
+          "id, account_id, transaction_type, created_at, description, recipient_name, reference_number, category, amount, balance_after, status",
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      setTxs((txData as StatementTx[]) || []);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -148,6 +167,32 @@ const Accounts = () => {
 
   const { format } = useCurrency();
   const formatCurrency = (amount: number) => format(amount);
+
+  // Money actually moved on each account in the last 30 days.
+  const change30 = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const a of accounts) {
+      map[a.id] = netChange(txs.filter((t) => t.account_id === a.id), 30);
+    }
+    return map;
+  }, [accounts, txs]);
+
+  const downloadStatement = (account: Account) => {
+    const accountTxs = txs.filter((t) => t.account_id === account.id);
+    const blob = new Blob([buildStatement(account, accountTxs, displayName)], {
+      type: "text/plain",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = statementFileName(account);
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({
+      title: "Statement downloaded",
+      description: `${accountTxs.length} transaction${accountTxs.length === 1 ? "" : "s"} listed for ${account.account_name}.`,
+    });
+  };
 
   return (
     <AuthLayout currentPage="accounts">
@@ -283,11 +328,22 @@ const Accounts = () => {
                         <p className="luxe-money font-display text-3xl md:text-4xl font-bold text-secondary tracking-tight">
                           <CountUp value={account.balance} format={formatCurrency} />
                         </p>
-                        <span className="luxe-delta mb-1.5">
-                          <TrendingUp className="h-3 w-3" />
-                          {account.account_type === "credit" ? "0.00%" : account.account_type === "savings" ? "+2.41%" : "+1.28%"}
-                        </span>
                       </div>
+                      {(() => {
+                        const change = change30[account.id] ?? 0;
+                        if (change === 0) return null;
+                        const up = change > 0;
+                        return (
+                          <span
+                            className="luxe-delta mt-2 self-start"
+                            title="Money moved in the last 30 days"
+                          >
+                            {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {up ? "+" : "-"}
+                            {formatCurrency(Math.abs(change))} in 30 days
+                          </span>
+                        );
+                      })()}
                     </div>
                     {account.account_type !== "credit" && (
                       <div className="text-left sm:text-right">
@@ -324,12 +380,7 @@ const Accounts = () => {
                       size="sm"
                       variant="outline"
                       className="luxe-btn-ghost flex-1 h-11 md:h-12 rounded-2xl border-border bg-card text-xs md:text-sm font-semibold tracking-wide transition-all hover:scale-[1.02] hover:bg-accent/5 active:scale-[0.98]"
-                      onClick={() =>
-                        toast({
-                          title: "Statement ready",
-                          description: `${account.account_name} statement download started.`,
-                        })
-                      }
+                      onClick={() => downloadStatement(account)}
                     >
                       <LuxeIcon name="statement" className="mr-2 h-5 w-5" />
                       Statement

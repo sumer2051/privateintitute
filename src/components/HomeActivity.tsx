@@ -20,6 +20,7 @@ import {
   Search,
 } from "lucide-react";
 import { Money } from "@/components/Money";
+import { signedAmount } from "@/lib/statement";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Tx {
@@ -107,7 +108,7 @@ export const HomeActivity = ({ accountNames }: { accountNames: Record<string, st
   }, [visible]);
 
   const iconFor = (t: Tx) => {
-    const credit = t.amount > 0;
+    const credit = signedAmount(t) > 0;
     if (t.category?.toLowerCase().includes("card")) return <CreditCard className="h-4 w-4" />;
     return credit ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />;
   };
@@ -151,7 +152,7 @@ export const HomeActivity = ({ accountNames }: { accountNames: Record<string, st
                 </div>
                 <ul className="divide-y divide-border/60">
                   {g.items.map((t) => {
-                    const credit = t.amount > 0;
+                    const credit = signedAmount(t) > 0;
                     return (
                       <li key={t.id}>
                         <button
@@ -234,10 +235,10 @@ export const HomeActivity = ({ accountNames }: { accountNames: Record<string, st
                 <Money
                   value={Math.abs(selected.amount)}
                   size="xl"
-                  className={selected.amount > 0 ? "text-success" : "text-secondary"}
+                  className={signedAmount(selected) >= 0 ? "text-success" : "text-secondary"}
                 />
                 <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">
-                  {selected.amount > 0 ? "Credit" : "Debit"} · {selected.status || "completed"}
+                  {signedAmount(selected) >= 0 ? "Credit" : "Debit"} · {selected.status || "completed"}
                 </p>
               </div>
               {[
