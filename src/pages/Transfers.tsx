@@ -677,32 +677,61 @@ const Transfers = () => {
 
 
           <TabsContent value="internal">
-            <Card>
-              <CardHeader><CardTitle>Transfer Between Your Accounts</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {accounts.map((acc) => (
-                    <button
-                      key={acc.id}
-                      type="button"
-                      onClick={() => {
-                        setFromAccount(acc.id);
-                        setToAccount("");
-                        setIntOpen(true);
-                      }}
-                      className="text-left rounded-xl border border-border bg-card p-3 transition-all hover:border-primary/40 hover:bg-muted/50 active:scale-[0.98]"
-                    >
-                      <div className="text-sm font-semibold text-secondary">{acc.account_name}</div>
-                      <p className="text-xs text-muted-foreground">****{acc.account_number}</p>
-                      <p className="mt-1 text-sm font-bold text-secondary">{formatCurrency(spendableOf(acc))}</p>
-                      {acc.account_type === "credit" && (
-                        <p className="text-[11px] text-muted-foreground">Available credit · owed {formatCurrency(acc.balance)}</p>
-                      )}
-                    </button>
-                  ))}
+            <Card className="border-primary/20">
+              <CardHeader className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <ArrowRightLeft className="h-5 w-5 text-primary" />
+                    Between Accounts
+                  </CardTitle>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                    <Globe2 className="h-3.5 w-3.5" />
+                    {currency.code} · {currency.name}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div>
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">Choose an account to move from</Label>
+                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {accounts.map((acc) => {
+                      const active = acc.id === fromAccount;
+                      const glyph = acc.account_type === "credit" ? "CC" : acc.account_type === "savings" ? "SV" : "CK";
+                      const accent = acc.account_type === "credit" ? "from-violet-500 to-purple-700" : acc.account_type === "savings" ? "from-emerald-500 to-green-700" : "from-sky-500 to-blue-700";
+                      return (
+                        <button
+                          key={acc.id}
+                          type="button"
+                          onClick={() => {
+                            setFromAccount(acc.id);
+                            setToAccount("");
+                            setIntOpen(true);
+                          }}
+                          className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
+                            active
+                              ? "border-primary ring-2 ring-primary/40 bg-primary/5 shadow-sm"
+                              : "border-border hover:border-primary/40 hover:bg-muted/50"
+                          }`}
+                        >
+                          <div className="grid grid-cols-[auto_1fr_auto] items-start gap-3">
+                            <div className={`h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br ${accent} text-white text-sm font-bold flex items-center justify-center shadow-sm`}>
+                              {glyph}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-semibold text-secondary leading-tight">{acc.account_name}</div>
+                              <p className="text-xs text-muted-foreground truncate">
+                                ****{acc.account_number} · {formatCurrency(spendableOf(acc))}
+                              </p>
+                            </div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5 min-w-fit">Instant</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Choose the account to move money from — the transfer sheet opens instantly.
+                  Pick an account above — the transfer form opens right away.
                 </p>
               </CardContent>
             </Card>
@@ -710,24 +739,22 @@ const Transfers = () => {
 
           <TabsContent value="external">
             <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Building className="h-5 w-5 text-primary" />External Bank Transfer</CardTitle>
-                <div className="flex items-start gap-2 rounded-lg border border-success/20 bg-success/5 p-3 text-xs text-muted-foreground">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-                  <p>Transfers to outside banks are reviewed by our support team before release.</p>
+              <CardHeader className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Building className="h-5 w-5 text-primary" />
+                    External Transfer
+                  </CardTitle>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                    <Globe2 className="h-3.5 w-3.5" />
+                    {currency.code} · {currency.name}
+                  </span>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-xs">
-                  <Globe2 className="h-3.5 w-3.5 text-primary" />
-                  <span className="font-medium">{currency.code} · {profile.scheme}</span>
-                  <span className="text-muted-foreground">· {profile.region}</span>
-                  <Badge variant="secondary" className="ml-auto">{profile.settlement}</Badge>
-                </div>
-
-                <div className="mt-3 space-y-2">
-                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-                    Transfer style for {currency.code}
-                  </Label>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div>
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">Choose a transfer style</Label>
+                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {schemes.map((s) => {
                       const active = s.id === profile.id;
                       return (
@@ -743,31 +770,29 @@ const Transfers = () => {
                             }
                             setExtOpen(true);
                           }}
-                          className={`text-left rounded-xl border px-3 py-3 transition-all active:scale-[0.98] ${
+                          className={`text-left rounded-xl border p-3 transition-all active:scale-[0.98] ${
                             active
-                              ? "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/40"
-                              : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
+                              ? "border-primary ring-2 ring-primary/40 bg-primary/5 shadow-sm"
+                              : "border-border hover:border-primary/40 hover:bg-muted/50"
                           }`}
                         >
-                          <div className="grid grid-cols-[1fr_auto] items-start gap-2">
-                            <span className="font-semibold text-sm text-secondary leading-tight">{s.scheme}</span>
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5">{s.settlement}</span>
+                          <div className="grid grid-cols-[auto_1fr_auto] items-start gap-3">
+                            <div className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br from-slate-600 to-slate-900 text-white flex items-center justify-center shadow-sm">
+                              <Building className="h-5 w-5" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-semibold text-secondary leading-tight">{s.scheme}</div>
+                              <p className="text-xs text-muted-foreground truncate">{s.tagline || s.region}</p>
+                            </div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap pt-0.5 min-w-fit">{s.settlement}</div>
                           </div>
-                          {s.tagline && (
-                            <p className="text-[11px] text-muted-foreground mt-0.5">{s.tagline}</p>
-                          )}
                         </button>
                       );
                     })}
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Switch currency in the top-right to see transfer styles for another country.
-                  </p>
                 </div>
-              </CardHeader>
-              <CardContent>
                 <p className="text-xs text-muted-foreground">
-                  Pick a transfer style above — the {profile.scheme} form opens with exactly the details that scheme requires.
+                  Pick a style above — the form opens right away. Transfers to outside banks are reviewed before release.
                 </p>
               </CardContent>
             </Card>
