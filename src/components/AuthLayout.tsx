@@ -245,7 +245,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
         <div className="container mx-auto flex h-14 md:h-16 items-center justify-between gap-2 px-3 md:px-4">
           <button onClick={() => navigate("/accounts")} className="group flex min-w-0 items-center gap-2 md:gap-3">
             <span className="flex min-w-0 flex-col items-start leading-tight">
-              <h1 className="whitespace-nowrap text-base md:text-xl font-bold tracking-tight text-secondary">
+              <h1 className="whitespace-nowrap text-sm sm:text-base md:text-xl font-bold tracking-tight text-secondary">
                 private institute
               </h1>
               <span
@@ -256,7 +256,7 @@ export const AuthLayout = ({ children, currentPage, onPageChange }: AuthLayoutPr
             </span>
           </button>
 
-          <div className="flex items-center gap-1 md:gap-3 shrink-0">
+          <div className="flex items-center gap-0 sm:gap-1 md:gap-3 shrink-0 max-sm:[&_button]:h-8 max-sm:[&_button]:w-8">
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input type="search" placeholder="Search accounts, services..." className="w-64 pl-10" />
