@@ -4,13 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { TransactionDetailsDialog } from "@/components/TransactionDetailsDialog";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -21,7 +15,6 @@ import {
 } from "lucide-react";
 import { Money } from "@/components/Money";
 import { signedAmount } from "@/lib/statement";
-import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Tx {
   id: string;
@@ -36,6 +29,7 @@ interface Tx {
   created_at: string;
   recipient_name: string | null;
   recipient_email: string | null;
+  currency: string | null;
 }
 
 const PAGE = 12;
@@ -65,7 +59,6 @@ export const HomeActivity = ({ accountNames }: { accountNames: Record<string, st
   const [limit, setLimit] = useState(PAGE);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Tx | null>(null);
-  const { format } = useCurrency();
 
   useEffect(() => {
     (async () => {
@@ -157,6 +150,7 @@ export const HomeActivity = ({ accountNames }: { accountNames: Record<string, st
                       <li key={t.id}>
                         <button
                           type="button"
+                          data-testid="recent-activity-item"
                           onClick={() => setSelected(t)}
                           className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-primary/5 active:bg-primary/10 md:px-6"
                         >
@@ -221,46 +215,19 @@ export const HomeActivity = ({ accountNames }: { accountNames: Record<string, st
         )}
       </CardContent>
 
-      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-sm rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-base">Transaction details</DialogTitle>
-            <DialogDescription className="text-xs">
-              {selected ? new Date(selected.created_at).toLocaleString() : ""}
-            </DialogDescription>
-          </DialogHeader>
-          {selected && (
-            <div className="space-y-3">
-              <div className="rounded-xl border border-primary/15 bg-primary/5 p-4 text-center">
-                <Money
-                  value={Math.abs(selected.amount)}
-                  size="xl"
-                  className={signedAmount(selected) >= 0 ? "text-success" : "text-secondary"}
-                />
-                <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">
-                  {signedAmount(selected) >= 0 ? "Credit" : "Debit"} · {selected.status || "completed"}
-                </p>
-              </div>
-              {[
-                ["Description", selected.description],
-                ["Recipient", selected.recipient_name || "—"],
-                ["Account", accountNames[selected.account_id] || "—"],
-                ["Category", selected.category],
-                ["Type", selected.transaction_type],
-                ["Reference", selected.reference_number || "—"],
-                ["Balance after", format(selected.balance_after)],
-              ].map(([k, v]) => (
-                <div key={k as string} className="flex items-start justify-between gap-3 text-sm">
-                  <span className="text-muted-foreground">{k}</span>
-                  <span className="max-w-[60%] break-words text-right font-medium text-secondary">
-                    {v as string}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <TransactionDetailsDialog
+        transaction={selected}
+        transactions={txs}
+        onClose={() => setSelected(null)}
+        onSelect={(transaction) => {
+          const existing = txs.find((item) => item.id === transaction.id);
+          if (existing) setSelected({ ...existing, ...transaction });
+        }}
+        onChange={(updated) => {
+          setTxs((previous) => previous.map((item) => item.id === updated.id ? { ...item, ...updated } : item));
+          setSelected((current) => current?.id === updated.id ? { ...current, ...updated } : current);
+        }}
+      />
     </Card>
   );
 };

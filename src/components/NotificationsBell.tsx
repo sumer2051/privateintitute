@@ -1,14 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, ArrowDownLeft, ArrowUpRight, Clock, CheckCircle2, Receipt, XCircle, AlertTriangle, Loader2, Ban } from "lucide-react";
-import { postingVia } from "@/lib/tx-status";
-import { TransferTracker } from "@/components/TransferTracker";
+import { useEffect, useRef, useState } from "react";
+import { ArrowDownLeft, ArrowUpRight, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LuxeIcon } from "@/components/LuxeIcon";
 import { useUiTheme } from "@/contexts/UiThemeContext";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -19,174 +15,34 @@ import {
 } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { TransactionMapCard } from "@/components/TransactionMapCard";
-import { COUNTRY_METHODS, SWIFT_FALLBACK, type CountryMethod } from "@/lib/country-methods";
-import { TransferReceipt, type ReceiptData } from "@/components/TransferReceipt";
-import { currencyInfo, formatIn } from "@/lib/fx";
-
-interface Notif {
-  id: string;
-  category: string | null;
-  description: string | null;
-  amount: number;
-  transaction_type: string;
-  status: string | null;
-  reference_number: string | null;
-  recipient_email: string | null;
-  recipient_name: string | null;
-  currency: string | null;
-  created_at: string | null;
-}
+import { formatIn } from "@/lib/fx";
+import {
+  statusMeta,
+  TransactionDetailsDialog,
+  type TransactionDetail,
+} from "@/components/TransactionDetailsDialog";
 
 const READ_KEY = "boa.notifs.lastReadAt";
 
-const ALL_METHODS: CountryMethod[] = [
-  ...Object.values(COUNTRY_METHODS).flat(),
-  SWIFT_FALLBACK,
-];
-
-const findMethod = (categoryOrName?: string | null): CountryMethod | null => {
-  if (!categoryOrName) return null;
-  const n = categoryOrName.toLowerCase();
-  return (
-    ALL_METHODS.find((m) => m.name.toLowerCase() === n) ||
-    ALL_METHODS.find((m) => m.id.toLowerCase() === n) ||
-    ALL_METHODS.find((m) => n.includes(m.name.toLowerCase())) ||
-    null
-  );
-};
-
-const schemeFromTransaction = (description?: string | null): string => {
-  const match = /^\s*\[([^\]]+)\]/.exec(description || "");
-  return match?.[1]?.trim() || "";
-};
-
-const parseDetails = (desc?: string | null): Record<string, string> => {
-  if (!desc) return {};
-  // Strip leading "[Method] To Name — "
-  const cleaned = desc.replace(/^\[[^\]]+\]\s*To\s*[^—]+—\s*/i, "");
-  const out: Record<string, string> = {};
-  const noteSplit = cleaned.match(/\s+—\s+(.+)$/);
-  const detailText = noteSplit ? cleaned.slice(0, noteSplit.index).trim() : cleaned;
-  detailText.split(" · ").forEach((pair) => {
-    const idx = pair.indexOf(":");
-    if (idx > 0) {
-      const k = pair.slice(0, idx).trim().toLowerCase().replace(/\s+/g, "_");
-      // The form note is appended bare after " — " at the end of the
-      // description, so it glues onto the last field's value — strip it.
-      const v = pair.slice(idx + 1).split(" — ")[0].trim();
-      if (k && v) out[k] = v;
-    }
-  });
-  if (noteSplit?.[1]?.trim()) out.note = noteSplit[1].trim();
-  return out;
-};
-
-const statusMeta = (status: string, isDebit: boolean) => {
-  switch (status) {
-    case "pending":
-      return { Icon: Clock, label: "Pending approval", pillClass: "bg-warning/15 text-warning", iconBg: "bg-warning/15 text-warning", showTypeIcon: false, failed: false };
-    case "processing":
-      return { Icon: Loader2, label: "Processing", pillClass: "bg-primary/10 text-primary", iconBg: "bg-primary/10 text-primary", showTypeIcon: false, failed: false };
-    case "under_review":
-      return { Icon: AlertTriangle, label: "Under review", pillClass: "bg-amber-500/15 text-amber-600", iconBg: "bg-amber-500/15 text-amber-600", showTypeIcon: false, failed: false };
-    case "compliance_hold":
-      return { Icon: AlertTriangle, label: "Compliance hold", pillClass: "bg-orange-500/15 text-orange-600", iconBg: "bg-orange-500/15 text-orange-600", showTypeIcon: false, failed: false };
-    case "reviewed":
-      return { Icon: Loader2, label: "Reviewed · clearance ongoing", pillClass: "bg-cyan-500/15 text-cyan-600", iconBg: "bg-cyan-500/15 text-cyan-600", showTypeIcon: false, failed: false };
-    case "clearing":
-      return { Icon: Loader2, label: "Clearing & settlement", pillClass: "bg-indigo-500/15 text-indigo-600", iconBg: "bg-indigo-500/15 text-indigo-600", showTypeIcon: false, failed: false };
-    case "posting":
-      return { Icon: CheckCircle2, label: "Successful · posting by recipient bank", pillClass: "bg-teal-500/15 text-teal-700", iconBg: "bg-teal-500/15 text-teal-700", showTypeIcon: false, failed: false };
-    case "failed":
-      return { Icon: XCircle, label: "Failed", pillClass: "bg-destructive/15 text-destructive", iconBg: "bg-destructive/15 text-destructive", showTypeIcon: false, failed: true };
-    case "cancelled":
-      return { Icon: Ban, label: "Cancelled", pillClass: "bg-muted text-muted-foreground", iconBg: "bg-muted text-muted-foreground", showTypeIcon: false, failed: true };
-    case "completed":
-    default:
-      return {
-        Icon: CheckCircle2,
-        label: status === "completed" ? "Completed" : status,
-        pillClass: "bg-success/10 text-success",
-        iconBg: isDebit ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success",
-        showTypeIcon: true,
-        failed: false,
-      };
-  }
-};
-
 export const NotificationsBell = () => {
   const { theme: uiTheme } = useUiTheme();
-  const [items, setItems] = useState<Notif[]>([]);
-
+  const [items, setItems] = useState<TransactionDetail[]>([]);
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<Notif | null>(null);
-  const [custConfirm, setCustConfirm] = useState<{ note: string; at: string } | null>(null);
-  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
-  const [returnTo, setReturnTo] = useState<Notif | null>(null);
-  const [senderName, setSenderName] = useState<string>("You");
+  const [selected, setSelected] = useState<TransactionDetail | null>(null);
   const [limit, setLimit] = useState(40);
   const [hasMore, setHasMore] = useState(false);
-  const [isStaff, setIsStaff] = useState(false);
-  useEffect(() => {
-    setCustConfirm(null);
-    if (!selected || !isStaff) return;
-    let alive = true;
-    supabase.from("staff_audit_log").select("meta, created_at").eq("action", "customer_confirmed_transfer")
-      .eq("target_id", selected.id).order("created_at", { ascending: false }).limit(1)
-      .then(({ data }) => {
-        const row = data?.[0] as any;
-        if (alive && row) setCustConfirm({ note: String(row.meta?.customer_note ?? ""), at: row.created_at });
-      });
-    return () => { alive = false; };
-  }, [selected?.id, isStaff]);
-  const [approveNote, setApproveNote] = useState("");
-  const [approving, setApproving] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-      const roles = ((data as any[]) || []).map((r) => r.role);
-      setIsStaff(roles.includes("admin") || roles.includes("tx_support"));
-    })();
-  }, []);
-
-  useEffect(() => { setApproveNote(""); }, [selected?.id]);
-
-  const approveSelected = async () => {
-    if (!selected) return;
-    setApproving(true);
-    const { error } = isStaff
-      ? await supabase.rpc("admin_update_transaction_status", { p_tx: selected.id, p_status: "processing" })
-      : await supabase.rpc("confirm_my_transfer_with_note", { p_tx: selected.id, p_note: approveNote.trim() });
-    if (error) { setApproving(false); toast.error(error.message); return; }
-    const { data: mailData, error: mailErr } = await supabase.functions.invoke("send-transaction-status-update", {
-      body: { transactionId: selected.id, status: "processing", note: approveNote.trim() || undefined },
-    });
-    setApproving(false);
-    const id = selected.id;
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, status: "processing" } : i)));
-    setSelected((s) => (s && s.id === id ? { ...s, status: "processing" } : s));
-    setApproveNote("");
-    if (mailErr || (mailData as any)?.failed?.length) toast.warning("Approved, but the processing email could not be sent");
-    else toast.success("Approved · moved to processing and email sent");
-  };
   const limitRef = useRef(40);
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrollPosRef = useRef(0);
   const restoringRef = useRef(false);
   const holdPosRef = useRef<number | null>(null);
   const navigate = useNavigate();
-  const { format, currency } = useCurrency();
+  const { format } = useCurrency();
 
   const fetchItems = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { data: prof } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
-    if (prof?.full_name) setSenderName(prof.full_name);
     const { data: accts } = await supabase.from("accounts").select("id").eq("user_id", user.id);
     const ids = (accts ?? []).map((a) => a.id);
     if (!ids.length) return;
@@ -196,7 +52,7 @@ export const NotificationsBell = () => {
       .in("account_id", ids)
       .order("created_at", { ascending: false })
       .limit(limitRef.current);
-    const rows = (data ?? []) as Notif[];
+    const rows = (data ?? []) as TransactionDetail[];
     setItems(rows);
     setHasMore(rows.length >= limitRef.current);
     const lastRead = Number(localStorage.getItem(READ_KEY) || 0);
@@ -206,8 +62,8 @@ export const NotificationsBell = () => {
   useEffect(() => {
     limitRef.current = limit;
     fetchItems();
-    const t = setInterval(fetchItems, 20000);
-    return () => clearInterval(t);
+    const timer = setInterval(fetchItems, 20000);
+    return () => clearInterval(timer);
   }, [limit]);
 
   // Every time the list re-opens, put it back where the user left off.
@@ -242,8 +98,6 @@ export const NotificationsBell = () => {
       const el = listRef.current;
       if (!el) return;
       el.scrollTop = target;
-      // Keep re-asserting for ~1.5s: the browser resets the list to the top again
-      // while the transaction's close animation finishes.
       if (++frame < 90) raf = requestAnimationFrame(tick);
       else restoringRef.current = false;
     };
@@ -255,14 +109,14 @@ export const NotificationsBell = () => {
     };
   }, [selected]);
 
-
   const markAllRead = () => {
     localStorage.setItem(READ_KEY, String(Date.now()));
     setUnread(0);
   };
 
-  /** Show each transaction in the currency it was actually made in. */
-  const fmtTx = (n: Notif) => (n.currency ? formatIn(n.currency, n.amount) : format(n.amount));
+  const fmtTx = (transaction: TransactionDetail) => (
+    transaction.currency ? formatIn(transaction.currency, transaction.amount) : format(transaction.amount)
+  );
 
   const timeAgo = (iso: string | null) => {
     if (!iso) return "";
@@ -273,48 +127,14 @@ export const NotificationsBell = () => {
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
-  const selectedMethod = useMemo(
-    () => findMethod(selected?.category) || findMethod(schemeFromTransaction(selected?.description)),
-    [selected],
-  );
-
-  /** Every other transfer that went to the same recipient name. */
-  const related = useMemo(() => {
-    const name = (selected?.recipient_name || "").trim().toLowerCase();
-    if (!selected || !name) return [] as Notif[];
-    return items.filter(
-      (i) => i.id !== selected.id && (i.recipient_name || "").trim().toLowerCase() === name,
-    );
-  }, [items, selected]);
-
-  const openReceipt = () => {
-    if (!selected) return;
-    const method = selectedMethod || SWIFT_FALLBACK;
-    const fields = parseDetails(selected.description);
-    if (selected.recipient_name && !fields.recipient_name) fields.recipient_name = selected.recipient_name;
-    if (selected.recipient_email && !fields.email) fields.email = selected.recipient_email;
-    const txCur = currencyInfo(selected.currency || currency.code);
-    setReceipt({
-      method,
-      // Stored amounts are USD — show the exact figure typed on the form.
-      amount: (Number(selected.amount) || 0) * txCur.rate,
-      currencyCode: txCur.code,
-      currencySymbol: txCur.symbol,
-      senderName,
-      recipientName: selected.recipient_name || fields.recipient_name || fields.handle || "Recipient",
-      recipientEmail: selected.recipient_email || fields.email || "",
-      fields,
-      note: fields.note || fields.memo,
-      reference: selected.reference_number || selected.id.slice(0, 8).toUpperCase(),
-      timestamp: selected.created_at || new Date().toISOString(),
-    });
-    setReturnTo(selected);
-    setSelected(null);
+  const updateTransaction = (updated: TransactionDetail) => {
+    setItems((previous) => previous.map((item) => item.id === updated.id ? updated : item));
+    setSelected(updated);
   };
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v) markAllRead(); }}>
+      <Dialog open={open} onOpenChange={(value) => { setOpen(value); if (value) markAllRead(); }}>
         <DialogTrigger asChild>
           <Button
             variant="ghost"
@@ -323,9 +143,8 @@ export const NotificationsBell = () => {
             aria-label="Notifications"
           >
             {uiTheme === "luxe" ? <LuxeIcon name="bell" className="h-6 w-6" /> : <Bell className="h-5 w-5" />}
-
             {unread > 0 && (
-              <Badge className="luxe-bell-badge absolute -right-1 -top-1 h-5 min-w-5 rounded-full p-0 text-xs flex items-center justify-center" variant="destructive">
+              <Badge className="luxe-bell-badge absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-xs" variant="destructive">
                 {unread}
               </Badge>
             )}
@@ -333,9 +152,9 @@ export const NotificationsBell = () => {
         </DialogTrigger>
         <DialogContent
           aria-label="Notifications"
-          className="left-0 top-0 translate-x-0 translate-y-0 w-screen max-w-none h-[100dvh] max-h-none rounded-none sm:rounded-none border-0 p-0 gap-0 flex flex-col"
+          className="left-0 top-0 flex h-[100dvh] max-h-none w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 p-0 sm:rounded-none"
         >
-          <div className="shrink-0 border-b bg-background px-4 pt-4 pb-3 shadow-sm">
+          <div className="shrink-0 border-b bg-background px-4 pb-3 pt-4 shadow-sm">
             <div className="mx-auto flex w-full max-w-xl items-center justify-between gap-2 pr-9">
               <div className="min-w-0">
                 <DialogTitle className="font-semibold text-secondary">Notifications</DialogTitle>
@@ -349,284 +168,73 @@ export const NotificationsBell = () => {
             </div>
           </div>
           <div
-            ref={(el) => { listRef.current = el; }}
-            onScroll={(e) => {
-              // Ignore the browser's reset-to-top while we are re-opening the list.
+            ref={(element) => { listRef.current = element; }}
+            onScroll={(event) => {
               if (restoringRef.current || holdPosRef.current !== null) return;
-              scrollPosRef.current = (e.target as HTMLDivElement).scrollTop;
+              scrollPosRef.current = (event.target as HTMLDivElement).scrollTop;
             }}
             className="flex-1 overflow-y-auto overscroll-contain px-4"
           >
             <div className="mx-auto w-full max-w-xl">
-            {items.length === 0 ? (
-              <div className="p-6 text-center text-sm text-muted-foreground">No notifications yet.</div>
-            ) : items.map((n) => {
-              const isDebit = n.transaction_type === "debit";
-              const status = (n.status || "completed").toLowerCase();
-              const meta = statusMeta(status, isDebit);
-              return (
-                <button
-                  key={n.id}
-                  onMouseDown={() => {
-                    // Capture the place in the list before the browser scrolls the
-                    // tapped row into view.
-                    holdPosRef.current = listRef.current?.scrollTop ?? scrollPosRef.current;
-                  }}
-                  onClick={() => setSelected(n)}
-                  className="flex w-full items-start gap-3 border-b p-3 text-left hover:bg-muted/40 transition"
-                >
-                  <div className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full ${meta.iconBg}`}>
-                    {meta.showTypeIcon ? (isDebit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />) : <meta.Icon className="h-4 w-4" />}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="truncate text-sm font-semibold text-secondary">{n.category || "Transaction"}</p>
-                      <span className={`text-sm font-bold ${meta.failed ? "text-muted-foreground line-through" : isDebit ? "text-destructive" : "text-success"}`}>
-                        {isDebit ? "-" : "+"}{fmtTx(n)}
-                      </span>
+              {items.length === 0 ? (
+                <div className="p-6 text-center text-sm text-muted-foreground">No notifications yet.</div>
+              ) : items.map((transaction) => {
+                const isDebit = transaction.transaction_type === "debit";
+                const status = (transaction.status || "completed").toLowerCase();
+                const meta = statusMeta(status, isDebit);
+                return (
+                  <button
+                    key={transaction.id}
+                    onMouseDown={() => {
+                      holdPosRef.current = listRef.current?.scrollTop ?? scrollPosRef.current;
+                    }}
+                    onClick={() => setSelected(transaction)}
+                    className="flex w-full items-start gap-3 border-b p-3 text-left transition hover:bg-muted/40"
+                  >
+                    <div className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full ${meta.iconBg}`}>
+                      {meta.showTypeIcon ? (isDebit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />) : <meta.Icon className="h-4 w-4" />}
                     </div>
-                    <p className="truncate text-xs text-muted-foreground">{n.description}</p>
-                    <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold ${meta.pillClass}`}>
-                        <meta.Icon className="h-3 w-3" /> {meta.label}
-                      </span>
-                      <span>· {timeAgo(n.created_at)}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-sm font-semibold text-secondary">{transaction.category || "Transaction"}</p>
+                        <span className={`text-sm font-bold ${meta.failed ? "text-muted-foreground line-through" : isDebit ? "text-destructive" : "text-success"}`}>
+                          {isDebit ? "-" : "+"}{fmtTx(transaction)}
+                        </span>
+                      </div>
+                      <p className="truncate text-xs text-muted-foreground">{transaction.description}</p>
+                      <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold ${meta.pillClass}`}>
+                          <meta.Icon className="h-3 w-3" /> {meta.label}
+                        </span>
+                        <span>· {timeAgo(transaction.created_at)}</span>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
-            {hasMore && (
-              <div className="p-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => setLimit((l) => l + 40)}
-                >
-                  Show older activity
-                </Button>
-              </div>
-            )}
+                  </button>
+                );
+              })}
+              {hasMore && (
+                <div className="p-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => setLimit((current) => current + 40)}
+                  >
+                    Show older activity
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Notification detail dialog */}
-      <Dialog open={!!selected} onOpenChange={(o) => { if (!o) setSelected(null); }}>
-        <DialogContent className="left-0 top-0 translate-x-0 translate-y-0 w-screen max-w-none h-[100dvh] max-h-none rounded-none sm:rounded-none border-0 p-0 gap-0 flex flex-col">
-          {selected && (
-            <>
-              <div className="shrink-0 border-b bg-background px-4 pt-4 pb-3 shadow-sm" data-testid="pinned-receipt">
-              <div className="mx-auto w-full max-w-xl space-y-3">
-              <DialogHeader className="pr-8 text-left">
-                <div className="flex items-center gap-3">
-                  {selectedMethod ? (
-                    <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${selectedMethod.accent} text-white flex items-center justify-center font-bold text-lg shadow-md`}>
-                      {selectedMethod.glyph}
-                    </div>
-                  ) : (
-                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground flex items-center justify-center">
-                      {selected.transaction_type === "debit" ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownLeft className="h-5 w-5" />}
-                    </div>
-                  )}
-                  <div>
-                    <DialogTitle className="text-secondary">{selected.category || "Transaction"}</DialogTitle>
-                    <DialogDescription>
-                      Ref {selected.reference_number || selected.id.slice(0, 8).toUpperCase()} · {timeAgo(selected.created_at)}
-                    </DialogDescription>
-                  </div>
-                </div>
-              </DialogHeader>
-
-              <div className="rounded-xl border bg-muted/40 p-3">
-                <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Amount</div>
-                <div className={`text-2xl font-bold ${selected.transaction_type === "debit" ? "text-destructive" : "text-success"}`}>
-                  {selected.transaction_type === "debit" ? "-" : "+"}{fmtTx(selected)}
-                </div>
-                <div className="mt-1 flex items-center gap-2">
-                  {(() => {
-                    const m = statusMeta((selected.status || "completed").toLowerCase(), selected.transaction_type === "debit");
-                    return (
-                      <Badge variant="outline" className={`gap-1 border-transparent ${m.pillClass}`}>
-                        <m.Icon className="h-3 w-3" /> {m.label}
-                      </Badge>
-                    );
-                  })()}
-                </div>
-                {(selected.recipient_name || selected.recipient_email) && (
-                  <div className="mt-3 border-t pt-2 text-xs space-y-0.5">
-                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Recipient</div>
-                    {selected.recipient_name && <div className="text-sm font-semibold text-secondary truncate">{selected.recipient_name}</div>}
-                    {selected.recipient_email && <div className="text-muted-foreground truncate">{selected.recipient_email}</div>}
-                  </div>
-                )}
-              </div>
-              </div>
-              </div>
-
-              <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-3">
-              <div className="mx-auto w-full max-w-xl space-y-3">
-              {selected.transaction_type === "debit" && (
-                <TransferTracker status={selected.status} createdAt={selected.created_at} />
-              )}
-
-              {isStaff && custConfirm && (
-                <div className="rounded-xl border border-border bg-muted/40 p-3 space-y-1">
-                  <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                    Customer confirmed · {new Date(custConfirm.at).toLocaleString()}
-                  </div>
-                  <div className="text-sm whitespace-pre-wrap break-words">{custConfirm.note || "No note added"}</div>
-                </div>
-              )}
-              {isStaff && selected.status === "pending" && (
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
-                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Approve transaction</div>
-                  <Textarea
-                    rows={2}
-                    value={approveNote}
-                    onChange={(e) => setApproveNote(e.target.value)}
-                    placeholder="Optional note for the customer"
-                    className="text-sm"
-                  />
-                  <Button className="w-full gap-2" disabled={approving} onClick={approveSelected}>
-                    {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                    Approve · move to processing
-                  </Button>
-                </div>
-              )}
-              {!isStaff && selected.status === "pending" && selected.transaction_type === "debit" && (
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
-                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Did you make this transfer?</div>
-                  <p className="text-xs text-muted-foreground">Confirm it was you and it will move to processing for our team to review.</p>
-                  <Textarea
-                    rows={2}
-                    value={approveNote}
-                    onChange={(e) => setApproveNote(e.target.value)}
-                    placeholder="Optional note for our team"
-                    maxLength={500}
-                    className="text-sm"
-                  />
-                  <Button className="w-full gap-2" disabled={approving} onClick={approveSelected}>
-                    {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                    Yes, I made this transfer
-                  </Button>
-                </div>
-              )}
-
-              <div className="space-y-1.5 text-sm">
-                <div className="rounded-md border bg-background p-3 text-xs text-muted-foreground">
-                  {selected.description}
-                </div>
-                {["purchase", "payment", "card", "merchant"].includes((selected.category || "").toLowerCase()) && selected.description && (
-                  <TransactionMapCard query={selected.description} />
-                )}
-                {selected.status === "pending" && (
-                  <p className="text-xs text-muted-foreground">
-                    A specialist will contact you to verify and approve this transfer.
-                  </p>
-                )}
-                {selected.status === "processing" && (
-                  <p className="text-xs text-muted-foreground">
-                    Your transfer is being processed and should complete shortly.
-                  </p>
-                )}
-                {selected.status === "under_review" && (
-                  <p className="text-xs text-muted-foreground">
-                    This transfer is under review by our compliance team. We'll update you soon.
-                  </p>
-                )}
-                {selected.status === "compliance_hold" && (
-                  <p className="text-xs text-muted-foreground">
-                    This transfer is on a temporary compliance hold. Our team is completing the required checks.
-                  </p>
-                )}
-                {selected.status === "reviewed" && (
-                  <p className="text-xs text-muted-foreground">
-                    Review is complete and clearance is now in progress.
-                  </p>
-                )}
-                {selected.status === "posting" && (
-                  <p className="text-xs text-muted-foreground">
-                    Payment successful — {postingVia(selected.description) || "the recipient bank"} is posting the funds to the beneficiary account.
-                  </p>
-                )}
-                {selected.status === "clearing" && (
-                  <p className="text-xs text-muted-foreground">
-                    Funds are clearing with the beneficiary bank and will settle shortly.
-                  </p>
-                )}
-                {selected.status === "failed" && (
-                  <p className="text-xs text-destructive">
-                    This transfer failed. No funds were moved. Please contact support if you need help.
-                  </p>
-                )}
-                {selected.status === "cancelled" && (
-                  <p className="text-xs text-muted-foreground">
-                    This transfer was cancelled.
-                  </p>
-                )}
-              </div>
-
-              {related.length > 0 && (
-                <div className="rounded-xl border bg-muted/30 p-3">
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                    Other transfers to {selected.recipient_name}
-                  </div>
-                  <div className="space-y-1">
-                    {related.map((r) => {
-                      const rDebit = r.transaction_type === "debit";
-                      const m = statusMeta((r.status || "completed").toLowerCase(), rDebit);
-                      return (
-                        <button
-                          key={r.id}
-                          onClick={() => setSelected(r)}
-                          className="flex w-full items-center justify-between gap-2 rounded-lg bg-background/70 px-2.5 py-2 text-left text-xs hover:bg-background transition"
-                        >
-                          <span className="min-w-0">
-                            <span className="block truncate font-medium text-secondary">{r.category || "Transfer"}</span>
-                            <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${m.pillClass}`}>
-                              {m.label}
-                            </span>
-                            <span className="ml-1 text-muted-foreground">· {timeAgo(r.created_at)}</span>
-                          </span>
-                          <span className={`shrink-0 font-bold ${rDebit ? "text-destructive" : "text-success"}`}>
-                            {rDebit ? "-" : "+"}{fmtTx(r)}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              </div>
-              </div>
-              <div className="shrink-0 border-t bg-background px-4 py-3">
-              <div className="mx-auto flex w-full max-w-xl justify-end gap-2">
-                <Button variant="outline" onClick={() => setSelected(null)}>Close</Button>
-                <Button onClick={openReceipt} className="gap-2">
-                  <Receipt className="h-4 w-4" /> View receipt
-                </Button>
-              </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <TransferReceipt
-        open={!!receipt}
-        onClose={() => {
-          setReceipt(null);
-          // Go back to the notification we came from instead of closing everything.
-          if (returnTo) {
-            setSelected(returnTo);
-            setReturnTo(null);
-          }
-        }}
-        receipt={receipt}
+      <TransactionDetailsDialog
+        transaction={selected}
+        transactions={items}
+        onClose={() => setSelected(null)}
+        onSelect={setSelected}
+        onChange={updateTransaction}
       />
     </>
   );
