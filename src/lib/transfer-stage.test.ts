@@ -9,3 +9,9 @@ describe("trackerState", () => {
   it("posting is done", () => assert.equal(trackerState("posting").step, 3));
   it("failed stops the tracker", () => assert.equal(trackerState("failed").stopped, "failed"));
 });
+
+import { adminStepIndex } from "./transfer-stage";
+describe("adminStepIndex", () => {
+  it("follows the admin order", () => assert.equal(adminStepIndex("clearing"), 5));
+  it("failed is off the list", () => assert.equal(adminStepIndex("failed"), -1));
+});

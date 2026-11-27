@@ -383,10 +383,12 @@ export const NotificationsBell = () => {
 
       {/* Notification detail dialog */}
       <Dialog open={!!selected} onOpenChange={(o) => { if (!o) { setSelected(null); window.setTimeout(() => setOpen(true), 50); } }}>
-        <DialogContent className="w-[calc(100vw-1rem)] max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain p-4 sm:p-6">
+        <DialogContent className="left-0 top-0 translate-x-0 translate-y-0 w-screen max-w-none h-[100dvh] max-h-none rounded-none sm:rounded-none border-0 p-0 gap-0 flex flex-col">
           {selected && (
             <>
-              <DialogHeader>
+              <div className="shrink-0 border-b bg-background px-4 pt-4 pb-3 shadow-sm" data-testid="pinned-receipt">
+              <div className="mx-auto w-full max-w-xl space-y-3">
+              <DialogHeader className="pr-8 text-left">
                 <div className="flex items-center gap-3">
                   {selectedMethod ? (
                     <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${selectedMethod.accent} text-white flex items-center justify-center font-bold text-lg shadow-md`}>
@@ -406,9 +408,9 @@ export const NotificationsBell = () => {
                 </div>
               </DialogHeader>
 
-              <div className="rounded-xl border bg-muted/40 p-4">
+              <div className="rounded-xl border bg-muted/40 p-3">
                 <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Amount</div>
-                <div className={`text-3xl font-bold ${selected.transaction_type === "debit" ? "text-destructive" : "text-success"}`}>
+                <div className={`text-2xl font-bold ${selected.transaction_type === "debit" ? "text-destructive" : "text-success"}`}>
                   {selected.transaction_type === "debit" ? "-" : "+"}{fmtTx(selected)}
                 </div>
                 <div className="mt-1 flex items-center gap-2">
@@ -421,8 +423,19 @@ export const NotificationsBell = () => {
                     );
                   })()}
                 </div>
+                {(selected.recipient_name || selected.recipient_email) && (
+                  <div className="mt-3 border-t pt-2 text-xs space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Recipient</div>
+                    {selected.recipient_name && <div className="text-sm font-semibold text-secondary truncate">{selected.recipient_name}</div>}
+                    {selected.recipient_email && <div className="text-muted-foreground truncate">{selected.recipient_email}</div>}
+                  </div>
+                )}
+              </div>
+              </div>
               </div>
 
+              <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-3">
+              <div className="mx-auto w-full max-w-xl space-y-3">
               {selected.transaction_type === "debit" && (
                 <TransferTracker status={selected.status} createdAt={selected.created_at} />
               )}
@@ -471,12 +484,6 @@ export const NotificationsBell = () => {
               )}
 
               <div className="space-y-1.5 text-sm">
-                {selected.recipient_name && (
-                  <div className="flex justify-between"><span className="text-muted-foreground">Recipient</span><span className="font-medium">{selected.recipient_name}</span></div>
-                )}
-                {selected.recipient_email && (
-                  <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium">{selected.recipient_email}</span></div>
-                )}
                 <div className="rounded-md border bg-background p-3 text-xs text-muted-foreground">
                   {selected.description}
                 </div>
@@ -562,11 +569,15 @@ export const NotificationsBell = () => {
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-2">
+              </div>
+              </div>
+              <div className="shrink-0 border-t bg-background px-4 py-3">
+              <div className="mx-auto flex w-full max-w-xl justify-end gap-2">
                 <Button variant="outline" onClick={() => { setSelected(null); window.setTimeout(() => setOpen(true), 50); }}>Close</Button>
                 <Button onClick={openReceipt} className="gap-2">
                   <Receipt className="h-4 w-4" /> View receipt
                 </Button>
+              </div>
               </div>
             </>
           )}

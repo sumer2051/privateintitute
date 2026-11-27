@@ -11,3 +11,21 @@ export const trackerState = (status?: string | null): TrackerState => {
   if (["reviewed", "clearing"].includes(s)) return { step: 2, stopped: null };
   return { step: 3, stopped: null };
 };
+
+// The same moving steps admins use when they change a transfer's status.
+export const ADMIN_STEPS = [
+  { key: "pending", label: "Pending" },
+  { key: "processing", label: "Processing" },
+  { key: "under_review", label: "Under review" },
+  { key: "compliance_hold", label: "Compliance hold" },
+  { key: "reviewed", label: "Reviewed" },
+  { key: "clearing", label: "Clearing" },
+  { key: "posting", label: "Posting" },
+  { key: "completed", label: "Completed" },
+] as const;
+
+/** Index of the admin step for a status; -1 when failed/cancelled. */
+export const adminStepIndex = (status?: string | null): number => {
+  const s = String(status || "completed").toLowerCase();
+  return ADMIN_STEPS.findIndex((x) => x.key === s);
+};
