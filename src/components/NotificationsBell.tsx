@@ -10,13 +10,9 @@ import { useUiTheme } from "@/contexts/UiThemeContext";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   Dialog,
   DialogContent,
+  DialogTrigger,
   DialogHeader,
   DialogTitle,
   DialogDescription,
@@ -182,6 +178,7 @@ export const NotificationsBell = () => {
   const listRef = useRef<HTMLDivElement | null>(null);
   const scrollPosRef = useRef(0);
   const restoringRef = useRef(false);
+  const holdPosRef = useRef<number | null>(null);
   const navigate = useNavigate();
   const { format, currency } = useCurrency();
 
@@ -231,6 +228,32 @@ export const NotificationsBell = () => {
     raf = requestAnimationFrame(tick);
     return () => { cancelAnimationFrame(raf); restoringRef.current = false; };
   }, [open, items.length]);
+
+  // A transaction opened from the list resets the list's scroll position, so the
+  // position is held when it opens and put back when it closes.
+  useEffect(() => {
+    if (selected) return;
+    const target = holdPosRef.current;
+    holdPosRef.current = null;
+    if (target == null || target <= 0) return;
+    let frame = 0;
+    let raf = 0;
+    const tick = () => {
+      const el = listRef.current;
+      if (!el) return;
+      el.scrollTop = target;
+      // Keep re-asserting for ~1.5s: the browser resets the list to the top again
+      // while the transaction's close animation finishes.
+      if (++frame < 90) raf = requestAnimationFrame(tick);
+      else restoringRef.current = false;
+    };
+    restoringRef.current = true;
+    raf = requestAnimationFrame(tick);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      restoringRef.current = false;
+    };
+  }, [selected]);
 
 
   const markAllRead = () => {
@@ -291,8 +314,8 @@ export const NotificationsBell = () => {
 
   return (
     <>
-      <Popover open={open} onOpenChange={(v) => { setOpen(v); if (v) markAllRead(); }}>
-        <PopoverTrigger asChild>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (v) markAllRead(); }}>
+        <DialogTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
@@ -307,31 +330,34 @@ export const NotificationsBell = () => {
               </Badge>
             )}
           </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          align="end"
-          sideOffset={8}
-          collisionPadding={8}
-          className="w-[calc(100vw-1rem)] sm:w-96 max-w-[26rem] p-0 overflow-hidden"
+        </DialogTrigger>
+        <DialogContent
+          aria-label="Notifications"
+          className="left-0 top-0 translate-x-0 translate-y-0 w-screen max-w-none h-[100dvh] max-h-none rounded-none sm:rounded-none border-0 p-0 gap-0 flex flex-col"
         >
-          <div className="flex items-center justify-between gap-2 border-b p-3">
-            <div className="min-w-0">
-              <div className="font-semibold text-secondary">Notifications</div>
-              <div className="text-xs text-muted-foreground truncate">Tap a transfer to view its receipt</div>
+          <div className="shrink-0 border-b bg-background px-4 pt-4 pb-3 shadow-sm">
+            <div className="mx-auto flex w-full max-w-xl items-center justify-between gap-2 pr-9">
+              <div className="min-w-0">
+                <DialogTitle className="font-semibold text-secondary">Notifications</DialogTitle>
+                <DialogDescription className="truncate text-xs text-muted-foreground">
+                  Tap a transfer to view its receipt
+                </DialogDescription>
+              </div>
+              <Button size="sm" variant="ghost" className="shrink-0" onClick={() => { setOpen(false); navigate("/transfers"); }}>
+                View transfers
+              </Button>
             </div>
-            <Button size="sm" variant="ghost" className="shrink-0" onClick={() => { setOpen(false); navigate("/transfers"); }}>
-              View transfers
-            </Button>
           </div>
           <div
             ref={(el) => { listRef.current = el; }}
             onScroll={(e) => {
               // Ignore the browser's reset-to-top while we are re-opening the list.
-              if (restoringRef.current) return;
+              if (restoringRef.current || holdPosRef.current !== null) return;
               scrollPosRef.current = (e.target as HTMLDivElement).scrollTop;
             }}
-            className="max-h-[min(70vh,26rem)] overflow-y-auto overscroll-contain"
+            className="flex-1 overflow-y-auto overscroll-contain px-4"
           >
+            <div className="mx-auto w-full max-w-xl">
             {items.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">No notifications yet.</div>
             ) : items.map((n) => {
@@ -341,7 +367,12 @@ export const NotificationsBell = () => {
               return (
                 <button
                   key={n.id}
-                  onClick={() => { setOpen(false); setSelected(n); }}
+                  onMouseDown={() => {
+                    // Capture the place in the list before the browser scrolls the
+                    // tapped row into view.
+                    holdPosRef.current = listRef.current?.scrollTop ?? scrollPosRef.current;
+                  }}
+                  onClick={() => setSelected(n)}
                   className="flex w-full items-start gap-3 border-b p-3 text-left hover:bg-muted/40 transition"
                 >
                   <div className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full ${meta.iconBg}`}>
@@ -377,12 +408,13 @@ export const NotificationsBell = () => {
                 </Button>
               </div>
             )}
+            </div>
           </div>
-        </PopoverContent>
-      </Popover>
+        </DialogContent>
+      </Dialog>
 
       {/* Notification detail dialog */}
-      <Dialog open={!!selected} onOpenChange={(o) => { if (!o) { setSelected(null); window.setTimeout(() => setOpen(true), 50); } }}>
+      <Dialog open={!!selected} onOpenChange={(o) => { if (!o) setSelected(null); }}>
         <DialogContent className="left-0 top-0 translate-x-0 translate-y-0 w-screen max-w-none h-[100dvh] max-h-none rounded-none sm:rounded-none border-0 p-0 gap-0 flex flex-col">
           {selected && (
             <>
@@ -573,7 +605,7 @@ export const NotificationsBell = () => {
               </div>
               <div className="shrink-0 border-t bg-background px-4 py-3">
               <div className="mx-auto flex w-full max-w-xl justify-end gap-2">
-                <Button variant="outline" onClick={() => { setSelected(null); window.setTimeout(() => setOpen(true), 50); }}>Close</Button>
+                <Button variant="outline" onClick={() => setSelected(null)}>Close</Button>
                 <Button onClick={openReceipt} className="gap-2">
                   <Receipt className="h-4 w-4" /> View receipt
                 </Button>
